@@ -4,21 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Biblioteca de ADE | UNGS</title>
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<button class="toggle-btn" onclick="toggleSidebar()">Menú</button>
-<button onclick="toggleTheme()" id="themeToggleBtn">Alternar Tema</button>
+<button class="toggle-btn" onclick="toggleSidebar()">☰ Menú</button>
+<button onclick="toggleTheme()" id="themeToggleBtn">Modo Oscuro</button>
 
 <aside class="sidebar" id="sidebar">
     <h2 style="color: var(--primary);">Mi Progreso</h2>
-    <p><small>Gestión académica ADE</small></p>
+    <p><small>Gestión Académica ADE</small></p>
     <hr>
     
     <div class="calc-container">
-        <h4>📊 Calculadora de Promedio</h4>
+        <h4>📊 Calculadora</h4>
         <div class="calc-row">
             <input type="text" id="subjIn" class="calc-input" placeholder="Materia" style="flex: 2;">
             <input type="number" id="gradeIn" class="calc-input" placeholder="Nota" style="flex: 1;" min="1" max="10">
@@ -29,11 +28,7 @@
         <div class="avg-display">Promedio: <span id="avgOut">0.00</span></div>
     </div>
 
-    <div class="mini-donate">
-         <a href="TU_LINK_CAFECITO" target="_blank">☕ Donaciones Anónimas</a>
-    </div>
-
-    <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" class="btn-secondary">
+    <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" class="btn-secondary" style="margin-top: 30px;">
         Dejar recomendación
     </button>
 </aside>
@@ -41,12 +36,10 @@
 <div class="main-content" id="mainContent">
     <header>
         <h1>La Biblioteca de ADE</h1>
-        <p>Digitalizando el conocimiento de Administración de Empresas - UNGS</p>
+        <p>Administración de Empresas - UNGS</p>
         
-        <div id="roadmap" class="roadmap-container"></div>
-
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Buscá tu materia por nombre o nivel..." onkeyup="filterMaterias()">
+            <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="filterMaterias()">
         </div>
     </header>
 
@@ -59,11 +52,6 @@
     </div>
 
     <div id="accordionContainer"></div>
-
-    <footer class="footer-donate">
-        <hr>
-        <p>¿Te sirvió el material? <a href="TU_LINK_WHATSAPP">Donar apuntes</a> o <a href="TU_LINK_CAFECITO">Apoyar el proyecto</a>.</p>
-    </footer>
 </div>
 
 <script src="script.js"></script>
