@@ -1,180 +1,108 @@
-/* =========================================
-   VARIABLES Y BASE
-   ========================================= */
 :root {
-    --primary: #FF8C00;        /* Naranja Principal */
-    --primary-hover: #e67e00;
+    --primary: #FF8C00;
     --bg: #ffffff;
-    --text: #1a1a1a;
-    --card-bg: rgba(249, 249, 249, 0.8);
-    --sidebar-bg: #f4f4f4;
-    --glass: rgba(255, 255, 255, 0.7);
-    --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-    --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --text: #2d3436;
+    --card-bg: #fdfdfd;
+    --sidebar-bg: #f8f9fa;
+    --border-color: #e1e4e8;
 }
 
 [data-theme="dark"] {
-    --bg: #0f172a;
-    --text: #f1f5f9;
-    --card-bg: rgba(30, 41, 59, 0.7);
-    --sidebar-bg: #1e293b;
-    --glass: rgba(15, 23, 42, 0.7);
+    --bg: #1a1c23;
+    --text: #f1f2f6;
+    --card-bg: #242731;
+    --sidebar-bg: #15171e;
+    --border-color: #30363d;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body { 
+body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background-color: var(--bg);
     color: var(--text);
-    line-height: 1.6;
-    overflow-x: hidden;
-    transition: background-color 0.5s ease;
+    margin: 0;
+    display: flex;
+    transition: 0.3s;
 }
 
-/* =========================================
-   ANIMACIONES (KEYFRAMES)
-   ========================================= */
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideInLeft {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(0); }
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-/* =========================================
-   LAYOUT PRINCIPAL
-   ========================================= */
+/* Sidebar más elegante */
 .sidebar {
     width: 320px;
     height: 100vh;
     background: var(--sidebar-bg);
-    backdrop-filter: blur(10px);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
     padding: 25px;
     position: fixed;
-    animation: slideInLeft 0.6s ease-out;
+    border-right: 1px solid var(--border-color);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
     z-index: 1000;
 }
 
 .main-content {
     margin-left: 320px;
-    padding: 50px;
+    padding: 60px;
     width: 100%;
-    max-width: 1200px;
 }
 
-/* =========================================
-   ESTILO DE MATERIAS (LISTA ANIMADA)
-   ========================================= */
-.year-section {
-    margin-bottom: 20px;
-    animation: fadeInUp 0.8s ease backwards;
+/* Tarjetas de materias más limpias */
+.year-header {
+    background: none;
+    color: var(--text);
+    padding: 15px 0;
+    border-bottom: 2px solid var(--primary);
+    margin-top: 30px;
+    font-size: 1.2rem;
+    font-weight: 700;
 }
 
 .materia-item {
-    background: var(--glass);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 15px 25px;
-    margin-bottom: 10px;
-    border-radius: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 18px 25px;
+    margin-top: 12px;
+    border-radius: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    transition: var(--transition);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    transition: 0.2s ease;
 }
 
 .materia-item:hover {
-    transform: scale(1.02) translateX(10px);
-    background: var(--bg);
-    border-left: 6px solid var(--primary);
-    box-shadow: var(--shadow);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(255, 140, 0, 0.15);
+    border-color: var(--primary);
 }
 
-/* =========================================
-   EL ROADMAP (NIVELES)
-   ========================================= */
-.roadmap-container {
-    display: flex;
-    gap: 15px;
-    overflow-x: auto;
-    padding: 20px 0;
-    margin-bottom: 30px;
-}
-
-.roadmap-node {
-    min-width: 60px;
-    height: 60px;
-    background: var(--card-bg);
-    border: 2px solid var(--primary);
+/* Roadmap con números claros */
+.node {
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
+    border: 2px solid var(--primary);
+    color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.9rem;
     font-weight: bold;
-    cursor: pointer;
-    transition: var(--transition);
+    transition: 0.3s;
 }
 
-.roadmap-node:hover, .roadmap-node.active {
+.node.active {
     background: var(--primary);
     color: white;
-    box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
 }
 
-/* =========================================
-   COMPONENTES UI
-   ========================================= */
-.search-container input {
-    width: 100%;
-    padding: 18px;
-    border-radius: 15px;
-    border: 2px solid transparent;
+/* Calculadora y botones */
+.calc-container {
     background: var(--card-bg);
-    color: var(--text);
-    font-size: 16px;
-    transition: var(--transition);
-    box-shadow: var(--shadow);
-}
-
-.search-container input:focus {
-    outline: none;
-    border-color: var(--primary);
-    transform: translateY(-2px);
+    border: 1px solid var(--border-color);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 30px;
 }
 
 .btn-primary {
     background: var(--primary);
-    color: white;
-    border: none;
-    padding: 12px 20px;
     border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.btn-primary:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 5px 15px rgba(255, 140, 0, 0.3);
-}
-
-/* =========================================
-   MODO CELULAR (RESPONSIVE)
-   ========================================= */
-@media (max-width: 768px) {
-    .sidebar { width: 100%; height: auto; position: relative; }
-    .main-content { margin-left: 0; padding: 20px; }
+    transition: 0.3s;
 }
