@@ -4,31 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Biblioteca de ADE | UNGS</title>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<button class="toggle-btn" onclick="toggleSidebar()">☰ Menú</button>
-<button onclick="toggleTheme()" id="themeToggleBtn">Modo Oscuro</button>
+<button class="toggle-btn" onclick="toggleSidebar()">Menú</button>
+<button onclick="toggleTheme()" style="position: fixed; top: 20px; right: 20px; border: 1px solid var(--primary); color: var(--primary); background: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; z-index: 1001;">Modo Oscuro</button>
 
 <aside class="sidebar" id="sidebar">
     <h2 style="color: var(--primary);">Mi Progreso</h2>
-    <p><small>Gestión Académica ADE</small></p>
-    <hr>
+    <p><small>Gestión académica ADE</small></p>
+    <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
     
     <div class="calc-container">
-        <h4>📊 Calculadora</h4>
-        <div class="calc-row">
-            <input type="text" id="subjIn" class="calc-input" placeholder="Materia" style="flex: 2;">
-            <input type="number" id="gradeIn" class="calc-input" placeholder="Nota" style="flex: 1;" min="1" max="10">
+        <h4 style="margin:0 0 10px 0;">📊 Mis Notas</h4>
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+            <input type="text" id="subjIn" class="calc-input" placeholder="Materia">
+            <input type="number" id="gradeIn" class="calc-input" placeholder="Nota" min="1" max="10">
+            <button onclick="addEntry()" class="btn-primary">Añadir Materia</button>
         </div>
-        <button onclick="addEntry()" class="btn-primary">Añadir Materia</button>
         
-        <div class="grade-list" id="gradeList"></div>
-        <div class="avg-display">Promedio: <span id="avgOut">0.00</span></div>
+        <div id="gradeList" style="margin-top: 15px; font-size: 12px; max-height: 120px; overflow-y: auto;"></div>
+        <div style="font-weight: bold; color: var(--primary); margin-top: 10px;">Promedio: <span id="avgOut">0.00</span></div>
     </div>
 
-    <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" class="btn-secondary" style="margin-top: 30px;">
+    <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" style="margin-top: 30px; width: 100%; background: #333; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
         Dejar recomendación
     </button>
 </aside>
@@ -36,24 +37,177 @@
 <div class="main-content" id="mainContent">
     <header>
         <h1>La Biblioteca de ADE</h1>
-        <p>Administración de Empresas - UNGS</p>
-        
+        <p>Digitalizando el conocimiento de Administración de Empresas - UNGS</p>
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="filterMaterias()">
+            <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="filterMaterias()" 
+                   style="width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--primary); font-size: 16px;">
         </div>
     </header>
 
-    <div id="viewer-container">
-        <div class="viewer-header">
-            <span id="activeTitle">Material de Estudio</span>
-            <button onclick="closeViewer()">✕</button>
+    <div id="viewer-container" style="display: none; border: 2px solid var(--primary); border-radius: 10px; overflow: hidden; margin-bottom: 20px;">
+        <div style="background: var(--primary); color: white; padding: 10px; display: flex; justify-content: space-between; font-weight: bold;">
+            <span id="activeTitle">Material</span>
+            <button onclick="document.getElementById('viewer-container').style.display='none'" style="background: none; border: none; color: white; cursor: pointer;">✕</button>
         </div>
-        <iframe id="driveViewer" src="" frameborder="0"></iframe>
+        <iframe id="driveViewer" src="" width="100%" height="500px" frameborder="0"></iframe>
     </div>
 
     <div id="accordionContainer"></div>
 </div>
 
-<script src="script.js"></script>
+<script>
+    // Los mismos datos de tus materias
+    const data = {
+        "PRIMER AÑO": [
+            {n: "Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1jLUf7D_7GzXwwXl0mkE0WJLmK3ydxtfb?usp=drive_link"},
+            {n: "Taller Orientado de Ciencias Exactas", l: "https://drive.google.com/drive/folders/1zRWjRQCmkwYRaJEk44JEp3j6litaBMxy?usp=drive_link"},
+            {n: "Teoría de la Organización", l: "https://drive.google.com/drive/folders/1VGkLpmiodcpVpNBCb8GzU_Pg9zG6GSby?usp=drive_link"},
+            {n: "Problemas Socioeconómicos Contemporáneos", l: "https://drive.google.com/drive/folders/1X1QrBi6AmALlNCXb4S6LHUMoFgDjboLS?usp=drive_link"},
+            {n: "Taller de Lectura y Escritura Orientado en las Disciplinas", l: "https://drive.google.com/drive/folders/132vYVDu8zE6qICc6X1Ru_4CnH-M252kn?usp=drive_link"},
+            {n: "Introducción a la Economía", l: "https://drive.google.com/drive/folders/1Qm-QVfLihmRHPjLnIxUoLO3G886n7vGH?usp=drive_link"}
+        ],
+        "SEGUNDO AÑO": [
+            {n: "Economía Clásica", l: "https://drive.google.com/drive/folders/1Ff9KD0Gamjk-_UmtdDLHWi0xi8mzIqpI?usp=drive_link"},
+            {n: "Diseño Estructural y Procesos", l: "https://drive.google.com/drive/folders/138Mzk3D_2qv3S6Qp6EueLi_tZ2Bq5gi-?usp=drive_link"},
+            {n: "Matemática para Economistas I", l: "https://drive.google.com/drive/folders/1-6QvTwuabzMhp-QWSMMNB9KSBZ4mXBfM?usp=drive_link"},
+            {n: "Economía Neoclásica", l: "https://drive.google.com/drive/folders/1wdSmGl7UVgNozz1Ktyux06b8e9QhSV2W?usp=drive_link"},
+            {n: "Sistemas de Información Contable I", l: "https://drive.google.com/drive/folders/1Nhfp3LT5WnUOUoS3JSMAy31gq88x4R0j?usp=drive_link"},
+            {n: "Historia Económica y Social Mundial y Latinoamericana", l: "https://drive.google.com/drive/folders/1P9snlibfSL62as1Sz-OX2gKe__1EOBSl?usp=drive_link"}
+        ],
+        "TERCER AÑO": [
+            {n: "Economía Keynesiana", l: "https://drive.google.com/drive/folders/1BDxNT2spCBZpZkZD106JRm7YF9sV7Ntx?usp=drive_link"},
+            {n: "Estadística para Economistas", l: "https://drive.google.com/drive/folders/1OxeMyLnkVKfZLN9txxIIlx5eentl-OGZ?usp=drive_link"},
+            {n: "Planeamiento y Control Organizacional", l: "https://drive.google.com/drive/folders/1Jc-uLaSCaPtiOH9nfAbR8UI0eGbv4qZK?usp=drive_link"},
+            {n: "Matemática para Economistas II", l: "https://drive.google.com/drive/folders/1NTAhvAECzPQB0de2dAdtNIzp_9_mA_cF?usp=drive_link"},
+            {n: "Laboratorio Interdisciplinario", l: "https://drive.google.com/drive/folders/1NdTpduQArGshJt976kRYwspdto-b4hG0?usp=drive_link"},
+            {n: "Sistemas de Información", l: "https://drive.google.com/drive/folders/1nCsfZY8qNIgnmSk2LyDXW7Z2hHT9DLmb?usp=drive_link"}
+        ],
+        "CUARTO AÑO": [
+            {n: "Derecho Administrativo", l: "https://drive.google.com/drive/folders/1NQgXQTJW3lWX-GJH2XZL6kGwBBV8M9ce?usp=drive_link"},
+            {n: "Organización Industrial", l: "https://drive.google.com/drive/folders/1xod_LTQ0ArN8ZXH8av29JqdQ5mpbLIRE?usp=drive_link"},
+            {n: "Gestión de Recursos Humanos (Material Viejo)", l: "https://drive.google.com/drive/folders/1n8lb2y-aomWoGNfYXUVGBaRTG-FCn4lz?usp=drive_link"},
+            {n: "Dirección Estratégica (Material Viejo)", l: "https://drive.google.com/drive/folders/1Nbgb0tiyIqdksPxxZVsCgYEtIKQ04OVx?usp=drive_link"},
+            {n: "Tópicos de Comercialización", l: "https://drive.google.com/drive/folders/13dSSC3d-Kttrr7E8MhmDxAyAHI66TAa4?usp=drive_link"},
+            {n: "Planificación y Proceso Decisorio en las Organizaciones", l: "https://drive.google.com/drive/folders/1ORmLF7_T-agImkCn3Se13sMFoGqM0WPF?usp=drive_link"},
+            {n: "Teoría de la Innovación y del Cambio Tecnológico", l: "https://drive.google.com/drive/folders/1BnY8s1GG8YAlTDNiBwv1Pj_tFgrabx3X?usp=drive_link"}
+        ],
+        "QUINTO AÑO": [
+            {n: "Matemática para Economistas III", l: "https://drive.google.com/drive/folders/1vDdnc8NAd3OrWDzZbRalQNLqIV7AJYVd?usp=drive_link"},
+            {n: "Costos Industriales", l: "https://drive.google.com/drive/folders/1YeqqEX6VSe6015mAw-PAYy1dlpQB3MMs?usp=drive_link"},
+            {n: "Sistemas de Información Contable II", l: "https://drive.google.com/drive/folders/1RorXYcziiTLhyZ5aC03bDSwiaadzlSQf?usp=drive_link"},
+            {n: "Gestión en Economía Mixta", l: "https://drive.google.com/drive/folders/1DvN2pJp7bvtpGxEVgWm0gCYZS9RoVi34?usp=drive_link"},
+            {n: "Empresas Públicas", l: "https://drive.google.com/drive/folders/1lTcdyE2KSOEpzDRonlVUSAvunniK4AMO?usp=drive_link"},
+            {n: "Ingeniería Financiera", l: "https://drive.google.com/drive/folders/1PnMt1NvDA_yvE2xlR7uhgk6S52LKBM7c?usp=drive_link"}
+        ],
+        "SEXTO AÑO": [
+            {n: "Sociología Industrial", l: "https://drive.google.com/drive/folders/1Qf4sCTAMmCy4wMoE3CwtvW01-7VYSNGF?usp=drive_link"},
+            {n: "Régimen Tributario", l: "https://drive.google.com/drive/folders/11JLYY480dlwRFwEGnhouSgSiARD0OoEs?usp=drive_link"},
+            {n: "Desarrollo y Gestión de Proyectos Emprendedores", l: "https://drive.google.com/drive/folders/18A5q6-n7A4LRjI-COwMgzYLrcPU1EF2M?usp=drive_link"}
+        ],
+        "EXTRACURRICULARES": [
+            {n: "Taller de Utilitarios", l: "https://drive.google.com/drive/folders/14XnFgwmu9W2tQXi5w3f6Cje3hyZgMfso?usp=drive_link"},
+            {n: "IPE 1", l: "https://drive.google.com/drive/folders/1BR5ZJZ5nQnokUQMhXq6zFb9jFHAH3LSf?usp=drive_link"},
+            {n: "IPE 2", l: "https://drive.google.com/drive/folders/1EoMGzwjnB48FkPwiP1YDOBqmnZITqB1z?usp=drive_link"},
+            {n: "IPE 3", l: "https://drive.google.com/drive/folders/1QHgjzkXPurYb0WXJ1qSoX7F10c86rUS1?usp=drive_link"}
+        ]
+    };
+
+    let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
+
+    function render() {
+        const container = document.getElementById('accordionContainer');
+        for (const [year, mats] of Object.entries(data)) {
+            const section = document.createElement('div');
+            section.className = 'year-section';
+            section.innerHTML = `
+                <div class="year-header" onclick="toggleYear(this)">${year} <span>+</span></div>
+                <div class="materia-container" style="display: none; padding-top: 10px;">
+                    ${mats.map(m => `
+                        <div class="materia-item" onclick="openDoc('${m.n}', '${m.l}')">
+                            <span>${m.n}</span>
+                            <small>Ver recursos →</small>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(section);
+        }
+        updateGPAUI();
+    }
+
+    function toggleYear(el) {
+        const panel = el.nextElementSibling;
+        const icon = el.querySelector('span');
+        const isOpen = panel.style.display === "block";
+        panel.style.display = isOpen ? "none" : "block";
+        icon.innerText = isOpen ? "+" : "-";
+    }
+
+    function openDoc(name, link) {
+        document.getElementById('activeTitle').innerText = name;
+        const viewer = document.getElementById('viewer-container');
+        const iframe = document.getElementById('driveViewer');
+        viewer.style.display = "block";
+        iframe.src = link.replace('/view', '/preview').replace('?usp=drive_link', '');
+        window.scrollTo({ top: viewer.offsetTop - 50, behavior: 'smooth' });
+    }
+
+    function filterMaterias() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const items = document.getElementsByClassName('materia-item');
+        const sections = document.getElementsByClassName('year-section');
+        for (let item of items) {
+            const title = item.innerText.toLowerCase();
+            item.style.display = title.includes(input) ? "" : "none";
+        }
+        for (let sec of sections) {
+            const panel = sec.querySelector('.materia-container');
+            panel.style.display = input ? "block" : "none";
+            sec.querySelector('span').innerText = input ? "-" : "+";
+        }
+    }
+
+    function addEntry() {
+        const subj = document.getElementById('subjIn').value;
+        const grade = parseFloat(document.getElementById('gradeIn').value);
+        if (subj && !isNaN(grade)) {
+            entries.push({ subj, grade });
+            localStorage.setItem('ungs_grades', JSON.stringify(entries));
+            updateGPAUI();
+            document.getElementById('subjIn').value = '';
+            document.getElementById('gradeIn').value = '';
+        }
+    }
+
+    function removeEntry(index) {
+        entries.splice(index, 1);
+        localStorage.setItem('ungs_grades', JSON.stringify(entries));
+        updateGPAUI();
+    }
+
+    function updateGPAUI() {
+        const list = document.getElementById('gradeList');
+        list.innerHTML = entries.map((e, i) => `
+            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
+                <span>${e.subj}</span>
+                <span><b>${e.grade}</b> <span onclick="removeEntry(${i})" style="color: red; cursor: pointer; margin-left: 5px;">×</span></span>
+            </div>
+        `).join('');
+        const avg = entries.length ? (entries.reduce((a, b) => a + b.grade, 0) / entries.length).toFixed(2) : "0.00";
+        document.getElementById('avgOut').innerText = avg;
+    }
+
+    function toggleTheme() {
+        const current = document.body.getAttribute('data-theme');
+        document.body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('hidden');
+        document.getElementById('mainContent').classList.toggle('expanded');
+    }
+
+    render();
+</script>
 </body>
 </html>
