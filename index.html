@@ -4,32 +4,191 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Biblioteca de ADE | UNGS</title>
-    
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --primary: #FF8C00; /* Naranja minimalista */
+            --bg: #ffffff;
+            --text: #1a1a1a;
+            --card-bg: #f9f9f9;
+            --sidebar-bg: #f4f4f4;
+            --sidebar-width: 320px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --sidebar-bg: #181818;
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            display: flex;
+            transition: 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Izquierdo Colapsable */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            padding: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid #ddd;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.hidden { transform: translateX(-100%); }
+
+        .toggle-btn {
+            position: fixed;
+            left: 10px;
+            bottom: 20px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Contenido Principal */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            width: 100%;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.expanded { margin-left: 0; }
+
+        header { max-width: 800px; margin: 0 auto 40px; text-align: center; }
+        
+        .search-container { margin: 20px 0; }
+        #searchInput {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid var(--primary);
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 16px;
+        }
+
+        /* Calculadora Estilos */
+        .calc-container {
+            margin-top: 25px;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        .calc-row { display: flex; gap: 5px; margin-bottom: 10px; }
+        .calc-input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 13px;
+        }
+        .grade-list { margin-top: 15px; max-height: 120px; overflow-y: auto; font-size: 12px; }
+        .grade-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
+        .btn-del { color: #ff4444; cursor: pointer; font-weight: bold; margin-left: 5px; }
+        .avg-display { font-size: 1.1rem; font-weight: bold; color: var(--primary); margin-top: 10px; }
+
+        /* Donación Minimalista */
+        .mini-donate {
+            margin-top: 20px;
+            padding: 12px;
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* Acordeón por Años */
+        .year-section { max-width: 800px; margin: 0 auto 15px; }
+        .year-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        .materia-container { display: none; padding: 10px 0; }
+        .materia-item {
+            background: var(--card-bg);
+            padding: 12px 20px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .materia-item:hover { background: #eee; transform: translateX(5px); }
+
+        /* Visor */
+        #viewer-container {
+            display: none;
+            max-width: 800px;
+            margin: 20px auto;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .footer-donate {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+    </style>
 </head>
 <body>
 
 <button class="toggle-btn" onclick="toggleSidebar()">Menú</button>
-<button onclick="toggleTheme()" style="position: fixed; top: 20px; right: 20px; border: 1px solid var(--primary); color: var(--primary); background: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; z-index: 1001;">Modo Oscuro</button>
+<button onclick="toggleTheme()" style="position: fixed; top: 20px; right: 20px; border: 1px solid var(--primary); color: var(--primary); background: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; z-index: 1001;">Alternar Tema</button>
 
 <aside class="sidebar" id="sidebar">
     <h2 style="color: var(--primary);">Mi Progreso</h2>
-    <p><small>Gestión académica ADE</small></p>
+    <p><small>Calculadora y consejos ADE</small></p>
     <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
     
     <div class="calc-container">
         <h4 style="margin:0 0 10px 0;">📊 Mis Notas</h4>
-        <div style="display: flex; flex-direction: column; gap: 5px;">
-            <input type="text" id="subjIn" class="calc-input" placeholder="Materia">
-            <input type="number" id="gradeIn" class="calc-input" placeholder="Nota" min="1" max="10">
-            <button onclick="addEntry()" class="btn-primary">Añadir Materia</button>
+        <div class="calc-row">
+            <input type="text" id="subjIn" class="calc-input" placeholder="Materia" style="flex: 2;">
+            <input type="number" id="gradeIn" class="calc-input" placeholder="Nota" style="flex: 1;" min="1" max="10">
         </div>
+        <button onclick="addEntry()" style="width:100%; background: var(--primary); color:white; border:none; padding:8px; border-radius:5px; cursor:pointer; font-weight:bold;">Añadir Materia</button>
         
-        <div id="gradeList" style="margin-top: 15px; font-size: 12px; max-height: 120px; overflow-y: auto;"></div>
-        <div style="font-weight: bold; color: var(--primary); margin-top: 10px;">Promedio: <span id="avgOut">0.00</span></div>
+        <div class="grade-list" id="gradeList"></div>
+        <div class="avg-display">Promedio: <span id="avgOut">0.00</span></div>
     </div>
 
-    <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" style="margin-top: 30px; width: 100%; background: #333; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
+    <div class="mini-donate">
+         <a href="TU_LINK_CAFECITO" target="_blank" style="color: #856404; text-decoration: none; font-weight: bold;">Donaciones</a>
+    </div>
+
+    <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" style="margin-top: 20px; width: 100%; background: #333; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
         Dejar recomendación
     </button>
 </aside>
@@ -39,12 +198,11 @@
         <h1>La Biblioteca de ADE</h1>
         <p>Digitalizando el conocimiento de Administración de Empresas - UNGS</p>
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="filterMaterias()" 
-                   style="width: 100%; padding: 15px; border-radius: 10px; border: 2px solid var(--primary); font-size: 16px;">
+            <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="filterMaterias()">
         </div>
     </header>
 
-    <div id="viewer-container" style="display: none; border: 2px solid var(--primary); border-radius: 10px; overflow: hidden; margin-bottom: 20px;">
+    <div id="viewer-container">
         <div style="background: var(--primary); color: white; padding: 10px; display: flex; justify-content: space-between; font-weight: bold;">
             <span id="activeTitle">Material</span>
             <button onclick="document.getElementById('viewer-container').style.display='none'" style="background: none; border: none; color: white; cursor: pointer;">✕</button>
@@ -53,10 +211,14 @@
     </div>
 
     <div id="accordionContainer"></div>
+
+    <div class="footer-donate">
+        <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
+        <p>¿Te sirvió el material? <a href="TU_LINK_WHATSAPP" style="color: var(--primary); text-decoration: none; font-weight: bold;">Donar apuntes</a> o <a href="TU_LINK_CAFECITO" style="color: var(--primary); text-decoration: none; font-weight: bold;">apoyar el proyecto</a>.</p>
+    </div>
 </div>
 
 <script>
-    // Los mismos datos de tus materias
     const data = {
         "PRIMER AÑO": [
             {n: "Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1jLUf7D_7GzXwwXl0mkE0WJLmK3ydxtfb?usp=drive_link"},
@@ -121,7 +283,7 @@
             section.className = 'year-section';
             section.innerHTML = `
                 <div class="year-header" onclick="toggleYear(this)">${year} <span>+</span></div>
-                <div class="materia-container" style="display: none; padding-top: 10px;">
+                <div class="materia-container">
                     ${mats.map(m => `
                         <div class="materia-item" onclick="openDoc('${m.n}', '${m.l}')">
                             <span>${m.n}</span>
@@ -132,7 +294,7 @@
             `;
             container.appendChild(section);
         }
-        updateGPAUI();
+        saveAndRender();
     }
 
     function toggleYear(el) {
@@ -172,8 +334,7 @@
         const grade = parseFloat(document.getElementById('gradeIn').value);
         if (subj && !isNaN(grade)) {
             entries.push({ subj, grade });
-            localStorage.setItem('ungs_grades', JSON.stringify(entries));
-            updateGPAUI();
+            saveAndRender();
             document.getElementById('subjIn').value = '';
             document.getElementById('gradeIn').value = '';
         }
@@ -181,16 +342,16 @@
 
     function removeEntry(index) {
         entries.splice(index, 1);
-        localStorage.setItem('ungs_grades', JSON.stringify(entries));
-        updateGPAUI();
+        saveAndRender();
     }
 
-    function updateGPAUI() {
+    function saveAndRender() {
+        localStorage.setItem('ungs_grades', JSON.stringify(entries));
         const list = document.getElementById('gradeList');
         list.innerHTML = entries.map((e, i) => `
-            <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
+            <div class="grade-item">
                 <span>${e.subj}</span>
-                <span><b>${e.grade}</b> <span onclick="removeEntry(${i})" style="color: red; cursor: pointer; margin-left: 5px;">×</span></span>
+                <span><b>${e.grade}</b> <span class="btn-del" onclick="removeEntry(${i})">×</span></span>
             </div>
         `).join('');
         const avg = entries.length ? (entries.reduce((a, b) => a + b.grade, 0) / entries.length).toFixed(2) : "0.00";
