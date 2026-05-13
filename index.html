@@ -20,11 +20,11 @@
             --card-bg: #1e1e1e;
             --sidebar-bg: #181818;
         }
-/* Corrección para visibilidad en modo oscuro al pasar el mouse */
-[data-theme="dark"] .materia-item:hover {
-    background-color: #2c2c2c; /* Un gris oscuro para que contraste con el fondo */
-    color: var(--primary);     /* El texto cambia a naranja para leerse mejor */
-}
+        /* Corrección para visibilidad en modo oscuro al pasar el mouse */
+        [data-theme="dark"] .materia-item:hover {
+            background-color: #2c2c2c; 
+            color: var(--primary);     
+        }
         body { 
             font-family: 'Segoe UI', system-ui, sans-serif; 
             background-color: var(--bg); 
@@ -215,7 +215,7 @@
         
         <div style="padding: 15px; background: var(--card-bg); text-align: center; border-top: 2px solid var(--primary);">
             <p style="font-size: 13px; margin-bottom: 10px; opacity: 0.8;">¿Ves un error de Google o no tenés acceso?</p>
-            <button id="requestBtn" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; max-width: 300px;">
+            <button id="requestBtn" onclick="pedirAcceso()" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; max-width: 300px;">
                 Pedir Acceso a la Carpeta →
             </button>
         </div>
@@ -225,7 +225,7 @@
 
     <div class="footer-donate">
         <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
-        <p>¿Te sirvió el material? <a href="TU_LINK_WHATSAPP" style="color: var(--primary); text-decoration: none; font-weight: bold;">Donar apuntes vía WhatsApp</a>.</p>
+        <p>¿Tenes material para donar? <a href="TU_LINK_WHATSAPP" style="color: var(--primary); text-decoration: none; font-weight: bold;">Donar apuntes vía WhatsApp</a>.</p>
     </div>
 </div>
 
@@ -285,6 +285,8 @@
         ]
     };
 
+    // VARIABLE AGREGADA PARA QUE EL BOTÓN SEPA QUÉ ABRIR
+    let enlaceActual = ""; 
     let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
 
     function render() {
@@ -316,13 +318,24 @@
         icon.innerText = isOpen ? "+" : "-";
     }
 
+    // FUNCIÓN ACTUALIZADA
     function openDoc(name, link) {
+        enlaceActual = link; // Guarda el enlace de la materia seleccionada
         document.getElementById('activeTitle').innerText = name;
         const viewer = document.getElementById('viewer-container');
         const iframe = document.getElementById('driveViewer');
         viewer.style.display = "block";
         iframe.src = link.replace('/view', '/preview').replace('?usp=drive_link', '');
         window.scrollTo({ top: viewer.offsetTop - 50, behavior: 'smooth' });
+    }
+
+    // NUEVA FUNCIÓN PARA EL BOTÓN
+    function pedirAcceso() {
+        if (enlaceActual) {
+            window.open(enlaceActual, '_blank');
+        } else {
+            alert("Por favor, seleccioná una materia primero.");
+        }
     }
 
     function filterMaterias() {
@@ -369,15 +382,44 @@
         document.getElementById('avgOut').innerText = avg;
     }
 
-    function toggleTheme() {
-        const current = document.body.getAttribute('data-theme');
-        document.body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
-    }
-
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('hidden');
         document.getElementById('mainContent').classList.toggle('expanded');
     }
+
+    // --- NUEVA LÓGICA DE TEMA (DETECCIÓN AUTOMÁTICA) ---
+    
+    function applyTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('ungs_theme', theme);
+    }
+
+    const systemSettingDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+    function initTheme() {
+        const savedTheme = localStorage.getItem('ungs_theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else {
+            applyTheme(systemSettingDark.matches ? 'dark' : 'light');
+        }
+    }
+
+    systemSettingDark.addEventListener("change", (e) => {
+        if (!localStorage.getItem('ungs_theme')) {
+            applyTheme(e.matches ? 'dark' : 'light');
+        }
+    });
+
+    function toggleTheme() {
+        const current = document.body.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+    }
+
+    // Inicializamos el tema antes de renderizar
+    initTheme();
+    // --- FIN NUEVA LÓGICA DE TEMA ---
 
     render();
 </script>
