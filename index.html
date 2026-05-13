@@ -171,7 +171,7 @@
 <button class="toggle-btn" onclick="toggleSidebar()">Menú</button>
 <button onclick="toggleTheme()" style="position: fixed; top: 20px; right: 20px; border: 1px solid var(--primary); color: var(--primary); background: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; z-index: 1001;">Alternar Tema</button>
 
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar hidden" id="sidebar">
     <h2 style="color: var(--primary);">Mi Progreso</h2>
     <p><small>Calculadora y consejos ADE</small></p>
     <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
@@ -195,9 +195,13 @@
     <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" style="margin-top: 20px; width: 100%; background: #333; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
         Dejar recomendación
     </button>
+
+    <button onclick="window.open('TU_LINK_AL_PDF_DE_RECOMENDACIONES', '_blank')" style="margin-top: 10px; width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 4px 6px rgba(255, 140, 0, 0.2);">
+        📖 Ver Recomendaciones
+    </button>
 </aside>
 
-<div class="main-content" id="mainContent">
+<div class="main-content expanded" id="mainContent">
     <header>
         <h1>La Biblioteca de ADE</h1>
         <p>Digitalizando el conocimiento de Administración de Empresas - UNGS</p>
