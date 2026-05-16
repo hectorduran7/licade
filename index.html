@@ -5,48 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Biblioteca de ADE | UNGS</title>
     <style>
+        /* Tipografía institucional estilo U-Finance */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
         :root {
-            --primary: #FF8C00; /* Naranja minimalista */
-            --bg: #ffffff;
+            --primary: #FF8C00; /* Naranja conservado */
+            --bg: #f9fafb;
             --text: #1a1a1a;
-            --card-bg: #f9f9f9;
-            --sidebar-bg: #f4f4f4;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --sidebar-bg: rgba(244, 244, 244, 0.85);
+            --border: #e5e7eb;
             --sidebar-width: 320px;
         }
 
+        /* Estética U-Finance para el Dark Mode */
         [data-theme="dark"] {
-            --bg: #121212;
-            --text: #e0e0e0;
-            --card-bg: #1e1e1e;
-            --sidebar-bg: #181818;
+            --bg: #080808; 
+            --text: #f5f5f5;
+            --card-bg: rgba(18, 18, 18, 0.6); 
+            --sidebar-bg: rgba(8, 8, 8, 0.85);
+            --border: #222222;
         }
-        /* Corrección para visibilidad en modo oscuro al pasar el mouse */
-        [data-theme="dark"] .materia-item:hover {
-            background-color: #2c2c2c; 
-            color: var(--primary);     
-        }
+
         body { 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
+            font-family: 'Inter', sans-serif; 
             background-color: var(--bg); 
             color: var(--text); 
             margin: 0; 
             display: flex;
-            transition: 0.3s;
+            transition: background-color 0.4s ease, color 0.4s ease;
             overflow-x: hidden;
         }
 
-        /* Sidebar Izquierdo Colapsable */
+        /* Grilla de fondo (solo visible en dark mode) */
+        [data-theme="dark"] body {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* Sidebar con Glassmorphism */
         .sidebar {
             width: var(--sidebar-width);
             height: 100vh;
             background: var(--sidebar-bg);
-            padding: 20px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 30px 20px;
             position: fixed;
             left: 0;
             top: 0;
-            border-right: 1px solid #ddd;
+            border-right: 1px solid var(--border);
             overflow-y: auto;
-            transition: transform 0.3s ease;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
         }
 
@@ -54,149 +66,231 @@
 
         .toggle-btn {
             position: fixed;
-            left: 10px;
+            left: 15px;
             bottom: 20px;
             z-index: 1100;
             background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
+            padding: 12px 20px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
+            transition: all 0.3s ease;
         }
+        .toggle-btn:hover { transform: translateY(-2px); }
+
+        .theme-btn {
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            border: 1px solid var(--border); 
+            color: var(--text); 
+            background: var(--card-bg); 
+            backdrop-filter: blur(10px);
+            padding: 8px 15px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            z-index: 1001;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
 
         /* Contenido Principal */
         .main-content {
             margin-left: var(--sidebar-width);
-            padding: 40px;
+            padding: 50px 40px;
             width: 100%;
-            transition: margin-left 0.3s ease;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         .main-content.expanded { margin-left: 0; }
 
-        header { max-width: 800px; margin: 0 auto 40px; text-align: center; }
-        
-        .search-container { margin: 20px 0; }
+        header { max-width: 800px; margin: 0 auto 50px; text-align: center; }
+        header h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; font-size: 2.5rem;}
+        header p { color: #9ca3af; }
+
+        .search-container { margin: 30px 0; }
         #searchInput {
             width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid var(--primary);
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
             background: var(--card-bg);
+            backdrop-filter: blur(10px);
             color: var(--text);
-            font-size: 16px;
+            font-size: 15px;
+            transition: all 0.3s ease;
         }
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.1);
+        }
+
+        /* Acordeón y Materias refinadas */
+        .year-section { max-width: 800px; margin: 0 auto 20px; }
+        .year-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            color: var(--text);
+            padding: 18px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+        .year-header:hover { border-color: rgba(255, 140, 0, 0.4); }
+        .year-header span { color: var(--primary); font-weight: 800; }
+
+        .materia-container { display: none; padding: 15px 0 5px 0; }
+        .materia-item {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 15px 24px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            border-left: 4px solid transparent; 
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .materia-item:hover { 
+            transform: translateY(-2px);
+            border-color: rgba(255, 140, 0, 0.3);
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 10px 30px -10px rgba(255, 140, 0, 0.15);
+        }
+        [data-theme="dark"] .materia-item:hover { background-color: rgba(25, 25, 25, 0.8); }
+        
+        .materia-item small { color: #9ca3af; transition: color 0.3s; font-weight: 500;}
+        .materia-item:hover small { color: var(--primary); }
 
         /* Calculadora Estilos */
         .calc-container {
-            margin-top: 25px;
-            padding: 15px;
+            margin-top: 30px;
+            padding: 20px;
             background: var(--card-bg);
-            border-radius: 10px;
-            border: 1px solid #ddd;
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid var(--border);
         }
-        .calc-row { display: flex; gap: 5px; margin-bottom: 10px; }
+        .calc-row { display: flex; gap: 8px; margin-bottom: 15px; }
         .calc-input {
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
             background: var(--bg);
             color: var(--text);
-            font-size: 13px;
+            font-size: 14px;
         }
-        .grade-list { margin-top: 15px; max-height: 120px; overflow-y: auto; font-size: 12px; }
-        .grade-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
-        .btn-del { color: #ff4444; cursor: pointer; font-weight: bold; margin-left: 5px; }
-        .avg-display { font-size: 1.1rem; font-weight: bold; color: var(--primary); margin-top: 10px; }
+        .calc-input:focus { outline: none; border-color: var(--primary); }
+        
+        .grade-list { margin-top: 15px; max-height: 150px; overflow-y: auto; font-size: 13px; }
+        .grade-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .btn-del { color: #ff4a4a; cursor: pointer; font-weight: bold; margin-left: 10px; transition: 0.2s;}
+        .btn-del:hover { transform: scale(1.2); }
+        .avg-display { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-top: 15px; text-align: right; }
 
-        /* Donación de Archivos */
+        /* Botones de acción Sidebar */
+        .btn-sidebar {
+            width: 100%;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        .btn-dark { background: #222; color: white; border: 1px solid #333; }
+        .btn-dark:hover { background: #333; }
+        
+        .btn-primary-solid {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.2);
+        }
+        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.3); }
+
         .mini-donate {
             margin-top: 20px;
             padding: 12px;
-            background: #fffbe6;
-            border: 1px solid #ffe58f;
+            background: rgba(255, 140, 0, 0.05);
+            border: 1px solid rgba(255, 140, 0, 0.2);
             border-radius: 8px;
             font-size: 13px;
             text-align: center;
+            transition: all 0.3s ease;
         }
-
-        /* Acordeón por Años */
-        .year-section { max-width: 800px; margin: 0 auto 15px; }
-        .year-header {
-            background: var(--primary);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            display: flex;
-            justify-content: space-between;
-        }
-        .materia-container { display: none; padding: 10px 0; }
-        .materia-item {
-            background: var(--card-bg);
-            padding: 12px 20px;
-            margin-bottom: 5px;
-            border-radius: 6px;
-            border-left: 4px solid var(--primary);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-        }
-        .materia-item:hover { background: #eee; transform: translateX(5px); }
+        .mini-donate:hover { background: rgba(255, 140, 0, 0.1); }
+        .mini-donate a { color: var(--primary); text-decoration: none; font-weight: 600; }
 
         /* Visor */
         #viewer-container {
             display: none;
             max-width: 800px;
-            margin: 20px auto;
-            border: 2px solid var(--primary);
-            border-radius: 10px;
+            margin: 30px auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
             overflow: hidden;
+            box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
         }
 
-        .footer-donate {
-            text-align: center;
-            padding: 20px;
-            font-size: 14px;
-            opacity: 0.8;
-            margin-top: 40px;
+        .footer-donate { 
+            text-align: center; 
+            padding: 30px; 
+            font-size: 14px; 
+            color: #9ca3af; 
+            margin-top: 50px; 
+            border-top: 1px solid var(--border); 
         }
+        .footer-donate a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .footer-donate a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-<button class="toggle-btn" onclick="toggleSidebar()">Menú</button>
-<button onclick="toggleTheme()" style="position: fixed; top: 20px; right: 20px; border: 1px solid var(--primary); color: var(--primary); background: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; z-index: 1001;">Alternar Tema</button>
+<button class="toggle-btn" onclick="toggleSidebar()">☰ Menú</button>
+<button class="theme-btn" onclick="toggleTheme()">🌓 Tema</button>
 
 <aside class="sidebar hidden" id="sidebar">
-    <h2 style="color: var(--primary);">Mi Progreso</h2>
-    <p><small>Calculadora y consejos ADE</small></p>
-    <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
+    <h2 style="color: var(--primary); font-weight: 800; margin-top: 10px;">Mi Progreso</h2>
+    <p style="color: #9ca3af; font-size: 14px; margin-top: -10px;">Gestión académica ADE</p>
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
     
     <div class="calc-container">
-        <h4 style="margin:0 0 10px 0;">📊 Mis Notas</h4>
+        <h4 style="margin:0 0 15px 0;">📊 Mis Notas</h4>
         <div class="calc-row">
             <input type="text" id="subjIn" class="calc-input" placeholder="Materia" style="flex: 2;">
             <input type="number" id="gradeIn" class="calc-input" placeholder="Nota" style="flex: 1;" min="1" max="10">
         </div>
-        <button onclick="addEntry()" style="width:100%; background: var(--primary); color:white; border:none; padding:8px; border-radius:5px; cursor:pointer; font-weight:bold;">Añadir Materia</button>
+        <button onclick="addEntry()" class="btn-sidebar btn-primary-solid" style="margin-top: 5px;">Añadir Materia</button>
         
         <div class="grade-list" id="gradeList"></div>
         <div class="avg-display">Promedio: <span id="avgOut">0.00</span></div>
     </div>
 
     <div class="mini-donate">
-         <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" style="color: #856404; text-decoration: none; font-weight: bold;">Donar Archivos (Email)</a>
+         <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE">Donar Archivos (Email)</a>
     </div>
 
-    <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" style="margin-top: 20px; width: 100%; background: #333; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold;">
+    <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" class="btn-sidebar btn-dark" style="margin-top: 30px;">
         Dejar recomendación
     </button>
 
-    <button onclick="window.open('TU_LINK_AL_PDF_DE_RECOMENDACIONES', '_blank')" style="margin-top: 10px; width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; box-shadow: 0 4px 6px rgba(255, 140, 0, 0.2);">
+    <button onclick="window.open('TU_LINK_AL_PDF_DE_RECOMENDACIONES', '_blank')" class="btn-sidebar btn-primary-solid">
         📖 Ver Recomendaciones
     </button>
 </aside>
@@ -210,16 +304,16 @@
         </div>
     </header>
 
-<div id="viewer-container">
-        <div style="background: var(--primary); color: white; padding: 10px; display: flex; justify-content: space-between; font-weight: bold;">
-            <span id="activeTitle">Material</span>
-            <button onclick="document.getElementById('viewer-container').style.display='none'" style="background: none; border: none; color: white; cursor: pointer;">✕</button>
+    <div id="viewer-container">
+        <div style="background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span id="activeTitle" style="font-weight: 700; color: var(--primary);">Material</span>
+            <button onclick="document.getElementById('viewer-container').style.display='none'" style="background: var(--border); border: none; color: var(--text); padding: 5px 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">✕ Cerrar</button>
         </div>
         <iframe id="driveViewer" src="" width="100%" height="450px" frameborder="0"></iframe>
         
-        <div style="padding: 15px; background: var(--card-bg); text-align: center; border-top: 2px solid var(--primary);">
-            <p style="font-size: 13px; margin-bottom: 10px; opacity: 0.8;">¿Ves un error de Google o no tenés acceso?</p>
-            <button id="requestBtn" onclick="pedirAcceso()" style="background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; max-width: 300px;">
+        <div style="padding: 20px; background: var(--card-bg); text-align: center; border-top: 1px solid var(--border);">
+            <p style="font-size: 14px; margin-bottom: 15px; color: #9ca3af;">¿Ves un error de Google o necesitas pedir permiso?</p>
+            <button id="requestBtn" onclick="pedirAcceso()" class="btn-sidebar btn-primary-solid" style="width: auto; padding: 10px 30px;">
                 Pedir Acceso a la Carpeta →
             </button>
         </div>
@@ -228,8 +322,7 @@
     <div id="accordionContainer"></div>
 
     <div class="footer-donate">
-        <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
-        <p>¿Tenes material para donar? <a href="TU_LINK_WHATSAPP" style="color: var(--primary); text-decoration: none; font-weight: bold;">Donar apuntes vía WhatsApp</a>.</p>
+        <p>¿Te sirvió el material? <a href="TU_LINK_WHATSAPP">Donar apuntes vía WhatsApp</a>.</p>
     </div>
 </div>
 
@@ -289,7 +382,6 @@
         ]
     };
 
-    // VARIABLE AGREGADA PARA QUE EL BOTÓN SEPA QUÉ ABRIR
     let enlaceActual = ""; 
     let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
 
@@ -322,18 +414,25 @@
         icon.innerText = isOpen ? "+" : "-";
     }
 
-    // FUNCIÓN ACTUALIZADA
+    // Función Híbrida: Abre Drive en iframe o archivos directos
     function openDoc(name, link) {
-        enlaceActual = link; // Guarda el enlace de la materia seleccionada
+        enlaceActual = link; 
         document.getElementById('activeTitle').innerText = name;
         const viewer = document.getElementById('viewer-container');
         const iframe = document.getElementById('driveViewer');
+        
         viewer.style.display = "block";
-        iframe.src = link.replace('/view', '/preview').replace('?usp=drive_link', '');
+        
+        if (link.includes('drive.google.com')) {
+            iframe.src = link.replace('/view', '/preview').replace('?usp=drive_link', '');
+        } else {
+            iframe.src = link;
+        }
+        
         window.scrollTo({ top: viewer.offsetTop - 50, behavior: 'smooth' });
     }
 
-    // NUEVA FUNCIÓN PARA EL BOTÓN
+    // Botón Solucionador del Error 403
     function pedirAcceso() {
         if (enlaceActual) {
             window.open(enlaceActual, '_blank');
@@ -379,7 +478,7 @@
         list.innerHTML = entries.map((e, i) => `
             <div class="grade-item">
                 <span>${e.subj}</span>
-                <span><b>${e.grade}</b> <span class="btn-del" onclick="removeEntry(${i})">×</span></span>
+                <span><b>${e.grade}</b> <span class="btn-del" onclick="removeEntry(${i})">✕</span></span>
             </div>
         `).join('');
         const avg = entries.length ? (entries.reduce((a, b) => a + b.grade, 0) / entries.length).toFixed(2) : "0.00";
@@ -391,8 +490,7 @@
         document.getElementById('mainContent').classList.toggle('expanded');
     }
 
-    // --- NUEVA LÓGICA DE TEMA (DETECCIÓN AUTOMÁTICA) ---
-    
+    // --- LÓGICA DE TEMA (DETECCIÓN AUTOMÁTICA) ---
     function applyTheme(theme) {
         document.body.setAttribute('data-theme', theme);
         localStorage.setItem('ungs_theme', theme);
@@ -421,9 +519,8 @@
         applyTheme(next);
     }
 
-    // Inicializamos el tema antes de renderizar
     initTheme();
-    // --- FIN NUEVA LÓGICA DE TEMA ---
+    // --- FIN LÓGICA DE TEMA ---
 
     render();
 </script>
