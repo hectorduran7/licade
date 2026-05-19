@@ -8,11 +8,10 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* Tipografía institucional estilo U-Finance */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
         :root {
-            --primary: #FF8C00; /* Naranja conservado */
+            --primary: #FF8C00; 
             --bg: #f9fafb;
             --text: #1a1a1a;
             --card-bg: rgba(255, 255, 255, 0.7);
@@ -21,7 +20,6 @@
             --sidebar-width: 320px;
         }
 
-        /* Estética U-Finance para el Dark Mode */
         [data-theme="dark"] {
             --bg: #080808; 
             --text: #f5f5f5;
@@ -47,19 +45,17 @@
             background-size: 50px 50px;
         }
 
-        /* Tamaños de íconos */
         .icon-sm { width: 16px; height: 16px; }
         .icon-md { width: 20px; height: 20px; }
         .icon-lg { width: 24px; height: 24px; }
 
-        /* Sidebar con Glassmorphism y arreglo de superposición (padding-bottom) */
         .sidebar {
             width: var(--sidebar-width);
             height: 100vh;
             background: var(--sidebar-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            padding: 30px 20px 100px 20px; /* Padding bottom 100px arregla el solapamiento */
+            padding: 30px 20px 50px 20px; 
             position: fixed;
             left: 0;
             top: 0;
@@ -111,7 +107,6 @@
         }
         .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-        /* Contenido Principal */
         .main-content {
             margin-left: var(--sidebar-width);
             padding: 50px 40px;
@@ -140,13 +135,11 @@
         }
         #searchInput:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 20px rgba(255, 140, 0, 0.1); }
 
-        /* NUEVO: Barra de Progreso */
         .progress-container { margin-top: 15px; margin-bottom: 20px; }
         .progress-bar-bg { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
         .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.8s ease-out; box-shadow: 0 0 10px rgba(255,140,0,0.4); }
         .progress-text { font-size: 12px; color: #9ca3af; font-weight: 600; text-align: right; }
 
-        /* Acordeón y Materias refinadas */
         .year-section { max-width: 800px; margin: 0 auto 20px; }
         .year-header {
             background: var(--card-bg);
@@ -191,7 +184,6 @@
         .materia-item small { color: #9ca3af; transition: color 0.3s; font-weight: 500; display: flex; align-items: center; gap: 5px;}
         .materia-item:hover small { color: var(--primary); }
 
-        /* Calculadora Estilos */
         .calc-container {
             margin-top: 20px;
             padding: 20px;
@@ -218,7 +210,6 @@
         .btn-del:hover { transform: scale(1.2); }
         .avg-display { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-top: 15px; text-align: right; }
 
-        /* Botones de acción Sidebar */
         .btn-sidebar {
             width: 100%;
             border: none;
@@ -253,7 +244,6 @@
         .mini-donate:hover { background: rgba(255, 140, 0, 0.1); }
         .mini-donate a { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; justify-content: center;}
 
-        /* Caja de Publicidad para Clases Particulares */
         .promo-box {
             margin-top: 30px;
             padding: 18px 15px;
@@ -282,7 +272,6 @@
         }
         .promo-btn:hover { box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4); }
 
-        /* Visor */
         #viewer-container {
             display: none;
             max-width: 800px;
@@ -295,9 +284,33 @@
             box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
         }
 
-        .footer-donate { text-align: center; padding: 30px; font-size: 14px; color: #9ca3af; margin-top: 50px; border-top: 1px solid var(--border); }
+        .footer-donate { 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 30px; 
+            font-size: 14px; 
+            color: #9ca3af; 
+            margin-top: 50px; 
+            border-top: 1px solid var(--border); 
+        }
         .footer-donate a { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
         .footer-donate a:hover { text-decoration: underline; }
+        
+        .btn-sugerencias {
+            color: #9ca3af !important;
+            border: 1px dashed #9ca3af;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .btn-sugerencias:hover {
+            color: var(--primary) !important;
+            border-color: var(--primary);
+            background: rgba(255,140,0,0.05);
+            text-decoration: none !important;
+        }
     </style>
 </head>
 <body>
@@ -324,7 +337,7 @@
         <h4 style="margin:0 0 15px 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="calculator" class="icon-md"></i> Mis Notas</h4>
         <div class="calc-row">
             <input type="text" id="subjIn" class="calc-input" placeholder="Materia" style="flex: 2;">
-            <input type="number" id="gradeIn" class="calc-input" placeholder="Nota" style="flex: 1;" min="1" max="10">
+            <input type="text" id="gradeIn" class="calc-input" placeholder="Nota (1-10 o 'A')" style="flex: 1;">
         </div>
         <button onclick="addEntry()" class="btn-sidebar btn-primary-solid" style="margin-top: 5px;">
             <i data-lucide="plus" class="icon-sm"></i> Añadir Materia
@@ -356,10 +369,6 @@
 
     <button onclick="window.open('TU_LINK_AL_PDF_DE_RECOMENDACIONES', '_blank')" class="btn-sidebar btn-primary-solid">
         <i data-lucide="book-open-check" class="icon-sm"></i> Ver Recomendaciones
-    </button>
-
-    <button onclick="window.open('LINK_TU_FORMULARIO_SUGERENCIAS', '_blank')" class="btn-sidebar" style="background: transparent; border: 1px dashed #9ca3af; color: var(--text);">
-        <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para la web
     </button>
 </aside>
 
@@ -395,7 +404,10 @@
     <div id="accordionContainer"></div>
 
     <div class="footer-donate">
-        <p>¿Te sirvió el material? <a href="TU_LINK_WHATSAPP"><i data-lucide="share-2" class="icon-sm"></i> Donar apuntes vía WhatsApp</a>.</p>
+        <p style="margin: 0;">¿Te sirvió el material? <a href="TU_LINK_WHATSAPP"><i data-lucide="share-2" class="icon-sm"></i> Donar apuntes vía WhatsApp</a></p>
+        <a href="LINK_TU_FORMULARIO_SUGERENCIAS" class="btn-sugerencias">
+            <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para mejorar la web
+        </a>
     </div>
 </div>
 
@@ -457,7 +469,7 @@
 
     let enlaceActual = ""; 
     let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
-    const totalMaterias = 38; // 38 materias totales de la carrera
+    const totalMaterias = 38; // 38 materias totales
 
     function render() {
         const container = document.getElementById('accordionContainer');
@@ -488,7 +500,6 @@
         icon.innerText = isOpen ? "+" : "-";
     }
 
-    // Función Híbrida: Abre Drive en iframe o archivos directos
     function openDoc(name, link) {
         enlaceActual = link; 
         document.getElementById('activeTitle').innerHTML = `<i data-lucide="file-text" class="icon-md"></i> ${name}`;
@@ -503,7 +514,7 @@
             iframe.src = link;
         }
         
-        lucide.createIcons(); // Recarga el icono del titulo
+        lucide.createIcons(); 
         window.scrollTo({ top: viewer.offsetTop - 50, behavior: 'smooth' });
     }
 
@@ -530,14 +541,23 @@
         }
     }
 
+    // LÓGICA MODIFICADA PARA ACEPTAR "APROBADO" SIN ARRUINAR EL PROMEDIO
     function addEntry() {
-        const subj = document.getElementById('subjIn').value;
-        const grade = parseFloat(document.getElementById('gradeIn').value);
-        if (subj && !isNaN(grade)) {
-            entries.push({ subj, grade });
+        const subj = document.getElementById('subjIn').value.trim();
+        const gradeRaw = document.getElementById('gradeIn').value.trim().toUpperCase();
+        
+        let gradeNum = parseFloat(gradeRaw);
+        let isNumeric = !isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 10;
+        let isApproved = gradeRaw === 'A' || gradeRaw === 'APROBADO' || gradeRaw === 'AP';
+
+        if (subj && (isNumeric || isApproved)) {
+            let finalGrade = isNumeric ? gradeNum : 'Aprobado';
+            entries.push({ subj: subj, grade: finalGrade, isNumeric: isNumeric });
             saveAndRender();
             document.getElementById('subjIn').value = '';
             document.getElementById('gradeIn').value = '';
+        } else {
+            alert("Ingresá una nota del 1 al 10, o la letra 'A' para materias que solo llevan 'Aprobado'.");
         }
     }
 
@@ -550,7 +570,6 @@
         localStorage.setItem('ungs_grades', JSON.stringify(entries));
         const list = document.getElementById('gradeList');
         
-        // Dibuja la lista de notas
         list.innerHTML = entries.map((e, i) => `
             <div class="grade-item">
                 <span>${e.subj}</span>
@@ -561,18 +580,19 @@
             </div>
         `).join('');
         
-        // Calcula promedio
-        const avg = entries.length ? (entries.reduce((a, b) => a + b.grade, 0) / entries.length).toFixed(2) : "0.00";
+        // El promedio SOLO cuenta las materias que tienen isNumeric == true
+        const numEntries = entries.filter(e => e.isNumeric !== false && !isNaN(parseFloat(e.grade)));
+        const avg = numEntries.length ? (numEntries.reduce((a, b) => a + parseFloat(b.grade), 0) / numEntries.length).toFixed(2) : "0.00";
         document.getElementById('avgOut').innerText = avg;
 
-        // Calcula Barra de Progreso (Gamificación)
+        // La barra de progreso cuenta TODAS las materias
         const completadas = entries.length;
         const porcentaje = Math.min((completadas / totalMaterias) * 100, 100).toFixed(1);
         
         document.getElementById('progressBar').style.width = porcentaje + '%';
         document.getElementById('progressText').innerText = `${completadas} / ${totalMaterias} materias completadas`;
 
-        lucide.createIcons(); // Recarga los iconos de la papelera
+        lucide.createIcons(); 
     }
 
     function toggleSidebar() {
@@ -580,7 +600,6 @@
         document.getElementById('mainContent').classList.toggle('expanded');
     }
 
-    // --- LÓGICA DE TEMA (DETECCIÓN AUTOMÁTICA) ---
     function applyTheme(theme) {
         document.body.setAttribute('data-theme', theme);
         localStorage.setItem('ungs_theme', theme);
@@ -610,11 +629,7 @@
     }
 
     initTheme();
-    // --- FIN LÓGICA DE TEMA ---
-
     render();
-    
-    // Inicializa todos los iconos Lucide la primera vez que carga la página
     lucide.createIcons();
 </script>
 </body>
