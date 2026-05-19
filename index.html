@@ -7,6 +7,14 @@
     
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -17,7 +25,7 @@
             --card-bg: rgba(255, 255, 255, 0.7);
             --sidebar-bg: rgba(244, 244, 244, 0.85);
             --border: #e5e7eb;
-            --sidebar-width: 320px;
+            --sidebar-width: 300px;
         }
 
         [data-theme="dark"] {
@@ -36,6 +44,7 @@
             display: flex;
             transition: background-color 0.4s ease, color 0.4s ease;
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
         [data-theme="dark"] body {
@@ -49,13 +58,14 @@
         .icon-md { width: 20px; height: 20px; }
         .icon-lg { width: 24px; height: 24px; }
 
+        /* Sidebar Limpio */
         .sidebar {
             width: var(--sidebar-width);
             height: 100vh;
             background: var(--sidebar-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            padding: 30px 20px 50px 20px; 
+            padding: 30px 20px; 
             position: fixed;
             left: 0;
             top: 0;
@@ -64,323 +74,224 @@
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1000;
         }
-
         .sidebar.hidden { transform: translateX(-100%); }
 
         .toggle-btn {
-            position: fixed;
-            left: 15px;
-            bottom: 20px;
-            z-index: 1100;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            position: fixed; left: 15px; bottom: 20px; z-index: 1100;
+            background: var(--primary); color: white; border: none; padding: 12px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3); transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 8px;
         }
         .toggle-btn:hover { transform: translateY(-2px); }
 
         .theme-btn {
-            position: fixed; 
-            top: 20px; 
-            right: 20px; 
-            border: 1px solid var(--border); 
-            color: var(--text); 
-            background: var(--card-bg); 
-            backdrop-filter: blur(10px);
-            padding: 8px 15px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            z-index: 1001;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            position: fixed; top: 20px; right: 20px; border: 1px solid var(--border); 
+            color: var(--text); background: var(--card-bg); backdrop-filter: blur(10px);
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; z-index: 1001;
+            font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
         }
         .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
 
         .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 50px 40px;
-            width: 100%;
-            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: var(--sidebar-width); padding: 50px 20px; width: 100%; max-width: 900px;
+            margin-right: auto; transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .main-content.expanded { margin-left: 0; }
+        .main-content.expanded { margin-left: auto; margin-right: auto; }
 
-        header { max-width: 800px; margin: 0 auto 50px; text-align: center; }
+        header { text-align: center; margin-bottom: 40px; }
         header h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; font-size: 2.5rem;}
         header p { color: #9ca3af; }
 
-        .search-container { margin: 30px 0; position: relative;}
+        .search-container { position: relative; margin-bottom: 30px;}
         .search-icon { position: absolute; left: 15px; top: 16px; color: #9ca3af; }
         #searchInput {
-            width: 100%;
-            padding: 16px 20px 16px 45px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            color: var(--text);
-            font-size: 15px;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
+            width: 100%; padding: 16px 20px 16px 45px; border-radius: 12px;
+            border: 1px solid var(--border); background: var(--card-bg); backdrop-filter: blur(10px);
+            color: var(--text); font-size: 15px; transition: all 0.3s ease; box-sizing: border-box;
         }
         #searchInput:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 20px rgba(255, 140, 0, 0.1); }
 
-        .progress-container { margin-top: 15px; margin-bottom: 20px; }
-        .progress-bar-bg { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+        /* NUEVO PANEL CENTRAL: Dashboard de Progreso */
+        .dashboard-panel {
+            background: var(--card-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--border); border-radius: 16px; padding: 25px;
+            margin-bottom: 30px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+        }
+        
+        .progress-container { margin: 15px 0 25px 0; }
+        .progress-bar-bg { width: 100%; height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; margin-bottom: 8px; }
         .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.8s ease-out; box-shadow: 0 0 10px rgba(255,140,0,0.4); }
-        .progress-text { font-size: 12px; color: #9ca3af; font-weight: 600; text-align: right; }
+        .progress-text { font-size: 13px; color: #9ca3af; font-weight: 600; text-align: right; }
 
-        .year-section { max-width: 800px; margin: 0 auto 20px; }
+        .calc-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .calc-input {
+            padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text); font-size: 14px; box-sizing: border-box;
+        }
+        .calc-input:focus { outline: none; border-color: var(--primary); }
+        
+        .grade-list { margin-top: 15px; max-height: 200px; overflow-y: auto; font-size: 14px; padding-right: 5px;}
+        .grade-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: center;}
+        .btn-del { color: #ff4a4a; cursor: pointer; margin-left: 15px; transition: 0.2s; padding: 2px;}
+        .btn-del:hover { transform: scale(1.2); }
+        .avg-display { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-top: 20px; text-align: right; }
+
+        /* PUBLICIDAD DESTACADA EN MAIN */
+        .promo-banner {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+            padding: 20px 25px; margin-bottom: 30px; border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255, 140, 0, 0.08) 0%, rgba(255, 140, 0, 0.02) 100%);
+            border: 1px dashed var(--primary); transition: all 0.3s ease;
+        }
+        .promo-banner:hover { background: rgba(255, 140, 0, 0.12); transform: translateY(-2px); }
+        .promo-banner-text h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        .promo-banner-text p { font-size: 13px; color: #9ca3af; margin: 0; }
+        .promo-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--primary); color: white; text-decoration: none; font-size: 13px;
+            font-weight: 700; padding: 12px 20px; border-radius: 8px; transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 140, 0, 0.2); white-space: nowrap;
+        }
+        .promo-btn:hover { box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4); }
+
+        /* Acordeón */
+        .year-section { margin-bottom: 20px; }
         .year-header {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            color: var(--text);
-            padding: 18px 24px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            transition: all 0.3s ease;
+            background: var(--card-bg); border: 1px solid var(--border); backdrop-filter: blur(10px);
+            color: var(--text); padding: 18px 24px; border-radius: 12px; cursor: pointer;
+            font-weight: 600; display: flex; justify-content: space-between; transition: all 0.3s ease;
         }
         .year-header:hover { border-color: rgba(255, 140, 0, 0.4); }
         .year-header span { color: var(--primary); font-weight: 800; }
 
         .materia-container { display: none; padding: 15px 0 5px 0; }
         .materia-item {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            padding: 15px 24px;
-            margin-bottom: 8px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            border-left: 4px solid transparent; 
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--card-bg); backdrop-filter: blur(10px); padding: 15px 24px;
+            margin-bottom: 8px; border-radius: 10px; border: 1px solid var(--border);
+            border-left: 4px solid transparent; cursor: pointer; display: flex;
+            justify-content: space-between; align-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
         .materia-item:hover { 
-            transform: translateY(-2px);
-            border-color: rgba(255, 140, 0, 0.3);
-            border-left: 4px solid var(--primary);
-            box-shadow: 0 10px 30px -10px rgba(255, 140, 0, 0.15);
+            transform: translateY(-2px); border-color: rgba(255, 140, 0, 0.3);
+            border-left: 4px solid var(--primary); box-shadow: 0 10px 30px -10px rgba(255, 140, 0, 0.15);
         }
         [data-theme="dark"] .materia-item:hover { background-color: rgba(25, 25, 25, 0.8); }
-        
         .materia-item small { color: #9ca3af; transition: color 0.3s; font-weight: 500; display: flex; align-items: center; gap: 5px;}
         .materia-item:hover small { color: var(--primary); }
 
-        .calc-container {
-            margin-top: 20px;
-            padding: 20px;
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            border: 1px solid var(--border);
+        /* Visor */
+        #viewer-container {
+            display: none; margin: 0 0 30px 0; background: var(--card-bg);
+            backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 16px;
+            overflow: hidden; box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
         }
-        .calc-row { display: flex; gap: 8px; margin-bottom: 15px; }
-        .calc-input {
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        .calc-input:focus { outline: none; border-color: var(--primary); }
-        
-        .grade-list { margin-top: 15px; max-height: 150px; overflow-y: auto; font-size: 13px; }
-        .grade-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); align-items: center;}
-        .btn-del { color: #ff4a4a; cursor: pointer; margin-left: 10px; transition: 0.2s; padding: 2px;}
-        .btn-del:hover { transform: scale(1.2); }
-        .avg-display { font-size: 1.2rem; font-weight: 700; color: var(--primary); margin-top: 15px; text-align: right; }
 
+        /* Botones genéricos */
         .btn-sidebar {
-            width: 100%;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            width: 100%; border: none; padding: 14px; border-radius: 8px; cursor: pointer;
+            font-size: 14px; font-weight: 600; transition: all 0.3s ease; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
         .btn-dark { background: #222; color: white; border: 1px solid #333; }
         .btn-dark:hover { background: #333; }
-        
         .btn-primary-solid { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255, 140, 0, 0.2); }
         .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.3); }
 
-        .mini-donate {
-            margin-top: 20px;
-            padding: 12px;
-            background: rgba(255, 140, 0, 0.05);
-            border: 1px solid rgba(255, 140, 0, 0.2);
-            border-radius: 8px;
-            font-size: 13px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .mini-donate:hover { background: rgba(255, 140, 0, 0.1); }
-        .mini-donate a { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; justify-content: center;}
-
-        .promo-box {
-            margin-top: 30px;
-            padding: 18px 15px;
-            background: linear-gradient(135deg, rgba(255, 140, 0, 0.08) 0%, rgba(255, 140, 0, 0.02) 100%);
-            border: 1px dashed var(--primary);
-            border-radius: 12px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        .promo-box:hover { background: rgba(255, 140, 0, 0.12); transform: translateY(-2px); }
-        .promo-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            margin-top: 12px;
-            background: var(--primary);
-            color: white;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 700;
-            padding: 10px 16px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(255, 140, 0, 0.2);
-        }
-        .promo-btn:hover { box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4); }
-
-        #viewer-container {
-            display: none;
-            max-width: 800px;
-            margin: 30px auto;
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
-        }
-
         .footer-donate { 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            padding: 30px; 
-            font-size: 14px; 
-            color: #9ca3af; 
-            margin-top: 50px; 
-            border-top: 1px solid var(--border); 
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
+            padding: 40px 20px; font-size: 14px; color: #9ca3af; margin-top: 60px; border-top: 1px solid var(--border); 
         }
         .footer-donate a { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
         .footer-donate a:hover { text-decoration: underline; }
         
         .btn-sugerencias {
-            color: #9ca3af !important;
-            border: 1px dashed #9ca3af;
-            padding: 10px 20px;
-            border-radius: 8px;
-            transition: 0.3s;
+            color: #9ca3af !important; border: 1px dashed #9ca3af; padding: 12px 24px;
+            border-radius: 8px; transition: 0.3s;
         }
         .btn-sugerencias:hover {
-            color: var(--primary) !important;
-            border-color: var(--primary);
-            background: rgba(255,140,0,0.05);
-            text-decoration: none !important;
+            color: var(--primary) !important; border-color: var(--primary);
+            background: rgba(255,140,0,0.05); text-decoration: none !important;
         }
     </style>
 </head>
 <body>
 
-<button class="toggle-btn" onclick="toggleSidebar()"><i data-lucide="menu" class="icon-md"></i> Menú</button>
+<button class="toggle-btn" onclick="toggleSidebar()"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
 <button class="theme-btn" onclick="toggleTheme()"><i data-lucide="moon" class="icon-sm"></i> Tema</button>
 
 <aside class="sidebar hidden" id="sidebar">
     <h2 style="color: var(--primary); font-weight: 800; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
-        <i data-lucide="trending-up" class="icon-lg"></i> Mi Progreso
+        <i data-lucide="library" class="icon-lg"></i> ADE UNGS
     </h2>
-    <p style="color: #9ca3af; font-size: 14px; margin-top: -5px;">Gestión académica ADE</p>
+    <p style="color: #9ca3af; font-size: 14px; margin-top: -5px;">Enlaces rápidos</p>
     
-    <div class="progress-container">
-        <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="progressBar"></div>
-        </div>
-        <div class="progress-text" id="progressText">0 / 38 materias</div>
-    </div>
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0 30px 0;">
 
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-    
-    <div class="calc-container">
-        <h4 style="margin:0 0 15px 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="calculator" class="icon-md"></i> Mis Notas</h4>
-        <div class="calc-row">
-            <input type="text" id="subjIn" class="calc-input" placeholder="Materia" style="flex: 2;">
-            <input type="text" id="gradeIn" class="calc-input" placeholder="Nota (1-10 o 'A')" style="flex: 1;">
-        </div>
-        <button onclick="addEntry()" class="btn-sidebar btn-primary-solid" style="margin-top: 5px;">
-            <i data-lucide="plus" class="icon-sm"></i> Añadir Materia
-        </button>
-        
-        <div class="grade-list" id="gradeList"></div>
-        <div class="avg-display">Promedio: <span id="avgOut">0.00</span></div>
-    </div>
-
-    <div class="promo-box">
-        <h4 style="margin: 0 0 5px 0; color: var(--primary); font-size: 15px; display: flex; justify-content: center; align-items: center; gap: 5px;">
-            <i data-lucide="graduation-cap" class="icon-md"></i> ¿Das clases particulares?
-        </h4>
-        <p style="font-size: 12px; color: #9ca3af; margin-bottom: 0;">Llegá a más alumnos de ADE. Destacá tus servicios en la plataforma.</p>
-        <a href="mailto:hectorjoseduran@gmail.com?subject=Publicidad%20Clases%20Particulares" class="promo-btn">
-            <i data-lucide="megaphone" class="icon-sm"></i> Consultar Publicidad
-        </a>
-    </div>
-
-    <div class="mini-donate">
-         <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE">
-            <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos (Email)
-         </a>
-    </div>
-
-    <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" class="btn-sidebar btn-dark" style="margin-top: 30px;">
+    <button onclick="window.open('https://forms.gle/rjBa6mMxTo9zxcmy7')" class="btn-sidebar btn-dark">
         <i data-lucide="message-square-plus" class="icon-sm"></i> Dejar recomendación
     </button>
 
     <button onclick="window.open('TU_LINK_AL_PDF_DE_RECOMENDACIONES', '_blank')" class="btn-sidebar btn-primary-solid">
         <i data-lucide="book-open-check" class="icon-sm"></i> Ver Recomendaciones
     </button>
+
+    <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar" style="background: rgba(255,140,0,0.1); color: var(--primary); text-decoration: none;">
+        <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos (Email)
+    </a>
 </aside>
 
 <div class="main-content expanded" id="mainContent">
     <header>
         <h1>La Biblioteca de ADE</h1>
         <p>Digitalizando el conocimiento de Administración de Empresas - UNGS</p>
-        <div class="search-container">
-            <i data-lucide="search" class="search-icon icon-md"></i>
-            <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="filterMaterias()">
-        </div>
     </header>
+
+    <div class="dashboard-panel">
+        <h3 style="margin: 0 0 5px 0; color: var(--primary); font-size: 20px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="trending-up" class="icon-md"></i> Panel Académico
+        </h3>
+        
+        <div class="progress-container">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 / 38 materias</div>
+        </div>
+
+        <hr style="border-top: 1px solid var(--border); margin: 25px 0;">
+
+        <div style="display: flex; flex-direction: column; md:flex-row;">
+            <h4 style="margin:0 0 15px 0; display: flex; align-items: center; gap: 8px; color: var(--text);">
+                <i data-lucide="calculator" class="icon-md"></i> Mis Notas
+            </h4>
+            <div class="calc-row">
+                <input type="text" id="subjIn" class="calc-input" placeholder="Materia" style="flex: 2;">
+                <input type="text" id="gradeIn" class="calc-input" placeholder="Nota (1-10 o 'A')" style="flex: 1;">
+                <button onclick="addEntry()" class="btn-sidebar btn-primary-solid" style="margin: 0; width: auto; padding: 0 20px;">
+                    <i data-lucide="plus" class="icon-sm"></i> 
+                </button>
+            </div>
+            
+            <div class="grade-list" id="gradeList"></div>
+            <div class="avg-display">Promedio: <span id="avgOut">0.00</span></div>
+        </div>
+    </div>
+
+    <div class="search-container">
+        <i data-lucide="search" class="search-icon icon-md"></i>
+        <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="filterMaterias()">
+    </div>
+
+    <div class="promo-banner">
+        <div class="promo-banner-text">
+            <h4><i data-lucide="graduation-cap" class="icon-md"></i> ¿Das clases particulares?</h4>
+            <p>Llegá a más alumnos de ADE. Destacá tus servicios directamente en la plataforma.</p>
+        </div>
+        <a href="mailto:hectorjoseduran@gmail.com?subject=Publicidad%20Clases%20Particulares" class="promo-btn">
+            <i data-lucide="megaphone" class="icon-sm"></i> Consultar Publicidad
+        </a>
+    </div>
 
     <div id="viewer-container">
         <div style="background: var(--card-bg); border-bottom: 1px solid var(--border); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
@@ -395,7 +306,7 @@
         
         <div style="padding: 20px; background: var(--card-bg); text-align: center; border-top: 1px solid var(--border);">
             <p style="font-size: 14px; margin-bottom: 15px; color: #9ca3af;">¿Ves un error de Google o necesitas pedir permiso?</p>
-            <button id="requestBtn" onclick="pedirAcceso()" class="btn-sidebar btn-primary-solid" style="width: auto; padding: 10px 30px; display: inline-flex;">
+            <button id="requestBtn" onclick="pedirAcceso()" class="btn-sidebar btn-primary-solid" style="width: auto; padding: 10px 30px; display: inline-flex; margin: 0 auto;">
                 <i data-lucide="external-link" class="icon-sm"></i> Pedir Acceso a la Carpeta
             </button>
         </div>
@@ -404,10 +315,10 @@
     <div id="accordionContainer"></div>
 
     <div class="footer-donate">
-        <p style="margin: 0;">¿Te sirvió el material? <a href="TU_LINK_WHATSAPP"><i data-lucide="share-2" class="icon-sm"></i> Donar apuntes vía WhatsApp</a></p>
         <a href="LINK_TU_FORMULARIO_SUGERENCIAS" class="btn-sugerencias">
             <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para mejorar la web
         </a>
+        <p style="margin: 0;">¿Te sirvió el material? <a href="TU_LINK_WHATSAPP"><i data-lucide="share-2" class="icon-sm"></i> Donar apuntes vía WhatsApp</a></p>
     </div>
 </div>
 
@@ -469,7 +380,7 @@
 
     let enlaceActual = ""; 
     let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
-    const totalMaterias = 38; // 38 materias totales
+    const totalMaterias = 38;
 
     function render() {
         const container = document.getElementById('accordionContainer');
@@ -541,7 +452,6 @@
         }
     }
 
-    // LÓGICA MODIFICADA PARA ACEPTAR "APROBADO" SIN ARRUINAR EL PROMEDIO
     function addEntry() {
         const subj = document.getElementById('subjIn').value.trim();
         const gradeRaw = document.getElementById('gradeIn').value.trim().toUpperCase();
@@ -557,7 +467,7 @@
             document.getElementById('subjIn').value = '';
             document.getElementById('gradeIn').value = '';
         } else {
-            alert("Ingresá una nota del 1 al 10, o la letra 'A' para materias que solo llevan 'Aprobado'.");
+            alert("Ingresá una nota del 1 al 10, o la letra 'A' para materias extracurriculares o talleres.");
         }
     }
 
@@ -580,12 +490,10 @@
             </div>
         `).join('');
         
-        // El promedio SOLO cuenta las materias que tienen isNumeric == true
         const numEntries = entries.filter(e => e.isNumeric !== false && !isNaN(parseFloat(e.grade)));
         const avg = numEntries.length ? (numEntries.reduce((a, b) => a + parseFloat(b.grade), 0) / numEntries.length).toFixed(2) : "0.00";
         document.getElementById('avgOut').innerText = avg;
 
-        // La barra de progreso cuenta TODAS las materias
         const completadas = entries.length;
         const porcentaje = Math.min((completadas / totalMaterias) * 100, 100).toFixed(1);
         
