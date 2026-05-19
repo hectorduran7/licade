@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de Material | Biblioteca ADE</title>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #FF8C00; 
+            --bg: #f9fafb;
+            --text: #1a1a1a;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --sidebar-bg: rgba(244, 244, 244, 0.85);
+            --border: #e5e7eb;
+            --sidebar-width: 300px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #080808; 
+            --text: #f5f5f5;
+            --card-bg: rgba(18, 18, 18, 0.6); 
+            --sidebar-bg: rgba(8, 8, 8, 0.85);
+            --border: #222222;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            display: flex;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        [data-theme="dark"] body {
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .icon-sm { width: 16px; height: 16px; }
+        .icon-md { width: 20px; height: 20px; }
+        .icon-lg { width: 24px; height: 24px; }
+
+        /* Sidebar Limpio (Navegación) */
+        .sidebar {
+            width: var(--sidebar-width); height: 100vh; background: var(--sidebar-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 30px 20px; position: fixed; left: 0; top: 0;
+            border-right: 1px solid var(--border); overflow-y: auto;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+        }
+        .sidebar.hidden { transform: translateX(-100%); }
+
+        .toggle-btn {
+            position: fixed; left: 15px; bottom: 20px; z-index: 1100;
+            background: var(--primary); color: white; border: none; padding: 12px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3); transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .toggle-btn:hover { transform: translateY(-2px); }
+
+        .theme-btn {
+            position: fixed; top: 20px; right: 20px; border: 1px solid var(--border); 
+            color: var(--text); background: var(--card-bg); backdrop-filter: blur(10px);
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; z-index: 1001;
+            font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
+        }
+        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        .main-content {
+            margin-left: var(--sidebar-width); padding: 50px 20px; width: 100%; max-width: 900px;
+            margin-right: auto; transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .main-content.expanded { margin-left: auto; margin-right: auto; }
+
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 5px; font-size: 2.2rem; color: var(--text); }
+        header p { color: #9ca3af; font-size: 14px; margin: 0; }
+
+        /* Contenedor del Visor Estilo Dashboard */
+        .viewer-card {
+            background: var(--card-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--border); border-radius: 16px;
+            overflow: hidden; box-shadow: 0 20px 40px -20px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .viewer-header {
+            border-bottom: 1px solid var(--border); padding: 15px 20px; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* Botones de navegación Sidebar */
+        .btn-sidebar {
+            width: 100%; border: none; padding: 14px; border-radius: 8px; cursor: pointer;
+            font-size: 14px; font-weight: 600; transition: all 0.3s ease; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: flex-start; gap: 12px;
+            text-decoration: none; box-sizing: border-box;
+        }
+        .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .btn-dark:hover { background: var(--card-bg); border-color: var(--primary); color: var(--primary); }
+        .btn-primary-solid { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255, 140, 0, 0.2); }
+        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.3); }
+
+        .footer-donate { 
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
+            padding: 40px 20px; font-size: 14px; color: #9ca3af; margin-top: 40px; border-top: 1px solid var(--border); 
+        }
+        .footer-donate a { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+        .footer-donate a:hover { text-decoration: underline; }
+        
+        .btn-sugerencias {
+            color: #9ca3af !important; border: 1px dashed #9ca3af; padding: 12px 24px;
+            border-radius: 8px; transition: 0.3s;
+        }
+        .btn-sugerencias:hover {
+            color: var(--primary) !important; border-color: var(--primary);
+            background: rgba(255,140,0,0.05); text-decoration: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<button class="toggle-btn" onclick="toggleSidebar()"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
+<button class="theme-btn" onclick="toggleTheme()"><i data-lucide="moon" class="icon-sm"></i> Tema</button>
+
+<aside class="sidebar hidden" id="sidebar">
+    <h2 style="color: var(--primary); font-weight: 800; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="library" class="icon-lg"></i> ADE UNGS
+    </h2>
+    <p style="color: #9ca3af; font-size: 14px; margin-top: -5px;">Navegación</p>
+    
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0 30px 0;">
+
+    <a href="index.html" class="btn-sidebar btn-dark">
+        <i data-lucide="search" class="icon-sm"></i> Buscar Materias
+    </a>
+
+    <a href="progreso.html" class="btn-sidebar btn-dark">
+        <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
+    </a>
+
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0 30px 0;">
+
+    <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="message-square-plus" class="icon-sm"></i> Dejar Recomendación
+    </a>
+
+    <a href="TU_LINK_AL_PDF_DE_RECOMENDACIONES" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="book-open-check" class="icon-sm"></i> Ver Recomendaciones
+    </a>
+</aside>
+
+<div class="main-content expanded" id="mainContent">
+    <header>
+        <p>Biblioteca Digital de Administración de Empresas</p>
+        <h1 id="materiaTitle">Cargando materia...</h1>
+    </header>
+
+    <a href="index.html" class="btn-sidebar btn-dark" style="width: auto; display: inline-flex; margin-bottom: 20px; padding: 10px 20px;">
+        <i data-lucide="arrow-left" class="icon-sm"></i> Volver a las materias
+    </a>
+
+    <div class="viewer-card" id="viewerCard">
+        <div class="viewer-header">
+            <span id="activeTitle" style="font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="folder-open" class="icon-md"></i> Repositorio de Recursos
+            </span>
+        </div>
+        
+        <iframe id="driveViewer" src="" width="100%" height="550px" frameborder="0"></iframe>
+        
+        <div style="padding: 25px; background: var(--card-bg); text-align: center; border-top: 1px solid var(--border);">
+            <p style="font-size: 14px; margin-bottom: 15px; color: #9ca3af;">¿Te aparece un error 403 o la carpeta está restringida?</p>
+            <button onclick="pedirAcceso()" class="btn-sidebar btn-primary-solid" style="width: auto; padding: 12px 35px; display: inline-flex; margin: 0 auto;">
+                <i data-lucide="external-link" class="icon-sm"></i> Solicitar Acceso Directo →
+            </button>
+        </div>
+    </div>
+    
+    <div class="footer-donate">
+        <a href="LINK_TU_FORMULARIO_SUGERENCIAS" class="btn-sugerencias" target="_blank">
+            <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para mejorar la web
+        </a>
+    </div>
+</div>
+
+<script>
+    // Captura los parámetros dinámicos de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const nombreMateria = urlParams.get('name');
+    const enlaceMateria = urlParams.get('link');
+
+    // Configuración inicial del visor usando los parámetros recibidos
+    if (nombreMateria && enlaceMateria) {
+        document.getElementById('materiaTitle').innerText = nombreMateria;
+        const iframe = document.getElementById('driveViewer');
+        
+        if (enlaceMateria.includes('drive.google.com')) {
+            iframe.src = enlaceMateria.replace('/view', '/preview').replace('?usp=drive_link', '');
+        } else {
+            iframe.src = enlaceMateria;
+        }
+    } else {
+        document.getElementById('materiaTitle').innerText = "Ninguna materia seleccionada";
+        document.getElementById('viewerCard').style.display = "none";
+    }
+
+    // Abre Drive en pestaña limpia para evitar el bloqueo 403 de los iframes
+    function pedirAcceso() {
+        if (enlaceMateria) {
+            window.open(enlaceMateria, '_blank');
+        } else {
+            alert("Error al cargar el enlace.");
+        }
+    }
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('hidden');
+        document.getElementById('mainContent').classList.toggle('expanded');
+    }
+
+    // --- LÓGICA DE TEMA ---
+    function applyTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('ungs_theme', theme);
+    }
+
+    const systemSettingDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+    function initTheme() {
+        const savedTheme = localStorage.getItem('ungs_theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else {
+            applyTheme(systemSettingDark.matches ? 'dark' : 'light');
+        }
+    }
+
+    systemSettingDark.addEventListener("change", (e) => {
+        if (!localStorage.getItem('ungs_theme')) {
+            applyTheme(e.matches ? 'dark' : 'light');
+        }
+    });
+
+    function toggleTheme() {
+        const current = document.body.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+    }
+
+    initTheme();
+    lucide.createIcons();
+</script>
+</body>
+</html>
