@@ -235,6 +235,37 @@
         .mini-donate:hover { background: rgba(255, 140, 0, 0.1); }
         .mini-donate a { color: var(--primary); text-decoration: none; font-weight: 600; }
 
+        /* NUEVO: Caja de Publicidad para Clases Particulares */
+        .promo-box {
+            margin-top: 30px;
+            padding: 18px 15px;
+            background: linear-gradient(135deg, rgba(255, 140, 0, 0.08) 0%, rgba(255, 140, 0, 0.02) 100%);
+            border: 1px dashed var(--primary);
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .promo-box:hover {
+            background: rgba(255, 140, 0, 0.12);
+            transform: translateY(-2px);
+        }
+        .promo-btn {
+            display: inline-block;
+            margin-top: 12px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 10px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 140, 0, 0.2);
+        }
+        .promo-btn:hover {
+            box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4);
+        }
+
         /* Visor */
         #viewer-container {
             display: none;
@@ -282,6 +313,12 @@
         <div class="avg-display">Promedio: <span id="avgOut">0.00</span></div>
     </div>
 
+    <div class="promo-box">
+        <h4 style="margin: 0 0 5px 0; color: var(--primary); font-size: 15px;">👨‍🏫 ¿Das clases particulares?</h4>
+        <p style="font-size: 12px; color: #9ca3af; margin-bottom: 0;">Llegá a más alumnos de ADE. Destacá tus servicios en la plataforma.</p>
+        <a href="mailto:hectorjoseduran@gmail.com?subject=Publicidad%20Clases%20Particulares" class="promo-btn">Consultar Publicidad</a>
+    </div>
+
     <div class="mini-donate">
          <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE">Donar Archivos (Email)</a>
     </div>
@@ -292,6 +329,10 @@
 
     <button onclick="window.open('TU_LINK_AL_PDF_DE_RECOMENDACIONES', '_blank')" class="btn-sidebar btn-primary-solid">
         📖 Ver Recomendaciones
+    </button>
+
+    <button onclick="window.open('LINK_TU_FORMULARIO_SUGERENCIAS', '_blank')" class="btn-sidebar" style="background: transparent; border: 1px dashed #9ca3af; color: var(--text);">
+        💡 Sugerencias para la web
     </button>
 </aside>
 
