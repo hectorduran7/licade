@@ -161,10 +161,7 @@
         .materia-info { display: flex; flex-direction: column; gap: 4px; }
         .materia-name { font-weight: 600; font-size: 15px; }
         .correlativas-text { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-        .req-badge, .dest-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px;}
-        .req-badge { background: rgba(255, 74, 74, 0.1); color: #ff4a4a; border: 1px solid rgba(255, 74, 74, 0.2); }
-        .dest-badge { background: rgba(0, 255, 136, 0.1); color: #00b35f; border: 1px solid rgba(0, 255, 136, 0.2); }
-        [data-theme="dark"] .dest-badge { color: #00ff88; }
+        .req-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px; background: rgba(255, 74, 74, 0.1); color: #ff4a4a; border: 1px solid rgba(255, 74, 74, 0.2); }
         
         .materia-action { color: #9ca3af; transition: color 0.3s; font-weight: 500; display: flex; align-items: center; gap: 5px; font-size: 13px;}
         .materia-item:hover .materia-action { color: var(--primary); }
@@ -278,59 +275,58 @@
 </div>
 
 <script>
-    // Base de datos actualizada con los Requisitos y lo que Abre cada materia (Correlatividades)
     const data = {
         "PRIMER AÑO": [
-            {n: "Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1jLUf7D_7GzXwwXl0mkE0WJLmK3ydxtfb?usp=drive_link", req: "", dest: "Múltiples Materias"},
-            {n: "Taller Orientado de Ciencias Exactas", l: "https://drive.google.com/drive/folders/1zRWjRQCmkwYRaJEk44JEp3j6litaBMxy?usp=drive_link", req: "", dest: "Mate I, Diseño Estructural"},
-            {n: "Teoría de la Organización", l: "https://drive.google.com/drive/folders/1VGkLpmiodcpVpNBCb8GzU_Pg9zG6GSby?usp=drive_link", req: "", dest: "Diseño Estructural, Inglés I"},
-            {n: "Problemas Socioeconómicos Contemporáneos", l: "https://drive.google.com/drive/folders/1X1QrBi6AmALlNCXb4S6LHUMoFgDjboLS?usp=drive_link", req: "Taller Lec. y Esc.", dest: "Planeamiento, Sociología Ind."},
-            {n: "Taller de Lectura y Escritura en las Disciplinas", l: "https://drive.google.com/drive/folders/132vYVDu8zE6qICc6X1Ru_4CnH-M252kn?usp=drive_link", req: "Taller Lec. y Esc.", dest: "Hist. Eco, Planeamiento, Sociología"},
-            {n: "Introducción a la Economía", l: "https://drive.google.com/drive/folders/1Qm-QVfLihmRHPjLnIxUoLO3G886n7vGH?usp=drive_link", req: "", dest: "Eco. Clásica, Hist. Económica"}
+            {n: "Taller Inicial Común: Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1jLUf7D_7GzXwwXl0mkE0WJLmK3ydxtfb?usp=drive_link", req: ""},
+            {n: "Taller Inicial Orientado: Ciencias Exactas", l: "https://drive.google.com/drive/folders/1zRWjRQCmkwYRaJEk44JEp3j6litaBMxy?usp=drive_link", req: ""},
+            {n: "Teoría de la Organización", l: "https://drive.google.com/drive/folders/1VGkLpmiodcpVpNBCb8GzU_Pg9zG6GSby?usp=drive_link", req: ""},
+            {n: "Problemas Socioeconómicos Contemporáneos", l: "https://drive.google.com/drive/folders/1X1QrBi6AmALlNCXb4S6LHUMoFgDjboLS?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Taller de Lectura y Escritura en las Disciplinas", l: "https://drive.google.com/drive/folders/132vYVDu8zE6qICc6X1Ru_4CnH-M252kn?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Introducción a la Economía", l: "https://drive.google.com/drive/folders/1Qm-QVfLihmRHPjLnIxUoLO3G886n7vGH?usp=drive_link", req: ""}
         ],
         "SEGUNDO AÑO": [
-            {n: "Economía Clásica", l: "https://drive.google.com/drive/folders/1Ff9KD0Gamjk-_UmtdDLHWi0xi8mzIqpI?usp=drive_link", req: "Intro a la Eco. | Taller Lec. y Esc.", dest: "Eco. Neoclásica"},
-            {n: "Diseño Estructural y Procesos", l: "https://drive.google.com/drive/folders/138Mzk3D_2qv3S6Qp6EueLi_tZ2Bq5gi-?usp=drive_link", req: "Teoría de la Org. | Taller Exactas", dest: "SIC I, Planeamiento, Derecho Adm."},
-            {n: "Matemática para Economistas I", l: "https://drive.google.com/drive/folders/1-6QvTwuabzMhp-QWSMMNB9KSBZ4mXBfM?usp=drive_link", req: "Taller Exactas | Taller Lec. y Esc.", dest: "Eco Neoclásica, Estadística, Mate II"},
-            {n: "Economía Neoclásica", l: "https://drive.google.com/drive/folders/1wdSmGl7UVgNozz1Ktyux06b8e9QhSV2W?usp=drive_link", req: "Eco. Clásica | Mate I", dest: "Eco. Keynesiana, Mate III"},
-            {n: "Sistemas de Información Contable I", l: "https://drive.google.com/drive/folders/1Nhfp3LT5WnUOUoS3JSMAy31gq88x4R0j?usp=drive_link", req: "Diseño Estructural | Taller Lec. y Esc.", dest: "SIC II, Sistemas Info., Costos"},
-            {n: "Historia Económica y Social Mundial y Latinoamericana", l: "https://drive.google.com/drive/folders/1P9snlibfSL62as1Sz-OX2gKe__1EOBSl?usp=drive_link", req: "Intro Eco | Taller Disc. | Prob. Socio.", dest: "Teo. Innovación"}
+            {n: "Economía Clásica", l: "https://drive.google.com/drive/folders/1Ff9KD0Gamjk-_UmtdDLHWi0xi8mzIqpI?usp=drive_link", req: "Introducción a la Economía | Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Diseño Estructural y Procesos", l: "https://drive.google.com/drive/folders/138Mzk3D_2qv3S6Qp6EueLi_tZ2Bq5gi-?usp=drive_link", req: "Teoría de la Organización | Taller Inicial Orientado: Ciencias Exactas"},
+            {n: "Matemática para Economistas I", l: "https://drive.google.com/drive/folders/1-6QvTwuabzMhp-QWSMMNB9KSBZ4mXBfM?usp=drive_link", req: "Taller Inicial Orientado: Ciencias Exactas | Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Economía Neoclásica", l: "https://drive.google.com/drive/folders/1wdSmGl7UVgNozz1Ktyux06b8e9QhSV2W?usp=drive_link", req: "Economía Clásica | Matemática para Economistas I"},
+            {n: "Sistemas de Información Contable I", l: "https://drive.google.com/drive/folders/1Nhfp3LT5WnUOUoS3JSMAy31gq88x4R0j?usp=drive_link", req: "Diseño Estructural y Procesos | Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Historia Económica y Social Mundial y Latinoamericana", l: "https://drive.google.com/drive/folders/1P9snlibfSL62as1Sz-OX2gKe__1EOBSl?usp=drive_link", req: "Introducción a la Economía | Taller de Lectura y Escritura en las Disciplinas | Problemas Socioeconómicos Contemporáneos"}
         ],
         "TERCER AÑO": [
-            {n: "Economía Keynesiana", l: "https://drive.google.com/drive/folders/1BDxNT2spCBZpZkZD106JRm7YF9sV7Ntx?usp=drive_link", req: "Eco. Neoclásica", dest: "Teo. Innovación"},
-            {n: "Estadística para Economistas", l: "https://drive.google.com/drive/folders/1OxeMyLnkVKfZLN9txxIIlx5eentl-OGZ?usp=drive_link", req: "Mate I", dest: "Org. Industrial, Planif. Decisoria"},
-            {n: "Planeamiento y Control Organizacional", l: "https://drive.google.com/drive/folders/1Jc-uLaSCaPtiOH9nfAbR8UI0eGbv4qZK?usp=drive_link", req: "Diseño Estructural | Prob. Socio. | Taller Disc.", dest: "Materias Llave (RRHH, Costos, Org)"},
-            {n: "Matemática para Economistas II", l: "https://drive.google.com/drive/folders/1NTAhvAECzPQB0de2dAdtNIzp_9_mA_cF?usp=drive_link", req: "Mate I", dest: "Mate III"},
-            {n: "Laboratorio Interdisciplinario", l: "https://drive.google.com/drive/folders/1NdTpduQArGshJt976kRYwspdto-b4hG0?usp=drive_link", req: "13 materias aprobadas", dest: ""},
-            {n: "Sistemas de Información", l: "https://drive.google.com/drive/folders/1nCsfZY8qNIgnmSk2LyDXW7Z2hHT9DLmb?usp=drive_link", req: "Sistemas de Info. Contable I", dest: ""}
+            {n: "Economía Keynesiana", l: "https://drive.google.com/drive/folders/1BDxNT2spCBZpZkZD106JRm7YF9sV7Ntx?usp=drive_link", req: "Economía Neoclásica"},
+            {n: "Estadística para Economistas", l: "https://drive.google.com/drive/folders/1OxeMyLnkVKfZLN9txxIIlx5eentl-OGZ?usp=drive_link", req: "Matemática para Economistas I"},
+            {n: "Planeamiento y Control Organizacional", l: "https://drive.google.com/drive/folders/1Jc-uLaSCaPtiOH9nfAbR8UI0eGbv4qZK?usp=drive_link", req: "Diseño Estructural y Procesos | Problemas Socioeconómicos Contemporáneos | Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "Matemática para Economistas II", l: "https://drive.google.com/drive/folders/1NTAhvAECzPQB0de2dAdtNIzp_9_mA_cF?usp=drive_link", req: "Matemática para Economistas I"},
+            {n: "Laboratorio Interdisciplinario", l: "https://drive.google.com/drive/folders/1NdTpduQArGshJt976kRYwspdto-b4hG0?usp=drive_link", req: "13 (trece) materias de la carrera"},
+            {n: "Sistemas de Información", l: "https://drive.google.com/drive/folders/1nCsfZY8qNIgnmSk2LyDXW7Z2hHT9DLmb?usp=drive_link", req: "Sistemas de Información Contable I"}
         ],
         "CUARTO AÑO": [
-            {n: "Derecho Administrativo", l: "https://drive.google.com/drive/folders/1NQgXQTJW3lWX-GJH2XZL6kGwBBV8M9ce?usp=drive_link", req: "Diseño Estructural", dest: "Empresas Públicas, Gest. Mixta"},
-            {n: "Organización Industrial", l: "https://drive.google.com/drive/folders/1xod_LTQ0ArN8ZXH8av29JqdQ5mpbLIRE?usp=drive_link", req: "Estadística | Planeamiento", dest: ""},
-            {n: "Gestión de Recursos Humanos (Material Viejo)", l: "https://drive.google.com/drive/folders/1n8lb2y-aomWoGNfYXUVGBaRTG-FCn4lz?usp=drive_link", req: "Planeamiento y Control Org.", dest: "Régimen Tributario"},
-            {n: "Dirección Estratégica (Material Viejo)", l: "https://drive.google.com/drive/folders/1Nbgb0tiyIqdksPxxZVsCgYEtIKQ04OVx?usp=drive_link", req: "Planeamiento y Control Org.", dest: "Régimen Tributario"},
-            {n: "Tópicos de Comercialización", l: "https://drive.google.com/drive/folders/13dSSC3d-Kttrr7E8MhmDxAyAHI66TAa4?usp=drive_link", req: "Planeamiento y Control Org.", dest: "Desarrollo Proyectos"},
-            {n: "Planificación y Proceso Decisorio en las Organizaciones", l: "https://drive.google.com/drive/folders/1ORmLF7_T-agImkCn3Se13sMFoGqM0WPF?usp=drive_link", req: "Estadística | Planeamiento", dest: ""},
-            {n: "Teoría de la Innovación y del Cambio Tecnológico", l: "https://drive.google.com/drive/folders/1BnY8s1GG8YAlTDNiBwv1Pj_tFgrabx3X?usp=drive_link", req: "Hist. Económica | Eco. Keynesiana", dest: ""}
+            {n: "Derecho Administrativo", l: "https://drive.google.com/drive/folders/1NQgXQTJW3lWX-GJH2XZL6kGwBBV8M9ce?usp=drive_link", req: "Diseño Estructural y Procesos"},
+            {n: "Organización Industrial", l: "https://drive.google.com/drive/folders/1xod_LTQ0ArN8ZXH8av29JqdQ5mpbLIRE?usp=drive_link", req: "Estadística para Economistas | Planeamiento y Control Organizacional"},
+            {n: "Gestión de Recursos Humanos (Material Viejo)", l: "https://drive.google.com/drive/folders/1n8lb2y-aomWoGNfYXUVGBaRTG-FCn4lz?usp=drive_link", req: "Planeamiento y Control Organizacional"},
+            {n: "Dirección Estratégica (Material Viejo)", l: "https://drive.google.com/drive/folders/1Nbgb0tiyIqdksPxxZVsCgYEtIKQ04OVx?usp=drive_link", req: "Planeamiento y Control Organizacional"},
+            {n: "Tópicos de Comercialización", l: "https://drive.google.com/drive/folders/13dSSC3d-Kttrr7E8MhmDxAyAHI66TAa4?usp=drive_link", req: "Planeamiento y Control Organizacional"},
+            {n: "Planificación y Proceso Decisorio en las Organizaciones", l: "https://drive.google.com/drive/folders/1ORmLF7_T-agImkCn3Se13sMFoGqM0WPF?usp=drive_link", req: "Estadística para Economistas | Planeamiento y Control Organizacional"},
+            {n: "Teoría de la Innovación y del Cambio Tecnológico", l: "https://drive.google.com/drive/folders/1BnY8s1GG8YAlTDNiBwv1Pj_tFgrabx3X?usp=drive_link", req: "Historia Económica y Social Mundial y Latinoamericana | Economía Keynesiana"}
         ],
         "QUINTO AÑO": [
-            {n: "Matemática para Economistas III", l: "https://drive.google.com/drive/folders/1vDdnc8NAd3OrWDzZbRalQNLqIV7AJYVd?usp=drive_link", req: "Mate II | Eco. Neoclásica", dest: "Ingeniería Financiera"},
-            {n: "Costos Industriales", l: "https://drive.google.com/drive/folders/1YeqqEX6VSe6015mAw-PAYy1dlpQB3MMs?usp=drive_link", req: "Planeamiento | SIC I", dest: "Ingeniería Financiera"},
-            {n: "Sistemas de Información Contable II", l: "https://drive.google.com/drive/folders/1RorXYcziiTLhyZ5aC03bDSwiaadzlSQf?usp=drive_link", req: "Sistemas de Info. Contable I", dest: ""},
-            {n: "Gestión en Economía Mixta", l: "https://drive.google.com/drive/folders/1DvN2pJp7bvtpGxEVgWm0gCYZS9RoVi34?usp=drive_link", req: "Derecho Adm. | Planeamiento", dest: ""},
-            {n: "Empresas Públicas", l: "https://drive.google.com/drive/folders/1lTcdyE2KSOEpzDRonlVUSAvunniK4AMO?usp=drive_link", req: "Derecho Adm. | Planeamiento", dest: ""},
-            {n: "Ingeniería Financiera", l: "https://drive.google.com/drive/folders/1PnMt1NvDA_yvE2xlR7uhgk6S52LKBM7c?usp=drive_link", req: "Costos Ind. | Mate III", dest: ""}
+            {n: "Matemática para Economistas III", l: "https://drive.google.com/drive/folders/1vDdnc8NAd3OrWDzZbRalQNLqIV7AJYVd?usp=drive_link", req: "Matemática para Economistas II | Economía Neoclásica"},
+            {n: "Costos Industriales", l: "https://drive.google.com/drive/folders/1YeqqEX6VSe6015mAw-PAYy1dlpQB3MMs?usp=drive_link", req: "Planeamiento y Control Organizacional | Sistemas de Información Contable I"},
+            {n: "Sistemas de Información Contable II", l: "https://drive.google.com/drive/folders/1RorXYcziiTLhyZ5aC03bDSwiaadzlSQf?usp=drive_link", req: "Sistemas de Información Contable I"},
+            {n: "Gestión en Economía Mixta", l: "https://drive.google.com/drive/folders/1DvN2pJp7bvtpGxEVgWm0gCYZS9RoVi34?usp=drive_link", req: "Derecho Administrativo | Planeamiento y Control Organizacional"},
+            {n: "Empresas Públicas", l: "https://drive.google.com/drive/folders/1lTcdyE2KSOEpzDRonlVUSAvunniK4AMO?usp=drive_link", req: "Derecho Administrativo | Planeamiento y Control Organizacional"},
+            {n: "Ingeniería Financiera", l: "https://drive.google.com/drive/folders/1PnMt1NvDA_yvE2xlR7uhgk6S52LKBM7c?usp=drive_link", req: "Costos Industriales | Matemática para Economistas III"}
         ],
         "SEXTO AÑO": [
-            {n: "Sociología Industrial", l: "https://drive.google.com/drive/folders/1Qf4sCTAMmCy4wMoE3CwtvW01-7VYSNGF?usp=drive_link", req: "Diseño Estruct. | Prob Socio. | Taller Disc.", dest: ""},
-            {n: "Régimen Tributario", l: "https://drive.google.com/drive/folders/11JLYY480dlwRFwEGnhouSgSiARD0OoEs?usp=drive_link", req: "RRHH | Dir. Estratégica", dest: ""},
-            {n: "Desarrollo y Gestión de Proyectos Emprendedores", l: "https://drive.google.com/drive/folders/18A5q6-n7A4LRjI-COwMgzYLrcPU1EF2M?usp=drive_link", req: "Tópicos de Comercialización", dest: ""}
+            {n: "Sociología Industrial", l: "https://drive.google.com/drive/folders/1Qf4sCTAMmCy4wMoE3CwtvW01-7VYSNGF?usp=drive_link", req: "Diseño Estructural y Procesos | Problemas Socioeconómicos Contemporáneos | Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "Régimen Tributario", l: "https://drive.google.com/drive/folders/11JLYY480dlwRFwEGnhouSgSiARD0OoEs?usp=drive_link", req: "Gestión de Recursos Humanos | Dirección Estratégica"},
+            {n: "Desarrollo y Gestión de Proyectos Emprendedores", l: "https://drive.google.com/drive/folders/18A5q6-n7A4LRjI-COwMgzYLrcPU1EF2M?usp=drive_link", req: "Tópicos de Comercialización"}
         ],
         "EXTRACURRICULARES": [
-            {n: "Taller de Utilitarios", l: "https://drive.google.com/drive/folders/14XnFgwmu9W2tQXi5w3f6Cje3hyZgMfso?usp=drive_link", req: "", dest: ""},
-            {n: "IPE 1", l: "https://drive.google.com/drive/folders/1BR5ZJZ5nQnokUQMhXq6zFb9jFHAH3LSf?usp=drive_link", req: "Taller Lec. y Esc. | Teoría de la Org.", dest: "IPE 2"},
-            {n: "IPE 2", l: "https://drive.google.com/drive/folders/1EoMGzwjnB48FkPwiP1YDOBqmnZITqB1z?usp=drive_link", req: "IPE 1 | Taller Lec. Disciplinas", dest: "IPE 3"},
-            {n: "IPE 3", l: "https://drive.google.com/drive/folders/1QHgjzkXPurYb0WXJ1qSoX7F10c86rUS1?usp=drive_link", req: "IPE 2", dest: ""}
+            {n: "Taller de Utilitarios", l: "https://drive.google.com/drive/folders/14XnFgwmu9W2tQXi5w3f6Cje3hyZgMfso?usp=drive_link", req: ""},
+            {n: "IPE 1", l: "https://drive.google.com/drive/folders/1BR5ZJZ5nQnokUQMhXq6zFb9jFHAH3LSf?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura | Teoría de la Organización"},
+            {n: "IPE 2", l: "https://drive.google.com/drive/folders/1EoMGzwjnB48FkPwiP1YDOBqmnZITqB1z?usp=drive_link", req: "IPE 1 | Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "IPE 3", l: "https://drive.google.com/drive/folders/1QHgjzkXPurYb0WXJ1qSoX7F10c86rUS1?usp=drive_link", req: "IPE 2"}
         ]
     };
 
@@ -340,7 +336,6 @@
             const section = document.createElement('div');
             section.className = 'year-section';
             
-            // Construcción del HTML inyectando las etiquetas (Badges)
             section.innerHTML = `
                 <div class="year-header" onclick="toggleYear(this)">${year} <span>+</span></div>
                 <div class="materia-container">
@@ -350,7 +345,6 @@
                                 <span class="materia-name">${m.n}</span>
                                 <div class="correlativas-text">
                                     ${m.req ? `<span class="req-badge"><i data-lucide="lock" style="width:10px;height:10px;"></i> Req: ${m.req}</span>` : ''}
-                                    ${m.dest ? `<span class="dest-badge"><i data-lucide="unlock" style="width:10px;height:10px;"></i> Abre: ${m.dest}</span>` : ''}
                                 </div>
                             </div>
                             <span class="materia-action">Ver recursos <i data-lucide="arrow-right" class="icon-sm"></i></span>
@@ -371,7 +365,6 @@
         icon.innerText = isOpen ? "+" : "-";
     }
 
-    // REDIRECCIÓN DINÁMICA AL ARCHIVO VISOR.HTML
     function openDoc(name, link) {
         window.location.href = `visor.html?name=${encodeURIComponent(name)}&link=${encodeURIComponent(link)}`;
     }
@@ -396,7 +389,6 @@
         document.getElementById('mainContent').classList.toggle('expanded');
     }
 
-    // --- LÓGICA DE TEMA ---
     function applyTheme(theme) {
         document.body.setAttribute('data-theme', theme);
         localStorage.setItem('ungs_theme', theme);
