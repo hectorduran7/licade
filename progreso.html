@@ -149,14 +149,51 @@
             color: var(--primary) !important; border-color: var(--primary);
             background: rgba(255,140,0,0.05); text-decoration: none !important;
         }
+
+        /* MODAL DE LOGIN */
+        .login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; display: flex; justify-content: center; align-items: center; transition: opacity 0.3s ease; }
+        .login-modal.hidden { opacity: 0; pointer-events: none; }
+        .login-modal-content { background: var(--bg); padding: 40px; border-radius: 16px; border: 1px solid var(--border); max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .login-modal-content h2 { margin-top: 0; font-weight: 800; color: var(--text); }
+        .login-modal-content p { color: #9ca3af; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+
+        /* Estilos Timer */
+        .timer-display { font-size: 4rem; font-weight: 800; color: var(--primary); margin: 15px 0; text-align: center; }
+        .timer-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .pomodoro-log { background: var(--bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border); font-size: 14px; color: #9ca3af; text-align: center;}
     </style>
 </head>
 <body>
+
+<div id="loginModal" class="login-modal hidden">
+    <div class="login-modal-content">
+        <i data-lucide="lock" class="icon-lg" style="color: var(--primary); margin-bottom: 15px; width: 40px; height: 40px;"></i>
+        <h2>Bienvenido a La Biblioteca</h2>
+        <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones desde cualquier dispositivo.</p>
+        <button id="btnModalLogin" class="btn-primary-solid" style="width: 100%; justify-content: center; padding: 14px; margin-bottom: 10px;">
+            <i data-lucide="log-in" class="icon-sm"></i> Ingresar con Google
+        </button>
+        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; justify-content: center; padding: 14px; border: none;">
+            Continuar como invitado
+        </button>
+    </div>
+</div>
 
 <button class="toggle-btn" onclick="toggleSidebar()"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
 <button class="theme-btn" onclick="toggleTheme()"><i data-lucide="moon" class="icon-sm"></i> Tema</button>
 
 <aside class="sidebar hidden" id="sidebar">
+    <div id="userProfile" style="margin-bottom: 25px; padding: 15px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; text-align: center; backdrop-filter: blur(10px);">
+        <i data-lucide="user-circle" class="icon-lg" style="color: var(--primary); margin-bottom: 8px;"></i>
+        <p id="userName" style="font-weight: 700; margin: 0 0 12px 0; font-size: 14px; color: var(--text);">Invitado</p>
+        <button id="sidebarLoginBtn" class="btn-primary-solid" style="width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
+            <i data-lucide="log-in" class="icon-sm"></i> Ingresar
+        </button>
+        <button id="sidebarLogoutBtn" class="btn-dark" style="width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; display: none; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
+            <i data-lucide="log-out" class="icon-sm"></i> Salir
+        </button>
+    </div>
+
     <h2 style="color: var(--primary); font-weight: 800; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
         <i data-lucide="library" class="icon-lg"></i> ADE UNGS
     </h2>
@@ -203,6 +240,25 @@
 
     <div class="dashboard-panel">
         <h3 style="margin: 0 0 15px 0; color: var(--text); font-size: 18px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="timer" class="icon-md" style="color: var(--primary);"></i> Sesión de Estudio Activa
+        </h3>
+        
+        <div class="timer-display" id="timerDisplay">25:00</div>
+        
+        <div class="timer-controls">
+            <button id="btnStartTimer" onclick="startTimer()" class="btn-sidebar btn-primary-solid" style="width: auto; padding: 12px 25px; margin: 0;"><i data-lucide="play" class="icon-sm"></i> Enfocarse</button>
+            <button id="btnPauseTimer" onclick="pauseTimer()" class="btn-sidebar btn-dark" style="width: auto; padding: 12px 25px; margin: 0; display: none;"><i data-lucide="pause" class="icon-sm"></i> Pausar</button>
+            <button onclick="resetTimer()" class="btn-sidebar btn-dark" style="width: auto; padding: 12px 25px; margin: 0;"><i data-lucide="rotate-ccw" class="icon-sm"></i> Reiniciar</button>
+        </div>
+
+        <div class="pomodoro-log">
+            <p style="margin: 0 0 5px 0; font-weight: 600; color: var(--text);">Historial de Concentración:</p>
+            <span id="sessionLogText">Has completado 0 sesiones de estudio (0 minutos totales).</span>
+        </div>
+    </div>
+
+    <div class="dashboard-panel">
+        <h3 style="margin: 0 0 15px 0; color: var(--text); font-size: 18px; display: flex; align-items: center; gap: 8px;">
             <i data-lucide="award" class="icon-md" style="color: var(--primary);"></i> Avance de la Carrera
         </h3>
         
@@ -239,11 +295,109 @@
     </div>
 </div>
 
-<script>
+<script type="module">
+    // --- INTEGRACIÓN FIREBASE ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoFacVfYeZpNVIvbBqlcXtlZkbeg_UeVg",
+      authDomain: "knowy-13079.firebaseapp.com",
+      projectId: "knowy-13079",
+      storageBucket: "knowy-13079.firebasestorage.app",
+      messagingSenderId: "645341817520",
+      appId: "1:645341817520:web:c86fcaefae8b50e2382975",
+      measurementId: "G-RWX9GTPVRN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const doLogin = () => {
+        signInWithPopup(auth, provider).then(() => {
+            document.getElementById('loginModal').classList.add('hidden');
+        }).catch(error => console.error("Error en login:", error));
+    };
+
+    document.getElementById('sidebarLoginBtn').addEventListener('click', doLogin);
+    document.getElementById('btnModalLogin').addEventListener('click', doLogin);
+    document.getElementById('sidebarLogoutBtn').addEventListener('click', () => signOut(auth));
+
+    window.closeLoginModal = function() {
+        document.getElementById('loginModal').classList.add('hidden');
+        sessionStorage.setItem('guestMode', 'true');
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('userName').innerText = "Hola, " + user.displayName.split(' ')[0];
+            document.getElementById('sidebarLoginBtn').style.display = 'none';
+            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+            document.getElementById('loginModal').classList.add('hidden');
+        } else {
+            document.getElementById('userName').innerText = "Invitado";
+            document.getElementById('sidebarLoginBtn').style.display = 'flex';
+            document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            // Mostrar modal si no es invitado
+            if (!sessionStorage.getItem('guestMode')) {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+        }
+    });
+
+    // --- LÓGICA POMODORO ---
+    let timeLeft = 25 * 60;
+    let timerId = null;
+    let completedSessions = parseInt(localStorage.getItem('ungs_pomodoros')) || 0;
+
+    function updateTimerUI() {
+        let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        let s = (timeLeft % 60).toString().padStart(2, '0');
+        document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+        document.getElementById('sessionLogText').innerText = `Has completado ${completedSessions} sesiones de estudio (${completedSessions * 25} minutos totales).`;
+    }
+
+    window.startTimer = function() {
+        if (timerId) return;
+        document.getElementById('btnStartTimer').style.display = 'none';
+        document.getElementById('btnPauseTimer').style.display = 'inline-flex';
+        timerId = setInterval(() => {
+            timeLeft--;
+            updateTimerUI();
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                timerId = null;
+                completedSessions++;
+                localStorage.setItem('ungs_pomodoros', completedSessions);
+                timeLeft = 25 * 60;
+                updateTimerUI();
+                document.getElementById('btnStartTimer').style.display = 'inline-flex';
+                document.getElementById('btnPauseTimer').style.display = 'none';
+                alert("¡Excelente trabajo! Sesión completada. Tómate 5 minutos de descanso.");
+            }
+        }, 1000);
+    }
+
+    window.pauseTimer = function() {
+        clearInterval(timerId);
+        timerId = null;
+        document.getElementById('btnStartTimer').style.display = 'inline-flex';
+        document.getElementById('btnPauseTimer').style.display = 'none';
+    }
+
+    window.resetTimer = function() {
+        window.pauseTimer();
+        timeLeft = 25 * 60;
+        updateTimerUI();
+    }
+    updateTimerUI();
+
+    // --- LÓGICA CALCULADORA ---
     let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
     const totalMaterias = 38;
 
-    function addEntry() {
+    window.addEntry = function() {
         const subj = document.getElementById('subjIn').value.trim();
         const gradeRaw = document.getElementById('gradeIn').value.trim().toUpperCase();
         
@@ -262,7 +416,7 @@
         }
     }
 
-    function removeEntry(index) {
+    window.removeEntry = function(index) {
         entries.splice(index, 1);
         saveAndRender();
     }
@@ -294,7 +448,7 @@
         lucide.createIcons(); 
     }
 
-    function toggleSidebar() {
+    window.toggleSidebar = function() {
         document.getElementById('sidebar').classList.toggle('hidden');
         document.getElementById('mainContent').classList.toggle('expanded');
     }
@@ -310,7 +464,7 @@
         }
     });
 
-    function toggleTheme() {
+    window.toggleTheme = function() {
         const current = document.documentElement.getAttribute('data-theme');
         const next = current === 'dark' ? 'light' : 'dark';
         applyTheme(next);
