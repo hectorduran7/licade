@@ -136,14 +136,46 @@
             color: var(--primary) !important; border-color: var(--primary);
             background: rgba(255,140,0,0.05); text-decoration: none !important;
         }
+
+        /* MODAL DE LOGIN */
+        .login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; display: flex; justify-content: center; align-items: center; transition: opacity 0.3s ease; }
+        .login-modal.hidden { opacity: 0; pointer-events: none; }
+        .login-modal-content { background: var(--bg); padding: 40px; border-radius: 16px; border: 1px solid var(--border); max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .login-modal-content h2 { margin-top: 0; font-weight: 800; color: var(--text); }
+        .login-modal-content p { color: #9ca3af; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
     </style>
 </head>
 <body>
+
+<div id="loginModal" class="login-modal hidden">
+    <div class="login-modal-content">
+        <i data-lucide="lock" class="icon-lg" style="color: var(--primary); margin-bottom: 15px; width: 40px; height: 40px;"></i>
+        <h2>Bienvenido a La Biblioteca</h2>
+        <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones desde cualquier dispositivo.</p>
+        <button id="btnModalLogin" class="btn-primary-solid" style="width: 100%; justify-content: center; padding: 14px; margin-bottom: 10px;">
+            <i data-lucide="log-in" class="icon-sm"></i> Ingresar con Google
+        </button>
+        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; justify-content: center; padding: 14px; border: none;">
+            Continuar como invitado
+        </button>
+    </div>
+</div>
 
 <button class="toggle-btn" onclick="toggleSidebar()"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
 <button class="theme-btn" onclick="toggleTheme()"><i data-lucide="moon" class="icon-sm"></i> Tema</button>
 
 <aside class="sidebar hidden" id="sidebar">
+    <div id="userProfile" style="margin-bottom: 25px; padding: 15px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; text-align: center; backdrop-filter: blur(10px);">
+        <i data-lucide="user-circle" class="icon-lg" style="color: var(--primary); margin-bottom: 8px;"></i>
+        <p id="userName" style="font-weight: 700; margin: 0 0 12px 0; font-size: 14px; color: var(--text);">Invitado</p>
+        <button id="sidebarLoginBtn" class="btn-primary-solid" style="width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
+            <i data-lucide="log-in" class="icon-sm"></i> Ingresar
+        </button>
+        <button id="sidebarLogoutBtn" class="btn-dark" style="width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; display: none; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
+            <i data-lucide="log-out" class="icon-sm"></i> Salir
+        </button>
+    </div>
+
     <h2 style="color: var(--primary); font-weight: 800; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
         <i data-lucide="library" class="icon-lg"></i> ADE UNGS
     </h2>
@@ -176,9 +208,6 @@
     </a>
     <a href="TU_LINK_AL_PDF_DE_RECOMENDACIONES" target="_blank" class="btn-sidebar btn-dark">
         <i data-lucide="book-open-check" class="icon-sm"></i> Ver Recomendaciones
-    </a>
-    <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="margin-top: 15px; border-style: dashed;">
-        <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos
     </a>
 </aside>
 
@@ -216,7 +245,57 @@
     </div>
 </div>
 
-<script>
+<script type="module">
+    // --- INTEGRACIÓN FIREBASE ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoFacVfYeZpNVIvbBqlcXtlZkbeg_UeVg",
+      authDomain: "knowy-13079.firebaseapp.com",
+      projectId: "knowy-13079",
+      storageBucket: "knowy-13079.firebasestorage.app",
+      messagingSenderId: "645341817520",
+      appId: "1:645341817520:web:c86fcaefae8b50e2382975",
+      measurementId: "G-RWX9GTPVRN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const doLogin = () => {
+        signInWithPopup(auth, provider).then(() => {
+            document.getElementById('loginModal').classList.add('hidden');
+        }).catch(error => console.error("Error en login:", error));
+    };
+
+    document.getElementById('sidebarLoginBtn').addEventListener('click', doLogin);
+    document.getElementById('btnModalLogin').addEventListener('click', doLogin);
+    document.getElementById('sidebarLogoutBtn').addEventListener('click', () => signOut(auth));
+
+    window.closeLoginModal = function() {
+        document.getElementById('loginModal').classList.add('hidden');
+        sessionStorage.setItem('guestMode', 'true');
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            document.getElementById('userName').innerText = "Hola, " + user.displayName.split(' ')[0];
+            document.getElementById('sidebarLoginBtn').style.display = 'none';
+            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+            document.getElementById('loginModal').classList.add('hidden');
+        } else {
+            document.getElementById('userName').innerText = "Invitado";
+            document.getElementById('sidebarLoginBtn').style.display = 'flex';
+            document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            // Mostrar modal si no es invitado
+            if (!sessionStorage.getItem('guestMode')) {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+        }
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     const nombreMateria = urlParams.get('name');
     const enlaceMateria = urlParams.get('link');
@@ -235,7 +314,7 @@
         document.getElementById('viewerCard').style.display = "none";
     }
 
-    function pedirAcceso() {
+    window.pedirAcceso = function() {
         if (enlaceMateria) {
             window.open(enlaceMateria, '_blank');
         } else {
@@ -243,7 +322,7 @@
         }
     }
 
-    function toggleSidebar() {
+    window.toggleSidebar = function() {
         document.getElementById('sidebar').classList.toggle('hidden');
         document.getElementById('mainContent').classList.toggle('expanded');
     }
@@ -259,7 +338,7 @@
         }
     });
 
-    function toggleTheme() {
+    window.toggleTheme = function() {
         const current = document.documentElement.getAttribute('data-theme');
         const next = current === 'dark' ? 'light' : 'dark';
         applyTheme(next);
