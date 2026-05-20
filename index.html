@@ -20,6 +20,10 @@
         document.documentElement.setAttribute('data-theme', theme);
     </script>
 
+    <!-- Firebase COMPAT (compatible con GitHub Pages / Jekyll, sin ES Modules) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -119,6 +123,7 @@
             border: 1px dashed var(--primary); transition: all 0.3s ease;
         }
         .promo-banner:hover { background: rgba(255, 140, 0, 0.12); transform: translateY(-2px); }
+
         .promo-banner-text h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 18px; display: flex; align-items: center; gap: 8px; }
         .promo-banner-text p { font-size: 13px; color: #9ca3af; margin: 0; }
         .promo-btn {
@@ -180,25 +185,120 @@
         .btn-sugerencias { color: #9ca3af !important; border: 1px dashed #9ca3af; padding: 12px 24px; border-radius: 8px; transition: 0.3s; }
         .btn-sugerencias:hover { color: var(--primary) !important; border-color: var(--primary); background: rgba(255,140,0,0.05); text-decoration: none !important; }
 
-        /* MODAL DE LOGIN */
-        .login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; display: flex; justify-content: center; align-items: center; transition: opacity 0.3s ease; }
+        /* ===== MODAL DE LOGIN ===== */
+        .login-modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; 
+            display: flex; justify-content: center; align-items: center; 
+            transition: opacity 0.3s ease; 
+        }
         .login-modal.hidden { opacity: 0; pointer-events: none; }
-        .login-modal-content { background: var(--bg); padding: 40px; border-radius: 16px; border: 1px solid var(--border); max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .login-modal-content { 
+            background: var(--bg); padding: 40px; border-radius: 16px; 
+            border: 1px solid var(--border); max-width: 420px; width: 90%; 
+            text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+        }
         .login-modal-content h2 { margin-top: 0; font-weight: 800; color: var(--text); }
-        .login-modal-content p { color: #9ca3af; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+        .login-modal-content p { color: #9ca3af; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+
+        /* Tabs del modal */
+        .login-tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .login-tab { flex: 1; padding: 10px; background: transparent; border: none; cursor: pointer; font-size: 13px; font-weight: 600; color: #9ca3af; transition: all 0.2s; }
+        .login-tab.active { background: var(--primary); color: white; }
+
+        /* Paneles del modal */
+        .login-panel { display: none; }
+        .login-panel.active { display: block; }
+
+        /* Inputs del formulario */
+        .login-input {
+            width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--card-bg); color: var(--text); font-size: 14px;
+            margin-bottom: 10px; box-sizing: border-box; font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+        .login-input:focus { outline: none; border-color: var(--primary); }
+        .login-input::placeholder { color: #9ca3af; }
+
+        /* Divisor */
+        .login-divider { display: flex; align-items: center; gap: 10px; margin: 15px 0; color: #9ca3af; font-size: 12px; }
+        .login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        /* Botón Google */
+        .btn-google {
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--card-bg); color: var(--text); font-size: 14px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.2s; font-family: 'Inter', sans-serif; margin-bottom: 10px;
+        }
+        .btn-google:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-google svg { width: 18px; height: 18px; }
+
+        /* Mensaje de error */
+        .login-error { color: #ff4a4a; font-size: 12px; margin-bottom: 10px; min-height: 16px; }
     </style>
 </head>
 <body>
 
+<!-- ===== MODAL DE LOGIN ===== -->
 <div id="loginModal" class="login-modal hidden">
     <div class="login-modal-content">
         <i data-lucide="lock" class="icon-lg" style="color: var(--primary); margin-bottom: 15px; width: 40px; height: 40px;"></i>
         <h2>Bienvenido a La Biblioteca</h2>
         <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones desde cualquier dispositivo.</p>
-        <button id="btnModalLogin" class="btn-primary-solid" style="width: 100%; justify-content: center; padding: 14px; margin-bottom: 10px;">
-            <i data-lucide="log-in" class="icon-sm"></i> Ingresar con Google
-        </button>
-        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; justify-content: center; padding: 14px; border: none;">
+
+        <!-- Tabs: Ingresar / Registrarse -->
+        <div class="login-tabs">
+            <button class="login-tab active" onclick="switchTab('login')">Ingresar</button>
+            <button class="login-tab" onclick="switchTab('register')">Registrarse</button>
+        </div>
+
+        <!-- Panel: Ingresar -->
+        <div id="panelLogin" class="login-panel active">
+            <button class="btn-google" id="btnGoogleLogin">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Continuar con Google
+            </button>
+
+            <div class="login-divider">o con tu correo</div>
+
+            <input type="email" id="loginEmail" class="login-input" placeholder="tu@gmail.com">
+            <input type="password" id="loginPassword" class="login-input" placeholder="Contraseña">
+            <div id="loginError" class="login-error"></div>
+            <button id="btnEmailLogin" class="btn-primary-solid" style="width: 100%; padding: 13px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; font-family: 'Inter', sans-serif;">
+                Ingresar
+            </button>
+        </div>
+
+        <!-- Panel: Registrarse -->
+        <div id="panelRegister" class="login-panel">
+            <button class="btn-google" id="btnGoogleRegister">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Registrarse con Google
+            </button>
+
+            <div class="login-divider">o creá una cuenta</div>
+
+            <input type="email" id="registerEmail" class="login-input" placeholder="tu@gmail.com">
+            <input type="password" id="registerPassword" class="login-input" placeholder="Contraseña (mín. 6 caracteres)">
+            <input type="password" id="registerPassword2" class="login-input" placeholder="Repetí tu contraseña">
+            <div id="registerError" class="login-error"></div>
+            <button id="btnEmailRegister" class="btn-primary-solid" style="width: 100%; padding: 13px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; font-family: 'Inter', sans-serif;">
+                Crear cuenta
+            </button>
+        </div>
+
+        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; justify-content: center; padding: 12px; border-radius: 8px; margin-top: 12px; cursor: pointer; font-size: 13px; color: #9ca3af;">
             Continuar como invitado
         </button>
     </div>
@@ -300,48 +400,136 @@
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-
-    // EL TRUCO ANTI-GITHUB: Separamos la clave para que el bot no se asuste
-    const firebaseConfig = {
-      apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
-      authDomain: "knowy-13079.firebaseapp.com",
-      projectId: "knowy-13079",
-      storageBucket: "knowy-13079.firebasestorage.app",
-      messagingSenderId: "645341817520",
-      appId: "1:645341817520:web:799733f87a0ad1a0382975",
-      measurementId: "G-PQGH6R9SZC"
+<!-- ===== FIREBASE COMPAT + LÓGICA DE AUTH ===== -->
+<!-- SIN type="module", sin imports ESM → 100% compatible con GitHub Pages / Jekyll -->
+<script>
+    // ── INICIALIZACIÓN FIREBASE (clave fragmentada para GitHub Actions) ──
+    var firebaseConfig = {
+        apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
+        authDomain: "knowy-13079.firebaseapp.com",
+        projectId: "knowy-13079",
+        storageBucket: "knowy-13079.firebasestorage.app",
+        messagingSenderId: "645341817520",
+        appId: "1:645341817520:web:799733f87a0ad1a0382975",
+        measurementId: "G-PQGH6R9SZC"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var googleProvider = new firebase.auth.GoogleAuthProvider();
 
-    const doLogin = () => {
-        signInWithPopup(auth, provider).then(() => {
-            document.getElementById('loginModal').classList.add('hidden');
-        }).catch(error => console.error("Error en login:", error));
+    // ── TABS DEL MODAL ──
+    window.switchTab = function(tab) {
+        document.querySelectorAll('.login-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.login-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('loginError').textContent = '';
+        document.getElementById('registerError').textContent = '';
+        if (tab === 'login') {
+            document.querySelectorAll('.login-tab')[0].classList.add('active');
+            document.getElementById('panelLogin').classList.add('active');
+        } else {
+            document.querySelectorAll('.login-tab')[1].classList.add('active');
+            document.getElementById('panelRegister').classList.add('active');
+        }
     };
 
-    document.getElementById('sidebarLoginBtn').addEventListener('click', doLogin);
-    document.getElementById('btnModalLogin').addEventListener('click', doLogin);
-    document.getElementById('sidebarLogoutBtn').addEventListener('click', () => signOut(auth));
+    // ── MENSAJE DE ERROR LEGIBLE ──
+    function authErrorMsg(code) {
+        var msgs = {
+            'auth/user-not-found': 'No existe una cuenta con ese correo.',
+            'auth/wrong-password': 'Contraseña incorrecta.',
+            'auth/email-already-in-use': 'Ese correo ya tiene una cuenta. Ingresá en la pestaña "Ingresar".',
+            'auth/invalid-email': 'El correo no tiene un formato válido.',
+            'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+            'auth/popup-closed-by-user': 'Cerraste la ventana de Google antes de terminar.',
+            'auth/network-request-failed': 'Error de red. Revisá tu conexión.',
+            'auth/invalid-credential': 'Correo o contraseña incorrectos.'
+        };
+        return msgs[code] || 'Ocurrió un error. Intentá de nuevo.';
+    }
 
+    // ── LOGIN CON GOOGLE (popup) ──
+    function doGoogleLogin() {
+        auth.signInWithPopup(googleProvider)
+            .then(function() {
+                document.getElementById('loginModal').classList.add('hidden');
+            })
+            .catch(function(error) {
+                document.getElementById('loginError').textContent = authErrorMsg(error.code);
+            });
+    }
+
+    // ── LOGIN CON EMAIL / CONTRASEÑA ──
+    function doEmailLogin() {
+        var email = document.getElementById('loginEmail').value.trim();
+        var pass  = document.getElementById('loginPassword').value;
+        document.getElementById('loginError').textContent = '';
+        if (!email || !pass) {
+            document.getElementById('loginError').textContent = 'Completá el correo y la contraseña.';
+            return;
+        }
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(function() {
+                document.getElementById('loginModal').classList.add('hidden');
+            })
+            .catch(function(error) {
+                document.getElementById('loginError').textContent = authErrorMsg(error.code);
+            });
+    }
+
+    // ── REGISTRO CON EMAIL / CONTRASEÑA ──
+    function doEmailRegister() {
+        var email  = document.getElementById('registerEmail').value.trim();
+        var pass   = document.getElementById('registerPassword').value;
+        var pass2  = document.getElementById('registerPassword2').value;
+        document.getElementById('registerError').textContent = '';
+        if (!email || !pass) {
+            document.getElementById('registerError').textContent = 'Completá todos los campos.';
+            return;
+        }
+        if (pass !== pass2) {
+            document.getElementById('registerError').textContent = 'Las contraseñas no coinciden.';
+            return;
+        }
+        auth.createUserWithEmailAndPassword(email, pass)
+            .then(function() {
+                document.getElementById('loginModal').classList.add('hidden');
+            })
+            .catch(function(error) {
+                document.getElementById('registerError').textContent = authErrorMsg(error.code);
+            });
+    }
+
+    // ── REGISTRAR EVENTOS ──
+    document.getElementById('btnGoogleLogin').addEventListener('click', doGoogleLogin);
+    document.getElementById('btnGoogleRegister').addEventListener('click', doGoogleLogin);
+    document.getElementById('btnEmailLogin').addEventListener('click', doEmailLogin);
+    document.getElementById('btnEmailRegister').addEventListener('click', doEmailRegister);
+
+    // Botones de la barra lateral
+    document.getElementById('sidebarLoginBtn').addEventListener('click', function() {
+        document.getElementById('loginModal').classList.remove('hidden');
+    });
+    document.getElementById('sidebarLogoutBtn').addEventListener('click', function() {
+        auth.signOut();
+    });
+
+    // ── CERRAR MODAL (modo invitado) ──
     window.closeLoginModal = function() {
         document.getElementById('loginModal').classList.add('hidden');
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    onAuthStateChanged(auth, (user) => {
+    // ── ESTADO DE AUTENTICACIÓN ──
+    auth.onAuthStateChanged(function(user) {
         if (user) {
-            document.getElementById('userName').innerText = "Hola, " + user.displayName.split(' ')[0];
+            var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
+            document.getElementById('userName').innerText = 'Hola, ' + nombre;
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
         } else {
-            document.getElementById('userName').innerText = "Invitado";
+            document.getElementById('userName').innerText = 'Invitado';
             document.getElementById('sidebarLoginBtn').style.display = 'flex';
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
             if (!sessionStorage.getItem('guestMode')) {
@@ -350,7 +538,8 @@
         }
     });
 
-    const data = {
+    // ── DATOS DE MATERIAS ──
+    var data = {
         "PRIMER AÑO": [
             {n: "Taller Inicial Común: Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1jLUf7D_7GzXwwXl0mkE0WJLmK3ydxtfb?usp=drive_link", req: ""},
             {n: "Taller Inicial Orientado: Ciencias Exactas", l: "https://drive.google.com/drive/folders/1zRWjRQCmkwYRaJEk44JEp3j6litaBMxy?usp=drive_link", req: ""},
@@ -371,7 +560,7 @@
             {n: "Economía Keynesiana", l: "https://drive.google.com/drive/folders/1BDxNT2spCBZpZkZD106JRm7YF9sV7Ntx?usp=drive_link", req: "Economía Neoclásica"},
             {n: "Estadística para Economistas", l: "https://drive.google.com/drive/folders/1OxeMyLnkVKfZLN9txxIIlx5eentl-OGZ?usp=drive_link", req: "Matemática para Economistas I"},
             {n: "Planeamiento y Control Organizacional", l: "https://drive.google.com/drive/folders/1Jc-uLaSCaPtiOH9nfAbR8UI0eGbv4qZK?usp=drive_link", req: "Diseño Estructural y Procesos | Problemas Socioeconómicos Contemporáneos | Taller de Lectura y Escritura en las Disciplinas"},
-            {n: "Matemática para Economistas II", l: "https://drive.google.com/drive/folders/1NTAhvAECzPQB0de2dAdtNIzp_9_mA_cF?usp=drive_link", req: "Matemática para Economistas I"},
+            {n: "Matemática para Economistas II", l: "https://drive.google.com/drive/folders/1NTAhvAECzPQB0de2dAdtNIzk_9_mA_cF?usp=drive_link", req: "Matemática para Economistas I"},
             {n: "Laboratorio Interdisciplinario", l: "https://drive.google.com/drive/folders/1NdTpduQArGshJt976kRYwspdto-b4hG0?usp=drive_link", req: "13 (trece) materias de la carrera"},
             {n: "Sistemas de Información", l: "https://drive.google.com/drive/folders/1nCsfZY8qNIgnmSk2LyDXW7Z2hHT9DLmb?usp=drive_link", req: "Sistemas de Información Contable I"}
         ],
@@ -406,76 +595,75 @@
     };
 
     function render() {
-        const container = document.getElementById('accordionContainer');
-        for (const [year, mats] of Object.entries(data)) {
-            const section = document.createElement('div');
+        var container = document.getElementById('accordionContainer');
+        for (var year in data) {
+            var mats = data[year];
+            var section = document.createElement('div');
             section.className = 'year-section';
-            section.innerHTML = `
-                <div class="year-header" onclick="toggleYear(this)">${year} <span>+</span></div>
-                <div class="materia-container">
-                    ${mats.map(m => `
-                        <div class="materia-item" onclick="openDoc('${m.n}', '${m.l}')">
-                            <div class="materia-info">
-                                <span class="materia-name">${m.n}</span>
-                                <div class="correlativas-text">
-                                    ${m.req ? `<span class="req-badge"><i data-lucide="lock" style="width:10px;height:10px;"></i> Req: ${m.req}</span>` : ''}
-                                </div>
-                            </div>
-                            <span class="materia-action">Ver recursos <i data-lucide="arrow-right" class="icon-sm"></i></span>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+            var items = mats.map(function(m) {
+                return '<div class="materia-item" onclick="openDoc(\'' + m.n.replace(/'/g, "\\'") + '\', \'' + m.l + '\')">' +
+                    '<div class="materia-info">' +
+                        '<span class="materia-name">' + m.n + '</span>' +
+                        '<div class="correlativas-text">' +
+                            (m.req ? '<span class="req-badge"><i data-lucide="lock" style="width:10px;height:10px;"></i> Req: ' + m.req + '</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                    '<span class="materia-action">Ver recursos <i data-lucide="arrow-right" class="icon-sm"></i></span>' +
+                '</div>';
+            }).join('');
+            section.innerHTML =
+                '<div class="year-header" onclick="toggleYear(this)">' + year + ' <span>+</span></div>' +
+                '<div class="materia-container">' + items + '</div>';
             container.appendChild(section);
         }
         lucide.createIcons();
     }
 
     window.toggleYear = function(el) {
-        const panel = el.nextElementSibling;
-        const icon = el.querySelector('span');
-        const isOpen = panel.style.display === "block";
+        var panel = el.nextElementSibling;
+        var icon = el.querySelector('span');
+        var isOpen = panel.style.display === "block";
         panel.style.display = isOpen ? "none" : "block";
         icon.innerText = isOpen ? "+" : "-";
-    }
+    };
 
     window.openDoc = function(name, link) {
-        window.location.href = `visor.html?name=${encodeURIComponent(name)}&link=${encodeURIComponent(link)}`;
-    }
+        window.location.href = 'visor.html?name=' + encodeURIComponent(name) + '&link=' + encodeURIComponent(link);
+    };
 
     window.filterMaterias = function() {
-        const input = document.getElementById('searchInput').value.toLowerCase();
-        const items = document.getElementsByClassName('materia-item');
-        const sections = document.getElementsByClassName('year-section');
-        for (let item of items) {
-            const title = item.querySelector('.materia-name').innerText.toLowerCase();
-            item.style.display = title.includes(input) ? "" : "none";
+        var input = document.getElementById('searchInput').value.toLowerCase();
+        var items = document.getElementsByClassName('materia-item');
+        var sections = document.getElementsByClassName('year-section');
+        for (var i = 0; i < items.length; i++) {
+            var title = items[i].querySelector('.materia-name').innerText.toLowerCase();
+            items[i].style.display = title.includes(input) ? "" : "none";
         }
-        for (let sec of sections) {
-            const panel = sec.querySelector('.materia-container');
+        for (var j = 0; j < sections.length; j++) {
+            var panel = sections[j].querySelector('.materia-container');
             panel.style.display = input ? "block" : "none";
-            sec.querySelector('span').innerText = input ? "-" : "+";
+            sections[j].querySelector('span').innerText = input ? "-" : "+";
         }
-    }
+    };
 
     window.toggleSidebar = function() {
         document.getElementById('sidebar').classList.toggle('hidden');
         document.getElementById('mainContent').classList.toggle('expanded');
-    }
+    };
 
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('ungs_theme', theme);
     }
 
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(e) {
         if (!localStorage.getItem('ungs_theme')) applyTheme(e.matches ? 'dark' : 'light');
     });
 
     window.toggleTheme = function() {
-        const current = document.documentElement.getAttribute('data-theme');
+        var current = document.documentElement.getAttribute('data-theme');
         applyTheme(current === 'dark' ? 'light' : 'dark');
-    }
+    };
 
     render();
 </script>
