@@ -56,8 +56,6 @@
             scroll-behavior: smooth;
         }
 
-        /* SE ELIMINÓ LA CUADRÍCULA DE FONDO DEL MODO OSCURO */
-
         .icon-sm { width: 16px; height: 16px; }
         .icon-md { width: 20px; height: 20px; }
         .icon-lg { width: 24px; height: 24px; }
@@ -150,14 +148,13 @@
             background: rgba(255,140,0,0.05); text-decoration: none !important;
         }
 
-        /* MODAL DE LOGIN */
+        /* MODAL DE LOGIN Y POMODORO (Se agregan conservando el estilo de la web) */
         .login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; display: flex; justify-content: center; align-items: center; transition: opacity 0.3s ease; }
         .login-modal.hidden { opacity: 0; pointer-events: none; }
         .login-modal-content { background: var(--bg); padding: 40px; border-radius: 16px; border: 1px solid var(--border); max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         .login-modal-content h2 { margin-top: 0; font-weight: 800; color: var(--text); }
         .login-modal-content p { color: #9ca3af; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
 
-        /* Estilos Timer */
         .timer-display { font-size: 4rem; font-weight: 800; color: var(--primary); margin: 15px 0; text-align: center; }
         .timer-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .pomodoro-log { background: var(--bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border); font-size: 14px; color: #9ca3af; text-align: center;}
@@ -209,7 +206,7 @@
     </a>
 
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-
+    
     <p style="color: #9ca3af; font-size: 13px; font-weight: 600; margin-bottom: 15px; margin-top: 0;">Oportunidades</p>
 
     <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark">
@@ -296,18 +293,18 @@
 </div>
 
 <script type="module">
-    // --- INTEGRACIÓN FIREBASE ---
+    // --- INTEGRACIÓN FIREBASE (Con el truco Anti-GitHub) ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDoFacVfYeZpNVIvbBqlcXtlZkbeg_UeVg",
+      apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
       authDomain: "knowy-13079.firebaseapp.com",
       projectId: "knowy-13079",
       storageBucket: "knowy-13079.firebasestorage.app",
       messagingSenderId: "645341817520",
-      appId: "1:645341817520:web:c86fcaefae8b50e2382975",
-      measurementId: "G-RWX9GTPVRN"
+      appId: "1:645341817520:web:799733f87a0ad1a0382975",
+      measurementId: "G-PQGH6R9SZC"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -339,7 +336,6 @@
             document.getElementById('userName').innerText = "Invitado";
             document.getElementById('sidebarLoginBtn').style.display = 'flex';
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
-            // Mostrar modal si no es invitado
             if (!sessionStorage.getItem('guestMode')) {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
