@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Progreso ADE | UNGS</title>
-    
+
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -15,8 +16,10 @@
       gtag('config', 'G-XXXXXXXXXX');
     </script>
 
+    <!-- Tema inicial -->
     <script>
-        const theme = localStorage.getItem('ungs_theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? 'dark' : 'light');
+        const savedTheme = localStorage.getItem('ungs_theme');
+        const theme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', theme);
     </script>
 
@@ -25,359 +28,757 @@
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         :root {
-            --primary: #FF8C00; 
+            --primary: #FF8C00;
             --bg: #f9fafb;
             --text: #1a1a1a;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --sidebar-bg: rgba(244, 244, 244, 0.85);
+            --card-bg: rgba(255,255,255,0.7);
+            --sidebar-bg: rgba(244,244,244,0.85);
             --border: #e5e7eb;
+            --danger: #ff4a4a;
+            --success: #22c55e;
+            --shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
             --sidebar-width: 300px;
         }
 
         [data-theme="dark"] {
-            --bg: #080808; 
+            --bg: #080808;
             --text: #f5f5f5;
-            --card-bg: rgba(18, 18, 18, 0.6); 
-            --sidebar-bg: rgba(8, 8, 8, 0.85);
+            --card-bg: rgba(18,18,18,0.6);
+            --sidebar-bg: rgba(8,8,8,0.85);
             --border: #222222;
+            --shadow: 0 10px 30px -10px rgba(0,0,0,0.4);
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text); 
-            margin: 0; 
-            display: flex;
-            transition: background-color 0.4s ease, color 0.4s ease;
-            overflow-x: hidden;
+        html {
             scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            overflow-x: hidden;
+            transition: background-color .4s ease, color .4s ease;
         }
 
         .icon-sm { width: 16px; height: 16px; }
         .icon-md { width: 20px; height: 20px; }
         .icon-lg { width: 24px; height: 24px; }
 
+        /* SIDEBAR */
         .sidebar {
-            width: var(--sidebar-width); height: 100vh; background: var(--sidebar-bg);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            padding: 30px 20px 90px 20px; position: fixed; left: 0; top: 0;
-            border-right: 1px solid var(--border); overflow-y: auto;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 30px 20px 100px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: transform .4s cubic-bezier(.4,0,.2,1);
         }
-        .sidebar.hidden { transform: translateX(-100%); }
 
-        .toggle-btn {
-            position: fixed; left: 15px; bottom: 20px; z-index: 1100;
-            background: var(--primary); color: white; border: none; padding: 12px 20px;
-            border-radius: 8px; cursor: pointer; font-weight: 600;
-            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3); transition: all 0.3s ease;
-            display: flex; align-items: center; gap: 8px;
+        .sidebar.hidden {
+            transform: translateX(-100%);
         }
-        .toggle-btn:hover { transform: translateY(-2px); }
-
-        .theme-btn {
-            position: fixed; top: 20px; right: 20px; border: 1px solid var(--border); 
-            color: var(--text); background: var(--card-bg); backdrop-filter: blur(10px);
-            padding: 8px 15px; border-radius: 8px; cursor: pointer; z-index: 1001;
-            font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
-        }
-        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
 
         .main-content {
-            margin-left: var(--sidebar-width); padding: 50px 20px 90px 20px; width: 100%; max-width: 900px;
-            margin-right: auto; transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            max-width: 900px;
+            margin-left: var(--sidebar-width);
+            margin-right: auto;
+            padding: 50px 20px 100px;
+            transition: margin-left .4s cubic-bezier(.4,0,.2,1);
         }
-        .main-content.expanded { margin-left: auto; margin-right: auto; }
 
-        header { text-align: center; margin-bottom: 40px; }
-        header h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; font-size: 2.5rem;}
-        header p { color: #9ca3af; }
+        .main-content.expanded {
+            margin-left: auto;
+        }
+
+        /* BOTONES FLOTANTES */
+        .toggle-btn,
+        .theme-btn {
+            position: fixed;
+            z-index: 1100;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: .25s ease;
+        }
+
+        .toggle-btn {
+            left: 15px;
+            bottom: 20px;
+            padding: 12px 18px;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,140,0,.3);
+        }
+
+        .toggle-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .theme-btn {
+            top: 20px;
+            right: 20px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.7rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #9ca3af;
+        }
 
         .dashboard-panel {
-            background: var(--card-bg); backdrop-filter: blur(10px);
-            border: 1px solid var(--border); border-radius: 16px; padding: 30px;
-            margin-bottom: 30px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
         }
-        
-        .progress-container { margin: 20px 0 30px 0; }
-        .progress-bar-bg { width: 100%; height: 12px; background: var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
-        .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.8s ease-out; box-shadow: 0 0 10px rgba(255,140,0,0.4); }
-        .progress-text { font-size: 14px; color: #9ca3af; font-weight: 600; text-align: right; }
 
-        .calc-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .panel-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .panel-title i {
+            color: var(--primary);
+        }
+
+        /* PROGRESO */
+        .progress-container {
+            margin: 20px 0 30px;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 12px;
+            background: var(--border);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            transition: width .8s ease-out;
+            box-shadow: 0 0 10px rgba(255,140,0,.4);
+        }
+
+        .progress-text {
+            text-align: right;
+            font-size: 14px;
+            color: #9ca3af;
+            font-weight: 600;
+        }
+
+        /* INPUTS */
+        .calc-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
         .calc-input {
-            padding: 14px 15px; border-radius: 8px; border: 1px solid var(--border);
-            background: var(--bg); color: var(--text); font-size: 14px; box-sizing: border-box;
+            padding: 14px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            transition: .25s ease;
         }
-        .calc-input:focus { outline: none; border-color: var(--primary); }
-        
-        .grade-list { margin-top: 20px; max-height: 400px; overflow-y: auto; font-size: 15px; padding-right: 5px;}
-        .grade-item { display: flex; justify-content: space-between; padding: 12px 10px; border-bottom: 1px solid var(--border); align-items: center; border-radius: 8px;}
-        .grade-item:hover { background: rgba(255, 140, 0, 0.05); }
-        .btn-del { color: #ff4a4a; cursor: pointer; margin-left: 15px; transition: 0.2s; padding: 2px;}
-        .btn-del:hover { transform: scale(1.2); }
-        .avg-display { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin-top: 30px; text-align: right; }
 
+        .calc-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* LISTA */
+        .grade-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .grade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border);
+            border-radius: 10px;
+            transition: .2s ease;
+        }
+
+        .grade-item:hover {
+            background: rgba(255,140,0,.05);
+        }
+
+        .btn-del {
+            color: var(--danger);
+            cursor: pointer;
+            transition: .2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-del:hover {
+            transform: scale(1.15);
+        }
+
+        .avg-display {
+            margin-top: 30px;
+            text-align: right;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        /* BOTONES */
         .btn-sidebar {
-            width: 100%; border: none; padding: 14px; border-radius: 8px; cursor: pointer;
-            font-size: 14px; font-weight: 600; transition: all 0.3s ease; margin-bottom: 12px;
-            display: flex; align-items: center; justify-content: flex-start; gap: 12px;
-            text-decoration: none; box-sizing: border-box;
+            width: 100%;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: .25s ease;
+            text-decoration: none;
+            margin-bottom: 12px;
         }
-        .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
-        .btn-dark:hover { background: var(--card-bg); border-color: var(--primary); color: var(--primary); }
-        .btn-primary-solid { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255, 140, 0, 0.2); }
-        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.3); }
 
-        .footer-donate { 
-            display: flex; flex-direction: column; align-items: center; gap: 20px;
-            padding: 40px 20px; font-size: 14px; color: #9ca3af; margin-top: 60px; border-top: 1px solid var(--border); 
+        .btn-dark {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
         }
-        .footer-donate a { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
-        .footer-donate a:hover { text-decoration: underline; }
-        
+
+        .btn-dark:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--card-bg);
+        }
+
+        .btn-primary-solid {
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(255,140,0,.2);
+        }
+
+        .btn-primary-solid:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,140,0,.3);
+        }
+
+        /* LOGIN MODAL */
+        .login-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity .3s ease;
+        }
+
+        .login-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .login-modal-content {
+            width: 90%;
+            max-width: 400px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,.3);
+        }
+
+        .login-modal-content h2 {
+            margin: 15px 0 10px;
+            font-weight: 800;
+        }
+
+        .login-modal-content p {
+            color: #9ca3af;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        /* TIMER */
+        .timer-display {
+            text-align: center;
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 15px 0;
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pomodoro-log {
+            padding: 15px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .footer-donate {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+        }
+
         .btn-sugerencias {
-            color: #9ca3af !important; border: 1px dashed #9ca3af; padding: 12px 24px;
-            border-radius: 8px; transition: 0.3s;
+            color: #9ca3af;
+            border: 1px dashed #9ca3af;
+            padding: 12px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: .25s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
         .btn-sugerencias:hover {
-            color: var(--primary) !important; border-color: var(--primary);
-            background: rgba(255,140,0,0.05); text-decoration: none !important;
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(255,140,0,.05);
         }
 
-        /* MODAL DE LOGIN Y POMODORO (Se agregan conservando el estilo de la web) */
-        .login-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; display: flex; justify-content: center; align-items: center; transition: opacity 0.3s ease; }
-        .login-modal.hidden { opacity: 0; pointer-events: none; }
-        .login-modal-content { background: var(--bg); padding: 40px; border-radius: 16px; border: 1px solid var(--border); max-width: 400px; width: 90%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .login-modal-content h2 { margin-top: 0; font-weight: 800; color: var(--text); }
-        .login-modal-content p { color: #9ca3af; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 90px 15px 100px;
+            }
 
-        .timer-display { font-size: 4rem; font-weight: 800; color: var(--primary); margin: 15px 0; text-align: center; }
-        .timer-controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .pomodoro-log { background: var(--bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border); font-size: 14px; color: #9ca3af; text-align: center;}
+            header h1 {
+                font-size: 2.1rem;
+            }
+
+            .dashboard-panel {
+                padding: 20px;
+            }
+
+            .calc-row {
+                flex-direction: column;
+            }
+
+            .timer-display {
+                font-size: 3rem;
+            }
+
+            .toggle-btn {
+                bottom: 15px;
+                left: 15px;
+            }
+        }
     </style>
 </head>
 <body>
 
+<!-- MODAL LOGIN -->
 <div id="loginModal" class="login-modal hidden">
     <div class="login-modal-content">
-        <i data-lucide="lock" class="icon-lg" style="color: var(--primary); margin-bottom: 15px; width: 40px; height: 40px;"></i>
+        <i data-lucide="lock" class="icon-lg" style="color: var(--primary); width: 40px; height: 40px;"></i>
         <h2>Bienvenido a La Biblioteca</h2>
-        <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones desde cualquier dispositivo.</p>
-        <button id="btnModalLogin" class="btn-primary-solid" style="width: 100%; justify-content: center; padding: 14px; margin-bottom: 10px;">
-            <i data-lucide="log-in" class="icon-sm"></i> Ingresar con Google
+        <p>
+            Iniciá sesión para guardar tu progreso en la nube y acceder desde cualquier dispositivo.
+        </p>
+
+        <button id="btnModalLogin" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
+            <i data-lucide="log-in" class="icon-sm"></i>
+            Ingresar con Google
         </button>
-        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; justify-content: center; padding: 14px; border: none;">
+
+        <button onclick="closeLoginModal()" class="btn-sidebar btn-dark" style="justify-content:center;">
             Continuar como invitado
         </button>
     </div>
 </div>
 
-<button class="toggle-btn" onclick="toggleSidebar()"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
-<button class="theme-btn" onclick="toggleTheme()"><i data-lucide="moon" class="icon-sm"></i> Tema</button>
+<!-- BOTONES -->
+<button class="toggle-btn" onclick="toggleSidebar()">
+    <i data-lucide="menu" class="icon-md"></i>
+    Herramientas
+</button>
 
+<button class="theme-btn" onclick="toggleTheme()">
+    <i data-lucide="moon" class="icon-sm"></i>
+    Tema
+</button>
+
+<!-- SIDEBAR -->
 <aside class="sidebar hidden" id="sidebar">
-    <div id="userProfile" style="margin-bottom: 25px; padding: 15px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; text-align: center; backdrop-filter: blur(10px);">
-        <i data-lucide="user-circle" class="icon-lg" style="color: var(--primary); margin-bottom: 8px;"></i>
-        <p id="userName" style="font-weight: 700; margin: 0 0 12px 0; font-size: 14px; color: var(--text);">Invitado</p>
-        <button id="sidebarLoginBtn" class="btn-primary-solid" style="width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
-            <i data-lucide="log-in" class="icon-sm"></i> Ingresar
+
+    <div id="userProfile" style="margin-bottom:25px; padding:15px; background:var(--card-bg); border:1px solid var(--border); border-radius:12px; text-align:center; backdrop-filter:blur(10px);">
+        <i data-lucide="user-circle" class="icon-lg" style="color:var(--primary); margin-bottom:8px;"></i>
+
+        <p id="userName" style="font-weight:700; margin-bottom:12px;">Invitado</p>
+
+        <button id="sidebarLoginBtn" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
+            <i data-lucide="log-in" class="icon-sm"></i>
+            Ingresar
         </button>
-        <button id="sidebarLogoutBtn" class="btn-dark" style="width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; display: none; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
-            <i data-lucide="log-out" class="icon-sm"></i> Salir
+
+        <button id="sidebarLogoutBtn" class="btn-sidebar btn-dark" style="justify-content:center; display:none;">
+            <i data-lucide="log-out" class="icon-sm"></i>
+            Salir
         </button>
     </div>
 
-    <h2 style="color: var(--primary); font-weight: 800; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
-        <i data-lucide="library" class="icon-lg"></i> ADE UNGS
+    <h2 style="display:flex; align-items:center; gap:8px; color:var(--primary); font-weight:800; margin-bottom:8px;">
+        <i data-lucide="library" class="icon-lg"></i>
+        ADE UNGS
     </h2>
-    <p style="color: #9ca3af; font-size: 14px; margin-top: -5px;">Navegación</p>
-    
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+
+    <p style="color:#9ca3af; font-size:14px; margin-bottom:20px;">Navegación</p>
+
+    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
 
     <a href="index.html" class="btn-sidebar btn-dark">
-        <i data-lucide="search" class="icon-sm"></i> Buscar Materias
-    </a>
-    <a href="progreso.html" class="btn-sidebar btn-primary-solid">
-        <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
+        <i data-lucide="search" class="icon-sm"></i>
+        Buscar Materias
     </a>
 
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-    
-    <p style="color: #9ca3af; font-size: 13px; font-weight: 600; margin-bottom: 15px; margin-top: 0;">Oportunidades</p>
+    <a href="progreso.html" class="btn-sidebar btn-primary-solid">
+        <i data-lucide="trending-up" class="icon-sm"></i>
+        Mi Progreso
+    </a>
+
+    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+
+    <p style="color:#9ca3af; font-size:13px; font-weight:600; margin-bottom:15px;">
+        Oportunidades
+    </p>
 
     <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark">
-        <i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo
-    </a>
-    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark">
-        <i data-lucide="building" class="icon-sm"></i> Pasantías UNGS
+        <i data-lucide="briefcase" class="icon-sm"></i>
+        Bolsa de Trabajo
     </a>
 
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="building" class="icon-sm"></i>
+        Pasantías UNGS
+    </a>
+
+    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
 
     <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar btn-dark">
-        <i data-lucide="message-square-plus" class="icon-sm"></i> Dejar Recomendación
+        <i data-lucide="message-square-plus" class="icon-sm"></i>
+        Dejar Recomendación
     </a>
-    <a href="TU_LINK_AL_PDF_DE_RECOMENDACIONES" target="_blank" class="btn-sidebar btn-dark">
-        <i data-lucide="book-open-check" class="icon-sm"></i> Ver Recomendaciones
+
+    <a href="#" class="btn-sidebar btn-dark">
+        <i data-lucide="book-open-check" class="icon-sm"></i>
+        Ver Recomendaciones
     </a>
-    <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="margin-top: 15px; border-style: dashed;">
-        <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos
+
+    <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="border-style:dashed; margin-top:15px;">
+        <i data-lucide="file-up" class="icon-sm"></i>
+        Donar Archivos
     </a>
 </aside>
 
+<!-- CONTENIDO -->
 <div class="main-content expanded" id="mainContent">
+
     <header>
         <h1>Mi Progreso</h1>
         <p>Panel de control académico y calculadora de promedio</p>
     </header>
 
+    <!-- POMODORO -->
     <div class="dashboard-panel">
-        <h3 style="margin: 0 0 15px 0; color: var(--text); font-size: 18px; display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="timer" class="icon-md" style="color: var(--primary);"></i> Sesión de Estudio Activa
-        </h3>
-        
+
+        <div class="panel-title">
+            <i data-lucide="timer" class="icon-md"></i>
+            Sesión de Estudio Activa
+        </div>
+
         <div class="timer-display" id="timerDisplay">25:00</div>
-        
+
         <div class="timer-controls">
-            <button id="btnStartTimer" onclick="startTimer()" class="btn-sidebar btn-primary-solid" style="width: auto; padding: 12px 25px; margin: 0;"><i data-lucide="play" class="icon-sm"></i> Enfocarse</button>
-            <button id="btnPauseTimer" onclick="pauseTimer()" class="btn-sidebar btn-dark" style="width: auto; padding: 12px 25px; margin: 0; display: none;"><i data-lucide="pause" class="icon-sm"></i> Pausar</button>
-            <button onclick="resetTimer()" class="btn-sidebar btn-dark" style="width: auto; padding: 12px 25px; margin: 0;"><i data-lucide="rotate-ccw" class="icon-sm"></i> Reiniciar</button>
+
+            <button id="btnStartTimer" onclick="startTimer()" class="btn-sidebar btn-primary-solid" style="width:auto; padding:12px 25px; margin:0;">
+                <i data-lucide="play" class="icon-sm"></i>
+                Enfocarse
+            </button>
+
+            <button id="btnPauseTimer" onclick="pauseTimer()" class="btn-sidebar btn-dark" style="width:auto; padding:12px 25px; margin:0; display:none;">
+                <i data-lucide="pause" class="icon-sm"></i>
+                Pausar
+            </button>
+
+            <button onclick="resetTimer()" class="btn-sidebar btn-dark" style="width:auto; padding:12px 25px; margin:0;">
+                <i data-lucide="rotate-ccw" class="icon-sm"></i>
+                Reiniciar
+            </button>
         </div>
 
         <div class="pomodoro-log">
-            <p style="margin: 0 0 5px 0; font-weight: 600; color: var(--text);">Historial de Concentración:</p>
-            <span id="sessionLogText">Has completado 0 sesiones de estudio (0 minutos totales).</span>
+            <p style="margin-bottom:5px; font-weight:600; color:var(--text);">
+                Historial de Concentración
+            </p>
+
+            <span id="sessionLogText">
+                Has completado 0 sesiones de estudio (0 minutos totales).
+            </span>
         </div>
     </div>
 
+    <!-- PROGRESO -->
     <div class="dashboard-panel">
-        <h3 style="margin: 0 0 15px 0; color: var(--text); font-size: 18px; display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="award" class="icon-md" style="color: var(--primary);"></i> Avance de la Carrera
-        </h3>
-        
+
+        <div class="panel-title">
+            <i data-lucide="award" class="icon-md"></i>
+            Avance de la Carrera
+        </div>
+
         <div class="progress-container">
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressBar"></div>
             </div>
-            <div class="progress-text" id="progressText">0 / 38 materias completadas</div>
+
+            <div class="progress-text" id="progressText">
+                0 / 38 materias completadas
+            </div>
         </div>
 
-        <hr style="border-top: 1px solid var(--border); margin: 35px 0;">
+        <hr style="border-top:1px solid var(--border); margin:35px 0;">
 
-        <h3 style="margin:0 0 20px 0; display: flex; align-items: center; gap: 8px; color: var(--text); font-size: 18px;">
-            <i data-lucide="calculator" class="icon-md" style="color: var(--primary);"></i> Historial de Calificaciones
-        </h3>
+        <div class="panel-title">
+            <i data-lucide="calculator" class="icon-md"></i>
+            Historial de Calificaciones
+        </div>
+
         <div class="calc-row">
-            <input type="text" id="subjIn" class="calc-input" placeholder="Nombre de la Materia" style="flex: 2;">
-            <input type="text" id="gradeIn" class="calc-input" placeholder="Nota (1-10 o 'A')" style="flex: 1;">
-            <button onclick="addEntry()" class="btn-sidebar btn-primary-solid" style="margin: 0; width: auto; padding: 0 25px;">
-                <i data-lucide="plus" class="icon-sm"></i> 
+            <input type="text" id="subjIn" class="calc-input" placeholder="Nombre de la Materia" style="flex:2;">
+
+            <input type="text" id="gradeIn" class="calc-input" placeholder="Nota (1-10 o 'A')" style="flex:1;">
+
+            <button onclick="addEntry()" class="btn-sidebar btn-primary-solid" style="margin:0; width:auto; padding:0 25px; justify-content:center;">
+                <i data-lucide="plus" class="icon-sm"></i>
             </button>
         </div>
-        
+
         <div class="grade-list" id="gradeList"></div>
-        
-        <div class="avg-display">Promedio Histórico: <span id="avgOut">0.00</span></div>
-        <p style="text-align: right; font-size: 12px; color: #9ca3af; margin-top: 5px;">*Las materias con calificación "Aprobado" no afectan el cálculo del promedio.</p>
+
+        <div class="avg-display">
+            Promedio Histórico: <span id="avgOut">0.00</span>
+        </div>
+
+        <p style="text-align:right; font-size:12px; color:#9ca3af; margin-top:5px;">
+            *Las materias marcadas como “Aprobado” no afectan el promedio.
+        </p>
     </div>
 
+    <!-- FOOTER -->
     <div class="footer-donate">
         <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="btn-sugerencias" target="_blank">
-            <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para mejorar la web
+            <i data-lucide="lightbulb" class="icon-sm"></i>
+            Sugerencias para mejorar la web
         </a>
     </div>
 </div>
 
+<!-- SCRIPT -->
 <script type="module">
-    // --- INTEGRACIÓN FIREBASE (Con el truco Anti-GitHub) ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+    import {
+        getAuth,
+        signInWithPopup,
+        GoogleAuthProvider,
+        onAuthStateChanged,
+        signOut
+    } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
+
+    // FIREBASE
     const firebaseConfig = {
-      apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
-      authDomain: "knowy-13079.firebaseapp.com",
-      projectId: "knowy-13079",
-      storageBucket: "knowy-13079.firebasestorage.app",
-      messagingSenderId: "645341817520",
-      appId: "1:645341817520:web:799733f87a0ad1a0382975",
-      measurementId: "G-PQGH6R9SZC"
+        apiKey: 'AIzaSy' + 'DoFacVfYeZp' + 'NVIvbBqlcXtlZ' + 'kbeg_UeVg',
+        authDomain: 'knowy-13079.firebaseapp.com',
+        projectId: 'knowy-13079',
+        storageBucket: 'knowy-13079.firebasestorage.app',
+        messagingSenderId: '645341817520',
+        appId: '1:645341817520:web:799733f87a0ad1a0382975',
+        measurementId: 'G-PQGH6R9SZC'
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    const doLogin = () => {
-        signInWithPopup(auth, provider).then(() => {
-            document.getElementById('loginModal').classList.add('hidden');
-        }).catch(error => console.error("Error en login:", error));
-    };
+    // LOGIN
+    function doLogin() {
+        signInWithPopup(auth, provider)
+            .then(() => {
+                document.getElementById('loginModal').classList.add('hidden');
+            })
+            .catch(error => {
+                console.error('Error login:', error);
+                alert('No se pudo iniciar sesión.');
+            });
+    }
 
     document.getElementById('sidebarLoginBtn').addEventListener('click', doLogin);
     document.getElementById('btnModalLogin').addEventListener('click', doLogin);
-    document.getElementById('sidebarLogoutBtn').addEventListener('click', () => signOut(auth));
+
+    document.getElementById('sidebarLogoutBtn').addEventListener('click', () => {
+        signOut(auth);
+    });
 
     window.closeLoginModal = function() {
         document.getElementById('loginModal').classList.add('hidden');
         sessionStorage.setItem('guestMode', 'true');
-    };
+    }
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            document.getElementById('userName').innerText = "Hola, " + user.displayName.split(' ')[0];
+            document.getElementById('userName').innerText = `Hola, ${user.displayName.split(' ')[0]}`;
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
         } else {
-            document.getElementById('userName').innerText = "Invitado";
+            document.getElementById('userName').innerText = 'Invitado';
             document.getElementById('sidebarLoginBtn').style.display = 'flex';
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
+
             if (!sessionStorage.getItem('guestMode')) {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
         }
     });
 
-    // --- LÓGICA POMODORO ---
+    // POMODORO
     let timeLeft = 25 * 60;
     let timerId = null;
+
     let completedSessions = parseInt(localStorage.getItem('ungs_pomodoros')) || 0;
 
     function updateTimerUI() {
-        let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-        let s = (timeLeft % 60).toString().padStart(2, '0');
-        document.getElementById('timerDisplay').innerText = `${m}:${s}`;
-        document.getElementById('sessionLogText').innerText = `Has completado ${completedSessions} sesiones de estudio (${completedSessions * 25} minutos totales).`;
+
+        const minutes = Math.floor(timeLeft / 60)
+            .toString()
+            .padStart(2, '0');
+
+        const seconds = (timeLeft % 60)
+            .toString()
+            .padStart(2, '0');
+
+        document.getElementById('timerDisplay').innerText = `${minutes}:${seconds}`;
+
+        document.getElementById('sessionLogText').innerText =
+            `Has completado ${completedSessions} sesiones de estudio (${completedSessions * 25} minutos totales).`;
     }
 
     window.startTimer = function() {
+
         if (timerId) return;
+
         document.getElementById('btnStartTimer').style.display = 'none';
         document.getElementById('btnPauseTimer').style.display = 'inline-flex';
+
         timerId = setInterval(() => {
+
             timeLeft--;
             updateTimerUI();
+
             if (timeLeft <= 0) {
+
                 clearInterval(timerId);
                 timerId = null;
+
                 completedSessions++;
                 localStorage.setItem('ungs_pomodoros', completedSessions);
+
                 timeLeft = 25 * 60;
+
                 updateTimerUI();
+
                 document.getElementById('btnStartTimer').style.display = 'inline-flex';
                 document.getElementById('btnPauseTimer').style.display = 'none';
-                alert("¡Excelente trabajo! Sesión completada. Tómate 5 minutos de descanso.");
+
+                alert('¡Excelente trabajo! Sesión completada.');
             }
+
         }, 1000);
     }
 
     window.pauseTimer = function() {
+
         clearInterval(timerId);
         timerId = null;
+
         document.getElementById('btnStartTimer').style.display = 'inline-flex';
         document.getElementById('btnPauseTimer').style.display = 'none';
     }
@@ -387,29 +788,48 @@
         timeLeft = 25 * 60;
         updateTimerUI();
     }
+
     updateTimerUI();
 
-    // --- LÓGICA CALCULADORA ---
-    let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
+    // CALCULADORA
     const totalMaterias = 38;
 
+    let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
+
     window.addEntry = function() {
+
         const subj = document.getElementById('subjIn').value.trim();
         const gradeRaw = document.getElementById('gradeIn').value.trim().toUpperCase();
-        
-        let gradeNum = parseFloat(gradeRaw);
-        let isNumeric = !isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 10;
-        let isApproved = gradeRaw === 'A' || gradeRaw === 'APROBADO' || gradeRaw === 'AP';
 
-        if (subj && (isNumeric || isApproved)) {
-            let finalGrade = isNumeric ? gradeNum : 'Aprobado';
-            entries.push({ subj: subj, grade: finalGrade, isNumeric: isNumeric });
-            saveAndRender();
-            document.getElementById('subjIn').value = '';
-            document.getElementById('gradeIn').value = '';
-        } else {
-            alert("Ingresá una nota del 1 al 10, o la letra 'A' para materias extracurriculares o talleres.");
+        const gradeNum = parseFloat(gradeRaw);
+
+        const isNumeric = !isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 10;
+
+        const isApproved =
+            gradeRaw === 'A' ||
+            gradeRaw === 'AP' ||
+            gradeRaw === 'APROBADO';
+
+        if (!subj) {
+            alert('Ingresá el nombre de la materia.');
+            return;
         }
+
+        if (!isNumeric && !isApproved) {
+            alert("Ingresá una nota válida del 1 al 10 o la letra 'A'.");
+            return;
+        }
+
+        entries.push({
+            subj,
+            grade: isNumeric ? gradeNum : 'Aprobado',
+            isNumeric
+        });
+
+        saveAndRender();
+
+        document.getElementById('subjIn').value = '';
+        document.getElementById('gradeIn').value = '';
     }
 
     window.removeEntry = function(index) {
@@ -418,56 +838,83 @@
     }
 
     function saveAndRender() {
+
         localStorage.setItem('ungs_grades', JSON.stringify(entries));
+
         const list = document.getElementById('gradeList');
-        
-        list.innerHTML = entries.map((e, i) => `
+
+        list.innerHTML = entries.map((entry, index) => `
             <div class="grade-item">
-                <span style="font-weight: 500;">${e.subj}</span>
-                <span style="display: flex; align-items: center; gap: 10px;">
-                    <b style="color: var(--primary);">${e.grade}</b> 
-                    <span class="btn-del" onclick="removeEntry(${i})" title="Eliminar materia"><i data-lucide="trash-2" class="icon-sm"></i></span>
+                <span style="font-weight:500;">${entry.subj}</span>
+
+                <span style="display:flex; align-items:center; gap:10px;">
+
+                    <b style="color:var(--primary);">
+                        ${entry.grade}
+                    </b>
+
+                    <span class="btn-del" onclick="removeEntry(${index})" title="Eliminar materia">
+                        <i data-lucide="trash-2" class="icon-sm"></i>
+                    </span>
                 </span>
             </div>
         `).join('');
-        
-        const numEntries = entries.filter(e => e.isNumeric !== false && !isNaN(parseFloat(e.grade)));
-        const avg = numEntries.length ? (numEntries.reduce((a, b) => a + parseFloat(b.grade), 0) / numEntries.length).toFixed(2) : "0.00";
-        document.getElementById('avgOut').innerText = avg;
 
-        const completadas = entries.length;
-        const porcentaje = Math.min((completadas / totalMaterias) * 100, 100).toFixed(1);
-        
-        document.getElementById('progressBar').style.width = porcentaje + '%';
-        document.getElementById('progressText').innerText = `${completadas} / ${totalMaterias} materias completadas (${porcentaje}%)`;
+        const numericEntries = entries.filter(entry => entry.isNumeric);
 
-        lucide.createIcons(); 
+        const average = numericEntries.length
+            ? (
+                numericEntries.reduce((acc, item) => acc + Number(item.grade), 0)
+                / numericEntries.length
+            ).toFixed(2)
+            : '0.00';
+
+        document.getElementById('avgOut').innerText = average;
+
+        const completed = entries.length;
+
+        const percentage = Math.min((completed / totalMaterias) * 100, 100).toFixed(1);
+
+        document.getElementById('progressBar').style.width = `${percentage}%`;
+
+        document.getElementById('progressText').innerText =
+            `${completed} / ${totalMaterias} materias completadas (${percentage}%)`;
+
+        lucide.createIcons();
     }
 
+    // SIDEBAR
     window.toggleSidebar = function() {
+
         document.getElementById('sidebar').classList.toggle('hidden');
         document.getElementById('mainContent').classList.toggle('expanded');
     }
 
+    // TEMA
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('ungs_theme', theme);
     }
 
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    window.toggleTheme = function() {
+
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+
+        applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+    }
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+
         if (!localStorage.getItem('ungs_theme')) {
             applyTheme(e.matches ? 'dark' : 'light');
         }
     });
 
-    window.toggleTheme = function() {
-        const current = document.documentElement.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-    }
-
-    saveAndRender(); 
+    // INIT
+    saveAndRender();
     lucide.createIcons();
+
 </script>
+
 </body>
 </html>
