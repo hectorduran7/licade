@@ -656,12 +656,14 @@
 
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
     import {
-        getAuth,
-        signInWithPopup,
-        GoogleAuthProvider,
-        onAuthStateChanged,
-        signOut
-    } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
+    getAuth,
+    signInWithPopup,
+    GoogleAuthProvider,
+    onAuthStateChanged,
+    signOut,
+    setPersistence,
+    browserLocalPersistence
+} from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
 
     // FIREBASE
     const firebaseConfig = {
@@ -674,10 +676,13 @@
         measurementId: 'G-PQGH6R9SZC'
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+const app = initializeApp(firebaseConfig);
 
+const auth = getAuth(app);
+
+await setPersistence(auth, browserLocalPersistence);
+
+const provider = new GoogleAuthProvider();
     // LOGIN
     function doLogin() {
         signInWithPopup(auth, provider)
