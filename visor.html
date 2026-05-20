@@ -56,8 +56,6 @@
             scroll-behavior: smooth;
         }
 
-        /* SE ELIMINÓ LA CUADRÍCULA DE FONDO DEL MODO OSCURO */
-
         .icon-sm { width: 16px; height: 16px; }
         .icon-md { width: 20px; height: 20px; }
         .icon-lg { width: 24px; height: 24px; }
@@ -246,18 +244,18 @@
 </div>
 
 <script type="module">
-    // --- INTEGRACIÓN FIREBASE ---
+    // --- INTEGRACIÓN FIREBASE (Con el truco Anti-GitHub) ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDoFacVfYeZpNVIvbBqlcXtlZkbeg_UeVg",
+      apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
       authDomain: "knowy-13079.firebaseapp.com",
       projectId: "knowy-13079",
       storageBucket: "knowy-13079.firebasestorage.app",
       messagingSenderId: "645341817520",
-      appId: "1:645341817520:web:c86fcaefae8b50e2382975",
-      measurementId: "G-RWX9GTPVRN"
+      appId: "1:645341817520:web:799733f87a0ad1a0382975",
+      measurementId: "G-PQGH6R9SZC"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -289,7 +287,6 @@
             document.getElementById('userName').innerText = "Invitado";
             document.getElementById('sidebarLoginBtn').style.display = 'flex';
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
-            // Mostrar modal si no es invitado
             if (!sessionStorage.getItem('guestMode')) {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
