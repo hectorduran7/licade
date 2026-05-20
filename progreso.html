@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -676,53 +677,95 @@
         measurementId: 'G-PQGH6R9SZC'
     };
 
-const app = initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
 
 await setPersistence(auth, browserLocalPersistence);
 
 const provider = new GoogleAuthProvider();
+
     // LOGIN
-    function doLogin() {
-        signInWithPopup(auth, provider)
-            .then(() => {
-                document.getElementById('loginModal').classList.add('hidden');
-            })
-            .catch(error => {
-                console.error('Error login:', error);
-                alert('No se pudo iniciar sesión.');
-            });
+    async function doLogin() {
+
+    try {
+
+        await setPersistence(auth, browserLocalPersistence);
+
+        await signInWithPopup(auth, provider);
+
+        sessionStorage.removeItem('guestMode');
+
+        document.getElementById('loginModal').classList.add('hidden');
+
+    } catch (error) {
+
+        console.error('Error login:', error);
+
+        alert('No se pudo iniciar sesión.');
     }
+}
 
     document.getElementById('sidebarLoginBtn').addEventListener('click', doLogin);
     document.getElementById('btnModalLogin').addEventListener('click', doLogin);
 
-    document.getElementById('sidebarLogoutBtn').addEventListener('click', () => {
-        signOut(auth);
-    });
+    document.getElementById('sidebarLogoutBtn').addEventListener('click', async () => {
+
+    await signOut(auth);
+
+    sessionStorage.removeItem('guestMode');
+
+    location.reload();
+});
 
     window.closeLoginModal = function() {
         document.getElementById('loginModal').classList.add('hidden');
         sessionStorage.setItem('guestMode', 'true');
     }
 
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            document.getElementById('userName').innerText = `Hola, ${user.displayName.split(' ')[0]}`;
-            document.getElementById('sidebarLoginBtn').style.display = 'none';
-            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
-            document.getElementById('loginModal').classList.add('hidden');
-        } else {
-            document.getElementById('userName').innerText = 'Invitado';
-            document.getElementById('sidebarLoginBtn').style.display = 'flex';
-            document.getElementById('sidebarLogoutBtn').style.display = 'none';
+    onAuthStateChanged(auth, async (user) => {
 
-            if (!sessionStorage.getItem('guestMode')) {
-                document.getElementById('loginModal').classList.remove('hidden');
-            }
+    if (user) {
+
+        document.getElementById('userName').innerText =
+            `Hola, ${user.displayName.split(' ')[0]}`;
+
+        document.getElementById('sidebarLoginBtn').style.display = 'none';
+
+        document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+
+        document.getElementById('loginModal').classList.add('hidden');
+
+    } else {
+
+        document.getElementById('userName').innerText = 'Invitado';
+
+        document.getElementById('sidebarLoginBtn').style.display = 'flex';
+
+        document.getElementById('sidebarLogoutBtn').style.display = 'none';
+
+        const currentUser = auth.currentUser;
+
+        if (currentUser) {
+
+            document.getElementById('userName').innerText =
+                `Hola, ${currentUser.displayName.split(' ')[0]}`;
+
+            document.getElementById('sidebarLoginBtn').style.display = 'none';
+
+            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+
+            document.getElementById('loginModal').classList.add('hidden');
+
+            return;
         }
-    });
+
+        if (!sessionStorage.getItem('guestMode')) {
+
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+    }
+});
 
     // POMODORO
     let timeLeft = 25 * 60;
