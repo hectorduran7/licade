@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesión de Estudio | Biblioteca ADE</title>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
+    <script>
+        const theme = localStorage.getItem('ungs_theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+    </script>
+
+    <!-- Firebase COMPAT v10.13.0 (estandarizado con otras páginas) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #FF8C00;
+            --bg: #f9fafb;
+            --text: #1a1a1a;
+            --card-bg: rgba(255,255,255,0.7);
+            --sidebar-bg: rgba(244,244,244,0.85);
+            --border: #e5e7eb;
+            --success: #22c55e;
+            --danger: #ff4a4a;
+            --sidebar-width: 300px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #080808;
+            --text: #f5f5f5;
+            --card-bg: rgba(18,18,18,0.6);
+            --sidebar-bg: rgba(8,8,8,0.85);
+            --border: #222222;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            overflow-x: hidden;
+            transition: background-color .4s ease, color .4s ease;
+        }
+
+        .icon-sm { width: 16px; height: 16px; }
+        .icon-md { width: 20px; height: 20px; }
+        .icon-lg { width: 24px; height: 24px; }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 30px 20px 100px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            transition: transform .4s cubic-bezier(.4,0,.2,1);
+        }
+        .sidebar.hidden { transform: translateX(-100%); }
+
+        .main-content {
+            width: 100%;
+            max-width: 900px;
+            margin-left: var(--sidebar-width);
+            margin-right: auto;
+            padding: 50px 20px 100px;
+            transition: margin-left .4s cubic-bezier(.4,0,.2,1);
+        }
+        .main-content.expanded { margin-left: auto; }
+
+        .toggle-btn, .theme-btn {
+            position: fixed;
+            z-index: 1100;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: .25s ease;
+        }
+
+        .toggle-btn {
+            left: 15px;
+            bottom: 20px;
+            padding: 12px 18px;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,140,0,.3);
+        }
+        .toggle-btn:hover { transform: translateY(-2px); }
+
+        .theme-btn {
+            top: 20px;
+            right: 20px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            backdrop-filter: blur(10px);
+        }
+        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        header { text-align: center; margin-bottom: 40px; }
+        header h1 { font-size: 2.7rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+        header p { color: #9ca3af; }
+
+        .btn-sidebar {
+            width: 100%; border: none; padding: 14px; border-radius: 10px; cursor: pointer;
+            font-size: 14px; font-weight: 600; transition: .25s ease; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 12px; text-decoration: none; box-sizing: border-box;
+        }
+        .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .btn-dark:hover { border-color: var(--primary); color: var(--primary); background: var(--card-bg); }
+        .btn-primary-solid { background: var(--primary); color: white; border: none; box-shadow: 0 4px 15px rgba(255,140,0,.2); }
+        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
+
+        /* ===== POMODORO TIMER ===== */
+        .timer-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 50px 30px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 20px 50px -20px rgba(0,0,0,0.2);
+        }
+
+        .timer-display {
+            font-size: 120px;
+            font-weight: 800;
+            font-family: 'Inter', monospace;
+            letter-spacing: 8px;
+            color: var(--primary);
+            margin: 30px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all .25s ease;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+        }
+
+        .mode-btn:hover { border-color: var(--primary); }
+        .mode-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 20px rgba(255,140,0,.3);
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 14px 32px;
+            border-radius: 10px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all .25s ease;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(255,140,0,.2);
+        }
+
+        .control-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
+        .control-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .control-btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .control-btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ===== ESTADÍSTICAS ===== */
+        .stats-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .stats-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: var(--text);
+        }
+        .stats-title i { color: var(--primary); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== HISTORIAL ===== */
+        .history-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .history-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .history-title i { color: var(--primary); }
+
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            border-radius: 10px;
+            transition: .2s ease;
+        }
+        .history-item:hover { background: rgba(255,140,0,.05); }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-materia {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .history-date {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .history-time {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        /* ===== NOTIFICACIÓN ===== */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(255,140,0,.3);
+            z-index: 2000;
+            animation: slideIn .3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ===== LOGIN MODAL ===== */
+        .login-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(5px);
+            z-index: 2001; display: flex; justify-content: center; align-items: center;
+            transition: opacity .3s ease;
+        }
+        .login-modal.hidden { opacity: 0; pointer-events: none; }
+        .login-modal-content {
+            width: 90%; max-width: 400px; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 18px; padding: 40px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,.3);
+        }
+        .login-modal-content h2 { margin: 15px 0 10px; font-weight: 800; }
+        .login-modal-content p { color: #9ca3af; line-height: 1.5; margin-bottom: 25px; font-size: 14px; }
+
+        .footer { margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border); text-align: center; color: #9ca3af; font-size: 13px; }
+
+        @media (max-width: 768px) {
+            .main-content { margin-left: 0; padding: 90px 15px 100px; }
+            header h1 { font-size: 2.1rem; }
+            .timer-display { font-size: 72px; letter-spacing: 4px; }
+            .timer-container { padding: 30px 20px; }
+            .controls { flex-direction: column; }
+            .control-btn { width: 100%; }
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="login-modal hidden">
+    <div class="login-modal-content">
+        <i data-lucide="lock" class="icon-lg" style="color: var(--primary); width: 40px; height: 40px; margin-bottom: 15px;"></i>
+        <h2>Inicia Sesión</h2>
+        <p>Para guardar tu progreso de estudio en la nube, iniciá sesión con tu cuenta.</p>
+        <button id="btnModalLogin" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
+            <i data-lucide="log-in" class="icon-sm"></i>
+            Ingresar con Google
+        </button>
+        <button onclick="closeLoginModal()" class="btn-sidebar btn-dark" style="justify-content:center;">
+            Continuar sin guardar
+        </button>
+    </div>
+</div>
+
+<button class="toggle-btn" onclick="toggleSidebar()">
+    <i data-lucide="menu" class="icon-md"></i>
+    Herramientas
+</button>
+
+<button class="theme-btn" onclick="toggleTheme()">
+    <i data-lucide="moon" class="icon-sm"></i>
+    Tema
+</button>
+
+<aside class="sidebar hidden" id="sidebar">
+    <div id="userProfile" style="margin-bottom:25px; padding:15px; background:var(--card-bg); border:1px solid var(--border); border-radius:12px; text-align:center; backdrop-filter:blur(10px);">
+        <i data-lucide="user-circle" class="icon-lg" style="color:var(--primary); margin-bottom:8px;"></i>
+        <p id="userName" style="font-weight:700; margin-bottom:12px;">Invitado</p>
+        <button id="sidebarLoginBtn" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
+            <i data-lucide="log-in" class="icon-sm"></i>
+            Ingresar
+        </button>
+        <button id="sidebarLogoutBtn" class="btn-sidebar btn-dark" style="justify-content:center; display:none;">
+            <i data-lucide="log-out" class="icon-sm"></i>
+            Salir
+        </button>
+    </div>
+
+    <h2 style="display:flex; align-items:center; gap:8px; color:var(--primary); font-weight:800; margin-bottom:8px;">
+        <i data-lucide="library" class="icon-lg"></i> ADE UNGS
+    </h2>
+    <p style="color:#9ca3af; font-size:14px; margin-bottom:20px;">Navegación</p>
+    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+
+    <a href="index.html" class="btn-sidebar btn-dark">
+        <i data-lucide="search" class="icon-sm"></i> Buscar Materias
+    </a>
+    <a href="progreso.html" class="btn-sidebar btn-dark">
+        <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
+    </a>
+    <a href="estudio.html" class="btn-sidebar btn-primary-solid">
+        <i data-lucide="timer" class="icon-sm"></i> 🍅 Sesión de Estudio
+    </a>
+
+    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+    <p style="color:#9ca3af; font-size:13px; font-weight:600; margin-bottom:15px;">Oportunidades</p>
+
+    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo
+    </a>
+    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="building" class="icon-sm"></i> Pasantías UNGS
+    </a>
+</aside>
+
+<div class="main-content expanded" id="mainContent">
+    <header>
+        <h1>🍅 Sesión de Estudio</h1>
+        <p>Técnica Pomodoro + Temporizador de Enfoque</p>
+    </header>
+
+    <!-- TIMER PRINCIPAL -->
+    <div class="timer-container">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
+            <i data-lucide="timer" class="icon-lg" style="color: var(--primary);"></i>
+            <span id="modeLabel" style="font-weight: 700; color: var(--primary); font-size: 18px;">Modo: Estudio (25 min)</span>
+        </div>
+        
+        <div class="timer-display" id="timerDisplay">25:00</div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setMode('work')">📚 Estudio (25m)</button>
+            <button class="mode-btn" onclick="setMode('short')">☕ Descanso (5m)</button>
+            <button class="mode-btn" onclick="setMode('long')">😴 Descanso Largo (15m)</button>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" id="playBtn" onclick="startTimer()">
+                <i data-lucide="play" class="icon-sm"></i> Iniciar
+            </button>
+            <button class="control-btn control-btn-secondary" id="pauseBtn" onclick="pauseTimer()" disabled>
+                <i data-lucide="pause" class="icon-sm"></i> Pausar
+            </button>
+            <button class="control-btn control-btn-secondary" onclick="resetTimer()">
+                <i data-lucide="rotate-ccw" class="icon-sm"></i> Reiniciar
+            </button>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: rgba(255,140,0,0.1); border-radius: 10px; border: 1px solid rgba(255,140,0,0.2);">
+            <p style="font-size: 12px; color: #9ca3af; margin: 0;">
+                💡 <strong>Consejo:</strong> Trabaja sin distracciones durante el Pomodoro. Usa el descanso para recargar energía.
+            </p>
+        </div>
+    </div>
+
+    <!-- ESTADÍSTICAS -->
+    <div class="stats-container">
+        <div class="stats-title">
+            <i data-lucide="bar-chart-3" class="icon-md"></i>
+            Estadísticas de Hoy
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Sesiones Completadas</div>
+                <div class="stat-value" id="statSessions">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Tiempo de Estudio</div>
+                <div class="stat-value" id="statTime">0m</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Descansos</div>
+                <div class="stat-value" id="statBreaks">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Productividad</div>
+                <div class="stat-value" id="statProductivity">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="history-container">
+        <div class="history-title">
+            <i data-lucide="history" class="icon-md"></i>
+            Historial de Hoy
+        </div>
+        
+        <div class="history-list" id="historyList">
+            <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
+                <i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i>
+                <p>Sin sesiones completadas aún.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>📊 Tus datos de estudio se guardan de forma segura en la nube cuando iniciás sesión.</p>
+    </div>
+</div>
+
+<!-- SCRIPT POMODORO -->
+<script>
+    // ── FIREBASE CONFIG ──
+    var firebaseConfig = {
+        apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
+        authDomain: "knowy-13079.firebaseapp.com",
+        projectId: "knowy-13079",
+        storageBucket: "knowy-13079.firebasestorage.app",
+        messagingSenderId: "645341817520",
+        appId: "1:645341817520:web:799733f87a0ad1a0382975",
+        measurementId: "G-PQGH6R9SZC"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
+
+    // Persistencia
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(function(error) { console.error("Persistencia error:", error); });
+
+    var googleProvider = new firebase.auth.GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    // ── ESTADO DEL TIMER ──
+    var timerState = {
+        running: false,
+        paused: false,
+        currentSeconds: 25 * 60,
+        mode: 'work', // work, short, long
+        timerInterval: null,
+        
+        // Estadísticas del día
+        sessionsCompleted: 0,
+        totalWorkSeconds: 0,
+        breaksTotal: 0,
+        startTime: new Date().toDateString(),
+        
+        // Historial
+        sessionHistory: []
+    };
+
+    // Cargar estado desde localStorage
+    function loadLocalState() {
+        var today = new Date().toDateString();
+        var saved = localStorage.getItem('pomodoro_state');
+        if (saved) {
+            var state = JSON.parse(saved);
+            // Solo cargar si es del mismo día
+            if (state.startTime === today) {
+                timerState.sessionsCompleted = state.sessionsCompleted || 0;
+                timerState.totalWorkSeconds = state.totalWorkSeconds || 0;
+                timerState.breaksTotal = state.breaksTotal || 0;
+                timerState.sessionHistory = state.sessionHistory || [];
+            }
+        }
+    }
+
+    // Guardar estado en localStorage
+    function saveLocalState() {
+        localStorage.setItem('pomodoro_state', JSON.stringify(timerState));
+    }
+
+    // Guardar en Firestore (si hay usuario logueado)
+    function saveToFirestore() {
+        var user = firebase.auth().currentUser;
+        if (!user) return;
+
+        var today = new Date();
+        var docId = user.uid + '_' + today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
+
+        db.collection('pomodoro_sessions').doc(docId).set({
+            userId: user.uid,
+            date: new Date(today.toDateString()),
+            sessionsCompleted: timerState.sessionsCompleted,
+            totalWorkSeconds: timerState.totalWorkSeconds,
+            breaksTotal: timerState.breaksTotal,
+            sessionHistory: timerState.sessionHistory,
+            lastUpdated: new Date()
+        }).catch(function(error) { console.error("Firestore error:", error); });
+    }
+
+    // Actualizar display
+    function updateDisplay() {
+        var mins = Math.floor(timerState.currentSeconds / 60);
+        var secs = timerState.currentSeconds % 60;
+        document.getElementById('timerDisplay').textContent = 
+            String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    }
+
+    // Actualizar estadísticas
+    function updateStats() {
+        document.getElementById('statSessions').textContent = timerState.sessionsCompleted;
+        document.getElementById('statTime').textContent = Math.floor(timerState.totalWorkSeconds / 60) + 'm';
+        document.getElementById('statBreaks').textContent = timerState.breaksTotal;
+        
+        var productivity = timerState.sessionsCompleted > 0 ? Math.min((timerState.sessionsCompleted / 10) * 100, 100).toFixed(0) : '0';
+        document.getElementById('statProductivity').textContent = productivity + '%';
+    }
+
+    // Actualizar historial
+    function updateHistory() {
+        var list = document.getElementById('historyList');
+        if (timerState.sessionHistory.length === 0) {
+            list.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i><p>Sin sesiones completadas aún.</p></div>';
+            return;
+        }
+
+        list.innerHTML = timerState.sessionHistory.map(function(session, idx) {
+            return '<div class="history-item">' +
+                '<div class="history-info">' +
+                    '<div class="history-materia">' + session.mode + '</div>' +
+                    '<div class="history-date">' + session.time + '</div>' +
+                '</div>' +
+                '<div class="history-time">' + session.duration + '</div>' +
+            '</div>';
+        }).reverse().join('');
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Iniciar timer
+    window.startTimer = function() {
+        if (timerState.running) return;
+        timerState.running = true;
+        document.getElementById('playBtn').disabled = true;
+        document.getElementById('pauseBtn').disabled = false;
+
+        timerState.timerInterval = setInterval(function() {
+            if (timerState.currentSeconds > 0) {
+                timerState.currentSeconds--;
+                updateDisplay();
+                saveLocalState();
+            } else {
+                completeSession();
+            }
+        }, 1000);
+    };
+
+    // Pausar timer
+    window.pauseTimer = function() {
+        timerState.running = false;
+        clearInterval(timerState.timerInterval);
+        document.getElementById('playBtn').disabled = false;
+        document.getElementById('pauseBtn').disabled = true;
+    };
+
+    // Reiniciar
+    window.resetTimer = function() {
+        pauseTimer();
+        timerState.currentSeconds = getModeDuration(timerState.mode);
+        updateDisplay();
+    };
+
+    // Cambiar modo
+    window.setMode = function(mode) {
+        if (timerState.running) pauseTimer();
+        timerState.mode = mode;
+        timerState.currentSeconds = getModeDuration(mode);
+        updateDisplay();
+
+        // Actualizar botones
+        document.querySelectorAll('.mode-btn').forEach(function(btn) { btn.classList.remove('active'); });
+        event.target.classList.add('active');
+
+        // Actualizar etiqueta
+        var labels = {
+            'work': 'Modo: Estudio (25 min)',
+            'short': 'Modo: Descanso Corto (5 min)',
+            'long': 'Modo: Descanso Largo (15 min)'
+        };
+        document.getElementById('modeLabel').textContent = labels[mode];
+    };
+
+    function getModeDuration(mode) {
+        return mode === 'work' ? 25*60 : mode === 'short' ? 5*60 : 15*60;
+    }
+
+    // Sesión completada
+    function completeSession() {
+        clearInterval(timerState.timerInterval);
+        timerState.running = false;
+
+        // Actualizar estadísticas
+        if (timerState.mode === 'work') {
+            timerState.sessionsCompleted++;
+            timerState.totalWorkSeconds += 25*60;
+        } else {
+            timerState.breaksTotal++;
+        }
+
+        // Agregar a historial
+        var now = new Date();
+        timerState.sessionHistory.push({
+            mode: timerState.mode === 'work' ? '📚 Estudio' : '☕ Descanso',
+            time: now.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'}),
+            duration: timerState.mode === 'work' ? '25 min' : timerState.mode === 'short' ? '5 min' : '15 min'
+        });
+
+        saveLocalState();
+        saveToFirestore();
+        showNotification('✅ ¡Sesión completada!');
+
+        // Sonido (simple beep con Web Audio API)
+        playSound();
+
+        // Resetear
+        resetTimer();
+        updateStats();
+        updateHistory();
+
+        document.getElementById('playBtn').disabled = false;
+        document.getElementById('pauseBtn').disabled = true;
+    }
+
+    function playSound() {
+        try {
+            var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            var oscillator = audioContext.createOscillator();
+            var gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.value = 1000;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        } catch(e) { console.log('Audio no disponible'); }
+    }
+
+    function showNotification(message) {
+        var notif = document.createElement('div');
+        notif.className = 'notification';
+        notif.textContent = message;
+        document.body.appendChild(notif);
+        setTimeout(function() { notif.remove(); }, 3000);
+    }
+
+    // ── AUTENTICACIÓN ──
+    function doGoogleLogin() {
+        auth.signInWithPopup(googleProvider)
+            .then(function() { document.getElementById('loginModal').classList.add('hidden'); })
+            .catch(function(error) { console.error("Login error:", error); });
+    }
+
+    document.getElementById('btnModalLogin').onclick = doGoogleLogin;
+    document.getElementById('sidebarLoginBtn').onclick = function() {
+        document.getElementById('loginModal').classList.remove('hidden');
+    };
+    document.getElementById('sidebarLogoutBtn').onclick = function() {
+        auth.signOut();
+    };
+
+    window.closeLoginModal = function() {
+        document.getElementById('loginModal').classList.add('hidden');
+        sessionStorage.setItem('guestMode', 'true');
+    };
+
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            var name = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + name;
+            document.getElementById('sidebarLoginBtn').style.display = 'none';
+            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+            document.getElementById('loginModal').classList.add('hidden');
+            
+            // Cargar datos de Firestore
+            var today = new Date();
+            var docId = user.uid + '_' + today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
+            db.collection('pomodoro_sessions').doc(docId).get().then(function(doc) {
+                if (doc.exists) {
+                    timerState.sessionsCompleted = doc.data().sessionsCompleted || 0;
+                    timerState.totalWorkSeconds = doc.data().totalWorkSeconds || 0;
+                    timerState.breaksTotal = doc.data().breaksTotal || 0;
+                    timerState.sessionHistory = doc.data().sessionHistory || [];
+                    updateStats();
+                    updateHistory();
+                }
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        } else {
+            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display:inline;"></i> Invitado';
+            document.getElementById('sidebarLoginBtn').style.display = 'flex';
+            document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            if (!sessionStorage.getItem('guestMode')) {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    });
+
+    // ── SIDEBAR ──
+    window.toggleSidebar = function() {
+        document.getElementById('sidebar').classList.toggle('hidden');
+        document.getElementById('mainContent').classList.toggle('expanded');
+    };
+
+    // ── TEMA ──
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('ungs_theme', theme);
+    }
+
+    window.toggleTheme = function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        if (!localStorage.getItem('ungs_theme')) applyTheme(e.matches ? 'dark' : 'light');
+    });
+
+    // ── INICIALIZAR ──
+    loadLocalState();
+    updateDisplay();
+    updateStats();
+    updateHistory();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+</script>
+</body>
+</html>

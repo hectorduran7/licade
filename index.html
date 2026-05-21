@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Biblioteca de ADE | UNGS</title>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
+    <script>
+        const theme = localStorage.getItem('ungs_theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+    </script>
+
+    <!-- Firebase COMPAT v10.13.0 (ESTANDARIZADO - compatible con GitHub Pages) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { box-sizing: border-box; }
+
+        :root {
+            --primary: #FF8C00; 
+            --bg: #f9fafb;
+            --text: #1a1a1a;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --sidebar-bg: rgba(244, 244, 244, 0.85);
+            --border: #e5e7eb;
+            --sidebar-width: 300px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #080808; 
+            --text: #f5f5f5;
+            --card-bg: rgba(18, 18, 18, 0.6); 
+            --sidebar-bg: rgba(8, 8, 8, 0.85);
+            --border: #222222;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            display: flex;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .icon-sm { width: 16px; height: 16px; }
+        .icon-md { width: 20px; height: 20px; }
+        .icon-lg { width: 24px; height: 24px; }
+
+        .sidebar {
+            width: var(--sidebar-width); height: 100vh; background: var(--sidebar-bg);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 30px 20px 90px 20px; position: fixed; left: 0; top: 0;
+            border-right: 1px solid var(--border); overflow-y: auto;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+        }
+        .sidebar.hidden { transform: translateX(-100%); }
+
+        .toggle-btn {
+            position: fixed; left: 15px; bottom: 20px; z-index: 1100;
+            background: var(--primary); color: white; border: none; padding: 12px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3); transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .toggle-btn:hover { transform: translateY(-2px); }
+
+        .theme-btn {
+            position: fixed; top: 20px; right: 20px; border: 1px solid var(--border); 
+            color: var(--text); background: var(--card-bg); backdrop-filter: blur(10px);
+            padding: 8px 15px; border-radius: 8px; cursor: pointer; z-index: 1001;
+            font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
+        }
+        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        .main-content {
+            margin-left: var(--sidebar-width); padding: 50px 20px 90px 20px; width: 100%; max-width: 900px;
+            margin-right: auto; transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .main-content.expanded { margin-left: auto; margin-right: auto; }
+
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; font-size: 2.5rem;}
+        header p { color: #9ca3af; margin-bottom: 25px; }
+
+        .launchpad-container { display: flex; gap: 15px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
+        .launchpad-btn {
+            display: flex; align-items: center; gap: 8px; background: var(--card-bg);
+            border: 1px solid var(--border); padding: 12px 20px; border-radius: 50px;
+            color: var(--text); text-decoration: none; font-weight: 600; font-size: 14px;
+            backdrop-filter: blur(10px); transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        }
+        .launchpad-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,140,0,0.15); }
+
+        .search-container { position: relative; margin-bottom: 30px;}
+        .search-icon { position: absolute; left: 15px; top: 16px; color: #9ca3af; }
+        #searchInput {
+            width: 100%; padding: 16px 20px 16px 45px; border-radius: 12px;
+            border: 1px solid var(--border); background: var(--card-bg); backdrop-filter: blur(10px);
+            color: var(--text); font-size: 15px; transition: all 0.3s ease; box-sizing: border-box;
+        }
+        #searchInput:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 20px rgba(255, 140, 0, 0.1); }
+
+        .promo-banner {
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
+            padding: 20px 25px; margin-bottom: 30px; border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255, 140, 0, 0.08) 0%, rgba(255, 140, 0, 0.02) 100%);
+            border: 1px dashed var(--primary); transition: all 0.3s ease;
+        }
+        .promo-banner:hover { background: rgba(255, 140, 0, 0.12); transform: translateY(-2px); }
+
+        .promo-banner-text h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        .promo-banner-text p { font-size: 13px; color: #9ca3af; margin: 0; }
+        .promo-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: var(--primary); color: white; text-decoration: none; font-size: 13px;
+            font-weight: 700; padding: 12px 20px; border-radius: 8px; transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(255, 140, 0, 0.2); white-space: nowrap;
+        }
+        .promo-btn:hover { box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4); }
+
+        .year-section { margin-bottom: 20px; }
+        .year-header {
+            background: var(--card-bg); border: 1px solid var(--border); backdrop-filter: blur(10px);
+            color: var(--text); padding: 18px 24px; border-radius: 12px; cursor: pointer;
+            font-weight: 600; display: flex; justify-content: space-between; transition: all 0.3s ease;
+        }
+        .year-header:hover { border-color: rgba(255, 140, 0, 0.4); }
+        .year-header span { color: var(--primary); font-weight: 800; }
+
+        .materia-container { display: none; padding: 15px 0 5px 0; }
+        .materia-item {
+            background: var(--card-bg); backdrop-filter: blur(10px); padding: 15px 24px;
+            margin-bottom: 8px; border-radius: 10px; border: 1px solid var(--border);
+            border-left: 4px solid transparent; cursor: pointer; display: flex;
+            justify-content: space-between; align-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .materia-item:hover { 
+            transform: translateY(-2px); border-color: rgba(255, 140, 0, 0.3);
+            border-left: 4px solid var(--primary); box-shadow: 0 10px 30px -10px rgba(255, 140, 0, 0.15);
+        }
+        [data-theme="dark"] .materia-item:hover { background-color: rgba(25, 25, 25, 0.8); }
+        
+        .materia-info { display: flex; flex-direction: column; gap: 4px; }
+        .materia-name { font-weight: 600; font-size: 15px; }
+        .correlativas-text { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+        .req-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px; background: rgba(255, 74, 74, 0.1); color: #ff4a4a; border: 1px solid rgba(255, 74, 74, 0.2); }
+        
+        .materia-action { color: #9ca3af; transition: color 0.3s; font-weight: 500; display: flex; align-items: center; gap: 5px; font-size: 13px;}
+        .materia-item:hover .materia-action { color: var(--primary); }
+
+        .btn-sidebar {
+            width: 100%; border: none; padding: 14px; border-radius: 8px; cursor: pointer;
+            font-size: 14px; font-weight: 600; transition: all 0.3s ease; margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: flex-start; gap: 12px;
+            text-decoration: none; box-sizing: border-box;
+        }
+        .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .btn-dark:hover { background: var(--card-bg); border-color: var(--primary); color: var(--primary); }
+        .btn-primary-solid { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255, 140, 0, 0.2); }
+        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.3); }
+
+        .footer-donate { 
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
+            padding: 40px 20px; font-size: 14px; color: #9ca3af; margin-top: 60px; border-top: 1px solid var(--border); 
+        }
+        .footer-donate a { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+        .footer-donate a:hover { text-decoration: underline; }
+        
+        .btn-sugerencias { color: #9ca3af !important; border: 1px dashed #9ca3af; padding: 12px 24px; border-radius: 8px; transition: 0.3s; }
+        .btn-sugerencias:hover { color: var(--primary) !important; border-color: var(--primary); background: rgba(255,140,0,0.05); text-decoration: none !important; }
+
+        /* ===== MODAL DE LOGIN ===== */
+        .login-modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; 
+            display: flex; justify-content: center; align-items: center; 
+            transition: opacity 0.3s ease; 
+        }
+        .login-modal.hidden { opacity: 0; pointer-events: none; }
+        .login-modal-content { 
+            background: var(--bg); padding: 40px; border-radius: 16px; 
+            border: 1px solid var(--border); max-width: 420px; width: 90%; 
+            text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+        }
+        .login-modal-content h2 { margin-top: 0; font-weight: 800; color: var(--text); }
+        .login-modal-content p { color: #9ca3af; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+
+        /* Tabs del modal */
+        .login-tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
+        .login-tab { flex: 1; padding: 10px; background: transparent; border: none; cursor: pointer; font-size: 13px; font-weight: 600; color: #9ca3af; transition: all 0.2s; }
+        .login-tab.active { background: var(--primary); color: white; }
+
+        /* Paneles del modal */
+        .login-panel { display: none; }
+        .login-panel.active { display: block; }
+
+        /* Inputs del formulario */
+        .login-input {
+            width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--card-bg); color: var(--text); font-size: 14px;
+            margin-bottom: 10px; box-sizing: border-box; font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+        .login-input:focus { outline: none; border-color: var(--primary); }
+        .login-input::placeholder { color: #9ca3af; }
+
+        /* Divisor */
+        .login-divider { display: flex; align-items: center; gap: 10px; margin: 15px 0; color: #9ca3af; font-size: 12px; }
+        .login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+        /* Botón Google */
+        .btn-google {
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--card-bg); color: var(--text); font-size: 14px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            transition: all 0.2s; font-family: 'Inter', sans-serif; margin-bottom: 10px;
+        }
+        .btn-google:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-google svg { width: 18px; height: 18px; }
+
+        /* Mensaje de error */
+        .login-error { color: #ff4a4a; font-size: 12px; margin-bottom: 10px; min-height: 16px; }
+    </style>
+</head>
+<body>
+
+<!-- ===== MODAL DE LOGIN ===== -->
+<div id="loginModal" class="login-modal hidden">
+    <div class="login-modal-content">
+        <i data-lucide="lock" class="icon-lg" style="color: var(--primary); margin-bottom: 15px; width: 40px; height: 40px;"></i>
+        <h2>Bienvenido a La Biblioteca</h2>
+        <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones desde cualquier dispositivo.</p>
+
+        <!-- Tabs: Ingresar / Registrarse -->
+        <div class="login-tabs">
+            <button class="login-tab active" onclick="switchTab('login')">Ingresar</button>
+            <button class="login-tab" onclick="switchTab('register')">Registrarse</button>
+        </div>
+
+        <!-- Panel: Ingresar -->
+        <div id="panelLogin" class="login-panel active">
+            <button class="btn-google" id="btnGoogleLogin">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Continuar con Google
+            </button>
+
+            <div class="login-divider">o con tu correo</div>
+
+            <input type="email" id="loginEmail" class="login-input" placeholder="tu@gmail.com">
+            <input type="password" id="loginPassword" class="login-input" placeholder="Contraseña">
+            <div id="loginError" class="login-error"></div>
+            <button id="btnEmailLogin" class="btn-primary-solid" style="width: 100%; padding: 13px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; font-family: 'Inter', sans-serif;">
+                Ingresar
+            </button>
+        </div>
+
+        <!-- Panel: Registrarse -->
+        <div id="panelRegister" class="login-panel">
+            <button class="btn-google" id="btnGoogleRegister">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Registrarse con Google
+            </button>
+
+            <div class="login-divider">o creá una cuenta</div>
+
+            <input type="email" id="registerEmail" class="login-input" placeholder="tu@gmail.com">
+            <input type="password" id="registerPassword" class="login-input" placeholder="Contraseña (mín. 6 caracteres)">
+            <input type="password" id="registerPassword2" class="login-input" placeholder="Repetí tu contraseña">
+            <div id="registerError" class="login-error"></div>
+            <button id="btnEmailRegister" class="btn-primary-solid" style="width: 100%; padding: 13px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; font-family: 'Inter', sans-serif;">
+                Crear cuenta
+            </button>
+        </div>
+
+        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; justify-content: center; padding: 12px; border-radius: 8px; margin-top: 12px; cursor: pointer; font-size: 13px; color: #9ca3af;">
+            Continuar como invitado
+        </button>
+    </div>
+</div>
+
+<button class="toggle-btn" onclick="toggleSidebar()"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
+<button class="theme-btn" onclick="toggleTheme()"><i data-lucide="moon" class="icon-sm"></i> Tema</button>
+
+<aside class="sidebar hidden" id="sidebar">
+    <div id="userProfile" style="margin-bottom: 25px; padding: 15px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; text-align: center; backdrop-filter: blur(10px);">
+        <i data-lucide="user-circle" class="icon-lg" style="color: var(--primary); margin-bottom: 8px;"></i>
+        <p id="userName" style="font-weight: 700; margin: 0 0 12px 0; font-size: 14px; color: var(--text);">Invitado</p>
+        <button id="sidebarLoginBtn" class="btn-primary-solid" style="width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
+            <i data-lucide="log-in" class="icon-sm"></i> Ingresar
+        </button>
+        <button id="sidebarLogoutBtn" class="btn-dark" style="width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; display: none; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
+            <i data-lucide="log-out" class="icon-sm"></i> Salir
+        </button>
+    </div>
+
+    <h2 style="color: var(--primary); font-weight: 800; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="library" class="icon-lg"></i> ADE UNGS
+    </h2>
+    <p style="color: #9ca3af; font-size: 14px; margin-top: -5px;">Navegación</p>
+    
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+
+    <a href="index.html" class="btn-sidebar btn-primary-solid">
+        <i data-lucide="search" class="icon-sm"></i> Buscar Materias
+    </a>
+    <a href="progreso.html" class="btn-sidebar btn-dark">
+        <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
+    </a>
+
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+
+    <!-- ✅ BOTÓN SESIÓN DE ESTUDIO - Link a estudio.html -->
+    <a href="estudio.html" class="btn-sidebar btn-dark">
+        <i data-lucide="timer" class="icon-sm"></i> 🍅 Sesión de Estudio
+    </a>
+
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+    
+    <p style="color: #9ca3af; font-size: 13px; font-weight: 600; margin-bottom: 15px; margin-top: 0;">Oportunidades</p>
+
+    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo
+    </a>
+    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="building" class="icon-sm"></i> Pasantías UNGS
+    </a>
+
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+
+    <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="message-square-plus" class="icon-sm"></i> Dejar Recomendación
+    </a>
+    <a href="TU_LINK_AL_PDF_DE_RECOMENDACIONES" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="book-open-check" class="icon-sm"></i> Ver Recomendaciones
+    </a>
+    <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="margin-top: 15px; border-style: dashed;">
+        <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos
+    </a>
+</aside>
+
+<div class="main-content expanded" id="mainContent">
+    <header>
+        <h1>La Biblioteca de ADE</h1>
+        <p>Digitalizando el conocimiento de Administración de Empresas - UNGS</p>
+        
+        <div class="launchpad-container">
+            <a href="https://inscripciones.ungs.edu.ar/" target="_blank" class="launchpad-btn">
+                <i data-lucide="monitor" class="icon-sm text-primary"></i> SIU Guaraní
+            </a>
+            <a href="https://sso.ungs.edu.ar/moodle" target="_blank" class="launchpad-btn">
+                <i data-lucide="graduation-cap" class="icon-sm text-primary"></i> Campus Virtual
+            </a>
+            <a href="https://www.ungs.edu.ar/wp-content/uploads/2025/12/calendario-academico-2026.pdf" target="_blank" class="launchpad-btn">
+                <i data-lucide="calendar" class="icon-sm text-primary"></i> Calendario 2026
+            </a>
+        </div>
+    </header>
+
+    <div class="promo-banner">
+        <div class="promo-banner-text">
+            <h4><i data-lucide="graduation-cap" class="icon-md"></i> ¿Das clases particulares?</h4>
+            <p>Llegá a más alumnos de ADE. Destacá tus servicios directamente en la plataforma.</p>
+        </div>
+        <a href="mailto:hectorjoseduran@gmail.com?subject=Publicidad%20Clases%20Particulares" class="promo-btn">
+            <i data-lucide="megaphone" class="icon-sm"></i> Consultar Publicidad
+        </a>
+    </div>
+
+    <div class="search-container">
+        <i data-lucide="search" class="search-icon icon-md"></i>
+        <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="filterMaterias()">
+    </div>
+
+    <div id="accordionContainer"></div>
+
+    <div class="footer-donate">
+        <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="btn-sugerencias" target="_blank">
+            <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para mejorar la web
+        </a>
+        <p style="margin: 0;">¿Te sirvió el material? <a href="TU_LINK_WHATSAPP"><i data-lucide="share-2" class="icon-sm"></i> Donar apuntes vía WhatsApp</a></p>
+    </div>
+</div>
+
+<!-- ===== SCRIPT FIREBASE + LÓGICA ===== -->
+<script>
+    // ── INICIALIZACIÓN FIREBASE v10.13.0 (clave fragmentada para seguridad) ──
+    var firebaseConfig = {
+        apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
+        authDomain: "knowy-13079.firebaseapp.com",
+        projectId: "knowy-13079",
+        storageBucket: "knowy-13079.firebasestorage.app",
+        messagingSenderId: "645341817520",
+        appId: "1:645341817520:web:799733f87a0ad1a0382975",
+        measurementId: "G-PQGH6R9SZC"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    
+    // ✅ PERSISTENCIA LOCAL - Mantiene sesión entre páginas
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(function() {
+            console.log("✅ Persistencia LOCAL configurada correctamente");
+        })
+        .catch(function(error) {
+            console.error("❌ Error configurando persistencia:", error);
+        });
+    
+    var googleProvider = new firebase.auth.GoogleAuthProvider();
+    // Agregar parámetro para forzar selección de cuenta
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    // ── TABS DEL MODAL ──
+    window.switchTab = function(tab) {
+        document.querySelectorAll('.login-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.login-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('loginError').textContent = '';
+        document.getElementById('registerError').textContent = '';
+        if (tab === 'login') {
+            document.querySelectorAll('.login-tab')[0].classList.add('active');
+            document.getElementById('panelLogin').classList.add('active');
+        } else {
+            document.querySelectorAll('.login-tab')[1].classList.add('active');
+            document.getElementById('panelRegister').classList.add('active');
+        }
+    };
+
+    // ── MENSAJE DE ERROR LEGIBLE ──
+    function authErrorMsg(code) {
+        var msgs = {
+            'auth/user-not-found': 'No existe una cuenta con ese correo.',
+            'auth/wrong-password': 'Contraseña incorrecta.',
+            'auth/email-already-in-use': 'Ese correo ya tiene una cuenta. Ingresá en la pestaña "Ingresar".',
+            'auth/invalid-email': 'El correo no tiene un formato válido.',
+            'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+            'auth/popup-closed-by-user': 'Cerraste la ventana de Google antes de terminar.',
+            'auth/network-request-failed': 'Error de red. Revisá tu conexión.',
+            'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+            'auth/unauthorized-domain': 'Dominio no autorizado. Agregá tu dominio en Firebase Console > Authentication > Authorized domains.'
+        };
+        return msgs[code] || 'Ocurrió un error. Intentá de nuevo.';
+    }
+
+    // ── LOGIN CON GOOGLE ──
+    function doGoogleLogin() {
+        auth.signInWithPopup(googleProvider)
+            .then(function(result) {
+                console.log("✅ Login con Google exitoso:", result.user.email);
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+            })
+            .catch(function(error) {
+                console.error("❌ Error en Google Login:", error.code, error.message);
+                document.getElementById('loginError').textContent = authErrorMsg(error.code);
+            });
+    }
+
+    // ── LOGIN CON EMAIL / CONTRASEÑA ──
+    function doEmailLogin() {
+        var email = document.getElementById('loginEmail').value.trim();
+        var pass  = document.getElementById('loginPassword').value;
+        document.getElementById('loginError').textContent = '';
+        if (!email || !pass) {
+            document.getElementById('loginError').textContent = 'Completá el correo y la contraseña.';
+            return;
+        }
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(function() {
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+            })
+            .catch(function(error) {
+                document.getElementById('loginError').textContent = authErrorMsg(error.code);
+            });
+    }
+
+    // ── REGISTRO CON EMAIL / CONTRASEÑA ──
+    function doEmailRegister() {
+        var email  = document.getElementById('registerEmail').value.trim();
+        var pass   = document.getElementById('registerPassword').value;
+        var pass2  = document.getElementById('registerPassword2').value;
+        document.getElementById('registerError').textContent = '';
+        if (!email || !pass) {
+            document.getElementById('registerError').textContent = 'Completá todos los campos.';
+            return;
+        }
+        if (pass !== pass2) {
+            document.getElementById('registerError').textContent = 'Las contraseñas no coinciden.';
+            return;
+        }
+        if (pass.length < 6) {
+            document.getElementById('registerError').textContent = 'La contraseña debe tener al menos 6 caracteres.';
+            return;
+        }
+        auth.createUserWithEmailAndPassword(email, pass)
+            .then(function() {
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+            })
+            .catch(function(error) {
+                document.getElementById('registerError').textContent = authErrorMsg(error.code);
+            });
+    }
+
+    // ── REGISTRAR EVENTOS ──
+    document.getElementById('btnGoogleLogin').onclick = doGoogleLogin;
+    document.getElementById('btnGoogleRegister').onclick = doGoogleLogin;
+    document.getElementById('btnEmailLogin').onclick = doEmailLogin;
+    document.getElementById('btnEmailRegister').onclick = doEmailRegister;
+
+    // Botones de la barra lateral
+    document.getElementById('sidebarLoginBtn').onclick = function() {
+        document.getElementById('loginModal').classList.remove('hidden');
+    };
+    document.getElementById('sidebarLogoutBtn').onclick = function() {
+        auth.signOut();
+    };
+
+    // ── CERRAR MODAL (modo invitado) ──
+    window.closeLoginModal = function() {
+        document.getElementById('loginModal').classList.add('hidden');
+        sessionStorage.setItem('guestMode', 'true');
+    };
+
+    // ── ESTADO DE AUTENTICACIÓN ──
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + nombre;
+            document.getElementById('sidebarLoginBtn').style.display = 'none';
+            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+            document.getElementById('loginModal').classList.add('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        } else {
+            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
+            document.getElementById('sidebarLoginBtn').style.display = 'flex';
+            document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            if (!sessionStorage.getItem('guestMode')) {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    });
+
+    // ── DATOS DE MATERIAS ──
+    var data = {
+        "PRIMER AÑO": [
+            {n: "Taller Inicial Común: Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1jLUf7D_7GzXwwXl0mkE0WJLmK3ydxtfb?usp=drive_link", req: ""},
+            {n: "Taller Inicial Orientado: Ciencias Exactas", l: "https://drive.google.com/drive/folders/1zRWjRQCmkwYRaJEk44JEp3j6litaBMxy?usp=drive_link", req: ""},
+            {n: "Teoría de la Organización", l: "https://drive.google.com/drive/folders/1VGkLpmiodcpVpNBCb8GzU_Pg9zG6GSby?usp=drive_link", req: ""},
+            {n: "Problemas Socioeconómicos Contemporáneos", l: "https://drive.google.com/drive/folders/1X1QrBi6AmALlNCXb4S6LHUMoFgDjboLS?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Taller de Lectura y Escritura en las Disciplinas", l: "https://drive.google.com/drive/folders/132vYVDu8zE6qICc6X1Ru_4CnH-M252kn?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Introducción a la Economía", l: "https://drive.google.com/drive/folders/1Qm-QVfLihmRHPjLnIxUoLO3G886n7vGH?usp=drive_link", req: ""}
+        ],
+        "SEGUNDO AÑO": [
+            {n: "Economía Clásica", l: "https://drive.google.com/drive/folders/1Ff9KD0Gamjk-_UmtdDLHWi0xi8mzIqpI?usp=drive_link", req: "Introducción a la Economía | Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Diseño Estructural y Procesos", l: "https://drive.google.com/drive/folders/138Mzk3D_2qv3S6Qp6EueLi_tZ2Bq5gi-?usp=drive_link", req: "Teoría de la Organización | Taller Inicial Orientado: Ciencias Exactas"},
+            {n: "Matemática para Economistas I", l: "https://drive.google.com/drive/folders/1-6QvTwuabzMhp-QWSMMNB9KSBZ4mXBfM?usp=drive_link", req: "Taller Inicial Orientado: Ciencias Exactas | Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Economía Neoclásica", l: "https://drive.google.com/drive/folders/1wdSmGl7UVgNozz1Ktyux06b8e9QhSV2W?usp=drive_link", req: "Economía Clásica | Matemática para Economistas I"},
+            {n: "Sistemas de Información Contable I", l: "https://drive.google.com/drive/folders/1Nhfp3LT5WnUOUoS3JSMAy31gq88x4R0j?usp=drive_link", req: "Diseño Estructural y Procesos | Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Historia Económica y Social Mundial y Latinoamericana", l: "https://drive.google.com/drive/folders/1P9snlibfSL62as1Sz-OX2gKe__1EOBSl?usp=drive_link", req: "Introducción a la Economía | Taller de Lectura y Escritura en las Disciplinas | Problemas Socioeconómicos Contemporáneos"}
+        ],
+        "TERCER AÑO": [
+            {n: "Economía Keynesiana", l: "https://drive.google.com/drive/folders/1BDxNT2spCBZpZkZD106JRm7YF9sV7Ntx?usp=drive_link", req: "Economía Neoclásica"},
+            {n: "Estadística para Economistas", l: "https://drive.google.com/drive/folders/1OxeMyLnkVKfZLN9txxIIlx5eentl-OGZ?usp=drive_link", req: "Matemática para Economistas I"},
+            {n: "Planeamiento y Control Organizacional", l: "https://drive.google.com/drive/folders/1Jc-uLaSCaPtiOH9nfAbR8UI0eGbv4qZK?usp=drive_link", req: "Diseño Estructural y Procesos | Problemas Socioeconómicos Contemporáneos | Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "Matemática para Economistas II", l: "https://drive.google.com/drive/folders/1NTAhvAECzPQB0de2dAdtNIzk_9_mA_cF?usp=drive_link", req: "Matemática para Economistas I"},
+            {n: "Laboratorio Interdisciplinario", l: "https://drive.google.com/drive/folders/1NdTpduQArGshJt976kRYwspdto-b4hG0?usp=drive_link", req: "13 (trece) materias de la carrera"},
+            {n: "Sistemas de Información", l: "https://drive.google.com/drive/folders/1nCsfZY8qNIgnmSk2LyDXW7Z2hHT9DLmb?usp=drive_link", req: "Sistemas de Información Contable I"}
+        ],
+        "CUARTO AÑO": [
+            {n: "Derecho Administrativo", l: "https://drive.google.com/drive/folders/1NQgXQTJW3lWX-GJH2XZL6kGwBBV8M9ce?usp=drive_link", req: "Diseño Estructural y Procesos"},
+            {n: "Organización Industrial", l: "https://drive.google.com/drive/folders/1xod_LTQ0ArN8ZXH8av29JqdQ5mpbLIRE?usp=drive_link", req: "Estadística para Economistas | Planeamiento y Control Organizacional"},
+            {n: "Gestión de Recursos Humanos (Material Viejo)", l: "https://drive.google.com/drive/folders/1n8lb2y-aomWoGNfYXUVGBaRTG-FCn4lz?usp=drive_link", req: "Planeamiento y Control Organizacional"},
+            {n: "Dirección Estratégica (Material Viejo)", l: "https://drive.google.com/drive/folders/1Nbgb0tiyIqdksPxxZVsCgYEtIKQ04OVx?usp=drive_link", req: "Planeamiento y Control Organizacional"},
+            {n: "Tópicos de Comercialización", l: "https://drive.google.com/drive/folders/13dSSC3d-Kttrr7E8MhmDxAyAHI66TAa4?usp=drive_link", req: "Planeamiento y Control Organizacional"},
+            {n: "Planificación y Proceso Decisorio en las Organizaciones", l: "https://drive.google.com/drive/folders/1ORmLF7_T-agImkCn3Se13sMFoGqM0WPF?usp=drive_link", req: "Estadística para Economistas | Planeamiento y Control Organizacional"},
+            {n: "Teoría de la Innovación y del Cambio Tecnológico", l: "https://drive.google.com/drive/folders/1BnY8s1GG8YAlTDNiBwv1Pj_tFgrabx3X?usp=drive_link", req: "Historia Económica y Social Mundial y Latinoamericana | Economía Keynesiana"}
+        ],
+        "QUINTO AÑO": [
+            {n: "Matemática para Economistas III", l: "https://drive.google.com/drive/folders/1vDdnc8NAd3OrWDzZbRalQNLqIV7AJYVd?usp=drive_link", req: "Matemática para Economistas II | Economía Neoclásica"},
+            {n: "Costos Industriales", l: "https://drive.google.com/drive/folders/1YeqqEX6VSe6015mAw-PAYy1dlpQB3MMs?usp=drive_link", req: "Planeamiento y Control Organizacional | Sistemas de Información Contable I"},
+            {n: "Sistemas de Información Contable II", l: "https://drive.google.com/drive/folders/1RorXYcziiTLhyZ5aC03bDSwiaadzlSQf?usp=drive_link", req: "Sistemas de Información Contable I"},
+            {n: "Gestión en Economía Mixta", l: "https://drive.google.com/drive/folders/1DvN2pJp7bvtpGxEVgWm0gCYZS9RoVi34?usp=drive_link", req: "Derecho Administrativo | Planeamiento y Control Organizacional"},
+            {n: "Empresas Públicas", l: "https://drive.google.com/drive/folders/1lTcdyE2KSOEpzDRonlVUSAvunniK4AMO?usp=drive_link", req: "Derecho Administrativo | Planeamiento y Control Organizacional"},
+            {n: "Ingeniería Financiera", l: "https://drive.google.com/drive/folders/1PnMt1NvDA_yvE2xlR7uhgk6S52LKBM7c?usp=drive_link", req: "Costos Industriales | Matemática para Economistas III"}
+        ],
+        "SEXTO AÑO": [
+            {n: "Sociología Industrial", l: "https://drive.google.com/drive/folders/1Qf4sCTAMmCy4wMoE3CwtvW01-7VYSNGF?usp=drive_link", req: "Diseño Estructural y Procesos | Problemas Socioeconómicos Contemporáneos | Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "Régimen Tributario", l: "https://drive.google.com/drive/folders/11JLYY480dlwRFwEGnhouSgSiARD0OoEs?usp=drive_link", req: "Gestión de Recursos Humanos | Dirección Estratégica"},
+            {n: "Desarrollo y Gestión de Proyectos Emprendedores", l: "https://drive.google.com/drive/folders/18A5q6-n7A4LRjI-COwMgzYLrcPU1EF2M?usp=drive_link", req: "Tópicos de Comercialización"}
+        ],
+        "EXTRACURRICULARES": [
+            {n: "Taller de Utilitarios", l: "https://drive.google.com/drive/folders/14XnFgwmu9W2tQXi5w3f6Cje3hyZgMfso?usp=drive_link", req: ""},
+            {n: "IPE 1", l: "https://drive.google.com/drive/folders/1BR5ZJZ5nQnokUQMhXq6zFb9jFHAH3LSf?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura | Teoría de la Organización"},
+            {n: "IPE 2", l: "https://drive.google.com/drive/folders/1EoMGzwjnB48FkPwiP1YDOBqmnZITqB1z?usp=drive_link", req: "IPE 1 | Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "IPE 3", l: "https://drive.google.com/drive/folders/1QHgjzkXPurYb0WXJ1qSoX7F10c86rUS1?usp=drive_link", req: "IPE 2"}
+        ]
+    };
+
+    function render() {
+        var container = document.getElementById('accordionContainer');
+        container.innerHTML = '';
+        for (var year in data) {
+            var mats = data[year];
+            var section = document.createElement('div');
+            section.className = 'year-section';
+            var items = mats.map(function(m) {
+                return '<div class="materia-item" onclick="openDoc(\'' + m.n.replace(/'/g, "\\'") + '\', \'' + m.l + '\')">' +
+                    '<div class="materia-info">' +
+                        '<span class="materia-name">' + m.n + '</span>' +
+                        '<div class="correlativas-text">' +
+                            (m.req ? '<span class="req-badge"><i data-lucide="lock" style="width:10px;height:10px;"></i> Req: ' + m.req + '</span>' : '') +
+                        '</div>' +
+                    '</div>' +
+                    '<span class="materia-action">Ver recursos <i data-lucide="arrow-right" class="icon-sm"></i></span>' +
+                '</div>';
+            }).join('');
+            section.innerHTML =
+                '<div class="year-header" onclick="toggleYear(this)">' + year + ' <span>+</span></div>' +
+                '<div class="materia-container">' + items + '</div>';
+            container.appendChild(section);
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    window.toggleYear = function(el) {
+        var panel = el.nextElementSibling;
+        var icon = el.querySelector('span');
+        var isOpen = panel.style.display === "block";
+        panel.style.display = isOpen ? "none" : "block";
+        icon.innerText = isOpen ? "+" : "-";
+    };
+
+    window.openDoc = function(name, link) {
+        window.location.href = 'visor.html?name=' + encodeURIComponent(name) + '&link=' + encodeURIComponent(link);
+    };
+
+    window.filterMaterias = function() {
+        var input = document.getElementById('searchInput').value.toLowerCase();
+        var items = document.getElementsByClassName('materia-item');
+        var sections = document.getElementsByClassName('year-section');
+        for (var i = 0; i < items.length; i++) {
+            var title = items[i].querySelector('.materia-name').innerText.toLowerCase();
+            items[i].style.display = title.includes(input) ? "" : "none";
+        }
+        for (var j = 0; j < sections.length; j++) {
+            var panel = sections[j].querySelector('.materia-container');
+            panel.style.display = input ? "block" : "none";
+            sections[j].querySelector('span').innerText = input ? "-" : "+";
+        }
+    };
+
+    window.toggleSidebar = function() {
+        document.getElementById('sidebar').classList.toggle('hidden');
+        document.getElementById('mainContent').classList.toggle('expanded');
+    };
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('ungs_theme', theme);
+    }
+
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(e) {
+        if (!localStorage.getItem('ungs_theme')) applyTheme(e.matches ? 'dark' : 'light');
+    });
+
+    window.toggleTheme = function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+
+    // ── INICIALIZAR ──
+    render();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+</script>
+</body>
+</html>
