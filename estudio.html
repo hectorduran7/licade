@@ -529,6 +529,40 @@
 
 <!-- SCRIPT POMODORO -->
 <script>
+    // ==================== FUNCIONES DE SEGURIDAD ====================
+    
+    // Función para sanitizar HTML (previene XSS)
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Función para sanitizar texto plano (para innerText/innerHTML seguro)
+    function sanitizeText(str) {
+        if (!str) return '';
+        return str.replace(/[<>]/g, function(m) {
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Función para sanitizar historial (modo y duración)
+    function sanitizeHistoryEntry(mode, duration) {
+        return {
+            mode: sanitizeText(mode),
+            duration: sanitizeText(duration),
+            time: sanitizeText(duration) // La hora se genera internamente, pero por seguridad
+        };
+    }
+    
+    // ==================== FIN FUNCIONES DE SEGURIDAD ====================
+    
     // ── FIREBASE CONFIG ──
     var firebaseConfig = {
         apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
@@ -569,36 +603,54 @@
         sessionHistory: []
     };
 
-    // Cargar estado desde localStorage
+    // Cargar estado desde sessionStorage (más seguro que localStorage)
     function loadLocalState() {
         var today = new Date().toDateString();
-        var saved = localStorage.getItem('pomodoro_state');
+        var saved = sessionStorage.getItem('pomodoro_state_guest');
         if (saved) {
-            var state = JSON.parse(saved);
-            // Solo cargar si es del mismo día
-            if (state.startTime === today) {
-                timerState.sessionsCompleted = state.sessionsCompleted || 0;
-                timerState.totalWorkSeconds = state.totalWorkSeconds || 0;
-                timerState.breaksTotal = state.breaksTotal || 0;
-                timerState.sessionHistory = state.sessionHistory || [];
+            try {
+                var state = JSON.parse(saved);
+                // Solo cargar si es del mismo día
+                if (state.startTime === today) {
+                    timerState.sessionsCompleted = state.sessionsCompleted || 0;
+                    timerState.totalWorkSeconds = state.totalWorkSeconds || 0;
+                    timerState.breaksTotal = state.breaksTotal || 0;
+                    // Sanitizar historial al cargar
+                    timerState.sessionHistory = (state.sessionHistory || []).map(function(entry) {
+                        return {
+                            mode: sanitizeText(entry.mode),
+                            time: sanitizeText(entry.time),
+                            duration: sanitizeText(entry.duration)
+                        };
+                    });
+                }
+            } catch(e) {
+                console.log("Error cargando estado local");
             }
         }
     }
 
-    // Guardar estado en localStorage
+    // Guardar estado en sessionStorage (más seguro que localStorage)
     function saveLocalState() {
-        localStorage.setItem('pomodoro_state', JSON.stringify(timerState));
+        // Solo guardar en modo invitado (sin usuario)
+        if (!firebase.auth().currentUser) {
+            sessionStorage.setItem('pomodoro_state_guest', JSON.stringify(timerState));
+        }
     }
 
-    // Guardar en Firestore (si hay usuario logueado)
+    // Guardar en Firestore usando UID como ID del documento y subcolección para días
     function saveToFirestore() {
         var user = firebase.auth().currentUser;
         if (!user) return;
 
         var today = new Date();
-        var docId = user.uid + '_' + today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
-
-        db.collection('pomodoro_sessions').doc(docId).set({
+        var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+        
+        // Estructura segura: users_pomodoro/{userId}/daily/{date}
+        var userDocRef = db.collection('users_pomodoro').doc(user.uid);
+        
+        // Guardar en subcolección daily
+        userDocRef.collection('daily').doc(dateStr).set({
             userId: user.uid,
             date: new Date(today.toDateString()),
             sessionsCompleted: timerState.sessionsCompleted,
@@ -607,6 +659,40 @@
             sessionHistory: timerState.sessionHistory,
             lastUpdated: new Date()
         }).catch(function(error) { console.error("Firestore error:", error); });
+    }
+
+    // Cargar desde Firestore
+    function loadFromFirestore(user) {
+        if (!user) return Promise.resolve();
+        
+        var today = new Date();
+        var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+        
+        var userDocRef = db.collection('users_pomodoro').doc(user.uid);
+        
+        return userDocRef.collection('daily').doc(dateStr).get()
+            .then(function(doc) {
+                if (doc.exists) {
+                    var data = doc.data();
+                    timerState.sessionsCompleted = data.sessionsCompleted || 0;
+                    timerState.totalWorkSeconds = data.totalWorkSeconds || 0;
+                    timerState.breaksTotal = data.breaksTotal || 0;
+                    // Sanitizar historial al cargar desde Firestore
+                    timerState.sessionHistory = (data.sessionHistory || []).map(function(entry) {
+                        return {
+                            mode: sanitizeText(entry.mode),
+                            time: sanitizeText(entry.time),
+                            duration: sanitizeText(entry.duration)
+                        };
+                    });
+                    updateStats();
+                    updateHistory();
+                    console.log("✅ Datos cargados desde Firestore");
+                }
+            })
+            .catch(function(error) {
+                console.error("Error cargando desde Firestore:", error);
+            });
     }
 
     // Actualizar display
@@ -627,7 +713,7 @@
         document.getElementById('statProductivity').textContent = productivity + '%';
     }
 
-    // Actualizar historial
+    // Actualizar historial con sanitización
     function updateHistory() {
         var list = document.getElementById('historyList');
         if (timerState.sessionHistory.length === 0) {
@@ -635,13 +721,17 @@
             return;
         }
 
+        // Sanitizar cada entrada del historial antes de renderizar
         list.innerHTML = timerState.sessionHistory.map(function(session, idx) {
+            var safeMode = sanitizeHTML(session.mode);
+            var safeTime = sanitizeHTML(session.time);
+            var safeDuration = sanitizeHTML(session.duration);
             return '<div class="history-item">' +
                 '<div class="history-info">' +
-                    '<div class="history-materia">' + session.mode + '</div>' +
-                    '<div class="history-date">' + session.time + '</div>' +
+                    '<div class="history-materia">' + safeMode + '</div>' +
+                    '<div class="history-date">' + safeTime + '</div>' +
                 '</div>' +
-                '<div class="history-time">' + session.duration + '</div>' +
+                '<div class="history-time">' + safeDuration + '</div>' +
             '</div>';
         }).reverse().join('');
 
@@ -690,7 +780,7 @@
 
         // Actualizar botones
         document.querySelectorAll('.mode-btn').forEach(function(btn) { btn.classList.remove('active'); });
-        event.target.classList.add('active');
+        if (event && event.target) event.target.classList.add('active');
 
         // Actualizar etiqueta
         var labels = {
@@ -718,12 +808,16 @@
             timerState.breaksTotal++;
         }
 
-        // Agregar a historial
+        // Agregar a historial con sanitización
         var now = new Date();
+        var modeText = timerState.mode === 'work' ? '📚 Estudio' : '☕ Descanso';
+        var timeText = now.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
+        var durationText = timerState.mode === 'work' ? '25 min' : timerState.mode === 'short' ? '5 min' : '15 min';
+        
         timerState.sessionHistory.push({
-            mode: timerState.mode === 'work' ? '📚 Estudio' : '☕ Descanso',
-            time: now.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'}),
-            duration: timerState.mode === 'work' ? '25 min' : timerState.mode === 'short' ? '5 min' : '15 min'
+            mode: sanitizeText(modeText),
+            time: sanitizeText(timeText),
+            duration: sanitizeText(durationText)
         });
 
         saveLocalState();
@@ -769,7 +863,10 @@
     // ── AUTENTICACIÓN ──
     function doGoogleLogin() {
         auth.signInWithPopup(googleProvider)
-            .then(function() { document.getElementById('loginModal').classList.add('hidden'); })
+            .then(function() { 
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+            })
             .catch(function(error) { console.error("Login error:", error); });
     }
 
@@ -778,7 +875,11 @@
         document.getElementById('loginModal').classList.remove('hidden');
     };
     document.getElementById('sidebarLogoutBtn').onclick = function() {
-        auth.signOut();
+        auth.signOut().then(function() {
+            // Limpiar datos de sesión al salir
+            sessionStorage.removeItem('guestMode');
+            location.reload();
+        });
     };
 
     window.closeLoginModal = function() {
@@ -789,29 +890,27 @@
     auth.onAuthStateChanged(function(user) {
         if (user) {
             var name = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
-            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + name;
+            // SANITIZAR: usar sanitizeText para innerHTML seguro
+            var safeName = sanitizeText(name);
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + safeName;
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
             
-            // Cargar datos de Firestore
-            var today = new Date();
-            var docId = user.uid + '_' + today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
-            db.collection('pomodoro_sessions').doc(docId).get().then(function(doc) {
-                if (doc.exists) {
-                    timerState.sessionsCompleted = doc.data().sessionsCompleted || 0;
-                    timerState.totalWorkSeconds = doc.data().totalWorkSeconds || 0;
-                    timerState.breaksTotal = doc.data().breaksTotal || 0;
-                    timerState.sessionHistory = doc.data().sessionHistory || [];
-                    updateStats();
-                    updateHistory();
-                }
-            });
+            // Cargar datos de Firestore con la nueva estructura segura
+            loadFromFirestore(user);
+            
             if (typeof lucide !== 'undefined') lucide.createIcons();
         } else {
             document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display:inline;"></i> Invitado';
             document.getElementById('sidebarLoginBtn').style.display = 'flex';
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            
+            // Modo invitado: cargar desde sessionStorage
+            loadLocalState();
+            updateStats();
+            updateHistory();
+            
             if (!sessionStorage.getItem('guestMode')) {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
