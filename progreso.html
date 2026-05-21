@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -23,6 +22,10 @@
         const theme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', theme);
     </script>
+
+    <!-- Firebase COMPAT (misma versión que index.html) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -362,31 +365,34 @@
             font-size: 14px;
         }
 
-        /* TIMER */
-        .timer-display {
-            text-align: center;
-            font-size: 4rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin: 15px 0;
-        }
-
-        .timer-controls {
+        /* Botón Google */
+        .btn-google {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
             display: flex;
+            align-items: center;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 10px;
         }
 
-        .pomodoro-log {
-            padding: 15px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            text-align: center;
-            font-size: 14px;
-            color: #9ca3af;
+        .btn-google:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-google svg {
+            width: 18px;
+            height: 18px;
         }
 
         .footer-donate {
@@ -434,10 +440,6 @@
                 flex-direction: column;
             }
 
-            .timer-display {
-                font-size: 3rem;
-            }
-
             .toggle-btn {
                 bottom: 15px;
                 left: 15px;
@@ -456,9 +458,14 @@
             Iniciá sesión para guardar tu progreso en la nube y acceder desde cualquier dispositivo.
         </p>
 
-        <button id="btnModalLogin" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
-            <i data-lucide="log-in" class="icon-sm"></i>
-            Ingresar con Google
+        <button id="btnGoogleLogin" class="btn-google">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Continuar con Google
         </button>
 
         <button onclick="closeLoginModal()" class="btn-sidebar btn-dark" style="justify-content:center;">
@@ -518,6 +525,14 @@
 
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
 
+    <!-- Botón Sesión de Estudio (agregado desde index.html) -->
+    <button onclick="window.location.href='index.html'" class="btn-sidebar btn-dark">
+        <i data-lucide="timer" class="icon-sm"></i>
+        🍅 Sesión de Estudio
+    </button>
+
+    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+
     <p style="color:#9ca3af; font-size:13px; font-weight:600; margin-bottom:15px;">
         Oportunidades
     </p>
@@ -558,46 +573,7 @@
         <p>Panel de control académico y calculadora de promedio</p>
     </header>
 
-    <!-- POMODORO -->
-    <div class="dashboard-panel">
-
-        <div class="panel-title">
-            <i data-lucide="timer" class="icon-md"></i>
-            Sesión de Estudio Activa
-        </div>
-
-        <div class="timer-display" id="timerDisplay">25:00</div>
-
-        <div class="timer-controls">
-
-            <button id="btnStartTimer" onclick="startTimer()" class="btn-sidebar btn-primary-solid" style="width:auto; padding:12px 25px; margin:0;">
-                <i data-lucide="play" class="icon-sm"></i>
-                Enfocarse
-            </button>
-
-            <button id="btnPauseTimer" onclick="pauseTimer()" class="btn-sidebar btn-dark" style="width:auto; padding:12px 25px; margin:0; display:none;">
-                <i data-lucide="pause" class="icon-sm"></i>
-                Pausar
-            </button>
-
-            <button onclick="resetTimer()" class="btn-sidebar btn-dark" style="width:auto; padding:12px 25px; margin:0;">
-                <i data-lucide="rotate-ccw" class="icon-sm"></i>
-                Reiniciar
-            </button>
-        </div>
-
-        <div class="pomodoro-log">
-            <p style="margin-bottom:5px; font-weight:600; color:var(--text);">
-                Historial de Concentración
-            </p>
-
-            <span id="sessionLogText">
-                Has completado 0 sesiones de estudio (0 minutos totales).
-            </span>
-        </div>
-    </div>
-
-    <!-- PROGRESO -->
+    <!-- PROGRESO (Sección de estudio eliminada) -->
     <div class="dashboard-panel">
 
         <div class="panel-title">
@@ -639,7 +615,7 @@
         </div>
 
         <p style="text-align:right; font-size:12px; color:#9ca3af; margin-top:5px;">
-            *Las materias marcadas como “Aprobado” no afectan el promedio.
+            *Las materias marcadas como "Aprobado" no afectan el promedio.
         </p>
     </div>
 
@@ -652,211 +628,97 @@
     </div>
 </div>
 
-<!-- SCRIPT -->
-<script type="module">
-
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
-    import {
-    getAuth,
-    signInWithPopup,
-    GoogleAuthProvider,
-    onAuthStateChanged,
-    signOut,
-    setPersistence,
-    browserLocalPersistence
-} from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
-
-    // FIREBASE
-    const firebaseConfig = {
-        apiKey: 'AIzaSy' + 'DoFacVfYeZp' + 'NVIvbBqlcXtlZ' + 'kbeg_UeVg',
-        authDomain: 'knowy-13079.firebaseapp.com',
-        projectId: 'knowy-13079',
-        storageBucket: 'knowy-13079.firebasestorage.app',
-        messagingSenderId: '645341817520',
-        appId: '1:645341817520:web:799733f87a0ad1a0382975',
-        measurementId: 'G-PQGH6R9SZC'
+<!-- SCRIPT (versión COMPAT, sin module) -->
+<script>
+    // ── INICIALIZACIÓN FIREBASE (misma que index.html) ──
+    var firebaseConfig = {
+        apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
+        authDomain: "knowy-13079.firebaseapp.com",
+        projectId: "knowy-13079",
+        storageBucket: "knowy-13079.firebasestorage.app",
+        messagingSenderId: "645341817520",
+        appId: "1:645341817520:web:799733f87a0ad1a0382975",
+        measurementId: "G-PQGH6R9SZC"
     };
 
-    const app = initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    
+    // Configurar persistencia para mantener la sesión entre páginas
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(function() {
+            console.log("Persistencia LOCAL configurada correctamente");
+        })
+        .catch(function(error) {
+            console.error("Error configurando persistencia:", error);
+        });
+    
+    var googleProvider = new firebase.auth.GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-const auth = getAuth(app);
-
-await setPersistence(auth, browserLocalPersistence);
-
-const provider = new GoogleAuthProvider();
-
-    // LOGIN
-    async function doLogin() {
-
-    try {
-
-        await setPersistence(auth, browserLocalPersistence);
-
-        await signInWithPopup(auth, provider);
-
-        sessionStorage.removeItem('guestMode');
-
-        document.getElementById('loginModal').classList.add('hidden');
-
-    } catch (error) {
-
-        console.error('Error login:', error);
-
-        alert('No se pudo iniciar sesión.');
+    // ── LOGIN CON GOOGLE ──
+    function doGoogleLogin() {
+        auth.signInWithPopup(googleProvider)
+            .then(function(result) {
+                console.log("Login con Google exitoso:", result.user.email);
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+                location.reload();
+            })
+            .catch(function(error) {
+                console.error("Error en Google Login:", error.code, error.message);
+                alert('Error: ' + (error.message || 'No se pudo iniciar sesión.'));
+            });
     }
-}
 
-    document.getElementById('sidebarLoginBtn').addEventListener('click', doLogin);
-    document.getElementById('btnModalLogin').addEventListener('click', doLogin);
+    // ── REGISTRAR EVENTOS ──
+    document.getElementById('btnGoogleLogin').onclick = doGoogleLogin;
+    document.getElementById('sidebarLoginBtn').onclick = function() {
+        document.getElementById('loginModal').classList.remove('hidden');
+    };
+    document.getElementById('sidebarLogoutBtn').onclick = function() {
+        auth.signOut().then(function() {
+            sessionStorage.removeItem('guestMode');
+            location.reload();
+        });
+    };
 
-    document.getElementById('sidebarLogoutBtn').addEventListener('click', async () => {
-
-    await signOut(auth);
-
-    sessionStorage.removeItem('guestMode');
-
-    location.reload();
-});
-
+    // ── CERRAR MODAL ──
     window.closeLoginModal = function() {
         document.getElementById('loginModal').classList.add('hidden');
         sessionStorage.setItem('guestMode', 'true');
-    }
+    };
 
-    onAuthStateChanged(auth, async (user) => {
-
-    if (user) {
-
-        document.getElementById('userName').innerText =
-            `Hola, ${user.displayName.split(' ')[0]}`;
-
-        document.getElementById('sidebarLoginBtn').style.display = 'none';
-
-        document.getElementById('sidebarLogoutBtn').style.display = 'flex';
-
-        document.getElementById('loginModal').classList.add('hidden');
-
-    } else {
-
-        document.getElementById('userName').innerText = 'Invitado';
-
-        document.getElementById('sidebarLoginBtn').style.display = 'flex';
-
-        document.getElementById('sidebarLogoutBtn').style.display = 'none';
-
-        const currentUser = auth.currentUser;
-
-        if (currentUser) {
-
-            document.getElementById('userName').innerText =
-                `Hola, ${currentUser.displayName.split(' ')[0]}`;
-
+    // ── ESTADO DE AUTENTICACIÓN ──
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + nombre;
             document.getElementById('sidebarLoginBtn').style.display = 'none';
-
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
-
             document.getElementById('loginModal').classList.add('hidden');
-
-            return;
-        }
-
-        if (!sessionStorage.getItem('guestMode')) {
-
-            document.getElementById('loginModal').classList.remove('hidden');
-        }
-    }
-});
-
-    // POMODORO
-    let timeLeft = 25 * 60;
-    let timerId = null;
-
-    let completedSessions = parseInt(localStorage.getItem('ungs_pomodoros')) || 0;
-
-    function updateTimerUI() {
-
-        const minutes = Math.floor(timeLeft / 60)
-            .toString()
-            .padStart(2, '0');
-
-        const seconds = (timeLeft % 60)
-            .toString()
-            .padStart(2, '0');
-
-        document.getElementById('timerDisplay').innerText = `${minutes}:${seconds}`;
-
-        document.getElementById('sessionLogText').innerText =
-            `Has completado ${completedSessions} sesiones de estudio (${completedSessions * 25} minutos totales).`;
-    }
-
-    window.startTimer = function() {
-
-        if (timerId) return;
-
-        document.getElementById('btnStartTimer').style.display = 'none';
-        document.getElementById('btnPauseTimer').style.display = 'inline-flex';
-
-        timerId = setInterval(() => {
-
-            timeLeft--;
-            updateTimerUI();
-
-            if (timeLeft <= 0) {
-
-                clearInterval(timerId);
-                timerId = null;
-
-                completedSessions++;
-                localStorage.setItem('ungs_pomodoros', completedSessions);
-
-                timeLeft = 25 * 60;
-
-                updateTimerUI();
-
-                document.getElementById('btnStartTimer').style.display = 'inline-flex';
-                document.getElementById('btnPauseTimer').style.display = 'none';
-
-                alert('¡Excelente trabajo! Sesión completada.');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        } else {
+            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
+            document.getElementById('sidebarLoginBtn').style.display = 'flex';
+            document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            if (!sessionStorage.getItem('guestMode')) {
+                document.getElementById('loginModal').classList.remove('hidden');
             }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    });
 
-        }, 1000);
-    }
-
-    window.pauseTimer = function() {
-
-        clearInterval(timerId);
-        timerId = null;
-
-        document.getElementById('btnStartTimer').style.display = 'inline-flex';
-        document.getElementById('btnPauseTimer').style.display = 'none';
-    }
-
-    window.resetTimer = function() {
-        window.pauseTimer();
-        timeLeft = 25 * 60;
-        updateTimerUI();
-    }
-
-    updateTimerUI();
-
-    // CALCULADORA
+    // ── CALCULADORA Y PROGRESO ──
     const totalMaterias = 38;
-
     let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
 
     window.addEntry = function() {
-
         const subj = document.getElementById('subjIn').value.trim();
         const gradeRaw = document.getElementById('gradeIn').value.trim().toUpperCase();
-
         const gradeNum = parseFloat(gradeRaw);
-
         const isNumeric = !isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 10;
-
-        const isApproved =
-            gradeRaw === 'A' ||
-            gradeRaw === 'AP' ||
-            gradeRaw === 'APROBADO';
+        const isApproved = gradeRaw === 'A' || gradeRaw === 'AP' || gradeRaw === 'APROBADO';
 
         if (!subj) {
             alert('Ingresá el nombre de la materia.');
@@ -869,99 +731,80 @@ const provider = new GoogleAuthProvider();
         }
 
         entries.push({
-            subj,
+            subj: subj,
             grade: isNumeric ? gradeNum : 'Aprobado',
-            isNumeric
+            isNumeric: isNumeric
         });
 
         saveAndRender();
 
         document.getElementById('subjIn').value = '';
         document.getElementById('gradeIn').value = '';
-    }
+    };
 
     window.removeEntry = function(index) {
         entries.splice(index, 1);
         saveAndRender();
-    }
+    };
 
     function saveAndRender() {
-
         localStorage.setItem('ungs_grades', JSON.stringify(entries));
 
         const list = document.getElementById('gradeList');
+        list.innerHTML = entries.map(function(entry, index) {
+            return '<div class="grade-item">' +
+                '<span style="font-weight:500;">' + entry.subj + '</span>' +
+                '<span style="display:flex; align-items:center; gap:10px;">' +
+                    '<b style="color:var(--primary);">' + entry.grade + '</b>' +
+                    '<span class="btn-del" onclick="removeEntry(' + index + ')" title="Eliminar materia">' +
+                        '<i data-lucide="trash-2" class="icon-sm"></i>' +
+                    '</span>' +
+                '</span>' +
+            '</div>';
+        }).join('');
 
-        list.innerHTML = entries.map((entry, index) => `
-            <div class="grade-item">
-                <span style="font-weight:500;">${entry.subj}</span>
-
-                <span style="display:flex; align-items:center; gap:10px;">
-
-                    <b style="color:var(--primary);">
-                        ${entry.grade}
-                    </b>
-
-                    <span class="btn-del" onclick="removeEntry(${index})" title="Eliminar materia">
-                        <i data-lucide="trash-2" class="icon-sm"></i>
-                    </span>
-                </span>
-            </div>
-        `).join('');
-
-        const numericEntries = entries.filter(entry => entry.isNumeric);
-
-        const average = numericEntries.length
-            ? (
-                numericEntries.reduce((acc, item) => acc + Number(item.grade), 0)
-                / numericEntries.length
-            ).toFixed(2)
+        var numericEntries = entries.filter(function(entry) { return entry.isNumeric; });
+        var average = numericEntries.length
+            ? (numericEntries.reduce(function(acc, item) { return acc + Number(item.grade); }, 0) / numericEntries.length).toFixed(2)
             : '0.00';
 
         document.getElementById('avgOut').innerText = average;
 
-        const completed = entries.length;
+        var completed = entries.length;
+        var percentage = Math.min((completed / totalMaterias) * 100, 100).toFixed(1);
 
-        const percentage = Math.min((completed / totalMaterias) * 100, 100).toFixed(1);
+        document.getElementById('progressBar').style.width = percentage + '%';
+        document.getElementById('progressText').innerText = completed + ' / ' + totalMaterias + ' materias completadas (' + percentage + '%)';
 
-        document.getElementById('progressBar').style.width = `${percentage}%`;
-
-        document.getElementById('progressText').innerText =
-            `${completed} / ${totalMaterias} materias completadas (${percentage}%)`;
-
-        lucide.createIcons();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // SIDEBAR
+    // ── SIDEBAR ──
     window.toggleSidebar = function() {
-
         document.getElementById('sidebar').classList.toggle('hidden');
         document.getElementById('mainContent').classList.toggle('expanded');
-    }
+    };
 
-    // TEMA
+    // ── TEMA ──
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('ungs_theme', theme);
     }
 
     window.toggleTheme = function() {
-
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-
+        var currentTheme = document.documentElement.getAttribute('data-theme');
         applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
-    }
+    };
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
         if (!localStorage.getItem('ungs_theme')) {
             applyTheme(e.matches ? 'dark' : 'light');
         }
     });
 
-    // INIT
+    // ── INICIALIZAR ──
     saveAndRender();
-    lucide.createIcons();
-
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
 
 </body>
