@@ -7,7 +7,6 @@
 
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -16,25 +15,19 @@
       gtag('config', 'G-XXXXXXXXXX');
     </script>
 
-    <!-- Tema inicial -->
     <script>
         const savedTheme = localStorage.getItem('ungs_theme');
         const theme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         document.documentElement.setAttribute('data-theme', theme);
     </script>
 
-    <!-- Firebase COMPAT (misma versión que index.html) -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         :root {
             --primary: #FF8C00;
@@ -58,10 +51,6 @@
             --shadow: 0 10px 30px -10px rgba(0,0,0,0.4);
         }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
             background: var(--bg);
@@ -75,7 +64,6 @@
         .icon-md { width: 20px; height: 20px; }
         .icon-lg { width: 24px; height: 24px; }
 
-        /* SIDEBAR */
         .sidebar {
             width: var(--sidebar-width);
             height: 100vh;
@@ -88,13 +76,9 @@
             background: var(--sidebar-bg);
             border-right: 1px solid var(--border);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             transition: transform .4s cubic-bezier(.4,0,.2,1);
         }
-
-        .sidebar.hidden {
-            transform: translateX(-100%);
-        }
+        .sidebar.hidden { transform: translateX(-100%); }
 
         .main-content {
             width: 100%;
@@ -104,14 +88,9 @@
             padding: 50px 20px 100px;
             transition: margin-left .4s cubic-bezier(.4,0,.2,1);
         }
+        .main-content.expanded { margin-left: auto; }
 
-        .main-content.expanded {
-            margin-left: auto;
-        }
-
-        /* BOTONES FLOTANTES */
-        .toggle-btn,
-        .theme-btn {
+        .toggle-btn, .theme-btn {
             position: fixed;
             z-index: 1100;
             border: none;
@@ -132,10 +111,7 @@
             color: white;
             box-shadow: 0 4px 15px rgba(255,140,0,.3);
         }
-
-        .toggle-btn:hover {
-            transform: translateY(-2px);
-        }
+        .toggle-btn:hover { transform: translateY(-2px); }
 
         .theme-btn {
             top: 20px;
@@ -146,27 +122,11 @@
             color: var(--text);
             backdrop-filter: blur(10px);
         }
+        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-        .theme-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        header h1 {
-            font-size: 2.7rem;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 10px;
-        }
-
-        header p {
-            color: #9ca3af;
-        }
+        header { text-align: center; margin-bottom: 40px; }
+        header h1 { font-size: 2.7rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+        header p { color: #9ca3af; }
 
         .dashboard-panel {
             background: var(--card-bg);
@@ -178,303 +138,70 @@
             box-shadow: var(--shadow);
         }
 
-        .panel-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 18px;
-            margin-bottom: 15px;
-            font-weight: 700;
-        }
+        .panel-title { display: flex; align-items: center; gap: 8px; font-size: 18px; margin-bottom: 15px; font-weight: 700; }
+        .panel-title i { color: var(--primary); }
 
-        .panel-title i {
-            color: var(--primary);
-        }
+        .progress-bar-bg { width: 100%; height: 12px; background: var(--border); border-radius: 999px; overflow: hidden; margin-bottom: 8px; }
+        .progress-bar-fill { height: 100%; width: 0%; background: var(--primary); transition: width .8s ease-out; box-shadow: 0 0 10px rgba(255,140,0,.4); }
+        .progress-text { text-align: right; font-size: 14px; color: #9ca3af; font-weight: 600; }
 
-        /* PROGRESO */
-        .progress-container {
-            margin: 20px 0 30px;
-        }
+        .calc-row { display: flex; gap: 10px; margin-bottom: 20px; }
+        .calc-input { padding: 14px 15px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; transition: .25s ease; flex: 1; }
+        .calc-input:focus { outline: none; border-color: var(--primary); }
 
-        .progress-bar-bg {
-            width: 100%;
-            height: 12px;
-            background: var(--border);
-            border-radius: 999px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
+        .grade-list { max-height: 400px; overflow-y: auto; padding-right: 5px; }
+        .grade-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid var(--border); border-radius: 10px; transition: .2s ease; }
+        .grade-item:hover { background: rgba(255,140,0,.05); }
 
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--primary);
-            transition: width .8s ease-out;
-            box-shadow: 0 0 10px rgba(255,140,0,.4);
-        }
+        .btn-del { color: var(--danger); cursor: pointer; transition: .2s ease; display: flex; align-items: center; }
+        .btn-del:hover { transform: scale(1.15); }
 
-        .progress-text {
-            text-align: right;
-            font-size: 14px;
-            color: #9ca3af;
-            font-weight: 600;
-        }
+        .avg-display { margin-top: 30px; text-align: right; font-size: 1.8rem; font-weight: 800; color: var(--primary); }
 
-        /* INPUTS */
-        .calc-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .calc-input {
-            padding: 14px 15px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 14px;
-            transition: .25s ease;
-        }
-
-        .calc-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        /* LISTA */
-        .grade-list {
-            max-height: 400px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-
-        .grade-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 10px;
-            border-bottom: 1px solid var(--border);
-            border-radius: 10px;
-            transition: .2s ease;
-        }
-
-        .grade-item:hover {
-            background: rgba(255,140,0,.05);
-        }
-
-        .btn-del {
-            color: var(--danger);
-            cursor: pointer;
-            transition: .2s ease;
-            display: flex;
-            align-items: center;
-        }
-
-        .btn-del:hover {
-            transform: scale(1.15);
-        }
-
-        .avg-display {
-            margin-top: 30px;
-            text-align: right;
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        /* BOTONES */
         .btn-sidebar {
-            width: 100%;
-            border: none;
-            padding: 14px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: .25s ease;
-            text-decoration: none;
-            margin-bottom: 12px;
+            width: 100%; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600;
+            display: flex; align-items: center; gap: 12px; transition: .25s ease; text-decoration: none; margin-bottom: 12px;
         }
+        .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .btn-dark:hover { border-color: var(--primary); color: var(--primary); background: var(--card-bg); }
+        .btn-primary-solid { background: var(--primary); color: white; border: none; box-shadow: 0 4px 15px rgba(255,140,0,.2); }
+        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
 
-        .btn-dark {
-            background: transparent;
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
+        .login-modal { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(5px); z-index: 2000; display: flex; justify-content: center; align-items: center; transition: opacity .3s ease; }
+        .login-modal.hidden { opacity: 0; pointer-events: none; }
+        .login-modal-content { width: 90%; max-width: 400px; background: var(--bg); border: 1px solid var(--border); border-radius: 18px; padding: 40px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,.3); }
+        .login-modal-content h2 { margin: 15px 0 10px; font-weight: 800; }
+        .login-modal-content p { color: #9ca3af; line-height: 1.5; margin-bottom: 25px; font-size: 14px; }
 
-        .btn-dark:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: var(--card-bg);
-        }
+        .footer-donate { margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border); display: flex; justify-content: center; }
+        .btn-sugerencias { color: #9ca3af; border: 1px dashed #9ca3af; padding: 12px 24px; border-radius: 10px; text-decoration: none; transition: .25s ease; display: flex; align-items: center; gap: 8px; }
+        .btn-sugerencias:hover { border-color: var(--primary); color: var(--primary); background: rgba(255,140,0,.05); }
 
-        .btn-primary-solid {
-            background: var(--primary);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(255,140,0,.2);
-        }
-
-        .btn-primary-solid:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255,140,0,.3);
-        }
-
-        /* LOGIN MODAL */
-        .login-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.7);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity .3s ease;
-        }
-
-        .login-modal.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .login-modal-content {
-            width: 90%;
-            max-width: 400px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,.3);
-        }
-
-        .login-modal-content h2 {
-            margin: 15px 0 10px;
-            font-weight: 800;
-        }
-
-        .login-modal-content p {
-            color: #9ca3af;
-            line-height: 1.5;
-            margin-bottom: 25px;
-            font-size: 14px;
-        }
-
-        /* Botón Google */
-        .btn-google {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            color: var(--text);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.2s;
-            font-family: 'Inter', sans-serif;
-            margin-bottom: 10px;
-        }
-
-        .btn-google:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-google svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .footer-donate {
-            margin-top: 60px;
-            padding-top: 40px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: center;
-        }
-
-        .btn-sugerencias {
-            color: #9ca3af;
-            border: 1px dashed #9ca3af;
-            padding: 12px 24px;
-            border-radius: 10px;
-            text-decoration: none;
-            transition: .25s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-sugerencias:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: rgba(255,140,0,.05);
-        }
-
-        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-                padding: 90px 15px 100px;
-            }
-
-            header h1 {
-                font-size: 2.1rem;
-            }
-
-            .dashboard-panel {
-                padding: 20px;
-            }
-
-            .calc-row {
-                flex-direction: column;
-            }
-
-            .toggle-btn {
-                bottom: 15px;
-                left: 15px;
-            }
+            .main-content { margin-left: 0; padding: 90px 15px 100px; }
+            header h1 { font-size: 2.1rem; }
+            .dashboard-panel { padding: 20px; }
+            .calc-row { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-<!-- MODAL LOGIN -->
 <div id="loginModal" class="login-modal hidden">
     <div class="login-modal-content">
         <i data-lucide="lock" class="icon-lg" style="color: var(--primary); width: 40px; height: 40px;"></i>
         <h2>Bienvenido a La Biblioteca</h2>
-        <p>
-            Iniciá sesión para guardar tu progreso en la nube y acceder desde cualquier dispositivo.
-        </p>
-
-        <button id="btnGoogleLogin" class="btn-google">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Continuar con Google
+        <p>Iniciá sesión para guardar tu progreso en la nube y acceder desde cualquier dispositivo.</p>
+        <button id="btnModalLogin" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
+            <i data-lucide="log-in" class="icon-sm"></i>
+            Ingresar con Google
         </button>
-
         <button onclick="closeLoginModal()" class="btn-sidebar btn-dark" style="justify-content:center;">
             Continuar como invitado
         </button>
     </div>
 </div>
 
-<!-- BOTONES -->
 <button class="toggle-btn" onclick="toggleSidebar()">
     <i data-lucide="menu" class="icon-md"></i>
     Herramientas
@@ -485,19 +212,14 @@
     Tema
 </button>
 
-<!-- SIDEBAR -->
 <aside class="sidebar hidden" id="sidebar">
-
     <div id="userProfile" style="margin-bottom:25px; padding:15px; background:var(--card-bg); border:1px solid var(--border); border-radius:12px; text-align:center; backdrop-filter:blur(10px);">
         <i data-lucide="user-circle" class="icon-lg" style="color:var(--primary); margin-bottom:8px;"></i>
-
         <p id="userName" style="font-weight:700; margin-bottom:12px;">Invitado</p>
-
         <button id="sidebarLoginBtn" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
             <i data-lucide="log-in" class="icon-sm"></i>
             Ingresar
         </button>
-
         <button id="sidebarLogoutBtn" class="btn-sidebar btn-dark" style="justify-content:center; display:none;">
             <i data-lucide="log-out" class="icon-sm"></i>
             Salir
@@ -505,87 +227,41 @@
     </div>
 
     <h2 style="display:flex; align-items:center; gap:8px; color:var(--primary); font-weight:800; margin-bottom:8px;">
-        <i data-lucide="library" class="icon-lg"></i>
-        ADE UNGS
+        <i data-lucide="library" class="icon-lg"></i> ADE UNGS
     </h2>
-
     <p style="color:#9ca3af; font-size:14px; margin-bottom:20px;">Navegación</p>
-
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
-
     <a href="index.html" class="btn-sidebar btn-dark">
-        <i data-lucide="search" class="icon-sm"></i>
-        Buscar Materias
+        <i data-lucide="search" class="icon-sm"></i> Buscar Materias
     </a>
-
     <a href="progreso.html" class="btn-sidebar btn-primary-solid">
-        <i data-lucide="trending-up" class="icon-sm"></i>
-        Mi Progreso
+        <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
     </a>
-
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
-
-    <!-- Botón Sesión de Estudio (agregado desde index.html) -->
-    <button onclick="window.location.href='index.html'" class="btn-sidebar btn-dark">
-        <i data-lucide="timer" class="icon-sm"></i>
-        🍅 Sesión de Estudio
-    </button>
-
-    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
-
-    <p style="color:#9ca3af; font-size:13px; font-weight:600; margin-bottom:15px;">
-        Oportunidades
-    </p>
-
+    <p style="color:#9ca3af; font-size:13px; font-weight:600; margin-bottom:15px;">Oportunidades</p>
     <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark">
-        <i data-lucide="briefcase" class="icon-sm"></i>
-        Bolsa de Trabajo
+        <i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo
     </a>
-
     <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark">
-        <i data-lucide="building" class="icon-sm"></i>
-        Pasantías UNGS
-    </a>
-
-    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
-
-    <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar btn-dark">
-        <i data-lucide="message-square-plus" class="icon-sm"></i>
-        Dejar Recomendación
-    </a>
-
-    <a href="#" class="btn-sidebar btn-dark">
-        <i data-lucide="book-open-check" class="icon-sm"></i>
-        Ver Recomendaciones
-    </a>
-
-    <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="border-style:dashed; margin-top:15px;">
-        <i data-lucide="file-up" class="icon-sm"></i>
-        Donar Archivos
+        <i data-lucide="building" class="icon-sm"></i> Pasantías UNGS
     </a>
 </aside>
 
-<!-- CONTENIDO -->
 <div class="main-content expanded" id="mainContent">
-
     <header>
         <h1>Mi Progreso</h1>
         <p>Panel de control académico y calculadora de promedio</p>
     </header>
 
-    <!-- PROGRESO (Sección de estudio eliminada) -->
     <div class="dashboard-panel">
-
         <div class="panel-title">
             <i data-lucide="award" class="icon-md"></i>
             Avance de la Carrera
         </div>
-
-        <div class="progress-container">
+        <div style="margin: 20px 0 30px;">
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressBar"></div>
             </div>
-
             <div class="progress-text" id="progressText">
                 0 / 38 materias completadas
             </div>
@@ -599,10 +275,8 @@
         </div>
 
         <div class="calc-row">
-            <input type="text" id="subjIn" class="calc-input" placeholder="Nombre de la Materia" style="flex:2;">
-
-            <input type="text" id="gradeIn" class="calc-input" placeholder="Nota (1-10 o 'A')" style="flex:1;">
-
+            <input type="text" id="subjIn" class="calc-input" placeholder="Nombre de la Materia">
+            <input type="text" id="gradeIn" class="calc-input" placeholder="Nota (1-10 o 'A')">
             <button onclick="addEntry()" class="btn-sidebar btn-primary-solid" style="margin:0; width:auto; padding:0 25px; justify-content:center;">
                 <i data-lucide="plus" class="icon-sm"></i>
             </button>
@@ -619,7 +293,6 @@
         </p>
     </div>
 
-    <!-- FOOTER -->
     <div class="footer-donate">
         <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="btn-sugerencias" target="_blank">
             <i data-lucide="lightbulb" class="icon-sm"></i>
@@ -628,9 +301,8 @@
     </div>
 </div>
 
-<!-- SCRIPT (versión COMPAT, sin module) -->
 <script>
-    // ── INICIALIZACIÓN FIREBASE (misma que index.html) ──
+    // FIREBASE CONFIG
     var firebaseConfig = {
         apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
         authDomain: "knowy-13079.firebaseapp.com",
@@ -643,73 +315,55 @@
 
     firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
-    
-    // Configurar persistencia para mantener la sesión entre páginas
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(function() {
-            console.log("Persistencia LOCAL configurada correctamente");
-        })
-        .catch(function(error) {
-            console.error("Error configurando persistencia:", error);
-        });
-    
     var googleProvider = new firebase.auth.GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-    // ── LOGIN CON GOOGLE ──
-    function doGoogleLogin() {
+    // GOOGLE LOGIN
+    window.doGoogleLogin = function() {
         auth.signInWithPopup(googleProvider)
             .then(function(result) {
-                console.log("Login con Google exitoso:", result.user.email);
                 document.getElementById('loginModal').classList.add('hidden');
-                sessionStorage.removeItem('guestMode');
-                location.reload();
             })
             .catch(function(error) {
-                console.error("Error en Google Login:", error.code, error.message);
-                alert('Error: ' + (error.message || 'No se pudo iniciar sesión.'));
+                console.error("Error:", error.code);
+                alert("Error en login: " + error.message);
             });
-    }
-
-    // ── REGISTRAR EVENTOS ──
-    document.getElementById('btnGoogleLogin').onclick = doGoogleLogin;
-    document.getElementById('sidebarLoginBtn').onclick = function() {
-        document.getElementById('loginModal').classList.remove('hidden');
-    };
-    document.getElementById('sidebarLogoutBtn').onclick = function() {
-        auth.signOut().then(function() {
-            sessionStorage.removeItem('guestMode');
-            location.reload();
-        });
     };
 
-    // ── CERRAR MODAL ──
+    // CLOSE MODAL
     window.closeLoginModal = function() {
         document.getElementById('loginModal').classList.add('hidden');
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    // ── ESTADO DE AUTENTICACIÓN ──
+    // AUTH STATE
     auth.onAuthStateChanged(function(user) {
         if (user) {
-            var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
-            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + nombre;
+            var displayName = user.displayName || user.email.split('@')[0];
+            document.getElementById('userName').innerText = 'Hola, ' + displayName.split(' ')[0];
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
-            if (typeof lucide !== 'undefined') lucide.createIcons();
         } else {
-            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
+            document.getElementById('userName').innerText = 'Invitado';
             document.getElementById('sidebarLoginBtn').style.display = 'flex';
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
             if (!sessionStorage.getItem('guestMode')) {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
-            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
     });
 
-    // ── CALCULADORA Y PROGRESO ──
+    // EVENT LISTENERS
+    document.getElementById('btnModalLogin').addEventListener('click', window.doGoogleLogin);
+    document.getElementById('sidebarLoginBtn').addEventListener('click', window.doGoogleLogin);
+    document.getElementById('sidebarLogoutBtn').addEventListener('click', function() {
+        auth.signOut().then(function() {
+            location.reload();
+        });
+    });
+
+    // CALCULADORA
     const totalMaterias = 38;
     let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
 
@@ -720,24 +374,11 @@
         const isNumeric = !isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 10;
         const isApproved = gradeRaw === 'A' || gradeRaw === 'AP' || gradeRaw === 'APROBADO';
 
-        if (!subj) {
-            alert('Ingresá el nombre de la materia.');
-            return;
-        }
+        if (!subj) { alert('Ingresá el nombre de la materia.'); return; }
+        if (!isNumeric && !isApproved) { alert("Ingresá una nota válida del 1 al 10 o la letra 'A'."); return; }
 
-        if (!isNumeric && !isApproved) {
-            alert("Ingresá una nota válida del 1 al 10 o la letra 'A'.");
-            return;
-        }
-
-        entries.push({
-            subj: subj,
-            grade: isNumeric ? gradeNum : 'Aprobado',
-            isNumeric: isNumeric
-        });
-
+        entries.push({ subj, grade: isNumeric ? gradeNum : 'Aprobado', isNumeric });
         saveAndRender();
-
         document.getElementById('subjIn').value = '';
         document.getElementById('gradeIn').value = '';
     };
@@ -749,60 +390,55 @@
 
     function saveAndRender() {
         localStorage.setItem('ungs_grades', JSON.stringify(entries));
-
         const list = document.getElementById('gradeList');
-        list.innerHTML = entries.map(function(entry, index) {
-            return '<div class="grade-item">' +
-                '<span style="font-weight:500;">' + entry.subj + '</span>' +
-                '<span style="display:flex; align-items:center; gap:10px;">' +
-                    '<b style="color:var(--primary);">' + entry.grade + '</b>' +
-                    '<span class="btn-del" onclick="removeEntry(' + index + ')" title="Eliminar materia">' +
-                        '<i data-lucide="trash-2" class="icon-sm"></i>' +
-                    '</span>' +
-                '</span>' +
-            '</div>';
-        }).join('');
+        list.innerHTML = entries.map((entry, index) => `
+            <div class="grade-item">
+                <span style="font-weight:500;">${entry.subj}</span>
+                <span style="display:flex; align-items:center; gap:10px;">
+                    <b style="color:var(--primary);">${entry.grade}</b>
+                    <span class="btn-del" onclick="removeEntry(${index})" title="Eliminar materia">
+                        <i data-lucide="trash-2" class="icon-sm"></i>
+                    </span>
+                </span>
+            </div>
+        `).join('');
 
-        var numericEntries = entries.filter(function(entry) { return entry.isNumeric; });
-        var average = numericEntries.length
-            ? (numericEntries.reduce(function(acc, item) { return acc + Number(item.grade); }, 0) / numericEntries.length).toFixed(2)
+        const numericEntries = entries.filter(entry => entry.isNumeric);
+        const average = numericEntries.length
+            ? (numericEntries.reduce((acc, item) => acc + Number(item.grade), 0) / numericEntries.length).toFixed(2)
             : '0.00';
 
         document.getElementById('avgOut').innerText = average;
-
-        var completed = entries.length;
-        var percentage = Math.min((completed / totalMaterias) * 100, 100).toFixed(1);
-
-        document.getElementById('progressBar').style.width = percentage + '%';
-        document.getElementById('progressText').innerText = completed + ' / ' + totalMaterias + ' materias completadas (' + percentage + '%)';
-
+        const completed = entries.length;
+        const percentage = Math.min((completed / totalMaterias) * 100, 100).toFixed(1);
+        document.getElementById('progressBar').style.width = `${percentage}%`;
+        document.getElementById('progressText').innerText = `${completed} / ${totalMaterias} materias completadas (${percentage}%)`;
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // ── SIDEBAR ──
+    // SIDEBAR
     window.toggleSidebar = function() {
         document.getElementById('sidebar').classList.toggle('hidden');
         document.getElementById('mainContent').classList.toggle('expanded');
     };
 
-    // ── TEMA ──
+    // TEMA
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('ungs_theme', theme);
     }
 
     window.toggleTheme = function() {
-        var currentTheme = document.documentElement.getAttribute('data-theme');
+        const currentTheme = document.documentElement.getAttribute('data-theme');
         applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
     };
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         if (!localStorage.getItem('ungs_theme')) {
             applyTheme(e.matches ? 'dark' : 'light');
         }
     });
 
-    // ── INICIALIZAR ──
     saveAndRender();
     if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
