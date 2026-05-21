@@ -188,6 +188,34 @@
         .btn-sugerencias { color: #9ca3af; border: 1px dashed #9ca3af; padding: 12px 24px; border-radius: 10px; text-decoration: none; transition: .25s ease; display: flex; align-items: center; gap: 8px; }
         .btn-sugerencias:hover { border-color: var(--primary); color: var(--primary); background: rgba(255,140,0,.05); }
 
+        /* Loading indicator */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(3px);
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 15px;
+            color: white;
+        }
+        .loading-overlay.hidden { display: none; }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @media (max-width: 768px) {
             .main-content { margin-left: 0; padding: 90px 15px 100px; }
             header h1 { font-size: 2.1rem; }
@@ -198,6 +226,13 @@
 </head>
 <body>
 
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="spinner"></div>
+    <p>Sincronizando datos...</p>
+</div>
+
+<!-- MODAL LOGIN -->
 <div id="loginModal" class="login-modal hidden">
     <div class="login-modal-content">
         <i data-lucide="lock" class="icon-lg" style="color: var(--primary); width: 40px; height: 40px;"></i>
@@ -335,18 +370,78 @@
 
     firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
+    var db = firebase.firestore();
     
     // ✅ PERSISTENCIA LOCAL - Mantiene sesión entre páginas
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(function() {
-            console.log("✅ Persistencia LOCAL configurada correctamente");
-        })
-        .catch(function(error) {
-            console.error("❌ Error configurando persistencia:", error);
-        });
+        .then(function() { console.log("✅ Persistencia LOCAL configurada"); })
+        .catch(function(error) { console.error("❌ Error configurando persistencia:", error); });
     
     var googleProvider = new firebase.auth.GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    // ── VARIABLES GLOBALES ──
+    const totalMaterias = 38;
+    let entries = [];           // Array de calificaciones
+    let currentUser = null;    // Usuario actual
+    let isLoading = false;      // Evitar cargas múltiples
+
+    // ── ELEMENTOS DOM ──
+    var loadingOverlay = document.getElementById('loadingOverlay');
+
+    function showLoading(show) {
+        if (show) {
+            loadingOverlay.classList.remove('hidden');
+        } else {
+            loadingOverlay.classList.add('hidden');
+        }
+    }
+
+    // ── GUARDAR EN FIRESTORE ──
+    function saveToFirestore() {
+        if (!currentUser) return;
+        
+        var userDocRef = db.collection('users_grades').doc(currentUser.uid);
+        userDocRef.set({
+            uid: currentUser.uid,
+            email: currentUser.email,
+            entries: entries,
+            totalMaterias: totalMaterias,
+            lastUpdated: new Date()
+        })
+        .then(function() {
+            console.log("✅ Datos guardados en Firestore");
+        })
+        .catch(function(error) {
+            console.error("❌ Error guardando en Firestore:", error);
+        });
+    }
+
+    // ── CARGAR DESDE FIRESTORE ──
+    function loadFromFirestore(user) {
+        if (!user) return Promise.resolve();
+        
+        showLoading(true);
+        
+        var userDocRef = db.collection('users_grades').doc(user.uid);
+        return userDocRef.get()
+            .then(function(doc) {
+                if (doc.exists) {
+                    var data = doc.data();
+                    entries = data.entries || [];
+                    console.log("✅ Datos cargados desde Firestore:", entries.length, "materias");
+                } else {
+                    entries = [];
+                    console.log("📭 No hay datos previos en Firestore, comenzando desde cero");
+                }
+                saveAndRender();
+                showLoading(false);
+            })
+            .catch(function(error) {
+                console.error("❌ Error cargando desde Firestore:", error);
+                showLoading(false);
+            });
+    }
 
     // ── GOOGLE LOGIN ──
     function doGoogleLogin() {
@@ -354,6 +449,7 @@
             .then(function(result) {
                 console.log("✅ Login con Google exitoso:", result.user.email);
                 document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
             })
             .catch(function(error) {
                 console.error("❌ Error:", error.code);
@@ -370,16 +466,32 @@
     // ── AUTH STATE ──
     auth.onAuthStateChanged(function(user) {
         if (user) {
+            currentUser = user;
             var displayName = user.displayName || user.email.split('@')[0];
             document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + displayName.split(' ')[0];
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
+            
+            // Cargar datos desde Firestore
+            loadFromFirestore(user);
+            
             if (typeof lucide !== 'undefined') lucide.createIcons();
         } else {
+            currentUser = null;
             document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display:inline;"></i> Invitado';
             document.getElementById('sidebarLoginBtn').style.display = 'flex';
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            
+            // Modo invitado: cargar desde localStorage como respaldo
+            var savedEntries = localStorage.getItem('ungs_grades_backup');
+            if (savedEntries) {
+                entries = JSON.parse(savedEntries);
+            } else {
+                entries = [];
+            }
+            saveAndRender();
+            
             if (!sessionStorage.getItem('guestMode')) {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
@@ -392,14 +504,14 @@
     document.getElementById('sidebarLoginBtn').onclick = doGoogleLogin;
     document.getElementById('sidebarLogoutBtn').onclick = function() {
         auth.signOut().then(function() {
+            // Limpiar datos del usuario al salir
+            entries = [];
+            saveAndRender();
             location.reload();
         });
     };
 
     // ── CALCULADORA ──
-    const totalMaterias = 38;
-    let entries = JSON.parse(localStorage.getItem('ungs_grades')) || [];
-
     window.addEntry = function() {
         const subj = document.getElementById('subjIn').value.trim();
         const gradeRaw = document.getElementById('gradeIn').value.trim().toUpperCase();
@@ -410,8 +522,23 @@
         if (!subj) { alert('Ingresá el nombre de la materia.'); return; }
         if (!isNumeric && !isApproved) { alert("Ingresá una nota válida del 1 al 10 o la letra 'A'."); return; }
 
-        entries.push({ subj, grade: isNumeric ? gradeNum : 'Aprobado', isNumeric });
+        entries.push({ 
+            subj: subj, 
+            grade: isNumeric ? gradeNum : 'Aprobado', 
+            isNumeric: isNumeric,
+            date: new Date().toISOString()
+        });
+        
         saveAndRender();
+        
+        // Guardar en Firestore si hay usuario
+        if (currentUser) {
+            saveToFirestore();
+        } else {
+            // Backup en localStorage para modo invitado
+            localStorage.setItem('ungs_grades_backup', JSON.stringify(entries));
+        }
+        
         document.getElementById('subjIn').value = '';
         document.getElementById('gradeIn').value = '';
     };
@@ -419,34 +546,59 @@
     window.removeEntry = function(index) {
         entries.splice(index, 1);
         saveAndRender();
+        
+        if (currentUser) {
+            saveToFirestore();
+        } else {
+            localStorage.setItem('ungs_grades_backup', JSON.stringify(entries));
+        }
     };
 
     function saveAndRender() {
-        localStorage.setItem('ungs_grades', JSON.stringify(entries));
+        // Renderizar lista
         const list = document.getElementById('gradeList');
-        list.innerHTML = entries.map((entry, index) => `
-            <div class="grade-item">
-                <span style="font-weight:500;">${entry.subj}</span>
-                <span style="display:flex; align-items:center; gap:10px;">
-                    <b style="color:var(--primary);">${entry.grade}</b>
-                    <span class="btn-del" onclick="removeEntry(${index})" title="Eliminar materia">
-                        <i data-lucide="trash-2" class="icon-sm"></i>
-                    </span>
-                </span>
-            </div>
-        `).join('');
+        if (entries.length === 0) {
+            list.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;">' +
+                '<i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i>' +
+                '<p>No hay materias cargadas aún. Agregá tu primera materia arriba.</p>' +
+            '</div>';
+        } else {
+            list.innerHTML = entries.map(function(entry, index) {
+                return '<div class="grade-item">' +
+                    '<span style="font-weight:500;">' + escapeHtml(entry.subj) + '</span>' +
+                    '<span style="display:flex; align-items:center; gap:10px;">' +
+                        '<b style="color:var(--primary);">' + entry.grade + '</b>' +
+                        '<span class="btn-del" onclick="removeEntry(' + index + ')" title="Eliminar materia">' +
+                            '<i data-lucide="trash-2" class="icon-sm"></i>' +
+                        '</span>' +
+                    '</span>' +
+                '</div>';
+            }).join('');
+        }
 
-        const numericEntries = entries.filter(entry => entry.isNumeric);
-        const average = numericEntries.length
-            ? (numericEntries.reduce((acc, item) => acc + Number(item.grade), 0) / numericEntries.length).toFixed(2)
+        // Calcular promedio
+        var numericEntries = entries.filter(function(entry) { return entry.isNumeric; });
+        var average = numericEntries.length
+            ? (numericEntries.reduce(function(acc, item) { return acc + Number(item.grade); }, 0) / numericEntries.length).toFixed(2)
             : '0.00';
 
         document.getElementById('avgOut').innerText = average;
-        const completed = entries.length;
-        const percentage = Math.min((completed / totalMaterias) * 100, 100).toFixed(1);
-        document.getElementById('progressBar').style.width = `${percentage}%`;
-        document.getElementById('progressText').innerText = `${completed} / ${totalMaterias} materias completadas (${percentage}%)`;
+        
+        // Calcular progreso
+        var completed = entries.length;
+        var percentage = Math.min((completed / totalMaterias) * 100, 100).toFixed(1);
+        document.getElementById('progressBar').style.width = percentage + '%';
+        document.getElementById('progressText').innerText = completed + ' / ' + totalMaterias + ' materias completadas (' + percentage + '%)';
+        
+        // Recargar íconos
         if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    // Función para escapar HTML (seguridad)
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     // ── SIDEBAR ──
@@ -466,12 +618,13 @@
         applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
     };
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
         if (!localStorage.getItem('ungs_theme')) {
             applyTheme(e.matches ? 'dark' : 'light');
         }
     });
 
+    // ── INICIALIZAR ──
     saveAndRender();
     if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
