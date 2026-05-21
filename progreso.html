@@ -357,6 +357,41 @@
 </div>
 
 <script>
+    // ==================== FUNCIONES DE SEGURIDAD ====================
+    
+    // Función para sanitizar HTML (previene XSS)
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Función para sanitizar texto plano (para innerText)
+    function sanitizeText(str) {
+        if (!str) return '';
+        return str.replace(/[<>]/g, function(m) {
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Función para validar y sanitizar el nombre de materia (solo letras, números, espacios y caracteres comunes)
+    function sanitizeSubjectName(name) {
+        if (!name) return '';
+        // Permite letras (incluyendo acentos), números, espacios, guiones, puntos, comas, paréntesis y dos puntos
+        let cleaned = name.replace(/[^\w\s\u00C0-\u00FF\-\.\,\(\)\:]/gi, '');
+        // Limitar longitud
+        if (cleaned.length > 100) cleaned = cleaned.substring(0, 100);
+        return cleaned.trim();
+    }
+    
+    // ==================== FIN FUNCIONES DE SEGURIDAD ====================
+    
     // ── FIREBASE CONFIG v10.13.0 ──
     var firebaseConfig = {
         apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
@@ -397,13 +432,13 @@
         }
     }
 
-    // ── GUARDAR EN FIRESTORE ──
+    // ── GUARDAR EN FIRESTORE (USANDO UID COMO ID DEL DOCUMENTO - SEGURO) ──
     function saveToFirestore() {
         if (!currentUser) return;
         
+        // Usar el UID como ID del documento para cumplir con las reglas de seguridad
         var userDocRef = db.collection('users_grades').doc(currentUser.uid);
         userDocRef.set({
-            uid: currentUser.uid,
             email: currentUser.email,
             entries: entries,
             totalMaterias: totalMaterias,
@@ -428,7 +463,15 @@
             .then(function(doc) {
                 if (doc.exists) {
                     var data = doc.data();
-                    entries = data.entries || [];
+                    // Sanitizar entries al cargar desde Firestore
+                    entries = (data.entries || []).map(function(entry) {
+                        return {
+                            subj: sanitizeSubjectName(entry.subj),
+                            grade: entry.grade,
+                            isNumeric: entry.isNumeric,
+                            date: entry.date
+                        };
+                    });
                     console.log("✅ Datos cargados desde Firestore:", entries.length, "materias");
                 } else {
                     entries = [];
@@ -463,12 +506,14 @@
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    // ── AUTH STATE ──
+    // ── AUTH STATE (CON SANITIZACIÓN DE NOMBRE DE USUARIO) ──
     auth.onAuthStateChanged(function(user) {
         if (user) {
             currentUser = user;
             var displayName = user.displayName || user.email.split('@')[0];
-            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + displayName.split(' ')[0];
+            // SANITIZAR: usar sanitizeText para innerHTML seguro
+            var safeName = sanitizeText(displayName.split(' ')[0]);
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + safeName;
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
@@ -483,10 +528,24 @@
             document.getElementById('sidebarLoginBtn').style.display = 'flex';
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
             
-            // Modo invitado: cargar desde localStorage como respaldo
-            var savedEntries = localStorage.getItem('ungs_grades_backup');
+            // Modo invitado: cargar desde sessionStorage (más seguro que localStorage)
+            // Cambiado de localStorage a sessionStorage para mejor seguridad
+            var savedEntries = sessionStorage.getItem('ungs_grades_backup_guest');
             if (savedEntries) {
-                entries = JSON.parse(savedEntries);
+                try {
+                    var parsed = JSON.parse(savedEntries);
+                    // Sanitizar entries al cargar
+                    entries = (parsed || []).map(function(entry) {
+                        return {
+                            subj: sanitizeSubjectName(entry.subj),
+                            grade: entry.grade,
+                            isNumeric: entry.isNumeric,
+                            date: entry.date
+                        };
+                    });
+                } catch(e) {
+                    entries = [];
+                }
             } else {
                 entries = [];
             }
@@ -511,9 +570,9 @@
         });
     };
 
-    // ── CALCULADORA ──
+    // ── CALCULADORA (CON SANITIZACIÓN DE ENTRADA) ──
     window.addEntry = function() {
-        const subj = document.getElementById('subjIn').value.trim();
+        let subj = document.getElementById('subjIn').value.trim();
         const gradeRaw = document.getElementById('gradeIn').value.trim().toUpperCase();
         const gradeNum = parseFloat(gradeRaw);
         const isNumeric = !isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 10;
@@ -521,6 +580,13 @@
 
         if (!subj) { alert('Ingresá el nombre de la materia.'); return; }
         if (!isNumeric && !isApproved) { alert("Ingresá una nota válida del 1 al 10 o la letra 'A'."); return; }
+        
+        // SANITIZAR: limpiar el nombre de la materia
+        subj = sanitizeSubjectName(subj);
+        if (!subj) {
+            alert('El nombre de la materia contiene caracteres no válidos.');
+            return;
+        }
 
         entries.push({ 
             subj: subj, 
@@ -535,8 +601,8 @@
         if (currentUser) {
             saveToFirestore();
         } else {
-            // Backup en localStorage para modo invitado
-            localStorage.setItem('ungs_grades_backup', JSON.stringify(entries));
+            // Backup en sessionStorage para modo invitado (más seguro que localStorage)
+            sessionStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
         }
         
         document.getElementById('subjIn').value = '';
@@ -544,18 +610,20 @@
     };
 
     window.removeEntry = function(index) {
-        entries.splice(index, 1);
-        saveAndRender();
-        
-        if (currentUser) {
-            saveToFirestore();
-        } else {
-            localStorage.setItem('ungs_grades_backup', JSON.stringify(entries));
+        if (index >= 0 && index < entries.length) {
+            entries.splice(index, 1);
+            saveAndRender();
+            
+            if (currentUser) {
+                saveToFirestore();
+            } else {
+                sessionStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
+            }
         }
     };
 
     function saveAndRender() {
-        // Renderizar lista
+        // Renderizar lista con sanitización
         const list = document.getElementById('gradeList');
         if (entries.length === 0) {
             list.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;">' +
@@ -564,10 +632,11 @@
             '</div>';
         } else {
             list.innerHTML = entries.map(function(entry, index) {
+                // entry.subj ya está sanitizado al guardar, pero aplicamos escapeHtml por si acaso
                 return '<div class="grade-item">' +
                     '<span style="font-weight:500;">' + escapeHtml(entry.subj) + '</span>' +
                     '<span style="display:flex; align-items:center; gap:10px;">' +
-                        '<b style="color:var(--primary);">' + entry.grade + '</b>' +
+                        '<b style="color:var(--primary);">' + escapeHtml(String(entry.grade)) + '</b>' +
                         '<span class="btn-del" onclick="removeEntry(' + index + ')" title="Eliminar materia">' +
                             '<i data-lucide="trash-2" class="icon-sm"></i>' +
                         '</span>' +
