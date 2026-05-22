@@ -410,7 +410,41 @@
 
 <!-- ===== SCRIPT FIREBASE + LÓGICA ===== -->
 <script>
-    // ── INICIALIZACIÓN FIREBASE v10.13.0 (clave fragmentada para seguridad) ──
+    // ==================== FUNCIONES DE SEGURIDAD ====================
+    
+    // Función para sanitizar HTML (previene XSS)
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Función para sanitizar texto plano
+    function sanitizeText(str) {
+        if (!str) return '';
+        return str.replace(/[<>]/g, function(m) {
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Función para sanitizar nombre de materia (permite caracteres comunes)
+    function sanitizeSubjectName(name) {
+        if (!name) return '';
+        // Permite letras (incluyendo acentos), números, espacios, guiones, puntos, comas, paréntesis, dos puntos y barras
+        let cleaned = name.replace(/[^\w\s\u00C0-\u00FF\-\.\,\(\)\:\/]/gi, '');
+        if (cleaned.length > 200) cleaned = cleaned.substring(0, 200);
+        return cleaned.trim();
+    }
+    
+    // ==================== FIN FUNCIONES DE SEGURIDAD ====================
+    
+    // ── INICIALIZACIÓN FIREBASE v10.13.0 ──
     var firebaseConfig = {
         apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
         authDomain: "knowy-13079.firebaseapp.com",
@@ -434,7 +468,6 @@
         });
     
     var googleProvider = new firebase.auth.GoogleAuthProvider();
-    // Agregar parámetro para forzar selección de cuenta
     googleProvider.setCustomParameters({ prompt: 'select_account' });
 
     // ── TABS DEL MODAL ──
@@ -540,7 +573,10 @@
         document.getElementById('loginModal').classList.remove('hidden');
     };
     document.getElementById('sidebarLogoutBtn').onclick = function() {
-        auth.signOut();
+        auth.signOut().then(function() {
+            sessionStorage.removeItem('guestMode');
+            location.reload();
+        });
     };
 
     // ── CERRAR MODAL (modo invitado) ──
@@ -549,11 +585,13 @@
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    // ── ESTADO DE AUTENTICACIÓN ──
+    // ── ESTADO DE AUTENTICACIÓN CON SANITIZACIÓN ──
     auth.onAuthStateChanged(function(user) {
         if (user) {
             var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
-            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + nombre;
+            // SANITIZAR nombre de usuario
+            var safeName = sanitizeText(nombre);
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + safeName;
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
@@ -569,7 +607,7 @@
         }
     });
 
-    // ── DATOS DE MATERIAS ──
+    // ── DATOS DE MATERIAS (ya sanitizados en el objeto, pero aplicamos sanitización adicional al renderizar) ──
     var data = {
         "PRIMER AÑO": [
             {n: "Taller Inicial Común: Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1jLUf7D_7GzXwwXl0mkE0WJLmK3ydxtfb?usp=drive_link", req: ""},
@@ -632,19 +670,29 @@
             var mats = data[year];
             var section = document.createElement('div');
             section.className = 'year-section';
+            
+            // Sanitizar el nombre del año
+            var safeYear = sanitizeHTML(year);
+            
             var items = mats.map(function(m) {
-                return '<div class="materia-item" onclick="openDoc(\'' + m.n.replace(/'/g, "\\'") + '\', \'' + m.l + '\')">' +
+                // Sanitizar nombre de materia y requisitos
+                var safeName = sanitizeHTML(m.n);
+                var safeReq = m.req ? sanitizeHTML(m.req) : '';
+                var safeLink = encodeURIComponent(m.l);
+                var safeNameForAttr = m.n.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                
+                return '<div class="materia-item" onclick="openDoc(\'' + safeNameForAttr + '\', \'' + safeLink + '\')">' +
                     '<div class="materia-info">' +
-                        '<span class="materia-name">' + m.n + '</span>' +
+                        '<span class="materia-name">' + safeName + '</span>' +
                         '<div class="correlativas-text">' +
-                            (m.req ? '<span class="req-badge"><i data-lucide="lock" style="width:10px;height:10px;"></i> Req: ' + m.req + '</span>' : '') +
+                            (safeReq ? '<span class="req-badge"><i data-lucide="lock" style="width:10px;height:10px;"></i> Req: ' + safeReq + '</span>' : '') +
                         '</div>' +
                     '</div>' +
                     '<span class="materia-action">Ver recursos <i data-lucide="arrow-right" class="icon-sm"></i></span>' +
                 '</div>';
             }).join('');
             section.innerHTML =
-                '<div class="year-header" onclick="toggleYear(this)">' + year + ' <span>+</span></div>' +
+                '<div class="year-header" onclick="toggleYear(this)">' + safeYear + ' <span>+</span></div>' +
                 '<div class="materia-container">' + items + '</div>';
             container.appendChild(section);
         }
@@ -660,7 +708,9 @@
     };
 
     window.openDoc = function(name, link) {
-        window.location.href = 'visor.html?name=' + encodeURIComponent(name) + '&link=' + encodeURIComponent(link);
+        // Sanitizar antes de enviar a la URL
+        var safeName = sanitizeText(name);
+        window.location.href = 'visor.html?name=' + encodeURIComponent(safeName) + '&link=' + link;
     };
 
     window.filterMaterias = function() {
@@ -668,13 +718,19 @@
         var items = document.getElementsByClassName('materia-item');
         var sections = document.getElementsByClassName('year-section');
         for (var i = 0; i < items.length; i++) {
-            var title = items[i].querySelector('.materia-name').innerText.toLowerCase();
-            items[i].style.display = title.includes(input) ? "" : "none";
+            var titleElem = items[i].querySelector('.materia-name');
+            if (titleElem) {
+                var title = titleElem.innerText.toLowerCase();
+                items[i].style.display = title.includes(input) ? "" : "none";
+            }
         }
         for (var j = 0; j < sections.length; j++) {
             var panel = sections[j].querySelector('.materia-container');
-            panel.style.display = input ? "block" : "none";
-            sections[j].querySelector('span').innerText = input ? "-" : "+";
+            if (panel) {
+                panel.style.display = input ? "block" : "none";
+                var span = sections[j].querySelector('span');
+                if (span) span.innerText = input ? "-" : "+";
+            }
         }
     };
 
