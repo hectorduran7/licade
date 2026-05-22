@@ -110,7 +110,6 @@
             margin-bottom: 30px;
         }
 
-        /* Mejor contraste en modo oscuro */
         [data-theme="dark"] .viewer-card {
             background: rgba(0, 0, 0, 0.8);
         }
@@ -203,7 +202,6 @@
         .btn-google:hover { border-color: var(--primary); color: var(--primary); }
         .btn-google svg { width: 18px; height: 18px; }
 
-        /* Estilos para el iframe - evita que muestre barras extra */
         .drive-frame {
             width: 100%;
             height: 550px;
@@ -213,6 +211,89 @@
 
         [data-theme="dark"] .drive-frame {
             background-color: #1a1a1a;
+        }
+
+        /* ===== NUEVOS ESTILOS PARA ERROR Y LOADING ===== */
+        .loading-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            text-align: center;
+            background: var(--bg);
+            min-height: 550px;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .error-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            text-align: center;
+            background: var(--bg);
+            min-height: 550px;
+        }
+
+        .error-overlay.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-icon {
+            width: 60px;
+            height: 60px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .error-overlay h3 {
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .error-overlay p {
+            color: #9ca3af;
+            margin-bottom: 25px;
+            max-width: 400px;
+        }
+
+        .error-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .access-requested {
+            margin-top: 20px;
+            padding: 12px;
+            background: rgba(255, 140, 0, 0.1);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--primary);
+        }
+
+        .drive-frame.hide {
+            display: none;
         }
     </style>
 </head>
@@ -315,12 +396,37 @@
                 <i data-lucide="folder-open" class="icon-md"></i> Repositorio de Recursos
             </span>
             <div class="viewer-buttons">
-                <button onclick="abrirEnDrive()" class="viewer-btn">
+                <button onclick="abrirEnDrive()" class="viewer-btn" id="btnAbrirDrive">
                     <i data-lucide="external-link" class="icon-sm"></i> Abrir en Drive
                 </button>
-                <button onclick="solicitarMaterial()" class="viewer-btn">
+                <button onclick="solicitarAccesoEnDrive()" class="viewer-btn" id="btnSolicitarAcceso">
                     <i data-lucide="mail" class="icon-sm"></i> Solicitar acceso
                 </button>
+            </div>
+        </div>
+        
+        <!-- Loading -->
+        <div id="loadingOverlay" class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Cargando contenido desde Google Drive...</p>
+            <p style="font-size: 12px; margin-top: 10px;">Esto puede tomar unos segundos</p>
+        </div>
+        
+        <!-- Error 403 (carpeta privada) -->
+        <div id="errorOverlay" class="error-overlay">
+            <i data-lucide="lock" class="error-icon"></i>
+            <h3>🔒 Acceso restringido</h3>
+            <p>Esta carpeta de Google Drive es privada. Necesitás solicitar acceso al propietario para ver su contenido.</p>
+            <div class="error-buttons">
+                <button onclick="solicitarAccesoEnDrive()" class="btn-primary-solid" style="padding: 10px 20px;">
+                    <i data-lucide="mail" class="icon-sm"></i> Solicitar acceso
+                </button>
+                <button onclick="abrirEnDrive()" class="btn-dark" style="padding: 10px 20px; border: 1px solid var(--border);">
+                    <i data-lucide="external-link" class="icon-sm"></i> Abrir en Drive
+                </button>
+            </div>
+            <div id="accessRequestedMsg" class="access-requested" style="display: none;">
+                <i data-lucide="clock" class="icon-sm"></i> Ya solicitaste acceso a esta carpeta. Verificá tu correo electrónico.
             </div>
         </div>
         
@@ -328,7 +434,7 @@
         
         <div style="padding: 15px 25px; background: var(--card-bg); text-align: center; border-top: 1px solid var(--border); font-size: 13px; color: #9ca3af;">
             <i data-lucide="info" class="icon-sm" style="display: inline; margin-right: 5px;"></i>
-            Si el contenido no se carga correctamente, hacé clic en "Abrir en Drive"
+            💡 Si ves un error 403, la carpeta es privada. Hacé clic en "Solicitar acceso" y esperá que el dueño te autorice.
         </div>
     </div>
     
@@ -434,39 +540,131 @@
     var urlParams = new URLSearchParams(window.location.search);
     var nombreMateria = urlParams.get('name');
     var enlaceMateria = urlParams.get('link');
+    var accessRequestedKey = 'access_requested_' + (enlaceMateria || '');
+
+    // Elementos del DOM
+    var iframe = document.getElementById('driveViewer');
+    var loadingDiv = document.getElementById('loadingOverlay');
+    var errorDiv = document.getElementById('errorOverlay');
+    var accessRequestedMsg = document.getElementById('accessRequestedMsg');
+
+    // Verificar si ya se solicitó acceso a esta carpeta
+    function checkAccessRequested() {
+        var requested = localStorage.getItem(accessRequestedKey);
+        if (requested && accessRequestedMsg) {
+            accessRequestedMsg.style.display = 'block';
+        }
+    }
+
+    // Marcar que se solicitó acceso
+    function markAccessRequested() {
+        localStorage.setItem(accessRequestedKey, new Date().toISOString());
+        if (accessRequestedMsg) {
+            accessRequestedMsg.style.display = 'block';
+        }
+    }
+
+    // Mostrar error 403 manualmente (cuando el iframe no carga)
+    function showError() {
+        loadingDiv.classList.remove('show');
+        iframe.classList.add('hide');
+        errorDiv.classList.add('show');
+        checkAccessRequested();
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // Mostrar loading y ocultar error
+    function showLoading() {
+        loadingDiv.classList.add('show');
+        iframe.classList.add('hide');
+        errorDiv.classList.remove('show');
+    }
+
+    // Ocultar loading y mostrar iframe
+    function showIframe() {
+        loadingDiv.classList.remove('show');
+        iframe.classList.remove('hide');
+        errorDiv.classList.remove('show');
+    }
 
     if (nombreMateria && enlaceMateria) {
         var safeNombre = sanitizeText(nombreMateria);
         document.getElementById('materiaTitle').innerText = safeNombre;
         
-        var iframe = document.getElementById('driveViewer');
+        showLoading();
         
-        // === SOLUCIÓN MEJORADA: fuerza el preview sin redirigir ===
+        // Construir URL del iframe
+        var iframeUrl = '';
+        
         if (enlaceMateria.includes('drive.google.com')) {
             var previewUrl = enlaceMateria
                 .replace('/view', '/preview')
                 .replace('?usp=drive_link', '')
                 .replace('edit', 'preview');
             
-            // Si es una carpeta, usar formato con /preview
             if (enlaceMateria.includes('folders')) {
-                iframe.src = enlaceMateria + '/preview';
+                iframeUrl = enlaceMateria + '/preview';
             } else {
-                iframe.src = previewUrl;
+                iframeUrl = previewUrl;
             }
         } else {
-            iframe.src = enlaceMateria;
+            iframeUrl = enlaceMateria;
         }
+        
+        iframe.src = iframeUrl;
+        
+        // Detectar si el iframe carga correctamente
+        iframe.onload = function() {
+            // Pequeño delay para asegurar que el iframe realmente cargó
+            setTimeout(function() {
+                try {
+                    // Intentar acceder al contenido del iframe (fallará si es cross-origin)
+                    var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    if (iframeDoc && iframeDoc.body && iframeDoc.body.innerHTML.includes('403')) {
+                        showError();
+                    } else {
+                        showIframe();
+                    }
+                } catch(e) {
+                    // Error de cross-origin = el iframe cargó contenido de otro dominio
+                    // Asumimos que está bien (o no podemos detectarlo)
+                    // Mostramos el iframe y esperamos que funcione
+                    showIframe();
+                }
+            }, 2000);
+        };
+        
+        iframe.onerror = function() {
+            showError();
+        };
+        
+        // Timeout por si el iframe nunca carga
+        setTimeout(function() {
+            if (loadingDiv.classList.contains('show')) {
+                showError();
+            }
+        }, 8000);
+        
     } else {
         document.getElementById('materiaTitle').innerText = "Ninguna materia seleccionada";
         document.getElementById('viewerCard').style.display = "none";
     }
 
+    // ── FUNCIONES PARA BOTONES ──
     window.abrirEnDrive = function() {
         if (enlaceMateria) {
             window.open(enlaceMateria, '_blank');
         } else {
             alert("No se pudo abrir el enlace.");
+        }
+    };
+
+    window.solicitarAccesoEnDrive = function() {
+        if (enlaceMateria) {
+            markAccessRequested();
+            window.open(enlaceMateria, '_blank');
+        } else {
+            alert("No se pudo abrir el enlace para solicitar acceso.");
         }
     };
 
