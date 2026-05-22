@@ -223,8 +223,8 @@
 
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
 
-    <!-- Botón Sesión de Estudio (agregado desde index.html) -->
-    <a href="index.html" class="btn-sidebar btn-dark">
+    <!-- Botón Sesión de Estudio -->
+    <a href="estudio.html" class="btn-sidebar btn-dark">
         <i data-lucide="timer" class="icon-sm"></i> 🍅 Sesión de Estudio
     </a>
 
@@ -287,7 +287,57 @@
 </div>
 
 <script>
-    // ── INICIALIZACIÓN FIREBASE (misma que index.html y progreso.html) ──
+    // ==================== FUNCIONES DE SEGURIDAD ====================
+    
+    // Función para sanitizar HTML
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Función para sanitizar texto plano
+    function sanitizeText(str) {
+        if (!str) return '';
+        return str.replace(/[<>]/g, function(m) {
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Función para validar URLs de Google Drive (seguridad)
+    function isValidDriveLink(link) {
+        if (!link || typeof link !== 'string') return false;
+        const allowedDomains = ['drive.google.com', 'docs.google.com'];
+        try {
+            // Si el enlace no tiene protocolo, asumir https
+            let urlStr = link;
+            if (!urlStr.startsWith('http://') && !urlStr.startsWith('https://')) {
+                urlStr = 'https://' + urlStr;
+            }
+            const url = new URL(urlStr);
+            return allowedDomains.includes(url.hostname);
+        } catch(e) {
+            return false;
+        }
+    }
+    
+    // Función para limpiar y validar el enlace de Google Drive
+    function cleanDriveLink(link) {
+        if (!link) return '';
+        // Solo permitir enlaces de Google Drive
+        if (!isValidDriveLink(link)) return '';
+        return link;
+    }
+    
+    // ==================== FIN FUNCIONES DE SEGURIDAD ====================
+    
+    // ── INICIALIZACIÓN FIREBASE ──
     var firebaseConfig = {
         apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
         authDomain: "knowy-13079.firebaseapp.com",
@@ -301,7 +351,7 @@
     firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
     
-    // Configurar persistencia para mantener la sesión entre páginas
+    // Configurar persistencia
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .then(function() {
             console.log("Persistencia LOCAL configurada correctamente");
@@ -335,6 +385,7 @@
     document.getElementById('sidebarLogoutBtn').onclick = function() {
         auth.signOut().then(function() {
             sessionStorage.removeItem('guestMode');
+            location.reload();
         });
     };
 
@@ -344,11 +395,12 @@
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    // ── ESTADO DE AUTENTICACIÓN ──
+    // ── ESTADO DE AUTENTICACIÓN CON SANITIZACIÓN ──
     auth.onAuthStateChanged(function(user) {
         if (user) {
             var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
-            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + nombre;
+            var safeName = sanitizeText(nombre);
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + safeName;
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
@@ -364,31 +416,44 @@
         }
     });
 
-    // ── OBTENER PARÁMETROS DE LA URL ──
+    // ── OBTENER PARÁMETROS DE LA URL CON VALIDACIÓN ──
     var urlParams = new URLSearchParams(window.location.search);
     var nombreMateria = urlParams.get('name');
     var enlaceMateria = urlParams.get('link');
 
     if (nombreMateria && enlaceMateria) {
-        document.getElementById('materiaTitle').innerText = nombreMateria;
+        // SANITIZAR: limpiar el nombre de materia
+        var safeNombre = sanitizeText(nombreMateria);
+        document.getElementById('materiaTitle').innerText = safeNombre;
+        
         var iframe = document.getElementById('driveViewer');
         
-        if (enlaceMateria.includes('drive.google.com')) {
-            iframe.src = enlaceMateria.replace('/view', '/preview').replace('?usp=drive_link', '');
+        // VALIDAR: solo permitir enlaces de Google Drive
+        var cleanLink = cleanDriveLink(enlaceMateria);
+        
+        if (cleanLink && cleanLink.includes('drive.google.com')) {
+            // Limpiar el enlace para embed
+            var embedSrc = cleanLink.replace('/view', '/preview').replace('?usp=drive_link', '');
+            iframe.src = embedSrc;
+        } else if (cleanLink) {
+            iframe.src = cleanLink;
         } else {
-            iframe.src = enlaceMateria;
+            // Enlace no válido
+            iframe.src = 'about:blank';
+            document.getElementById('materiaTitle').innerText = 'Enlace no disponible';
+            document.getElementById('activeTitle').innerHTML = '<i data-lucide="alert-triangle" class="icon-md"></i> Contenido no disponible';
         }
     } else {
         document.getElementById('materiaTitle').innerText = "Ninguna materia seleccionada";
         document.getElementById('viewerCard').style.display = "none";
     }
 
-    // ── FUNCIÓN PARA SOLICITAR ACCESO ──
+    // ── FUNCIÓN PARA SOLICITAR ACCESO (con validación) ──
     window.pedirAcceso = function() {
-        if (enlaceMateria) {
+        if (enlaceMateria && isValidDriveLink(enlaceMateria)) {
             window.open(enlaceMateria, '_blank');
         } else {
-            alert("Error al cargar el enlace.");
+            alert("El enlace no es válido o no está disponible.");
         }
     };
 
