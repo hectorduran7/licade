@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario de Estudio | Biblioteca ADE</title>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PQGH6R9SZC');
+    </script>
+
+    <script>
+        const theme = localStorage.getItem('ungs_theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+    </script>
+
+    <!-- Firebase COMPAT -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #FF8C00;
+            --bg: #f9fafb;
+            --text: #1a1a1a;
+            --card-bg: rgba(255,255,255,0.7);
+            --sidebar-bg: rgba(244,244,244,0.85);
+            --border: #e5e7eb;
+            --danger: #ff4a4a;
+            --warning: #f59e0b;
+            --success: #22c55e;
+            --sidebar-width: 300px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #080808;
+            --text: #f5f5f5;
+            --card-bg: rgba(18,18,18,0.6);
+            --sidebar-bg: rgba(8,8,8,0.85);
+            --border: #222222;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            overflow-x: hidden;
+            transition: background-color .4s ease, color .4s ease;
+        }
+
+        .icon-sm { width: 16px; height: 16px; }
+        .icon-md { width: 20px; height: 20px; }
+        .icon-lg { width: 24px; height: 24px; }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 30px 20px 100px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            transition: transform .4s cubic-bezier(.4,0,.2,1);
+        }
+        .sidebar.hidden { transform: translateX(-100%); }
+
+        .main-content {
+            width: 100%;
+            max-width: 1000px;
+            margin-left: var(--sidebar-width);
+            margin-right: auto;
+            padding: 50px 20px 100px;
+            transition: margin-left .4s cubic-bezier(.4,0,.2,1);
+        }
+        .main-content.expanded { margin-left: auto; }
+
+        .toggle-btn, .theme-btn {
+            position: fixed;
+            z-index: 1100;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: .25s ease;
+        }
+
+        .toggle-btn {
+            left: 15px;
+            bottom: 20px;
+            padding: 12px 18px;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,140,0,.3);
+        }
+        .toggle-btn:hover { transform: translateY(-2px); }
+
+        .theme-btn {
+            top: 20px;
+            right: 20px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            backdrop-filter: blur(10px);
+        }
+        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { font-size: 2.7rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+        header p { color: #9ca3af; }
+
+        .btn-sidebar {
+            width: 100%; border: none; padding: 14px; border-radius: 10px; cursor: pointer;
+            font-size: 14px; font-weight: 600; transition: .25s ease; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 12px; text-decoration: none; box-sizing: border-box;
+        }
+        .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .btn-dark:hover { border-color: var(--primary); color: var(--primary); background: var(--card-bg); }
+        .btn-primary-solid { background: var(--primary); color: white; border: none; box-shadow: 0 4px 15px rgba(255,140,0,.2); }
+        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #e04444; }
+
+        /* ===== CALENDARIO ===== */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .month-nav button {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text);
+        }
+
+        .month-nav button:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .current-month {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .btn-add-event {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-add-event:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255,140,0,0.3);
+        }
+
+        /* Grid del calendario */
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            padding: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-height: 100px;
+            padding: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .calendar-day:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.4;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--primary);
+            background: rgba(255,140,0,0.1);
+        }
+
+        .day-number {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .day-events {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .day-event {
+            font-size: 10px;
+            padding: 3px 6px;
+            border-radius: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .day-event.exam {
+            background: rgba(255,74,74,0.2);
+            color: var(--danger);
+            border-left: 3px solid var(--danger);
+        }
+
+        .day-event.deadline {
+            background: rgba(245,158,11,0.2);
+            color: var(--warning);
+            border-left: 3px solid var(--warning);
+        }
+
+        .day-event.study {
+            background: rgba(34,197,94,0.2);
+            color: var(--success);
+            border-left: 3px solid var(--success);
+        }
+
+        .day-event:hover {
+            transform: scale(1.02);
+        }
+
+        /* Lista de eventos */
+        .events-list-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .events-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .events-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .events-title i {
+            color: var(--primary);
+        }
+
+        .events-filters {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .events-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            border-radius: 10px;
+            transition: .2s ease;
+        }
+
+        .event-item:hover {
+            background: rgba(255,140,0,.05);
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .event-details {
+            font-size: 12px;
+            color: #9ca3af;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .event-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .event-badge.exam { background: rgba(255,74,74,0.2); color: var(--danger); }
+        .event-badge.deadline { background: rgba(245,158,11,0.2); color: var(--warning); }
+        .event-badge.study { background: rgba(34,197,94,0.2); color: var(--success); }
+
+        .event-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .event-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color 0.2s;
+            padding: 5px;
+        }
+
+        .event-btn:hover {
+            color: var(--primary);
+        }
+
+        .event-btn.delete:hover {
+            color: var(--danger);
+        }
+
+        /* Modal de evento */
+        .event-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .event-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .event-modal-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .event-modal-content h2 {
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* Notificaciones */
+        .notification-banner {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .notification-banner.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        .notification-banner.danger {
+            border-left: 4px solid var(--danger);
+        }
+
+        .notification-banner i {
+            color: var(--warning);
+        }
+
+        .notification-banner.danger i {
+            color: var(--danger);
+        }
+
+        .notification-text {
+            flex: 1;
+        }
+
+        .notification-text strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .notification-text span {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        /* Otros */
+        .login-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(5px);
+            z-index: 2002; display: flex; justify-content: center; align-items: center;
+            transition: opacity .3s ease;
+        }
+        .login-modal.hidden { opacity: 0; pointer-events: none; }
+        .login-modal-content {
+            width: 90%; max-width: 400px; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 18px; padding: 40px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,.3);
+        }
+        .login-modal-content h2 { margin: 15px 0 10px; font-weight: 800; }
+        .login-modal-content p { color: #9ca3af; line-height: 1.5; margin-bottom: 25px; font-size: 14px; }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content { margin-left: 0; padding: 90px 15px 100px; }
+            header h1 { font-size: 2.1rem; }
+            .calendar-day { min-height: 70px; font-size: 12px; }
+            .day-number { font-size: 12px; }
+            .form-row { flex-direction: column; }
+            .calendar-header { flex-direction: column; }
+            .events-header { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="login-modal hidden">
+    <div class="login-modal-content">
+        <i data-lucide="lock" class="icon-lg" style="color: var(--primary); width: 40px; height: 40px; margin-bottom: 15px;"></i>
+        <h2>Inicia Sesión</h2>
+        <p>Para guardar tus eventos en la nube y acceder desde cualquier dispositivo, iniciá sesión con tu cuenta.</p>
+        <button id="btnModalLogin" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
+            <i data-lucide="log-in" class="icon-sm"></i>
+            Ingresar con Google
+        </button>
+        <button onclick="closeLoginModal()" class="btn-sidebar btn-dark" style="justify-content:center;">
+            Continuar sin guardar
+        </button>
+    </div>
+</div>
+
+<button class="toggle-btn" onclick="toggleSidebar()">
+    <i data-lucide="menu" class="icon-md"></i>
+    Herramientas
+</button>
+
+<button class="theme-btn" onclick="toggleTheme()">
+    <i data-lucide="moon" class="icon-sm"></i>
+    Tema
+</button>
+
+<aside class="sidebar hidden" id="sidebar">
+    <div id="userProfile" style="margin-bottom:25px; padding:15px; background:var(--card-bg); border:1px solid var(--border); border-radius:12px; text-align:center; backdrop-filter:blur(10px);">
+        <i data-lucide="user-circle" class="icon-lg" style="color:var(--primary); margin-bottom:8px;"></i>
+        <p id="userName" style="font-weight:700; margin-bottom:12px;">Invitado</p>
+        <button id="sidebarLoginBtn" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
+            <i data-lucide="log-in" class="icon-sm"></i>
+            Ingresar
+        </button>
+        <button id="sidebarLogoutBtn" class="btn-sidebar btn-dark" style="justify-content:center; display:none;">
+            <i data-lucide="log-out" class="icon-sm"></i>
+            Salir
+        </button>
+    </div>
+
+    <h2 style="display:flex; align-items:center; gap:8px; color:var(--primary); font-weight:800; margin-bottom:8px;">
+        <i data-lucide="library" class="icon-lg"></i> ADE UNGS
+    </h2>
+    <p style="color:#9ca3af; font-size:14px; margin-bottom:20px;">Navegación</p>
+    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+
+    <a href="index.html" class="btn-sidebar btn-dark">
+        <i data-lucide="search" class="icon-sm"></i> Buscar Materias
+    </a>
+    <a href="progreso.html" class="btn-sidebar btn-dark">
+        <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
+    </a>
+    <a href="estudio.html" class="btn-sidebar btn-dark">
+        <i data-lucide="timer" class="icon-sm"></i> Sesión de Estudio
+    </a>
+    <a href="calendario.html" class="btn-sidebar btn-primary-solid">
+        <i data-lucide="calendar" class="icon-sm"></i> Calendario
+    </a>
+
+    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+    <p style="color:#9ca3af; font-size:13px; font-weight:600; margin-bottom:15px;">Oportunidades</p>
+
+    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo
+    </a>
+    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="building" class="icon-sm"></i> Pasantías UNGS
+    </a>
+</aside>
+
+<div class="main-content expanded" id="mainContent">
+    <header>
+        <h1>Calendario de Estudio</h1>
+        <p>Organizá tus fechas importantes y recibí recordatorios</p>
+    </header>
+
+    <!-- Banner de próximos eventos (notificaciones) -->
+    <div id="upcomingEventsBanner" class="notification-banner warning" style="display: none;">
+        <i data-lucide="bell" class="icon-md"></i>
+        <div class="notification-text">
+            <strong>Próximos eventos</strong>
+            <span id="upcomingEventsText"></span>
+        </div>
+        <button onclick="document.getElementById('upcomingEventsBanner').style.display='none'" class="btn-dark" style="padding: 5px 10px;">Cerrar</button>
+    </div>
+
+    <!-- Calendario -->
+    <div class="calendar-header">
+        <div class="month-nav">
+            <button id="prevMonthBtn">
+                <i data-lucide="chevron-left" class="icon-sm"></i>
+            </button>
+            <span id="currentMonth" class="current-month"></span>
+            <button id="nextMonthBtn">
+                <i data-lucide="chevron-right" class="icon-sm"></i>
+            </button>
+        </div>
+        <button id="addEventBtn" class="btn-add-event">
+            <i data-lucide="plus" class="icon-sm"></i>
+            Agregar evento
+        </button>
+    </div>
+
+    <div class="calendar-weekdays">
+        <div class="weekday">Lun</div>
+        <div class="weekday">Mar</div>
+        <div class="weekday">Mié</div>
+        <div class="weekday">Jue</div>
+        <div class="weekday">Vie</div>
+        <div class="weekday">Sáb</div>
+        <div class="weekday">Dom</div>
+    </div>
+    <div id="calendarDays" class="calendar-days"></div>
+
+    <!-- Lista de eventos -->
+    <div class="events-list-container">
+        <div class="events-header">
+            <div class="events-title">
+                <i data-lucide="list" class="icon-md"></i>
+                Mis Eventos
+            </div>
+            <div class="events-filters">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="exam">Parciales</button>
+                <button class="filter-btn" data-filter="deadline">Entregas</button>
+                <button class="filter-btn" data-filter="study">Estudio</button>
+            </div>
+        </div>
+        <div id="eventsList" class="events-list">
+            <div style="text-align: center; padding: 40px; color: #9ca3af;">
+                <i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i>
+                <p>No hay eventos. Hacé clic en "Agregar evento" para comenzar.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>📅 Tus eventos se guardan en la nube y se sincronizan entre todos tus dispositivos.</p>
+    </div>
+</div>
+
+<!-- Modal para agregar/editar evento -->
+<div id="eventModal" class="event-modal hidden">
+    <div class="event-modal-content">
+        <h2 id="modalTitle">Agregar evento</h2>
+        <form id="eventForm">
+            <div class="form-group">
+                <label>Título del evento</label>
+                <input type="text" id="eventTitle" placeholder="Ej: Parcial de Economía" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="eventDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora (opcional)</label>
+                    <input type="time" id="eventTime">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Tipo de evento</label>
+                <select id="eventType">
+                    <option value="exam">Parcial / Final</option>
+                    <option value="deadline">Entrega de TP</option>
+                    <option value="study">Sesión de estudio</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Materia (opcional)</label>
+                <input type="text" id="eventSubject" placeholder="Ej: Economía Clásica">
+            </div>
+            <div class="form-group">
+                <label>Descripción (opcional)</label>
+                <textarea id="eventDescription" rows="3" placeholder="Detalles adicionales..."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" id="deleteEventBtn" class="btn-sidebar btn-danger" style="display: none;">Eliminar</button>
+                <button type="button" onclick="closeEventModal()" class="btn-sidebar btn-dark">Cancelar</button>
+                <button type="submit" class="btn-sidebar btn-primary-solid">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // ==================== FUNCIONES DE SEGURIDAD ====================
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function sanitizeText(str) {
+        if (!str) return '';
+        return str.replace(/[<>]/g, function(m) {
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ==================== FIREBASE ====================
+    var firebaseConfig = {
+        apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
+        authDomain: "knowy-13079.firebaseapp.com",
+        projectId: "knowy-13079",
+        storageBucket: "knowy-13079.firebasestorage.app",
+        messagingSenderId: "645341817520",
+        appId: "1:645341817520:web:799733f87a0ad1a0382975",
+        measurementId: "G-PQGH6R9SZC"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(function(error) { console.error("Persistencia error:", error); });
+
+    var googleProvider = new firebase.auth.GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    // ==================== ESTADO DEL CALENDARIO ====================
+    var currentDate = new Date();
+    var currentYear = currentDate.getFullYear();
+    var currentMonth = currentDate.getMonth();
+    var events = [];
+    var currentFilter = 'all';
+    var editingEventId = null;
+
+    // ==================== FUNCIONES DEL CALENDARIO ====================
+    function getDaysInMonth(year, month) {
+        return new Date(year, month + 1, 0).getDate();
+    }
+
+    function getFirstDayOfMonth(year, month) {
+        // 0 = Domingo, ajustamos para que 0 = Lunes
+        var firstDay = new Date(year, month, 1).getDay();
+        return firstDay === 0 ? 6 : firstDay - 1;
+    }
+
+    function formatDate(year, month, day) {
+        return year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    }
+
+    function getEventsForDate(dateStr) {
+        return events.filter(function(e) { return e.date === dateStr; });
+    }
+
+    function getEventTypeLabel(type) {
+        var labels = {
+            'exam': 'Parcial / Final',
+            'deadline': 'Entrega de TP',
+            'study': 'Sesión de estudio'
+        };
+        return labels[type] || type;
+    }
+
+    function renderCalendar() {
+        var daysInMonth = getDaysInMonth(currentYear, currentMonth);
+        var firstDayIndex = getFirstDayOfMonth(currentYear, currentMonth);
+        var prevMonthDays = getDaysInMonth(currentYear, currentMonth - 1);
+        
+        var calendarDays = document.getElementById('calendarDays');
+        calendarDays.innerHTML = '';
+        
+        var todayStr = formatDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+        var currentDateStr = formatDate(currentYear, currentMonth, 1);
+        
+        // Días del mes anterior
+        for (var i = firstDayIndex - 1; i >= 0; i--) {
+            var dayNum = prevMonthDays - i;
+            var dateStr = formatDate(currentYear, currentMonth - 1, dayNum);
+            var dayEvents = getEventsForDate(dateStr);
+            var dayDiv = createDayElement(dayNum, dateStr, dayEvents, true, false);
+            calendarDays.appendChild(dayDiv);
+        }
+        
+        // Días del mes actual
+        for (var d = 1; d <= daysInMonth; d++) {
+            var dateStr = formatDate(currentYear, currentMonth, d);
+            var dayEvents = getEventsForDate(dateStr);
+            var isToday = (dateStr === todayStr);
+            var dayDiv = createDayElement(d, dateStr, dayEvents, false, isToday);
+            calendarDays.appendChild(dayDiv);
+        }
+        
+        // Días del mes siguiente
+        var totalCells = Math.ceil((firstDayIndex + daysInMonth) / 7) * 7;
+        var nextMonthDays = totalCells - (firstDayIndex + daysInMonth);
+        for (var n = 1; n <= nextMonthDays; n++) {
+            var dateStr = formatDate(currentYear, currentMonth + 1, n);
+            var dayEvents = getEventsForDate(dateStr);
+            var dayDiv = createDayElement(n, dateStr, dayEvents, true, false);
+            calendarDays.appendChild(dayDiv);
+        }
+        
+        // Actualizar título del mes
+        var monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        document.getElementById('currentMonth').textContent = monthNames[currentMonth] + ' ' + currentYear;
+        
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    function createDayElement(dayNum, dateStr, dayEvents, isOtherMonth, isToday) {
+        var div = document.createElement('div');
+        div.className = 'calendar-day';
+        if (isOtherMonth) div.classList.add('other-month');
+        if (isToday) div.classList.add('today');
+        
+        div.onclick = function() { openAddEventModal(dateStr); };
+        
+        var dayNumberSpan = document.createElement('div');
+        dayNumberSpan.className = 'day-number';
+        dayNumberSpan.textContent = dayNum;
+        div.appendChild(dayNumberSpan);
+        
+        if (dayEvents.length > 0) {
+            var eventsContainer = document.createElement('div');
+            eventsContainer.className = 'day-events';
+            dayEvents.slice(0, 3).forEach(function(ev) {
+                var eventSpan = document.createElement('div');
+                eventSpan.className = 'day-event ' + ev.type;
+                eventSpan.textContent = ev.title.length > 20 ? ev.title.substring(0, 18) + '...' : ev.title;
+                eventSpan.onclick = function(e) {
+                    e.stopPropagation();
+                    openEditEventModal(ev.id);
+                };
+                eventsContainer.appendChild(eventSpan);
+            });
+            if (dayEvents.length > 3) {
+                var moreSpan = document.createElement('div');
+                moreSpan.className = 'day-event';
+                moreSpan.textContent = '+' + (dayEvents.length - 3) + ' más';
+                moreSpan.style.opacity = '0.7';
+                eventsContainer.appendChild(moreSpan);
+            }
+            div.appendChild(eventsContainer);
+        }
+        
+        return div;
+    }
+    
+    function renderEventsList() {
+        var filteredEvents = events;
+        if (currentFilter !== 'all') {
+            filteredEvents = events.filter(function(e) { return e.type === currentFilter; });
+        }
+        
+        filteredEvents.sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
+        
+        var container = document.getElementById('eventsList');
+        if (filteredEvents.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #9ca3af;"><i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i><p>No hay eventos para mostrar.</p></div>';
+            return;
+        }
+        
+        container.innerHTML = filteredEvents.map(function(event) {
+            var eventDate = new Date(event.date);
+            var formattedDate = eventDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+            if (event.time) formattedDate += ' - ' + event.time;
+            
+            var typeLabels = { exam: 'Parcial/Final', deadline: 'Entrega TP', study: 'Estudio' };
+            
+            return '<div class="event-item">' +
+                '<div class="event-info">' +
+                    '<div class="event-title">' + sanitizeHTML(event.title) + '</div>' +
+                    '<div class="event-details">' +
+                        '<span>' + sanitizeHTML(formattedDate) + '</span>' +
+                        (event.subject ? '<span>📖 ' + sanitizeHTML(event.subject) + '</span>' : '') +
+                        '<span class="event-badge ' + event.type + '">' + typeLabels[event.type] + '</span>' +
+                    '</div>' +
+                    (event.description ? '<div style="font-size: 11px; color: #9ca3af; margin-top: 5px;">' + sanitizeHTML(event.description) + '</div>' : '') +
+                '</div>' +
+                '<div class="event-actions">' +
+                    '<button class="event-btn" onclick="openEditEventModal(\'' + event.id + '\')" title="Editar"><i data-lucide="edit-2" class="icon-sm"></i></button>' +
+                    '<button class="event-btn delete" onclick="deleteEvent(\'' + event.id + '\')" title="Eliminar"><i data-lucide="trash-2" class="icon-sm"></i></button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+        
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    function checkUpcomingEvents() {
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        var upcoming = [];
+        for (var i = 0; i < events.length; i++) {
+            var eventDate = new Date(events[i].date);
+            eventDate.setHours(0, 0, 0, 0);
+            var diffDays = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+            if (diffDays >= 1 && diffDays <= 3) {
+                upcoming.push(events[i]);
+            }
+        }
+        
+        if (upcoming.length > 0) {
+            var banner = document.getElementById('upcomingEventsBanner');
+            var textSpan = document.getElementById('upcomingEventsText');
+            var eventNames = upcoming.map(function(e) { return e.title; }).join(', ');
+            textSpan.textContent = 'Tenés ' + upcoming.length + ' evento(s) en los próximos días: ' + eventNames;
+            banner.style.display = 'flex';
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    }
+    
+    // ==================== CRUD DE EVENTOS ====================
+    function loadEventsFromFirestore(user) {
+        if (!user) return;
+        
+        db.collection('users_calendar').doc(user.uid).collection('events').orderBy('date').get()
+            .then(function(querySnapshot) {
+                events = [];
+                querySnapshot.forEach(function(doc) {
+                    var data = doc.data();
+                    events.push({
+                        id: doc.id,
+                        title: data.title,
+                        date: data.date,
+                        time: data.time || '',
+                        type: data.type,
+                        subject: data.subject || '',
+                        description: data.description || ''
+                    });
+                });
+                renderCalendar();
+                renderEventsList();
+                checkUpcomingEvents();
+            })
+            .catch(function(error) {
+                console.error("Error cargando eventos:", error);
+            });
+    }
+    
+    function saveEventToFirestore(eventData, eventId) {
+        var user = auth.currentUser;
+        if (!user) return Promise.reject('No hay usuario');
+        
+        var docRef = db.collection('users_calendar').doc(user.uid).collection('events');
+        if (eventId) {
+            return docRef.doc(eventId).update(eventData);
+        } else {
+            return docRef.add(eventData);
+        }
+    }
+    
+    function deleteEventFromFirestore(eventId) {
+        var user = auth.currentUser;
+        if (!user) return Promise.reject('No hay usuario');
+        
+        return db.collection('users_calendar').doc(user.uid).collection('events').doc(eventId).delete();
+    }
+    
+    function addOrUpdateEvent(eventData, eventId) {
+        saveEventToFirestore(eventData, eventId)
+            .then(function() {
+                loadEventsFromFirestore(auth.currentUser);
+                closeEventModal();
+            })
+            .catch(function(error) {
+                console.error("Error guardando evento:", error);
+                alert('Error al guardar el evento');
+            });
+    }
+    
+    window.deleteEvent = function(eventId) {
+        if (confirm('¿Eliminar este evento?')) {
+            deleteEventFromFirestore(eventId)
+                .then(function() {
+                    loadEventsFromFirestore(auth.currentUser);
+                })
+                .catch(function(error) {
+                    console.error("Error eliminando evento:", error);
+                    alert('Error al eliminar el evento');
+                });
+        }
+    };
+    
+    // ==================== MODAL ====================
+    function openAddEventModal(dateStr) {
+        editingEventId = null;
+        document.getElementById('modalTitle').textContent = 'Agregar evento';
+        document.getElementById('eventForm').reset();
+        document.getElementById('eventDate').value = dateStr || formatDate(currentYear, currentMonth, new Date().getDate());
+        document.getElementById('deleteEventBtn').style.display = 'none';
+        document.getElementById('eventModal').classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    window.openEditEventModal = function(eventId) {
+        var event = events.find(function(e) { return e.id === eventId; });
+        if (!event) return;
+        
+        editingEventId = eventId;
+        document.getElementById('modalTitle').textContent = 'Editar evento';
+        document.getElementById('eventTitle').value = event.title;
+        document.getElementById('eventDate').value = event.date;
+        document.getElementById('eventTime').value = event.time || '';
+        document.getElementById('eventType').value = event.type;
+        document.getElementById('eventSubject').value = event.subject || '';
+        document.getElementById('eventDescription').value = event.description || '';
+        document.getElementById('deleteEventBtn').style.display = 'flex';
+        document.getElementById('eventModal').classList.remove('hidden');
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    };
+    
+    window.closeEventModal = function() {
+        document.getElementById('eventModal').classList.add('hidden');
+        editingEventId = null;
+    };
+    
+    document.getElementById('eventForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var title = document.getElementById('eventTitle').value.trim();
+        var date = document.getElementById('eventDate').value;
+        var time = document.getElementById('eventTime').value;
+        var type = document.getElementById('eventType').value;
+        var subject = document.getElementById('eventSubject').value.trim();
+        var description = document.getElementById('eventDescription').value.trim();
+        
+        if (!title || !date) {
+            alert('Completá el título y la fecha');
+            return;
+        }
+        
+        var eventData = {
+            title: sanitizeText(title),
+            date: date,
+            time: time || '',
+            type: type,
+            subject: sanitizeText(subject),
+            description: sanitizeText(description),
+            updatedAt: new Date().toISOString()
+        };
+        
+        addOrUpdateEvent(eventData, editingEventId);
+    });
+    
+    document.getElementById('deleteEventBtn').addEventListener('click', function() {
+        if (editingEventId && confirm('¿Eliminar este evento?')) {
+            deleteEventFromFirestore(editingEventId)
+                .then(function() {
+                    loadEventsFromFirestore(auth.currentUser);
+                    closeEventModal();
+                })
+                .catch(function(error) {
+                    console.error("Error eliminando evento:", error);
+                    alert('Error al eliminar el evento');
+                });
+        }
+    });
+    
+    // ==================== FILTROS ====================
+    document.querySelectorAll('.filter-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            currentFilter = btn.getAttribute('data-filter');
+            renderEventsList();
+        });
+    });
+    
+    // ==================== NAVEGACIÓN DEL CALENDARIO ====================
+    document.getElementById('prevMonthBtn').addEventListener('click', function() {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        renderCalendar();
+    });
+    
+    document.getElementById('nextMonthBtn').addEventListener('click', function() {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        renderCalendar();
+    });
+    
+    document.getElementById('addEventBtn').addEventListener('click', function() {
+        openAddEventModal(null);
+    });
+    
+    // ==================== AUTENTICACIÓN ====================
+    function doGoogleLogin() {
+        auth.signInWithPopup(googleProvider)
+            .then(function() { 
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+            })
+            .catch(function(error) { console.error("Login error:", error); });
+    }
+    
+    document.getElementById('btnModalLogin').onclick = doGoogleLogin;
+    document.getElementById('sidebarLoginBtn').onclick = function() {
+        document.getElementById('loginModal').classList.remove('hidden');
+    };
+    document.getElementById('sidebarLogoutBtn').onclick = function() {
+        auth.signOut().then(function() {
+            sessionStorage.removeItem('guestMode');
+            location.reload();
+        });
+    };
+    
+    window.closeLoginModal = function() {
+        document.getElementById('loginModal').classList.add('hidden');
+        sessionStorage.setItem('guestMode', 'true');
+    };
+    
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            var name = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
+            var safeName = sanitizeText(name);
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + safeName;
+            document.getElementById('sidebarLoginBtn').style.display = 'none';
+            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+            document.getElementById('loginModal').classList.add('hidden');
+            loadEventsFromFirestore(user);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        } else {
+            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display:inline;"></i> Invitado';
+            document.getElementById('sidebarLoginBtn').style.display = 'flex';
+            document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            if (!sessionStorage.getItem('guestMode')) {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    });
+    
+    // ==================== SIDEBAR Y TEMA ====================
+    window.toggleSidebar = function() {
+        document.getElementById('sidebar').classList.toggle('hidden');
+        document.getElementById('mainContent').classList.toggle('expanded');
+    };
+    
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('ungs_theme', theme);
+    }
+    
+    window.toggleTheme = function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        if (!localStorage.getItem('ungs_theme')) applyTheme(e.matches ? 'dark' : 'light');
+    });
+    
+    // ==================== INICIALIZAR ====================
+    renderCalendar();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+</script>
+</body>
+</html>
