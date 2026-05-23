@@ -25,6 +25,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase App Check (PROTECCIÓN API) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -292,6 +295,9 @@
     <a href="estudio.html" class="btn-sidebar btn-dark">
         <i data-lucide="timer" class="icon-sm"></i> 🍅 Sesión de Estudio
     </a>
+    <a href="calendario.html" class="btn-sidebar btn-dark">
+        <i data-lucide="calendar" class="icon-sm"></i> Calendario
+    </a>
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
     <p style="color:#9ca3af; font-size:13px; font-weight:600; margin-bottom:15px;">Oportunidades</p>
     <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark">
@@ -406,6 +412,17 @@
     firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
     var db = firebase.firestore();
+    
+    // ==================== APP CHECK (PROTECCIÓN API) ====================
+    var SITE_KEY = "6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u";
+    
+    try {
+        var appCheck = firebase.appCheck();
+        appCheck.activate(SITE_KEY, true);
+        console.log("✅ App Check activado correctamente");
+    } catch (error) {
+        console.error("❌ Error activando App Check:", error);
+    }
     
     // ✅ PERSISTENCIA LOCAL - Mantiene sesión entre páginas
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
@@ -529,7 +546,6 @@
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
             
             // Modo invitado: cargar desde sessionStorage (más seguro que localStorage)
-            // Cambiado de localStorage a sessionStorage para mejor seguridad
             var savedEntries = sessionStorage.getItem('ungs_grades_backup_guest');
             if (savedEntries) {
                 try {
@@ -601,7 +617,7 @@
         if (currentUser) {
             saveToFirestore();
         } else {
-            // Backup en sessionStorage para modo invitado (más seguro que localStorage)
+            // Backup en sessionStorage para modo invitado
             sessionStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
         }
         
@@ -632,7 +648,6 @@
             '</div>';
         } else {
             list.innerHTML = entries.map(function(entry, index) {
-                // entry.subj ya está sanitizado al guardar, pero aplicamos escapeHtml por si acaso
                 return '<div class="grade-item">' +
                     '<span style="font-weight:500;">' + escapeHtml(entry.subj) + '</span>' +
                     '<span style="display:flex; align-items:center; gap:10px;">' +
