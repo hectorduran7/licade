@@ -24,6 +24,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase App Check (PROTECCIÓN API) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -795,6 +798,17 @@
     firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
     var db = firebase.firestore();
+    
+    // ==================== APP CHECK (PROTECCIÓN API) ====================
+    var SITE_KEY = "6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u";
+    
+    try {
+        var appCheck = firebase.appCheck();
+        appCheck.activate(SITE_KEY, true);
+        console.log("✅ App Check activado correctamente");
+    } catch (error) {
+        console.error("❌ Error activando App Check:", error);
+    }
 
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .catch(function(error) { console.error("Persistencia error:", error); });
