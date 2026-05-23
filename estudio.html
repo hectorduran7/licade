@@ -24,6 +24,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase App Check (PROTECCIÓN API) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -689,6 +692,9 @@
     <a href="estudio.html" class="btn-sidebar btn-primary-solid">
         <i data-lucide="timer" class="icon-sm"></i> Sesión de Estudio
     </a>
+    <a href="calendario.html" class="btn-sidebar btn-dark">
+        <i data-lucide="calendar" class="icon-sm"></i> Calendario
+    </a>
 
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
     <p style="color:#9ca3af; font-size:13px; font-weight:600; margin-bottom:15px;">Oportunidades</p>
@@ -883,6 +889,58 @@
         "IPE 3"
     ];
 
+    // ==================== FUNCIONES DE SEGURIDAD ====================
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function sanitizeText(str) {
+        if (!str) return '';
+        return str.replace(/[<>]/g, function(m) {
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // ==================== FIREBASE ====================
+    var firebaseConfig = {
+        apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
+        authDomain: "knowy-13079.firebaseapp.com",
+        projectId: "knowy-13079",
+        storageBucket: "knowy-13079.firebasestorage.app",
+        messagingSenderId: "645341817520",
+        appId: "1:645341817520:web:799733f87a0ad1a0382975",
+        measurementId: "G-PQGH6R9SZC"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
+    
+    // ==================== APP CHECK (PROTECCIÓN API) ====================
+    var SITE_KEY = "6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u";
+    
+    try {
+        var appCheck = firebase.appCheck();
+        appCheck.activate(SITE_KEY, true);
+        console.log("✅ App Check activado correctamente");
+    } catch (error) {
+        console.error("❌ Error activando App Check:", error);
+    }
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(function(error) { console.error("Persistencia error:", error); });
+
+    var googleProvider = new firebase.auth.GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+
     // ==================== ELEMENTOS DOM ====================
     var subjectInput = document.getElementById('subjectInput');
     var suggestionsBox = document.getElementById('suggestionsBox');
@@ -892,7 +950,6 @@
     var playBtn = document.getElementById('playBtn');
     var pauseBtn = document.getElementById('pauseBtn');
 
-    // Elementos de duración
     var durationNumber = document.getElementById('durationNumber');
     var durationMinus = document.getElementById('durationMinus');
     var durationPlus = document.getElementById('durationPlus');
@@ -953,19 +1010,19 @@
 
     // ==================== CONFIRMAR MATERIA ====================
     confirmSubjectBtn.addEventListener('click', function() {
-        var subject = subjectInput.value.trim();
+        var subject = sanitizeText(subjectInput.value.trim());
         if (!subject) {
             showNotification('Escribí o seleccioná una materia primero');
             return;
         }
         currentSubject = subject;
-        currentSubjectDisplay.innerHTML = '<i data-lucide="check-circle" class="icon-sm" style="margin-right: 5px;"></i> Estudiando: ' + currentSubject;
+        currentSubjectDisplay.innerHTML = '<i data-lucide="check-circle" class="icon-sm" style="margin-right: 5px;"></i> Estudiando: ' + sanitizeHTML(currentSubject);
         currentSubjectDisplay.classList.add('show');
         if (typeof lucide !== 'undefined') lucide.createIcons();
         showNotification('Materia seleccionada: ' + currentSubject);
     });
 
-    // ==================== CONTROL DE DURACIÓN MEJORADO ====================
+    // ==================== CONTROL DE DURACIÓN ====================
     function updateDurationDisplay(minutes) {
         durationNumber.textContent = minutes;
         if (!unlimitedCheck.checked && !timerRunning) {
@@ -1042,17 +1099,10 @@
 
     // ==================== TIMER FUNCTIONS ====================
     function updateDisplay() {
-        if (isUnlimited) {
-            var mins = Math.floor(currentSeconds / 60);
-            var secs = currentSeconds % 60;
-            document.getElementById('timerDisplay').textContent = 
-                String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-        } else {
-            var mins = Math.floor(currentSeconds / 60);
-            var secs = currentSeconds % 60;
-            document.getElementById('timerDisplay').textContent = 
-                String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
-        }
+        var mins = Math.floor(currentSeconds / 60);
+        var secs = currentSeconds % 60;
+        document.getElementById('timerDisplay').textContent = 
+            String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
     }
 
     function startTimer() {
@@ -1173,47 +1223,7 @@
         showNotification('Estudiado: ' + currentSubject + ' - ' + durationText);
     }
 
-    // ==================== FUNCIONES DE SEGURIDAD ====================
-    function sanitizeHTML(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-    
-    function sanitizeText(str) {
-        if (!str) return '';
-        return str.replace(/[<>]/g, function(m) {
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-    
-    // ==================== FIREBASE ====================
-    var firebaseConfig = {
-        apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
-        authDomain: "knowy-13079.firebaseapp.com",
-        projectId: "knowy-13079",
-        storageBucket: "knowy-13079.firebasestorage.app",
-        messagingSenderId: "645341817520",
-        appId: "1:645341817520:web:799733f87a0ad1a0382975",
-        measurementId: "G-PQGH6R9SZC"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    var auth = firebase.auth();
-    var db = firebase.firestore();
-
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .catch(function(error) { console.error("Persistencia error:", error); });
-
-    var googleProvider = new firebase.auth.GoogleAuthProvider();
-    googleProvider.setCustomParameters({ prompt: 'select_account' });
-
+    // ==================== ESTADO DEL TIMER ====================
     var timerState = {
         sessionsCompleted: 0,
         totalWorkSeconds: 0,
