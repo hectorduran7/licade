@@ -23,6 +23,9 @@
     <!-- Firebase COMPAT -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    
+    <!-- Firebase App Check (PROTECCIÓN API) -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -213,7 +216,6 @@
             background-color: #1a1a1a;
         }
 
-        /* ===== NUEVOS ESTILOS PARA ERROR Y LOADING ===== */
         .loading-overlay {
             display: none;
             flex-direction: column;
@@ -355,6 +357,10 @@
     <a href="estudio.html" class="btn-sidebar btn-dark">
         <i data-lucide="timer" class="icon-sm"></i> 🍅 Sesión de Estudio
     </a>
+    
+    <a href="calendario.html" class="btn-sidebar btn-dark">
+        <i data-lucide="calendar" class="icon-sm"></i> Calendario
+    </a>
 
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
 
@@ -405,14 +411,12 @@
             </div>
         </div>
         
-        <!-- Loading -->
         <div id="loadingOverlay" class="loading-overlay">
             <div class="spinner"></div>
             <p>Cargando contenido desde Google Drive...</p>
             <p style="font-size: 12px; margin-top: 10px;">Esto puede tomar unos segundos</p>
         </div>
         
-        <!-- Error 403 (carpeta privada) -->
         <div id="errorOverlay" class="error-overlay">
             <i data-lucide="lock" class="error-icon"></i>
             <h3>🔒 Acceso restringido</h3>
@@ -446,7 +450,8 @@
 </div>
 
 <script>
-    // ── FUNCIONES DE SEGURIDAD ──
+    // ==================== FUNCIONES DE SEGURIDAD ====================
+    
     function sanitizeHTML(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -465,6 +470,24 @@
             return m;
         });
     }
+    
+    // Validación de URLs de Google Drive
+    function isValidDriveLink(link) {
+        if (!link || typeof link !== 'string') return false;
+        var allowedDomains = ['drive.google.com', 'docs.google.com'];
+        try {
+            var urlStr = link;
+            if (!urlStr.startsWith('http://') && !urlStr.startsWith('https://')) {
+                urlStr = 'https://' + urlStr;
+            }
+            var url = new URL(urlStr);
+            return allowedDomains.includes(url.hostname);
+        } catch(e) {
+            return false;
+        }
+    }
+    
+    // ==================== FIN FUNCIONES DE SEGURIDAD ====================
 
     // ── FIREBASE ──
     var firebaseConfig = {
@@ -479,6 +502,17 @@
 
     firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
+    
+    // ==================== APP CHECK (PROTECCIÓN API) ====================
+    var SITE_KEY = "6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u";
+    
+    try {
+        var appCheck = firebase.appCheck();
+        appCheck.activate(SITE_KEY, true);
+        console.log("✅ App Check activado correctamente");
+    } catch (error) {
+        console.error("❌ Error activando App Check:", error);
+    }
     
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .then(function() { console.log("Persistencia LOCAL configurada"); })
@@ -542,13 +576,11 @@
     var enlaceMateria = urlParams.get('link');
     var accessRequestedKey = 'access_requested_' + (enlaceMateria || '');
 
-    // Elementos del DOM
     var iframe = document.getElementById('driveViewer');
     var loadingDiv = document.getElementById('loadingOverlay');
     var errorDiv = document.getElementById('errorOverlay');
     var accessRequestedMsg = document.getElementById('accessRequestedMsg');
 
-    // Verificar si ya se solicitó acceso a esta carpeta
     function checkAccessRequested() {
         var requested = localStorage.getItem(accessRequestedKey);
         if (requested && accessRequestedMsg) {
@@ -556,7 +588,6 @@
         }
     }
 
-    // Marcar que se solicitó acceso
     function markAccessRequested() {
         localStorage.setItem(accessRequestedKey, new Date().toISOString());
         if (accessRequestedMsg) {
@@ -564,7 +595,6 @@
         }
     }
 
-    // Mostrar error 403 manualmente (cuando el iframe no carga)
     function showError() {
         loadingDiv.classList.remove('show');
         iframe.classList.add('hide');
@@ -573,14 +603,12 @@
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
-    // Mostrar loading y ocultar error
     function showLoading() {
         loadingDiv.classList.add('show');
         iframe.classList.add('hide');
         errorDiv.classList.remove('show');
     }
 
-    // Ocultar loading y mostrar iframe
     function showIframe() {
         loadingDiv.classList.remove('show');
         iframe.classList.remove('hide');
@@ -591,76 +619,72 @@
         var safeNombre = sanitizeText(nombreMateria);
         document.getElementById('materiaTitle').innerText = safeNombre;
         
-        showLoading();
-        
-        // Construir URL del iframe
-        var iframeUrl = '';
-        
-        if (enlaceMateria.includes('drive.google.com')) {
-            var previewUrl = enlaceMateria
-                .replace('/view', '/preview')
-                .replace('?usp=drive_link', '')
-                .replace('edit', 'preview');
-            
-            if (enlaceMateria.includes('folders')) {
-                iframeUrl = enlaceMateria + '/preview';
-            } else {
-                iframeUrl = previewUrl;
-            }
+        // VALIDAR ENLACE ANTES DE PROCESAR
+        if (!isValidDriveLink(enlaceMateria)) {
+            document.getElementById('materiaTitle').innerText = safeNombre + ' (Enlace no válido)';
+            showError();
         } else {
-            iframeUrl = enlaceMateria;
-        }
-        
-        iframe.src = iframeUrl;
-        
-        // Detectar si el iframe carga correctamente
-        iframe.onload = function() {
-            // Pequeño delay para asegurar que el iframe realmente cargó
-            setTimeout(function() {
-                try {
-                    // Intentar acceder al contenido del iframe (fallará si es cross-origin)
-                    var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    if (iframeDoc && iframeDoc.body && iframeDoc.body.innerHTML.includes('403')) {
-                        showError();
-                    } else {
+            showLoading();
+            
+            var iframeUrl = '';
+            
+            if (enlaceMateria.includes('drive.google.com')) {
+                var previewUrl = enlaceMateria
+                    .replace('/view', '/preview')
+                    .replace('?usp=drive_link', '')
+                    .replace('edit', 'preview');
+                
+                if (enlaceMateria.includes('folders')) {
+                    iframeUrl = enlaceMateria + '/preview';
+                } else {
+                    iframeUrl = previewUrl;
+                }
+            } else {
+                iframeUrl = enlaceMateria;
+            }
+            
+            iframe.src = iframeUrl;
+            
+            iframe.onload = function() {
+                setTimeout(function() {
+                    try {
+                        var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        if (iframeDoc && iframeDoc.body && iframeDoc.body.innerHTML.includes('403')) {
+                            showError();
+                        } else {
+                            showIframe();
+                        }
+                    } catch(e) {
                         showIframe();
                     }
-                } catch(e) {
-                    // Error de cross-origin = el iframe cargó contenido de otro dominio
-                    // Asumimos que está bien (o no podemos detectarlo)
-                    // Mostramos el iframe y esperamos que funcione
-                    showIframe();
-                }
-            }, 2000);
-        };
-        
-        iframe.onerror = function() {
-            showError();
-        };
-        
-        // Timeout por si el iframe nunca carga
-        setTimeout(function() {
-            if (loadingDiv.classList.contains('show')) {
+                }, 2000);
+            };
+            
+            iframe.onerror = function() {
                 showError();
-            }
-        }, 8000);
-        
+            };
+            
+            setTimeout(function() {
+                if (loadingDiv.classList.contains('show')) {
+                    showError();
+                }
+            }, 8000);
+        }
     } else {
         document.getElementById('materiaTitle').innerText = "Ninguna materia seleccionada";
         document.getElementById('viewerCard').style.display = "none";
     }
 
-    // ── FUNCIONES PARA BOTONES ──
     window.abrirEnDrive = function() {
-        if (enlaceMateria) {
+        if (enlaceMateria && isValidDriveLink(enlaceMateria)) {
             window.open(enlaceMateria, '_blank');
         } else {
-            alert("No se pudo abrir el enlace.");
+            alert("El enlace no es válido.");
         }
     };
 
     window.solicitarAccesoEnDrive = function() {
-        if (enlaceMateria) {
+        if (enlaceMateria && isValidDriveLink(enlaceMateria)) {
             markAccessRequested();
             window.open(enlaceMateria, '_blank');
         } else {
