@@ -1,0 +1,26 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno (archivos con secretos)
+.env
+.env.local
+.env.production.local
+.env.development.local
+firebase-config.js
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# Editor
+.vscode/
+.idea/
+
+# Firebase
+.firebase/
+
+# Jekyll (GitHub Pages)
+_site/
+.sass-cache/
+.jekyll-metadata
