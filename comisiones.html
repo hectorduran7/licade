@@ -428,7 +428,7 @@
 
 <div class="main-content expanded" id="mainContent">
     <header>
-        <h1>👥 Grupos de Estudio</h1>
+        <h1>Grupos de Estudio</h1>
         <p>Encontrá compañeros en tu misma comisión y armá grupos de estudio</p>
     </header>
 
@@ -440,20 +440,20 @@
         </div>
 
         <div class="form-group">
-            <label>📚 Materia</label>
+            <label>Materia</label>
             <select id="materiaSelect">
                 <option value="">Seleccioná una materia...</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label>📅 Tu comisión</label>
+            <label>Tu comisión</label>
             <input type="text" id="comisionInput" placeholder="Ej: Comisión 1 - Lunes 18:00">
             <div class="form-hint">Escribí tu comisión como quieras. Ej: "Comisión 1 - Lunes 18:00", "Comi 2", "Turno noche"</div>
         </div>
 
         <div class="form-group">
-            <label>📱 WhatsApp (opcional)</label>
+            <label>WhatsApp (opcional)</label>
             <input type="text" id="whatsappInput" placeholder="+54 9 11 1234-5678">
             <div class="form-hint">Compartí tu WhatsApp para que otros compañeros te contacten</div>
         </div>
@@ -488,7 +488,7 @@
     </div>
 
     <div class="footer">
-        <p>🔒 Los datos de contacto solo se comparten con compañeros de tu misma materia y comisión</p>
+        <p>Los datos de contacto solo se comparten con compañeros de tu misma materia y comisión</p>
     </div>
 </div>
 
@@ -598,6 +598,15 @@
     var currentMateria = '';
     var currentComision = '';
 
+    // Función para generar ID válido para Firestore
+    function generarIdValido(texto) {
+        return texto.toLowerCase()
+            .replace(/[^a-z0-9]/g, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_|_$/, '')
+            .substring(0, 100);
+    }
+
     // Cargar materias en el select
     function cargarMaterias() {
         materiaSelect.innerHTML = '<option value="">Seleccioná una materia...</option>';
@@ -660,7 +669,7 @@
     }
 
     // Guardar comisión del usuario
-    function guardarComision() {
+    window.guardarComision = function() {
         var user = auth.currentUser;
         if (!user) {
             mostrarLoginRequerido();
@@ -686,6 +695,10 @@
         btnGuardar.disabled = true;
         btnGuardar.innerHTML = '<i data-lucide="loader" class="icon-sm"></i> Guardando...';
         
+        // Crear ID válido para Firestore
+        var materiaId = generarIdValido(materia);
+        var docId = user.uid + '_' + materiaId;
+        
         var data = {
             uid: user.uid,
             nombre: sanitizeText(nombre),
@@ -695,22 +708,20 @@
             updatedAt: new Date().toISOString()
         };
         
-        db.collection('grupos_estudio').doc(user.uid + '_' + materia.replace(/\s/g, '_')).set(data, { merge: true })
+        db.collection('grupos_estudio').doc(docId).set(data, { merge: true })
             .then(function() {
                 btnGuardar.disabled = false;
                 btnGuardar.innerHTML = '<i data-lucide="save" class="icon-sm"></i> Guardar y ver compañeros';
-                showToast('¡Te uniste al grupo de estudio!');
+                showToast('Te uniste al grupo de estudio');
                 cargarCompaneros();
             })
             .catch(function(error) {
                 console.error("Error guardando:", error);
                 btnGuardar.disabled = false;
                 btnGuardar.innerHTML = '<i data-lucide="save" class="icon-sm"></i> Guardar y ver compañeros';
-                alert('Error al guardar. Intentá de nuevo.');
+                alert('Error al guardar: ' + error.message);
             });
-    }
-    
-    window.guardarComision = guardarComision;
+    };
     
     function mostrarLoginRequerido() {
         loginRequiredMsg.style.display = 'block';
@@ -722,11 +733,9 @@
         btnGuardar.style.display = 'block';
     }
     
-    function abrirLoginModal() {
+    window.abrirLoginModal = function() {
         document.getElementById('loginModal').classList.remove('hidden');
-    }
-    
-    window.abrirLoginModal = abrirLoginModal;
+    };
     
     function showToast(message) {
         var toast = document.createElement('div');
