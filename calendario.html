@@ -25,7 +25,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
     
-    <!-- Firebase App Check (PROTECCIÓN API) -->
+    <!-- Firebase App Check -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
 
     <style>
@@ -498,29 +498,52 @@
             margin-top: 20px;
         }
 
-        /* Notificaciones */
+        /* ===== BANNER DE NOTIFICACIONES MEJORADO ===== */
         .notification-banner {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: none;
+            flex-direction: column;
             gap: 15px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .notification-banner.warning {
-            border-left: 4px solid var(--warning);
+            border-left: 5px solid var(--warning);
+            background: linear-gradient(135deg, rgba(245,158,11,0.05), var(--card-bg));
         }
 
         .notification-banner.danger {
-            border-left: 4px solid var(--danger);
+            border-left: 5px solid var(--danger);
+            background: linear-gradient(135deg, rgba(255,74,74,0.05), var(--card-bg));
         }
 
-        .notification-banner i {
+        .notification-banner-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification-banner-header i {
+            width: 28px;
+            height: 28px;
+        }
+
+        .notification-banner.warning i {
             color: var(--warning);
         }
 
@@ -528,18 +551,97 @@
             color: var(--danger);
         }
 
-        .notification-text {
-            flex: 1;
+        .notification-banner-header strong {
+            font-size: 1.1rem;
+            color: var(--text);
         }
 
-        .notification-text strong {
-            display: block;
-            margin-bottom: 5px;
+        .notification-events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-left: 40px;
         }
 
-        .notification-text span {
-            font-size: 13px;
+        .notification-event-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--bg);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .notification-event-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .notification-event-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .notification-event-date {
+            font-size: 12px;
             color: #9ca3af;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .notification-event-badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .notification-event-badge.exam { background: rgba(255,74,74,0.2); color: var(--danger); }
+        .notification-event-badge.deadline { background: rgba(245,158,11,0.2); color: var(--warning); }
+        .notification-event-badge.study { background: rgba(34,197,94,0.2); color: var(--success); }
+
+        .notification-banner-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-left: 40px;
+        }
+
+        .btn-snooze {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-snooze:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-dismiss {
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .btn-dismiss:hover {
+            transform: translateY(-2px);
         }
 
         /* Otros */
@@ -573,6 +675,9 @@
             .form-row { flex-direction: column; }
             .calendar-header { flex-direction: column; }
             .events-header { flex-direction: column; }
+            .notification-event-item { flex-direction: column; align-items: flex-start; }
+            .notification-banner-buttons { margin-left: 0; justify-content: flex-start; }
+            .notification-events-list { margin-left: 0; }
         }
     </style>
 </head>
@@ -654,14 +759,9 @@
         <p>Organizá tus fechas importantes y recibí recordatorios</p>
     </header>
 
-    <!-- Banner de próximos eventos (notificaciones) -->
-    <div id="upcomingEventsBanner" class="notification-banner warning" style="display: none;">
-        <i data-lucide="bell" class="icon-md"></i>
-        <div class="notification-text">
-            <strong>Próximos eventos</strong>
-            <span id="upcomingEventsText"></span>
-        </div>
-        <button onclick="document.getElementById('upcomingEventsBanner').style.display='none'" class="btn-dark" style="padding: 5px 10px;">Cerrar</button>
+    <!-- Banner de próximos eventos MEJORADO -->
+    <div id="upcomingEventsBanner" class="notification-banner">
+        <!-- Contenido dinámico -->
     </div>
 
     <!-- Calendario -->
@@ -799,7 +899,7 @@
     var auth = firebase.auth();
     var db = firebase.firestore();
     
-    // ==================== APP CHECK (PROTECCIÓN API) ====================
+    // ==================== APP CHECK ====================
     var SITE_KEY = "6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u";
     
     try {
@@ -830,7 +930,6 @@
     }
 
     function getFirstDayOfMonth(year, month) {
-        // 0 = Domingo, ajustamos para que 0 = Lunes
         var firstDay = new Date(year, month, 1).getDay();
         return firstDay === 0 ? 6 : firstDay - 1;
     }
@@ -843,15 +942,6 @@
         return events.filter(function(e) { return e.date === dateStr; });
     }
 
-    function getEventTypeLabel(type) {
-        var labels = {
-            'exam': 'Parcial / Final',
-            'deadline': 'Entrega de TP',
-            'study': 'Sesión de estudio'
-        };
-        return labels[type] || type;
-    }
-
     function renderCalendar() {
         var daysInMonth = getDaysInMonth(currentYear, currentMonth);
         var firstDayIndex = getFirstDayOfMonth(currentYear, currentMonth);
@@ -861,7 +951,6 @@
         calendarDays.innerHTML = '';
         
         var todayStr = formatDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-        var currentDateStr = formatDate(currentYear, currentMonth, 1);
         
         // Días del mes anterior
         for (var i = firstDayIndex - 1; i >= 0; i--) {
@@ -891,7 +980,6 @@
             calendarDays.appendChild(dayDiv);
         }
         
-        // Actualizar título del mes
         var monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         document.getElementById('currentMonth').textContent = monthNames[currentMonth] + ' ' + currentYear;
         
@@ -978,9 +1066,39 @@
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     
+    // ==================== NOTIFICACIONES MEJORADAS ====================
+    function getDaysRemaining(eventDateStr) {
+        var today = new Date();
+        today.setHours(0, 0, 0, 0);
+        var eventDate = new Date(eventDateStr);
+        eventDate.setHours(0, 0, 0, 0);
+        var diffDays = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }
+    
+    function getEventTypeText(type) {
+        var types = {
+            'exam': 'Parcial/Final',
+            'deadline': 'Entrega de TP',
+            'study': 'Sesión de estudio'
+        };
+        return types[type] || type;
+    }
+    
     function checkUpcomingEvents() {
         var today = new Date();
         today.setHours(0, 0, 0, 0);
+        
+        // Verificar si el usuario pospuso las notificaciones
+        var snoozedUntil = localStorage.getItem('event_notification_snooze');
+        if (snoozedUntil) {
+            var snoozeDate = new Date(parseInt(snoozedUntil));
+            if (new Date() < snoozeDate) {
+                return;
+            } else {
+                localStorage.removeItem('event_notification_snooze');
+            }
+        }
         
         var upcoming = [];
         for (var i = 0; i < events.length; i++) {
@@ -988,19 +1106,86 @@
             eventDate.setHours(0, 0, 0, 0);
             var diffDays = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
             if (diffDays >= 1 && diffDays <= 3) {
-                upcoming.push(events[i]);
+                upcoming.push({
+                    event: events[i],
+                    daysRemaining: diffDays
+                });
             }
         }
         
-        if (upcoming.length > 0) {
-            var banner = document.getElementById('upcomingEventsBanner');
-            var textSpan = document.getElementById('upcomingEventsText');
-            var eventNames = upcoming.map(function(e) { return e.title; }).join(', ');
-            textSpan.textContent = 'Tenés ' + upcoming.length + ' evento(s) en los próximos días: ' + eventNames;
-            banner.style.display = 'flex';
-            
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+        var banner = document.getElementById('upcomingEventsBanner');
+        
+        if (upcoming.length === 0) {
+            banner.style.display = 'none';
+            return;
         }
+        
+        // Determinar urgencia
+        var hasUrgent = upcoming.some(function(e) { return e.daysRemaining === 1; });
+        var bannerClass = hasUrgent ? 'danger' : 'warning';
+        banner.className = 'notification-banner ' + bannerClass;
+        
+        // Construir HTML del banner
+        var bannerHtml = '<div class="notification-banner-header">' +
+            '<i data-lucide="' + (hasUrgent ? 'alert-triangle' : 'bell') + '" class="icon-md"></i>' +
+            '<strong>' + (hasUrgent ? '¡Atención! Eventos para mañana' : 'Próximos eventos') + '</strong>' +
+        '</div>';
+        
+        bannerHtml += '<div class="notification-events-list">';
+        
+        for (var j = 0; j < upcoming.length; j++) {
+            var item = upcoming[j];
+            var event = item.event;
+            var daysRemaining = item.daysRemaining;
+            
+            var daysText = '';
+            if (daysRemaining === 1) daysText = 'Mañana';
+            else if (daysRemaining === 2) daysText = 'Pasado mañana';
+            else daysText = 'En ' + daysRemaining + ' días';
+            
+            bannerHtml += '<div class="notification-event-item">' +
+                '<div class="notification-event-info">' +
+                    '<span class="notification-event-title">' + sanitizeHTML(event.title) + '</span>' +
+                    '<span class="notification-event-date">' +
+                        '<i data-lucide="calendar" class="icon-sm" style="width: 12px; height: 12px;"></i> ' + daysText +
+                    '</span>' +
+                    '<span class="notification-event-badge ' + event.type + '">' + getEventTypeText(event.type) + '</span>' +
+                    (event.subject ? '<span style="font-size: 11px; color: #9ca3af;">📖 ' + sanitizeHTML(event.subject) + '</span>' : '') +
+                '</div>' +
+            '</div>';
+        }
+        
+        bannerHtml += '</div>';
+        
+        bannerHtml += '<div class="notification-banner-buttons">' +
+            '<button class="btn-snooze" onclick="snoozeNotifications()">⏰ Recordar después (3h)</button>' +
+            '<button class="btn-dismiss" onclick="dismissNotificationBanner()">✓ Entendido</button>' +
+        '</div>';
+        
+        banner.innerHTML = bannerHtml;
+        banner.style.display = 'flex';
+        
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+    
+    window.snoozeNotifications = function() {
+        var snoozeUntil = new Date();
+        snoozeUntil.setHours(snoozeUntil.getHours() + 3);
+        localStorage.setItem('event_notification_snooze', snoozeUntil.getTime());
+        document.getElementById('upcomingEventsBanner').style.display = 'none';
+        showToast('Te recordaremos en 3 horas', 'info');
+    };
+    
+    window.dismissNotificationBanner = function() {
+        document.getElementById('upcomingEventsBanner').style.display = 'none';
+    };
+    
+    function showToast(message, type) {
+        var toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 12px 20px; border-radius: 8px; z-index: 3000; animation: slideIn 0.3s ease;';
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.remove(); }, 3000);
     }
     
     // ==================== CRUD DE EVENTOS ====================
