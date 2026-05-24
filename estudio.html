@@ -25,7 +25,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
     
-    <!-- Firebase App Check (PROTECCIÓN API) -->
+    <!-- Firebase App Check -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
 
     <style>
@@ -60,6 +60,102 @@
             display: flex;
             overflow-x: hidden;
             transition: background-color .4s ease, color .4s ease;
+        }
+
+        /* ===== MODO SIN DISTRACCIONES ===== */
+        body.distraction-free .sidebar {
+            display: none !important;
+        }
+
+        body.distraction-free .main-content {
+            margin-left: auto !important;
+            margin-right: auto !important;
+            max-width: 100% !important;
+            padding: 20px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            min-height: 100vh !important;
+        }
+
+        body.distraction-free .toggle-btn,
+        body.distraction-free .theme-btn {
+            display: none !important;
+        }
+
+        body.distraction-free .subject-selector,
+        body.distraction-free .duration-selector,
+        body.distraction-free .stats-container,
+        body.distraction-free .history-container,
+        body.distraction-free .techniques-container,
+        body.distraction-free .footer,
+        body.distraction-free header p {
+            display: none !important;
+        }
+
+        body.distraction-free header {
+            margin-bottom: 0 !important;
+        }
+
+        body.distraction-free .timer-container {
+            margin-bottom: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+        body.distraction-free .timer-display {
+            font-size: 180px !important;
+        }
+
+        body.distraction-free .controls {
+            margin-top: 50px !important;
+        }
+
+        .distraction-free-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .distraction-free-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        body.distraction-free .distraction-free-btn {
+            display: none !important;
+        }
+
+        #exitDistractionBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1100;
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        body.distraction-free #exitDistractionBtn {
+            display: flex !important;
         }
 
         .icon-sm { width: 16px; height: 16px; }
@@ -140,7 +236,7 @@
         .btn-primary-solid { background: var(--primary); color: white; border: none; box-shadow: 0 4px 15px rgba(255,140,0,.2); }
         .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
 
-        /* Selector de materia con autocompletado */
+        /* Selector de materia */
         .subject-selector {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -221,7 +317,6 @@
             display: block;
         }
 
-        /* Sugerencias */
         .suggestions-box {
             position: absolute;
             top: 100%;
@@ -237,10 +332,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        .suggestions-box.show {
-            display: block;
-        }
-
+        .suggestions-box.show { display: block; }
         .suggestion-item {
             padding: 10px 15px;
             cursor: pointer;
@@ -248,13 +340,9 @@
             font-size: 13px;
             border-bottom: 1px solid var(--border);
         }
+        .suggestion-item:hover { background: rgba(255,140,0,0.1); color: var(--primary); }
 
-        .suggestion-item:hover {
-            background: rgba(255,140,0,0.1);
-            color: var(--primary);
-        }
-
-        /* Selector de duración - Versión mejorada */
+        /* Selector de duración */
         .duration-selector {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -292,8 +380,7 @@
             padding: 4px;
         }
 
-        .duration-btn-decrement,
-        .duration-btn-increment {
+        .duration-btn-decrement, .duration-btn-increment {
             width: 40px;
             height: 40px;
             border-radius: 40px;
@@ -309,16 +396,9 @@
             justify-content: center;
         }
 
-        .duration-btn-decrement:hover,
-        .duration-btn-increment:hover {
+        .duration-btn-decrement:hover, .duration-btn-increment:hover {
             background: var(--primary);
             color: white;
-        }
-
-        .duration-btn-decrement:disabled,
-        .duration-btn-increment:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
 
         .duration-value {
@@ -336,7 +416,6 @@
             margin-left: 4px;
         }
 
-        /* Toggle switch */
         .unlimited-toggle {
             display: flex;
             align-items: center;
@@ -346,10 +425,7 @@
             color: var(--text);
         }
 
-        .unlimited-toggle input {
-            display: none;
-        }
-
+        .unlimited-toggle input { display: none; }
         .toggle-slider {
             width: 44px;
             height: 24px;
@@ -358,7 +434,6 @@
             position: relative;
             transition: 0.3s;
         }
-
         .toggle-slider::after {
             content: '';
             width: 20px;
@@ -370,14 +445,8 @@
             left: 3px;
             transition: 0.3s;
         }
-
-        .unlimited-toggle input:checked + .toggle-slider {
-            background: var(--primary);
-        }
-
-        .unlimited-toggle input:checked + .toggle-slider::after {
-            left: 21px;
-        }
+        .unlimited-toggle input:checked + .toggle-slider { background: var(--primary); }
+        .unlimited-toggle input:checked + .toggle-slider::after { left: 21px; }
 
         .duration-presets {
             display: flex;
@@ -397,21 +466,82 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-
-        .preset-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
+        .preset-btn:hover { border-color: var(--primary); color: var(--primary); }
         .preset-btn.active {
             background: var(--primary);
             border-color: var(--primary);
             color: white;
         }
 
-        .preset-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        /* Técnicas de estudio */
+        .techniques-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+
+        .techniques-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        .techniques-title i { color: var(--primary); }
+
+        .techniques-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .technique-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .technique-card i {
+            width: 40px;
+            height: 40px;
+            color: #9ca3af;
+            margin-bottom: 12px;
+        }
+
+        .technique-card h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .technique-card p {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .technique-card.coming-soon {
+            background: rgba(156, 163, 175, 0.1);
+            border-color: rgba(156, 163, 175, 0.3);
+        }
+
+        .coming-badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 10px;
+            background: rgba(156, 163, 175, 0.2);
+            border-radius: 20px;
+            font-size: 10px;
+            color: #9ca3af;
         }
 
         /* ===== TIMER ===== */
@@ -523,11 +653,6 @@
             border: 2px solid var(--primary);
         }
 
-        .streak-card .stat-value {
-            color: var(--primary);
-            font-size: 36px;
-        }
-
         /* ===== HISTORIAL ===== */
         .history-container {
             background: var(--card-bg);
@@ -564,28 +689,11 @@
         }
         .history-item:hover { background: rgba(255,140,0,.05); }
 
-        .history-info {
-            flex: 1;
-        }
+        .history-info { flex: 1; }
+        .history-materia { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .history-date { font-size: 12px; color: #9ca3af; }
+        .history-time { font-weight: 700; color: var(--primary); font-size: 16px; }
 
-        .history-materia {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .history-date {
-            font-size: 12px;
-            color: #9ca3af;
-        }
-
-        .history-time {
-            font-weight: 700;
-            color: var(--primary);
-            font-size: 16px;
-        }
-
-        /* ===== NOTIFICACIÓN ===== */
         .notification {
             position: fixed;
             top: 20px;
@@ -604,7 +712,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        /* ===== LOGIN MODAL ===== */
         .login-modal {
             position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(5px);
             z-index: 2001; display: flex; justify-content: center; align-items: center;
@@ -624,6 +731,7 @@
             .main-content { margin-left: 0; padding: 90px 15px 100px; }
             header h1 { font-size: 2.1rem; }
             .timer-display { font-size: 72px; letter-spacing: 4px; }
+            body.distraction-free .timer-display { font-size: 100px !important; }
             .timer-container { padding: 30px 20px; }
             .controls { flex-direction: column; }
             .control-btn { width: 100%; justify-content: center; }
@@ -631,7 +739,7 @@
             .subject-row { flex-direction: column; }
             .btn-confirm { width: 100%; justify-content: center; }
             .duration-controls { flex-direction: column; align-items: stretch; }
-            .unlimited-toggle { justify-content: space-between; }
+            .techniques-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -661,6 +769,16 @@
 <button class="theme-btn" onclick="toggleTheme()">
     <i data-lucide="moon" class="icon-sm"></i>
     Tema
+</button>
+
+<!-- Botón Modo sin distracciones -->
+<button id="distractionFreeBtn" class="distraction-free-btn" onclick="enterDistractionFreeMode()">
+    <i data-lucide="maximize-2" class="icon-sm"></i>
+    Modo sin distracciones
+</button>
+<button id="exitDistractionBtn" onclick="exitDistractionFreeMode()">
+    <i data-lucide="minimize-2" class="icon-sm"></i>
+    Salir del modo
 </button>
 
 <aside class="sidebar hidden" id="sidebar">
@@ -713,7 +831,7 @@
         <p>Temporizador Pomodoro y seguimiento de estudio</p>
     </header>
 
-    <!-- SELECTOR DE MATERIA CON AUTOCOMPLETADO -->
+    <!-- SELECTOR DE MATERIA -->
     <div class="subject-selector">
         <label>
             <i data-lucide="book-open" class="icon-sm"></i>
@@ -732,7 +850,7 @@
         <div id="currentSubjectDisplay" class="current-subject"></div>
     </div>
 
-    <!-- SELECTOR DE DURACIÓN - VERSIÓN MEJORADA -->
+    <!-- SELECTOR DE DURACIÓN -->
     <div class="duration-selector">
         <div class="duration-header">
             <i data-lucide="clock" class="icon-sm"></i>
@@ -794,6 +912,40 @@
         </div>
     </div>
 
+    <!-- TÉCNICAS DE ESTUDIO (NUEVO - SOLO PRÓXIMAMENTE) -->
+    <div class="techniques-container">
+        <div class="techniques-title">
+            <i data-lucide="lightbulb" class="icon-md"></i>
+            Técnicas de Estudio
+        </div>
+        <div class="techniques-grid">
+            <div class="technique-card coming-soon">
+                <i data-lucide="lock"></i>
+                <h4>Próximamente</h4>
+                <p>Nuevas técnicas de estudio</p>
+                <span class="coming-badge">En desarrollo</span>
+            </div>
+            <div class="technique-card coming-soon">
+                <i data-lucide="lock"></i>
+                <h4>Próximamente</h4>
+                <p>Nuevas técnicas de estudio</p>
+                <span class="coming-badge">En desarrollo</span>
+            </div>
+            <div class="technique-card coming-soon">
+                <i data-lucide="lock"></i>
+                <h4>Próximamente</h4>
+                <p>Nuevas técnicas de estudio</p>
+                <span class="coming-badge">En desarrollo</span>
+            </div>
+            <div class="technique-card coming-soon">
+                <i data-lucide="lock"></i>
+                <h4>Próximamente</h4>
+                <p>Nuevas técnicas de estudio</p>
+                <span class="coming-badge">En desarrollo</span>
+            </div>
+        </div>
+    </div>
+
     <!-- ESTADÍSTICAS -->
     <div class="stats-container">
         <div class="stats-title">
@@ -847,6 +999,38 @@
 </div>
 
 <script>
+    // ==================== MODOS ====================
+    
+    // Modo sin distracciones (pantalla completa + ocultar todo excepto timer y botones)
+    function enterDistractionFreeMode() {
+        document.body.classList.add('distraction-free');
+        document.getElementById('distractionFreeBtn').style.display = 'none';
+        document.getElementById('exitDistractionBtn').style.display = 'flex';
+        
+        // Intentar pantalla completa
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        }
+        
+        showNotification('Modo sin distracciones activado');
+    }
+    
+    function exitDistractionFreeMode() {
+        document.body.classList.remove('distraction-free');
+        document.getElementById('distractionFreeBtn').style.display = 'flex';
+        document.getElementById('exitDistractionBtn').style.display = 'none';
+        
+        // Salir de pantalla completa
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+        
+        showNotification('Modo normal restaurado');
+    }
+    
+    window.enterDistractionFreeMode = enterDistractionFreeMode;
+    window.exitDistractionFreeMode = exitDistractionFreeMode;
+    
     // ==================== LISTA DE MATERIAS ADE ====================
     var materiasADE = [
         "Taller Inicial Común: Taller de Lectura y Escritura",
@@ -924,15 +1108,14 @@
     var auth = firebase.auth();
     var db = firebase.firestore();
     
-    // ==================== APP CHECK (PROTECCIÓN API) ====================
     var SITE_KEY = "6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u";
     
     try {
         var appCheck = firebase.appCheck();
         appCheck.activate(SITE_KEY, true);
-        console.log("✅ App Check activado correctamente");
+        console.log("App Check activado");
     } catch (error) {
-        console.error("❌ Error activando App Check:", error);
+        console.error("Error App Check:", error);
     }
 
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
