@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupos de Estudio | Biblioteca ADE</title>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PQGH6R9SZC');
+    </script>
+
+    <script>
+        const theme = localStorage.getItem('ungs_theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+    </script>
+
+    <!-- Firebase COMPAT -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase App Check -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary: #FF8C00;
+            --bg: #f9fafb;
+            --text: #1a1a1a;
+            --card-bg: rgba(255,255,255,0.7);
+            --sidebar-bg: rgba(244,244,244,0.85);
+            --border: #e5e7eb;
+            --success: #22c55e;
+            --danger: #ff4a4a;
+            --sidebar-width: 300px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #080808;
+            --text: #f5f5f5;
+            --card-bg: rgba(18,18,18,0.6);
+            --sidebar-bg: rgba(8,8,8,0.85);
+            --border: #222222;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            overflow-x: hidden;
+            transition: background-color .4s ease, color .4s ease;
+        }
+
+        .icon-sm { width: 16px; height: 16px; }
+        .icon-md { width: 20px; height: 20px; }
+        .icon-lg { width: 24px; height: 24px; }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 30px 20px 100px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            transition: transform .4s cubic-bezier(.4,0,.2,1);
+        }
+        .sidebar.hidden { transform: translateX(-100%); }
+
+        .main-content {
+            width: 100%;
+            max-width: 900px;
+            margin-left: var(--sidebar-width);
+            margin-right: auto;
+            padding: 50px 20px 100px;
+            transition: margin-left .4s cubic-bezier(.4,0,.2,1);
+        }
+        .main-content.expanded { margin-left: auto; }
+
+        .toggle-btn, .theme-btn {
+            position: fixed;
+            z-index: 1100;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: .25s ease;
+        }
+
+        .toggle-btn {
+            left: 15px;
+            bottom: 20px;
+            padding: 12px 18px;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,140,0,.3);
+        }
+        .toggle-btn:hover { transform: translateY(-2px); }
+
+        .theme-btn {
+            top: 20px;
+            right: 20px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text);
+            backdrop-filter: blur(10px);
+        }
+        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; }
+        header p { color: #9ca3af; }
+
+        .btn-sidebar {
+            width: 100%; border: none; padding: 14px; border-radius: 10px; cursor: pointer;
+            font-size: 14px; font-weight: 600; transition: .25s ease; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 12px; text-decoration: none; box-sizing: border-box;
+        }
+        .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .btn-dark:hover { border-color: var(--primary); color: var(--primary); background: var(--card-bg); }
+        .btn-primary-solid { background: var(--primary); color: white; border: none; box-shadow: 0 4px 15px rgba(255,140,0,.2); }
+        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
+
+        /* Formulario */
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        .form-title i { color: var(--primary); }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 5px;
+        }
+
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255,140,0,0.3);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Lista de compañeros */
+        .companeros-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .companeros-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .companeros-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .companeros-title i { color: var(--primary); }
+
+        .companeros-count {
+            background: var(--primary);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .companeros-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .companero-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .companero-item:hover {
+            border-color: var(--primary);
+        }
+
+        .companero-info {
+            flex: 1;
+        }
+
+        .companero-nombre {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .companero-whatsapp {
+            font-size: 12px;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .companero-whatsapp i {
+            width: 14px;
+            height: 14px;
+        }
+
+        .companero-empty {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+
+        .login-required {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,140,0,0.1);
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .login-required button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .login-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(5px);
+            z-index: 2000; display: flex; justify-content: center; align-items: center;
+            transition: opacity .3s ease;
+        }
+        .login-modal.hidden { opacity: 0; pointer-events: none; }
+        .login-modal-content {
+            width: 90%; max-width: 400px; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 18px; padding: 40px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,.3);
+        }
+        .login-modal-content h2 { margin: 15px 0 10px; font-weight: 800; }
+        .login-modal-content p { color: #9ca3af; line-height: 1.5; margin-bottom: 25px; font-size: 14px; }
+
+        @media (max-width: 768px) {
+            .main-content { margin-left: 0; padding: 90px 15px 100px; }
+            header h1 { font-size: 2rem; }
+            .companero-item { flex-direction: column; gap: 10px; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="login-modal hidden">
+    <div class="login-modal-content">
+        <i data-lucide="lock" class="icon-lg" style="color: var(--primary); width: 40px; height: 40px; margin-bottom: 15px;"></i>
+        <h2>Inicia Sesión</h2>
+        <p>Para unirte a un grupo de estudio y conectar con compañeros, iniciá sesión con tu cuenta.</p>
+        <button id="btnModalLogin" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
+            <i data-lucide="log-in" class="icon-sm"></i>
+            Ingresar con Google
+        </button>
+        <button onclick="closeLoginModal()" class="btn-sidebar btn-dark" style="justify-content:center;">
+            Continuar como invitado (solo lectura)
+        </button>
+    </div>
+</div>
+
+<button class="toggle-btn" onclick="toggleSidebar()">
+    <i data-lucide="menu" class="icon-md"></i>
+    Herramientas
+</button>
+
+<button class="theme-btn" onclick="toggleTheme()">
+    <i data-lucide="moon" class="icon-sm"></i>
+    Tema
+</button>
+
+<aside class="sidebar hidden" id="sidebar">
+    <div id="userProfile" style="margin-bottom:25px; padding:15px; background:var(--card-bg); border:1px solid var(--border); border-radius:12px; text-align:center; backdrop-filter:blur(10px);">
+        <i data-lucide="user-circle" class="icon-lg" style="color:var(--primary); margin-bottom:8px;"></i>
+        <p id="userName" style="font-weight:700; margin-bottom:12px;">Invitado</p>
+        <button id="sidebarLoginBtn" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
+            <i data-lucide="log-in" class="icon-sm"></i>
+            Ingresar
+        </button>
+        <button id="sidebarLogoutBtn" class="btn-sidebar btn-dark" style="justify-content:center; display:none;">
+            <i data-lucide="log-out" class="icon-sm"></i>
+            Salir
+        </button>
+    </div>
+
+    <h2 style="display:flex; align-items:center; gap:8px; color:var(--primary); font-weight:800; margin-bottom:8px;">
+        <i data-lucide="library" class="icon-lg"></i> ADE UNGS
+    </h2>
+    <p style="color:#9ca3af; font-size:14px; margin-bottom:20px;">Navegación</p>
+    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+
+    <a href="index.html" class="btn-sidebar btn-dark">
+        <i data-lucide="search" class="icon-sm"></i> Buscar Materias
+    </a>
+    <a href="progreso.html" class="btn-sidebar btn-dark">
+        <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
+    </a>
+    <a href="estudio.html" class="btn-sidebar btn-dark">
+        <i data-lucide="timer" class="icon-sm"></i> Sesión de Estudio
+    </a>
+    <a href="calendario.html" class="btn-sidebar btn-dark">
+        <i data-lucide="calendar" class="icon-sm"></i> Calendario
+    </a>
+    <a href="comisiones.html" class="btn-sidebar btn-primary-solid">
+        <i data-lucide="users" class="icon-sm"></i> Grupos de Estudio
+    </a>
+
+    <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
+    <p style="color:#9ca3af; font-size:13px; font-weight:600; margin-bottom:15px;">Oportunidades</p>
+    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo
+    </a>
+    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark">
+        <i data-lucide="building" class="icon-sm"></i> Pasantías UNGS
+    </a>
+</aside>
+
+<div class="main-content expanded" id="mainContent">
+    <header>
+        <h1>👥 Grupos de Estudio</h1>
+        <p>Encontrá compañeros en tu misma comisión y armá grupos de estudio</p>
+    </header>
+
+    <!-- Formulario para registrarse en una comisión -->
+    <div class="form-card">
+        <div class="form-title">
+            <i data-lucide="user-plus" class="icon-md"></i>
+            Unite a una comisión
+        </div>
+
+        <div class="form-group">
+            <label>📚 Materia</label>
+            <select id="materiaSelect">
+                <option value="">Seleccioná una materia...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>📅 Tu comisión</label>
+            <input type="text" id="comisionInput" placeholder="Ej: Comisión 1 - Lunes 18:00">
+            <div class="form-hint">Escribí tu comisión como quieras. Ej: "Comisión 1 - Lunes 18:00", "Comi 2", "Turno noche"</div>
+        </div>
+
+        <div class="form-group">
+            <label>📱 WhatsApp (opcional)</label>
+            <input type="text" id="whatsappInput" placeholder="+54 9 11 1234-5678">
+            <div class="form-hint">Compartí tu WhatsApp para que otros compañeros te contacten</div>
+        </div>
+
+        <button id="btnGuardar" class="btn-submit" onclick="guardarComision()">
+            <i data-lucide="save" class="icon-sm"></i> Guardar y ver compañeros
+        </button>
+
+        <div id="loginRequiredMsg" class="login-required" style="display: none;">
+            <i data-lucide="log-in" class="icon-md"></i>
+            <p>Iniciá sesión para unirte a un grupo de estudio</p>
+            <button onclick="abrirLoginModal()">Ingresar con Google</button>
+        </div>
+    </div>
+
+    <!-- Lista de compañeros -->
+    <div class="companeros-container">
+        <div class="companeros-header">
+            <div class="companeros-title">
+                <i data-lucide="users" class="icon-md"></i>
+                Compañeros en esta comisión
+            </div>
+            <div class="companeros-count" id="companerosCount">0</div>
+        </div>
+
+        <div id="companerosList" class="companeros-list">
+            <div class="companero-empty">
+                <i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i>
+                <p>Seleccioná una materia y comisión para ver compañeros</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>🔒 Los datos de contacto solo se comparten con compañeros de tu misma materia y comisión</p>
+    </div>
+</div>
+
+<script>
+    // ==================== LISTA DE MATERIAS ADE ====================
+    var materiasADE = [
+        "Taller Inicial Común: Taller de Lectura y Escritura",
+        "Taller Inicial Orientado: Ciencias Exactas",
+        "Teoría de la Organización",
+        "Problemas Socioeconómicos Contemporáneos",
+        "Taller de Lectura y Escritura en las Disciplinas",
+        "Introducción a la Economía",
+        "Economía Clásica",
+        "Diseño Estructural y Procesos",
+        "Matemática para Economistas I",
+        "Economía Neoclásica",
+        "Sistemas de Información Contable I",
+        "Historia Económica y Social Mundial y Latinoamericana",
+        "Economía Keynesiana",
+        "Estadística para Economistas",
+        "Planeamiento y Control Organizacional",
+        "Matemática para Economistas II",
+        "Laboratorio Interdisciplinario",
+        "Sistemas de Información",
+        "Derecho Administrativo",
+        "Organización Industrial",
+        "Gestión de Recursos Humanos",
+        "Dirección Estratégica",
+        "Tópicos de Comercialización",
+        "Planificación y Proceso Decisorio en las Organizaciones",
+        "Teoría de la Innovación y del Cambio Tecnológico",
+        "Matemática para Economistas III",
+        "Costos Industriales",
+        "Sistemas de Información Contable II",
+        "Gestión en Economía Mixta",
+        "Empresas Públicas",
+        "Ingeniería Financiera",
+        "Sociología Industrial",
+        "Régimen Tributario",
+        "Desarrollo y Gestión de Proyectos Emprendedores",
+        "Taller de Utilitarios",
+        "IPE 1",
+        "IPE 2",
+        "IPE 3"
+    ];
+
+    // ==================== FUNCIONES DE SEGURIDAD ====================
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function sanitizeText(str) {
+        if (!str) return '';
+        return str.replace(/[<>]/g, function(m) {
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ==================== FIREBASE ====================
+    var firebaseConfig = {
+        apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
+        authDomain: "knowy-13079.firebaseapp.com",
+        projectId: "knowy-13079",
+        storageBucket: "knowy-13079.firebasestorage.app",
+        messagingSenderId: "645341817520",
+        appId: "1:645341817520:web:799733f87a0ad1a0382975",
+        measurementId: "G-PQGH6R9SZC"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    var auth = firebase.auth();
+    var db = firebase.firestore();
+    
+    var SITE_KEY = "6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u";
+    
+    try {
+        var appCheck = firebase.appCheck();
+        appCheck.activate(SITE_KEY, true);
+        console.log("App Check activado");
+    } catch (error) {
+        console.error("Error App Check:", error);
+    }
+
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .catch(function(error) { console.error("Persistencia error:", error); });
+
+    var googleProvider = new firebase.auth.GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    // ==================== ELEMENTOS DOM ====================
+    var materiaSelect = document.getElementById('materiaSelect');
+    var comisionInput = document.getElementById('comisionInput');
+    var whatsappInput = document.getElementById('whatsappInput');
+    var btnGuardar = document.getElementById('btnGuardar');
+    var loginRequiredMsg = document.getElementById('loginRequiredMsg');
+    var companerosList = document.getElementById('companerosList');
+    var companerosCount = document.getElementById('companerosCount');
+
+    var currentMateria = '';
+    var currentComision = '';
+
+    // Cargar materias en el select
+    function cargarMaterias() {
+        materiaSelect.innerHTML = '<option value="">Seleccioná una materia...</option>';
+        materiasADE.forEach(function(materia) {
+            var option = document.createElement('option');
+            option.value = materia;
+            option.textContent = materia;
+            materiaSelect.appendChild(option);
+        });
+    }
+
+    // Cargar compañeros según materia y comisión
+    function cargarCompaneros() {
+        var materia = materiaSelect.value;
+        var comision = comisionInput.value.trim();
+        
+        if (!materia || !comision) {
+            companerosList.innerHTML = '<div class="companero-empty"><i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i><p>Seleccioná una materia y comisión para ver compañeros</p></div>';
+            companerosCount.textContent = '0';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            return;
+        }
+        
+        currentMateria = materia;
+        currentComision = comision;
+        
+        db.collection('grupos_estudio')
+            .where('materia', '==', materia)
+            .where('comision', '==', comision)
+            .get()
+            .then(function(querySnapshot) {
+                var companeros = [];
+                querySnapshot.forEach(function(doc) {
+                    companeros.push(doc.data());
+                });
+                
+                companerosCount.textContent = companeros.length;
+                
+                if (companeros.length === 0) {
+                    companerosList.innerHTML = '<div class="companero-empty"><i data-lucide="users" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i><p>No hay compañeros registrados en esta comisión todavía. ¡Sé el primero!</p></div>';
+                } else {
+                    companerosList.innerHTML = companeros.map(function(c) {
+                        var whatsappHtml = '';
+                        if (c.whatsapp) {
+                            whatsappHtml = '<div class="companero-whatsapp"><i data-lucide="message-circle" class="icon-sm"></i> ' + sanitizeHTML(c.whatsapp) + '</div>';
+                        }
+                        return '<div class="companero-item">' +
+                            '<div class="companero-info">' +
+                                '<div class="companero-nombre">' + sanitizeHTML(c.nombre) + '</div>' +
+                                whatsappHtml +
+                            '</div>' +
+                        '</div>';
+                    }).join('');
+                }
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            })
+            .catch(function(error) {
+                console.error("Error cargando compañeros:", error);
+            });
+    }
+
+    // Guardar comisión del usuario
+    function guardarComision() {
+        var user = auth.currentUser;
+        if (!user) {
+            mostrarLoginRequerido();
+            return;
+        }
+        
+        var materia = materiaSelect.value;
+        var comision = comisionInput.value.trim();
+        var whatsapp = whatsappInput.value.trim();
+        
+        if (!materia) {
+            alert('Seleccioná una materia');
+            return;
+        }
+        
+        if (!comision) {
+            alert('Escribí tu comisión');
+            return;
+        }
+        
+        var nombre = user.displayName || user.email.split('@')[0];
+        
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = '<i data-lucide="loader" class="icon-sm"></i> Guardando...';
+        
+        var data = {
+            uid: user.uid,
+            nombre: sanitizeText(nombre),
+            materia: materia,
+            comision: comision,
+            whatsapp: sanitizeText(whatsapp),
+            updatedAt: new Date().toISOString()
+        };
+        
+        db.collection('grupos_estudio').doc(user.uid + '_' + materia.replace(/\s/g, '_')).set(data, { merge: true })
+            .then(function() {
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = '<i data-lucide="save" class="icon-sm"></i> Guardar y ver compañeros';
+                showToast('¡Te uniste al grupo de estudio!');
+                cargarCompaneros();
+            })
+            .catch(function(error) {
+                console.error("Error guardando:", error);
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = '<i data-lucide="save" class="icon-sm"></i> Guardar y ver compañeros';
+                alert('Error al guardar. Intentá de nuevo.');
+            });
+    }
+    
+    window.guardarComision = guardarComision;
+    
+    function mostrarLoginRequerido() {
+        loginRequiredMsg.style.display = 'block';
+        btnGuardar.style.display = 'none';
+    }
+    
+    function ocultarLoginRequerido() {
+        loginRequiredMsg.style.display = 'none';
+        btnGuardar.style.display = 'block';
+    }
+    
+    function abrirLoginModal() {
+        document.getElementById('loginModal').classList.remove('hidden');
+    }
+    
+    window.abrirLoginModal = abrirLoginModal;
+    
+    function showToast(message) {
+        var toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 12px 20px; border-radius: 8px; z-index: 3000; animation: slideIn 0.3s ease;';
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.remove(); }, 3000);
+    }
+    
+    // ==================== EVENTOS ====================
+    materiaSelect.addEventListener('change', function() {
+        cargarCompaneros();
+    });
+    
+    comisionInput.addEventListener('input', function() {
+        cargarCompaneros();
+    });
+    
+    // ==================== AUTENTICACIÓN ====================
+    function doGoogleLogin() {
+        auth.signInWithPopup(googleProvider)
+            .then(function() { 
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+                ocultarLoginRequerido();
+                cargarCompaneros();
+            })
+            .catch(function(error) { console.error("Login error:", error); });
+    }
+    
+    document.getElementById('btnModalLogin').onclick = doGoogleLogin;
+    document.getElementById('sidebarLoginBtn').onclick = function() {
+        document.getElementById('loginModal').classList.remove('hidden');
+    };
+    document.getElementById('sidebarLogoutBtn').onclick = function() {
+        auth.signOut().then(function() {
+            sessionStorage.removeItem('guestMode');
+            location.reload();
+        });
+    };
+    
+    window.closeLoginModal = function() {
+        document.getElementById('loginModal').classList.add('hidden');
+        sessionStorage.setItem('guestMode', 'true');
+    };
+    
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            var name = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
+            var safeName = sanitizeText(name);
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + safeName;
+            document.getElementById('sidebarLoginBtn').style.display = 'none';
+            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+            document.getElementById('loginModal').classList.add('hidden');
+            ocultarLoginRequerido();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        } else {
+            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display:inline;"></i> Invitado';
+            document.getElementById('sidebarLoginBtn').style.display = 'flex';
+            document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            mostrarLoginRequerido();
+            if (!sessionStorage.getItem('guestMode')) {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    });
+    
+    // ==================== SIDEBAR Y TEMA ====================
+    window.toggleSidebar = function() {
+        document.getElementById('sidebar').classList.toggle('hidden');
+        document.getElementById('mainContent').classList.toggle('expanded');
+    };
+    
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('ungs_theme', theme);
+    }
+    
+    window.toggleTheme = function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+    };
+    
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        if (!localStorage.getItem('ungs_theme')) applyTheme(e.matches ? 'dark' : 'light');
+    });
+    
+    // ==================== INICIALIZAR ====================
+    cargarMaterias();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+</script>
+</body>
+</html>
