@@ -197,6 +197,25 @@
             margin-top: 5px;
         }
 
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
         .btn-submit {
             background: var(--primary);
             color: white;
@@ -218,6 +237,18 @@
         .btn-submit:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--danger);
+            color: var(--danger);
         }
 
         /* Lista de compañeros */
@@ -255,6 +286,55 @@
             font-size: 12px;
         }
 
+        .grupo-whatsapp-card {
+            background: linear-gradient(135deg, rgba(37, 211, 102, 0.1), rgba(37, 211, 102, 0.05));
+            border: 1px solid rgba(37, 211, 102, 0.3);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .grupo-whatsapp-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--success);
+        }
+
+        .grupo-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: var(--bg);
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+
+        .grupo-link a {
+            color: var(--success);
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 13px;
+        }
+
+        .grupo-link a:hover {
+            text-decoration: underline;
+        }
+
+        .btn-whatsapp {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
         .companeros-list {
             display: flex;
             flex-direction: column;
@@ -270,6 +350,8 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             transition: all 0.2s;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .companero-item:hover {
@@ -286,17 +368,54 @@
             margin-bottom: 4px;
         }
 
-        .companero-whatsapp {
+        .companero-email {
             font-size: 12px;
-            color: var(--success);
+            color: #9ca3af;
             display: flex;
             align-items: center;
             gap: 4px;
         }
 
-        .companero-whatsapp i {
+        .companero-email i {
             width: 14px;
             height: 14px;
+        }
+
+        .companero-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: rgba(255,140,0,0.2);
+            color: var(--primary);
+            margin-left: 8px;
+        }
+
+        .companero-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+            transition: color 0.2s;
+            padding: 5px;
+        }
+
+        .btn-icon:hover {
+            color: var(--primary);
+        }
+
+        .btn-icon.danger:hover {
+            color: var(--danger);
+        }
+
+        .leader-actions {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
         }
 
         .companero-empty {
@@ -348,7 +467,8 @@
         @media (max-width: 768px) {
             .main-content { margin-left: 0; padding: 90px 15px 100px; }
             header h1 { font-size: 2rem; }
-            .companero-item { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .companero-item { flex-direction: column; align-items: flex-start; }
+            .companero-actions { align-self: flex-end; }
         }
     </style>
 </head>
@@ -449,13 +569,12 @@
         <div class="form-group">
             <label>Tu comisión</label>
             <input type="text" id="comisionInput" placeholder="Ej: Comisión 1 - Lunes 18:00">
-            <div class="form-hint">Escribí tu comisión como quieras. Ej: "Comisión 1 - Lunes 18:00", "Comi 2", "Turno noche"</div>
+            <div class="form-hint">Escribí tu comisión como quieras</div>
         </div>
 
-        <div class="form-group">
-            <label>WhatsApp (opcional)</label>
-            <input type="text" id="whatsappInput" placeholder="+54 9 11 1234-5678">
-            <div class="form-hint">Compartí tu WhatsApp para que otros compañeros te contacten</div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="showEmailCheckbox" checked>
+            <label for="showEmailCheckbox">Mostrar mi email a otros compañeros</label>
         </div>
 
         <button id="btnGuardar" class="btn-submit" onclick="guardarComision()">
@@ -479,10 +598,31 @@
             <div class="companeros-count" id="companerosCount">0</div>
         </div>
 
+        <div id="grupoWhatsappCard" class="grupo-whatsapp-card" style="display: none;">
+            <div class="grupo-whatsapp-title">
+                <i data-lucide="message-circle" class="icon-md"></i>
+                Grupo de WhatsApp
+            </div>
+            <div id="grupoWhatsappLink" class="grupo-link">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+
         <div id="companerosList" class="companeros-list">
             <div class="companero-empty">
                 <i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i>
                 <p>Seleccioná una materia y comisión para ver compañeros</p>
+            </div>
+        </div>
+
+        <div id="leaderActions" class="leader-actions" style="display: none;">
+            <div class="form-group">
+                <label>🔗 Link de invitación al grupo de WhatsApp</label>
+                <input type="text" id="whatsappLinkInput" placeholder="https://chat.whatsapp.com/..." class="form-group">
+                <div class="form-hint">Compartí el enlace de invitación de tu grupo de WhatsApp</div>
+                <button class="btn-submit btn-secondary" onclick="guardarWhatsappLink()" style="margin-top: 10px;">
+                    <i data-lucide="link" class="icon-sm"></i> Compartir link del grupo
+                </button>
             </div>
         </div>
     </div>
@@ -589,14 +729,20 @@
     // ==================== ELEMENTOS DOM ====================
     var materiaSelect = document.getElementById('materiaSelect');
     var comisionInput = document.getElementById('comisionInput');
-    var whatsappInput = document.getElementById('whatsappInput');
+    var showEmailCheckbox = document.getElementById('showEmailCheckbox');
     var btnGuardar = document.getElementById('btnGuardar');
     var loginRequiredMsg = document.getElementById('loginRequiredMsg');
     var companerosList = document.getElementById('companerosList');
     var companerosCount = document.getElementById('companerosCount');
+    var grupoWhatsappCard = document.getElementById('grupoWhatsappCard');
+    var grupoWhatsappLink = document.getElementById('grupoWhatsappLink');
+    var leaderActions = document.getElementById('leaderActions');
+    var whatsappLinkInput = document.getElementById('whatsappLinkInput');
 
     var currentMateria = '';
     var currentComision = '';
+    var currentGrupoLink = '';
+    var currentUserIsLeader = false;
 
     // Función para generar ID válido para Firestore
     function generarIdValido(texto) {
@@ -626,6 +772,8 @@
         if (!materia || !comision) {
             companerosList.innerHTML = '<div class="companero-empty"><i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i><p>Seleccioná una materia y comisión para ver compañeros</p></div>';
             companerosCount.textContent = '0';
+            grupoWhatsappCard.style.display = 'none';
+            leaderActions.style.display = 'none';
             if (typeof lucide !== 'undefined') lucide.createIcons();
             return;
         }
@@ -639,25 +787,78 @@
             .get()
             .then(function(querySnapshot) {
                 var companeros = [];
+                var grupoLink = null;
                 querySnapshot.forEach(function(doc) {
-                    companeros.push(doc.data());
+                    var data = doc.data();
+                    companeros.push(data);
+                    if (data.whatsappLink && data.isLeader) {
+                        grupoLink = data.whatsappLink;
+                    }
                 });
                 
+                currentGrupoLink = grupoLink;
                 companerosCount.textContent = companeros.length;
+                
+                // Mostrar link del grupo si existe
+                if (grupoLink) {
+                    grupoWhatsappCard.style.display = 'block';
+                    grupoWhatsappLink.innerHTML = '<a href="' + sanitizeHTML(grupoLink) + '" target="_blank">' + sanitizeHTML(grupoLink) + '</a>' +
+                        '<button class="btn-whatsapp" onclick="window.open(\'' + sanitizeHTML(grupoLink) + '\', \'_blank\')">Unirse al grupo</button>';
+                } else {
+                    grupoWhatsappCard.style.display = 'none';
+                }
+                
+                // Verificar si el usuario actual es líder
+                var user = auth.currentUser;
+                if (user) {
+                    var liderDoc = companeros.find(function(c) { return c.uid === user.uid && c.isLeader === true; });
+                    if (liderDoc) {
+                        currentUserIsLeader = true;
+                        leaderActions.style.display = 'block';
+                        if (liderDoc.whatsappLink) {
+                            whatsappLinkInput.value = liderDoc.whatsappLink;
+                        } else {
+                            whatsappLinkInput.value = '';
+                        }
+                    } else {
+                        currentUserIsLeader = false;
+                        leaderActions.style.display = 'none';
+                    }
+                }
                 
                 if (companeros.length === 0) {
                     companerosList.innerHTML = '<div class="companero-empty"><i data-lucide="users" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i><p>No hay compañeros registrados en esta comisión todavía. ¡Sé el primero!</p></div>';
                 } else {
                     companerosList.innerHTML = companeros.map(function(c) {
-                        var whatsappHtml = '';
-                        if (c.whatsapp) {
-                            whatsappHtml = '<div class="companero-whatsapp"><i data-lucide="message-circle" class="icon-sm"></i> ' + sanitizeHTML(c.whatsapp) + '</div>';
+                        var emailHtml = '';
+                        var isCurrentUser = (user && c.uid === user.uid);
+                        
+                        if (c.showEmail && c.email) {
+                            emailHtml = '<div class="companero-email"><i data-lucide="mail" class="icon-sm"></i> ' + sanitizeHTML(c.email) + '</div>';
+                        } else if (isCurrentUser && c.email) {
+                            emailHtml = '<div class="companero-email"><i data-lucide="mail" class="icon-sm"></i> ' + sanitizeHTML(c.email) + ' <span class="companero-badge">solo visible para vos</span></div>';
                         }
+                        
+                        var actionsHtml = '';
+                        if (isCurrentUser) {
+                            actionsHtml = '<div class="companero-actions">' +
+                                '<button class="btn-icon" onclick="editarMiRegistro()" title="Editar"><i data-lucide="edit-2" class="icon-sm"></i></button>' +
+                                '<button class="btn-icon danger" onclick="salirDeComision()" title="Salir de esta comisión"><i data-lucide="log-out" class="icon-sm"></i></button>' +
+                            '</div>';
+                        } else if (c.showEmail && c.email) {
+                            actionsHtml = '<div class="companero-actions">' +
+                                '<button class="btn-icon" onclick="copiarEmail(\'' + sanitizeHTML(c.email) + '\')" title="Copiar email"><i data-lucide="copy" class="icon-sm"></i></button>' +
+                            '</div>';
+                        }
+                        
+                        var liderBadge = c.isLeader ? '<span class="companero-badge">Líder</span>' : '';
+                        
                         return '<div class="companero-item">' +
                             '<div class="companero-info">' +
-                                '<div class="companero-nombre">' + sanitizeHTML(c.nombre) + '</div>' +
-                                whatsappHtml +
+                                '<div class="companero-nombre">' + sanitizeHTML(c.nombre) + ' ' + liderBadge + '</div>' +
+                                emailHtml +
                             '</div>' +
+                            actionsHtml +
                         '</div>';
                     }).join('');
                 }
@@ -678,7 +879,7 @@
         
         var materia = materiaSelect.value;
         var comision = comisionInput.value.trim();
-        var whatsapp = whatsappInput.value.trim();
+        var showEmail = showEmailCheckbox.checked;
         
         if (!materia) {
             alert('Seleccioná una materia');
@@ -691,24 +892,36 @@
         }
         
         var nombre = user.displayName || user.email.split('@')[0];
+        var email = user.email;
         
         btnGuardar.disabled = true;
         btnGuardar.innerHTML = '<i data-lucide="loader" class="icon-sm"></i> Guardando...';
         
-        // Crear ID válido para Firestore
         var materiaId = generarIdValido(materia);
         var docId = user.uid + '_' + materiaId;
         
-        var data = {
-            uid: user.uid,
-            nombre: sanitizeText(nombre),
-            materia: materia,
-            comision: comision,
-            whatsapp: sanitizeText(whatsapp),
-            updatedAt: new Date().toISOString()
-        };
-        
-        db.collection('grupos_estudio').doc(docId).set(data, { merge: true })
+        // Verificar si ya existe un líder en esta comisión
+        db.collection('grupos_estudio')
+            .where('materia', '==', materia)
+            .where('comision', '==', comision)
+            .where('isLeader', '==', true)
+            .get()
+            .then(function(leaderQuery) {
+                var isLeader = leaderQuery.empty;
+                
+                var data = {
+                    uid: user.uid,
+                    nombre: sanitizeText(nombre),
+                    email: email,
+                    materia: materia,
+                    comision: comision,
+                    showEmail: showEmail,
+                    isLeader: isLeader,
+                    updatedAt: new Date().toISOString()
+                };
+                
+                return db.collection('grupos_estudio').doc(docId).set(data, { merge: true });
+            })
             .then(function() {
                 btnGuardar.disabled = false;
                 btnGuardar.innerHTML = '<i data-lucide="save" class="icon-sm"></i> Guardar y ver compañeros';
@@ -721,6 +934,99 @@
                 btnGuardar.innerHTML = '<i data-lucide="save" class="icon-sm"></i> Guardar y ver compañeros';
                 alert('Error al guardar: ' + error.message);
             });
+    };
+    
+    window.salirDeComision = function() {
+        var user = auth.currentUser;
+        if (!user) return;
+        
+        var materia = materiaSelect.value;
+        if (!materia) return;
+        
+        if (confirm('¿Salir de esta comisión? Tus datos ya no aparecerán en la lista.')) {
+            var materiaId = generarIdValido(materia);
+            var docId = user.uid + '_' + materiaId;
+            
+            db.collection('grupos_estudio').doc(docId).delete()
+                .then(function() {
+                    showToast('Saliste de la comisión');
+                    cargarCompaneros();
+                })
+                .catch(function(error) {
+                    console.error("Error al salir:", error);
+                    alert('Error al salir de la comisión');
+                });
+        }
+    };
+    
+    window.editarMiRegistro = function() {
+        var showEmail = showEmailCheckbox.checked;
+        var materia = materiaSelect.value;
+        var comision = comisionInput.value.trim();
+        
+        if (!materia || !comision) return;
+        
+        var user = auth.currentUser;
+        if (!user) return;
+        
+        var materiaId = generarIdValido(materia);
+        var docId = user.uid + '_' + materiaId;
+        
+        db.collection('grupos_estudio').doc(docId).update({
+            showEmail: showEmail,
+            comision: comision,
+            updatedAt: new Date().toISOString()
+        })
+        .then(function() {
+            showToast('Datos actualizados');
+            cargarCompaneros();
+        })
+        .catch(function(error) {
+            console.error("Error al actualizar:", error);
+            alert('Error al actualizar');
+        });
+    };
+    
+    window.guardarWhatsappLink = function() {
+        var user = auth.currentUser;
+        if (!user) return;
+        
+        var materia = materiaSelect.value;
+        var comision = comisionInput.value.trim();
+        var link = whatsappLinkInput.value.trim();
+        
+        if (!materia || !comision) {
+            alert('Seleccioná una materia y comisión primero');
+            return;
+        }
+        
+        if (!link) {
+            alert('Ingresá un link de invitación válido');
+            return;
+        }
+        
+        var materiaId = generarIdValido(materia);
+        var docId = user.uid + '_' + materiaId;
+        
+        db.collection('grupos_estudio').doc(docId).update({
+            whatsappLink: link,
+            isLeader: true,
+            updatedAt: new Date().toISOString()
+        })
+        .then(function() {
+            showToast('Link del grupo compartido');
+            cargarCompaneros();
+        })
+        .catch(function(error) {
+            console.error("Error guardando link:", error);
+            alert('Error al guardar el link');
+        });
+    };
+    
+    window.copiarEmail = function(email) {
+        navigator.clipboard.writeText(email).then(function() {
+            showToast('Email copiado al portapapeles');
+        });
     };
     
     function mostrarLoginRequerido() {
