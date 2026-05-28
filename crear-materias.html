@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear materias - script temporal</title>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #0a0a0a; color: white; }
+        .success { color: #22c55e; }
+        .error { color: #ff4a4a; }
+        .loading { color: #FF8C00; }
+    </style>
+</head>
+<body>
+    <h1>Script de creación de materias</h1>
+    <div id="status">Iniciando...</div>
+
+    <script>
+        // Configuración de Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
+            authDomain: "knowy-13079.firebaseapp.com",
+            projectId: "knowy-13079",
+            storageBucket: "knowy-13079.firebasestorage.app",
+            messagingSenderId: "645341817520",
+            appId: "1:645341817520:web:799733f87a0ad1a0382975",
+            measurementId: "G-PQGH6R9SZC"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        var auth = firebase.auth();
+        var db = firebase.firestore();
+
+        // Lista completa de materias de ADE
+        var materias = [
+            "Taller Inicial Común: Taller de Lectura y Escritura",
+            "Taller Inicial Orientado: Ciencias Exactas",
+            "Teoría de la Organización",
+            "Problemas Socioeconómicos Contemporáneos",
+            "Taller de Lectura y Escritura en las Disciplinas",
+            "Introducción a la Economía",
+            "Economía Clásica",
+            "Diseño Estructural y Procesos",
+            "Matemática para Economistas I",
+            "Economía Neoclásica",
+            "Sistemas de Información Contable I",
+            "Historia Económica y Social Mundial y Latinoamericana",
+            "Economía Keynesiana",
+            "Estadística para Economistas",
+            "Planeamiento y Control Organizacional",
+            "Matemática para Economistas II",
+            "Laboratorio Interdisciplinario",
+            "Sistemas de Información",
+            "Derecho Administrativo",
+            "Organización Industrial",
+            "Gestión de Recursos Humanos",
+            "Dirección Estratégica",
+            "Tópicos de Comercialización",
+            "Planificación y Proceso Decisorio en las Organizaciones",
+            "Teoría de la Innovación y del Cambio Tecnológico",
+            "Matemática para Economistas III",
+            "Costos Industriales",
+            "Sistemas de Información Contable II",
+            "Gestión en Economía Mixta",
+            "Empresas Públicas",
+            "Ingeniería Financiera",
+            "Sociología Industrial",
+            "Régimen Tributario",
+            "Desarrollo y Gestión de Proyectos Emprendedores",
+            "Taller de Utilitarios",
+            "IPE 1",
+            "IPE 2",
+            "IPE 3"
+        ];
+
+        function generarIdValido(nombre) {
+            return nombre.toLowerCase()
+                .replace(/[^a-z0-9]/g, '_')
+                .replace(/_+/g, '_')
+                .replace(/^_|_$/, '')
+                .substring(0, 100);
+        }
+
+        function crearMaterias() {
+            var statusDiv = document.getElementById('status');
+            var user = auth.currentUser;
+            
+            if (!user) {
+                statusDiv.innerHTML = '<span class="error">❌ No estás logueado. Iniciá sesión con Google primero.</span>';
+                return;
+            }
+            
+            statusDiv.innerHTML = '<span class="loading">🔄 Creando ' + materias.length + ' materias... Por favor esperá.</span>';
+            
+            var promises = materias.map(function(materia) {
+                var id = generarIdValido(materia);
+                var docRef = db.collection('materias_stats').doc(id);
+                return docRef.set({
+                    nombre: materia,
+                    promedio: 0,
+                    totalVotos: 0,
+                    creado: new Date().toISOString()
+                }, { merge: true })
+                .then(function() {
+                    return { materia: materia, id: id, success: true };
+                })
+                .catch(function(error) {
+                    return { materia: materia, id: id, success: false, error: error };
+                });
+            });
+            
+            Promise.all(promises).then(function(resultados) {
+                var exitosos = resultados.filter(function(r) { return r.success; });
+                var fallidos = resultados.filter(function(r) { return !r.success; });
+                
+                statusDiv.innerHTML = '<span class="success">✅ Creadas ' + exitosos.length + ' materias correctamente.</span><br>';
+                if (fallidos.length > 0) {
+                    statusDiv.innerHTML += '<span class="error">❌ Fallaron ' + fallidos.length + ' materias.</span><br>';
+                    fallidos.forEach(function(f) {
+                        statusDiv.innerHTML += '<span class="error">  - ' + f.materia + ': ' + (f.error ? f.error.message : 'error desconocido') + '</span><br>';
+                    });
+                }
+                statusDiv.innerHTML += '<br><span class="success">🎉 Proceso completado. Podés cerrar esta página.</span>';
+            });
+        }
+
+        // Esperar autenticación
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                document.getElementById('status').innerHTML = '<span class="success">✅ Logueado como: ' + user.email + '</span><br><br><button onclick="crearMaterias()" style="padding: 10px 20px; background: #FF8C00; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">▶️ Crear materias</button>';
+                window.crearMaterias = crearMaterias;
+            } else {
+                document.getElementById('status').innerHTML = '<span class="loading">⏳ No estás logueado. Redirigiendo a login...</span>';
+                // Redirigir a index.html para login
+                setTimeout(function() {
+                    window.location.href = 'index.html';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
