@@ -25,7 +25,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
     
-    <!-- Firebase App Check (PROTECCIÓN API) -->
+    <!-- Firebase App Check -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
 
     <style>
@@ -102,6 +102,29 @@
         header h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; font-size: 2.5rem;}
         header p { color: #9ca3af; margin-bottom: 25px; }
 
+        /* Focus Social - Contador de usuarios activos */
+        .social-counter {
+            background: linear-gradient(135deg, rgba(255,140,0,0.1), rgba(255,140,0,0.05));
+            border: 1px solid rgba(255,140,0,0.2);
+            border-radius: 40px;
+            padding: 8px 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+        }
+
+        .social-counter i {
+            color: var(--primary);
+        }
+
+        .social-counter .count {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
         .launchpad-container { display: flex; gap: 15px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
         .launchpad-btn {
             display: flex; align-items: center; gap: 8px; background: var(--card-bg);
@@ -151,7 +174,7 @@
         .materia-item {
             background: var(--card-bg); backdrop-filter: blur(10px); padding: 15px 24px;
             margin-bottom: 8px; border-radius: 10px; border: 1px solid var(--border);
-            border-left: 4px solid transparent; cursor: pointer; display: flex;
+            border-left: 4px solid transparent; display: flex;
             justify-content: space-between; align-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .materia-item:hover { 
@@ -160,13 +183,121 @@
         }
         [data-theme="dark"] .materia-item:hover { background-color: rgba(25, 25, 25, 0.8); }
         
-        .materia-info { display: flex; flex-direction: column; gap: 4px; }
-        .materia-name { font-weight: 600; font-size: 15px; }
+        .materia-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+        .materia-name { font-weight: 600; font-size: 15px; cursor: pointer; }
+        .materia-name:hover { color: var(--primary); }
         .correlativas-text { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
         .req-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px; background: rgba(255, 74, 74, 0.1); color: #ff4a4a; border: 1px solid rgba(255, 74, 74, 0.2); }
         
-        .materia-action { color: #9ca3af; transition: color 0.3s; font-weight: 500; display: flex; align-items: center; gap: 5px; font-size: 13px;}
-        .materia-item:hover .materia-action { color: var(--primary); }
+        .materia-action { color: #9ca3af; transition: color 0.3s; font-weight: 500; display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;}
+
+        /* ===== RANKING DE DIFICULTAD ===== */
+        .materia-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        .stars-container {
+            display: flex;
+            gap: 2px;
+        }
+
+        .star {
+            font-size: 14px;
+            color: #9ca3af;
+            transition: color 0.2s;
+        }
+
+        .star.filled {
+            color: #FF8C00;
+        }
+
+        .rating-average {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .vote-count {
+            font-size: 10px;
+            color: #9ca3af;
+        }
+
+        .btn-vote {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 2px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text);
+        }
+
+        .btn-vote:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Modal de votación */
+        .vote-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .vote-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .vote-modal-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .vote-stars {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .vote-star {
+            font-size: 32px;
+            cursor: pointer;
+            color: #9ca3af;
+            transition: all 0.2s;
+        }
+
+        .vote-star:hover,
+        .vote-star.selected {
+            color: #FF8C00;
+            transform: scale(1.1);
+        }
+
+        .vote-modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
 
         .btn-sidebar {
             width: 100%; border: none; padding: 14px; border-radius: 8px; cursor: pointer;
@@ -205,16 +336,11 @@
         .login-modal-content h2 { margin-top: 0; font-weight: 800; color: var(--text); }
         .login-modal-content p { color: #9ca3af; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
 
-        /* Tabs del modal */
         .login-tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
         .login-tab { flex: 1; padding: 10px; background: transparent; border: none; cursor: pointer; font-size: 13px; font-weight: 600; color: #9ca3af; transition: all 0.2s; }
         .login-tab.active { background: var(--primary); color: white; }
-
-        /* Paneles del modal */
         .login-panel { display: none; }
         .login-panel.active { display: block; }
-
-        /* Inputs del formulario */
         .login-input {
             width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border);
             background: var(--card-bg); color: var(--text); font-size: 14px;
@@ -223,12 +349,8 @@
         }
         .login-input:focus { outline: none; border-color: var(--primary); }
         .login-input::placeholder { color: #9ca3af; }
-
-        /* Divisor */
         .login-divider { display: flex; align-items: center; gap: 10px; margin: 15px 0; color: #9ca3af; font-size: 12px; }
         .login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-        /* Botón Google */
         .btn-google {
             width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
             background: var(--card-bg); color: var(--text); font-size: 14px; font-weight: 600;
@@ -237,9 +359,15 @@
         }
         .btn-google:hover { border-color: var(--primary); color: var(--primary); }
         .btn-google svg { width: 18px; height: 18px; }
-
-        /* Mensaje de error */
         .login-error { color: #ff4a4a; font-size: 12px; margin-bottom: 10px; min-height: 16px; }
+
+        @media (max-width: 768px) {
+            .materia-rating { flex-wrap: wrap; }
+            .stars-container { order: 1; }
+            .rating-average { order: 2; }
+            .vote-count { order: 3; }
+            .btn-vote { order: 4; }
+        }
     </style>
 </head>
 <body>
@@ -333,10 +461,9 @@
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
 
     <a href="estudio.html" class="btn-sidebar btn-dark">
-        <i data-lucide="timer" class="icon-sm"></i> 🍅 Sesión de Estudio
+        <i data-lucide="timer" class="icon-sm"></i> Sesión de Estudio
     </a>
 
-    <!-- ✅ NUEVO BOTÓN CALENDARIO -->
     <a href="calendario.html" class="btn-sidebar btn-dark">
         <i data-lucide="calendar" class="icon-sm"></i> Calendario
     </a>
@@ -369,6 +496,12 @@
     <header>
         <h1>La Biblioteca de ADE</h1>
         <p>Digitalizando el conocimiento de Administración de Empresas - UNGS</p>
+        
+        <!-- Focus Social - Contador de usuarios activos -->
+        <div class="social-counter" id="socialCounter">
+            <i data-lucide="users" class="icon-sm"></i>
+            <span><span id="activeUsersCount" class="count">0</span> estudiantes están estudiando en Knowy ahora mismo</span>
+        </div>
         
         <div class="launchpad-container">
             <a href="https://inscripciones.ungs.edu.ar/" target="_blank" class="launchpad-btn">
@@ -408,6 +541,26 @@
             <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para mejorar la web
         </a>
     </div>
+</div>
+
+<!-- ===== MODAL DE VOTACIÓN ===== -->
+<div id="voteModal" class="vote-modal hidden">
+    <div class="vote-modal-content">
+        <h3 id="voteMateriaTitle">¿Qué tan difícil es esta materia?</h3>
+        <div class="vote-stars" id="voteStars">
+            <span class="vote-star" data-value="1">★</span>
+            <span class="vote-star" data-value="2">★</span>
+            <span class="vote-star" data-value="3">★</span>
+            <span class="vote-star" data-value="4">★</span>
+            <span class="vote-star" data-value="5">★</span>
+        </div>
+        <p style="font-size: 13px; color: #9ca3af;">1 = Muy fácil | 5 = Muy difícil</p>
+        <div class="vote-modal-buttons">
+            <button onclick="closeVoteModal()" class="btn-dark">Cancelar</button>
+            <button onclick="submitVote()" class="btn-primary-solid">Votar</button>
+        </div>
+    </div>
+</div>
 
 <script>
     // ==================== FUNCIONES DE SEGURIDAD ====================
@@ -442,6 +595,14 @@
         return cleaned.trim();
     }
     
+    function generarIdValido(texto) {
+        return texto.toLowerCase()
+            .replace(/[^a-z0-9]/g, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_|_$/, '')
+            .substring(0, 100);
+    }
+    
     // ==================== FIREBASE ====================
     var firebaseConfig = {
         apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
@@ -455,177 +616,235 @@
 
     firebase.initializeApp(firebaseConfig);
     var auth = firebase.auth();
+    var db = firebase.firestore();
     
-    // ==================== APP CHECK (PROTECCIÓN API - GRATIS) ====================
-    // Tu Site Key de reCAPTCHA v3
     var SITE_KEY = "6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u";
     
     try {
         var appCheck = firebase.appCheck();
         appCheck.activate(SITE_KEY, true);
-        console.log("✅ App Check activado correctamente");
+        console.log("App Check activado");
     } catch (error) {
-        console.error("❌ Error activando App Check:", error);
+        console.error("Error App Check:", error);
     }
     
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(function() { console.log("✅ Persistencia LOCAL configurada"); })
-        .catch(function(error) { console.error("❌ Error configurando persistencia:", error); });
+        .then(function() { console.log("Persistencia LOCAL configurada"); })
+        .catch(function(error) { console.error("Error configurando persistencia:", error); });
     
     var googleProvider = new firebase.auth.GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-    // ==================== TABS DEL MODAL ====================
-    window.switchTab = function(tab) {
-        document.querySelectorAll('.login-tab').forEach(function(t) { t.classList.remove('active'); });
-        document.querySelectorAll('.login-panel').forEach(function(p) { p.classList.remove('active'); });
-        document.getElementById('loginError').textContent = '';
-        document.getElementById('registerError').textContent = '';
-        if (tab === 'login') {
-            document.querySelectorAll('.login-tab')[0].classList.add('active');
-            document.getElementById('panelLogin').classList.add('active');
-        } else {
-            document.querySelectorAll('.login-tab')[1].classList.add('active');
-            document.getElementById('panelRegister').classList.add('active');
+    // ==================== FOCUS SOCIAL ====================
+    var activeUsersUnsubscribe = null;
+    
+    function initFocusSocial() {
+        if (activeUsersUnsubscribe) {
+            activeUsersUnsubscribe();
         }
-    };
-
-    function authErrorMsg(code) {
-        var msgs = {
-            'auth/user-not-found': 'No existe una cuenta con ese correo.',
-            'auth/wrong-password': 'Contraseña incorrecta.',
-            'auth/email-already-in-use': 'Ese correo ya tiene una cuenta. Ingresá en la pestaña "Ingresar".',
-            'auth/invalid-email': 'El correo no tiene un formato válido.',
-            'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
-            'auth/popup-closed-by-user': 'Cerraste la ventana de Google antes de terminar.',
-            'auth/network-request-failed': 'Error de red. Revisá tu conexión.',
-            'auth/invalid-credential': 'Correo o contraseña incorrectos.',
-            'auth/unauthorized-domain': 'Dominio no autorizado. Agregá tu dominio en Firebase Console.'
-        };
-        return msgs[code] || 'Ocurrió un error. Intentá de nuevo.';
-    }
-
-    // ==================== LOGIN CON VALIDACIÓN ====================
-    function doGoogleLogin() {
-        auth.signInWithPopup(googleProvider)
-            .then(function(result) {
-                console.log("✅ Login con Google exitoso:", result.user.email);
-                document.getElementById('loginModal').classList.add('hidden');
-                sessionStorage.removeItem('guestMode');
-            })
-            .catch(function(error) {
-                console.error("❌ Error en Google Login:", error.code);
-                document.getElementById('loginError').textContent = authErrorMsg(error.code);
+        
+        activeUsersUnsubscribe = db.collection('usuarios_activos')
+            .onSnapshot(function(snapshot) {
+                var count = snapshot.size;
+                document.getElementById('activeUsersCount').textContent = count;
+            }, function(error) {
+                console.error("Error en Focus Social:", error);
             });
     }
-
-    function doEmailLogin() {
-        var email = document.getElementById('loginEmail').value.trim();
-        var pass = document.getElementById('loginPassword').value;
-        document.getElementById('loginError').textContent = '';
+    
+    function marcarUsuarioActivo() {
+        var user = auth.currentUser;
+        if (!user) return;
         
-        if (!email || !pass) {
-            document.getElementById('loginError').textContent = 'Completá el correo y la contraseña.';
-            return;
-        }
+        var userRef = db.collection('usuarios_activos').doc(user.uid);
+        userRef.set({
+            uid: user.uid,
+            nombre: user.displayName || user.email.split('@')[0],
+            ultimaActividad: new Date().toISOString()
+        }).catch(function(error) {
+            console.error("Error marcando usuario activo:", error);
+        });
         
-        if (!validateEmail(email)) {
-            document.getElementById('loginError').textContent = 'Ingresá un email válido (ej: usuario@dominio.com).';
-            return;
-        }
-        
-        if (pass.length < 6) {
-            document.getElementById('loginError').textContent = 'La contraseña debe tener al menos 6 caracteres.';
-            return;
-        }
-        
-        auth.signInWithEmailAndPassword(email, pass)
-            .then(function() {
-                document.getElementById('loginModal').classList.add('hidden');
-                sessionStorage.removeItem('guestMode');
+        // Eliminar al cerrar la página
+        window.addEventListener('beforeunload', function() {
+            userRef.delete().catch(function() {});
+        });
+    }
+    
+    // ==================== RANKING DE DIFICULTAD ====================
+    var selectedMateria = null;
+    var selectedVote = null;
+    var currentMateriaId = null;
+    var currentMateriaNombre = null;
+    
+    function cargarEstadisticasMaterias() {
+        db.collection('materias_stats').get()
+            .then(function(querySnapshot) {
+                querySnapshot.forEach(function(doc) {
+                    var data = doc.data();
+                    var materiaNombre = data.nombre;
+                    var promedio = data.promedio || 0;
+                    var totalVotos = data.totalVotos || 0;
+                    actualizarRatingEnPagina(materiaNombre, promedio, totalVotos);
+                });
             })
             .catch(function(error) {
-                document.getElementById('loginError').textContent = authErrorMsg(error.code);
+                console.error("Error cargando estadísticas:", error);
             });
     }
-
-    function doEmailRegister() {
-        var email = document.getElementById('registerEmail').value.trim();
-        var pass = document.getElementById('registerPassword').value;
-        var pass2 = document.getElementById('registerPassword2').value;
-        document.getElementById('registerError').textContent = '';
-        
-        if (!email || !pass) {
-            document.getElementById('registerError').textContent = 'Completá todos los campos.';
-            return;
+    
+    function actualizarRatingEnPagina(materiaNombre, promedio, totalVotos) {
+        var elementosMateria = document.querySelectorAll('.materia-name');
+        for (var i = 0; i < elementosMateria.length; i++) {
+            if (elementosMateria[i].innerText === materiaNombre) {
+                var materiaItem = elementosMateria[i].closest('.materia-item');
+                var ratingContainer = materiaItem.querySelector('.materia-rating');
+                if (ratingContainer) {
+                    var stars = ratingContainer.querySelectorAll('.star');
+                    for (var s = 0; s < stars.length; s++) {
+                        var starValue = parseInt(stars[s].getAttribute('data-value'));
+                        if (starValue <= Math.round(promedio)) {
+                            stars[s].classList.add('filled');
+                        } else {
+                            stars[s].classList.remove('filled');
+                        }
+                    }
+                    var avgSpan = ratingContainer.querySelector('.rating-average');
+                    var countSpan = ratingContainer.querySelector('.vote-count');
+                    if (avgSpan) avgSpan.textContent = promedio.toFixed(1);
+                    if (countSpan) countSpan.textContent = '(' + totalVotos + ')';
+                }
+                break;
+            }
         }
+    }
+    
+    function verificarVotoUsuario(materiaId) {
+        var user = auth.currentUser;
+        if (!user) return Promise.resolve(false);
         
-        if (!validateEmail(email)) {
-            document.getElementById('registerError').textContent = 'Ingresá un email válido (ej: usuario@dominio.com).';
-            return;
-        }
-        
-        if (pass !== pass2) {
-            document.getElementById('registerError').textContent = 'Las contraseñas no coinciden.';
-            return;
-        }
-        
-        if (pass.length < 6) {
-            document.getElementById('registerError').textContent = 'La contraseña debe tener al menos 6 caracteres.';
-            return;
-        }
-        
-        auth.createUserWithEmailAndPassword(email, pass)
-            .then(function() {
-                document.getElementById('loginModal').classList.add('hidden');
-                sessionStorage.removeItem('guestMode');
-            })
-            .catch(function(error) {
-                document.getElementById('registerError').textContent = authErrorMsg(error.code);
+        var docId = user.uid + '_' + materiaId;
+        return db.collection('users_votes').doc(docId).get()
+            .then(function(doc) {
+                return doc.exists;
             });
     }
-
-    document.getElementById('btnGoogleLogin').onclick = doGoogleLogin;
-    document.getElementById('btnGoogleRegister').onclick = doGoogleLogin;
-    document.getElementById('btnEmailLogin').onclick = doEmailLogin;
-    document.getElementById('btnEmailRegister').onclick = doEmailRegister;
-
-    document.getElementById('sidebarLoginBtn').onclick = function() {
-        document.getElementById('loginModal').classList.remove('hidden');
-    };
-    document.getElementById('sidebarLogoutBtn').onclick = function() {
-        auth.signOut().then(function() {
-            sessionStorage.removeItem('guestMode');
-            location.reload();
+    
+    function abrirModalVotacion(materiaNombre, materiaId) {
+        var user = auth.currentUser;
+        if (!user) {
+            alert('Iniciá sesión para votar la dificultad de las materias');
+            document.getElementById('loginModal').classList.remove('hidden');
+            return;
+        }
+        
+        verificarVotoUsuario(materiaId).then(function(yaVoto) {
+            if (yaVoto) {
+                alert('Ya votaste esta materia anteriormente');
+                return;
+            }
+            
+            selectedMateria = materiaNombre;
+            currentMateriaId = materiaId;
+            currentMateriaNombre = materiaNombre;
+            selectedVote = null;
+            
+            document.getElementById('voteMateriaTitle').textContent = '¿Qué tan difícil es ' + materiaNombre + '?';
+            
+            var stars = document.querySelectorAll('#voteStars .vote-star');
+            stars.forEach(function(star) {
+                star.classList.remove('selected');
+            });
+            
+            document.getElementById('voteModal').classList.remove('hidden');
+        });
+    }
+    
+    window.submitVote = function() {
+        if (!selectedVote) {
+            alert('Seleccioná una calificación (1 a 5 estrellas)');
+            return;
+        }
+        
+        var user = auth.currentUser;
+        if (!user) return;
+        
+        var docId = user.uid + '_' + currentMateriaId;
+        
+        db.collection('users_votes').doc(docId).set({
+            uid: user.uid,
+            materiaId: currentMateriaId,
+            materiaNombre: currentMateriaNombre,
+            voto: selectedVote,
+            fecha: new Date().toISOString()
+        })
+        .then(function() {
+            return actualizarEstadisticasMateria(currentMateriaId, selectedVote);
+        })
+        .then(function() {
+            closeVoteModal();
+            alert('¡Gracias por tu voto!');
+            cargarEstadisticasMaterias();
+        })
+        .catch(function(error) {
+            console.error("Error al votar:", error);
+            alert('Error al guardar el voto');
         });
     };
-
-    window.closeLoginModal = function() {
-        document.getElementById('loginModal').classList.add('hidden');
-        sessionStorage.setItem('guestMode', 'true');
-    };
-
-    auth.onAuthStateChanged(function(user) {
-        if (user) {
-            var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
-            var safeName = sanitizeText(nombre);
-            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + safeName;
-            document.getElementById('sidebarLoginBtn').style.display = 'none';
-            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
-            document.getElementById('loginModal').classList.add('hidden');
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        } else {
-            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
-            document.getElementById('sidebarLoginBtn').style.display = 'flex';
-            document.getElementById('sidebarLogoutBtn').style.display = 'none';
-            if (!sessionStorage.getItem('guestMode')) {
-                document.getElementById('loginModal').classList.remove('hidden');
+    
+    function actualizarEstadisticasMateria(materiaId, nuevoVoto) {
+        var materiaRef = db.collection('materias_stats').doc(materiaId);
+        
+        return materiaRef.get().then(function(doc) {
+            if (doc.exists) {
+                var data = doc.data();
+                var totalVotos = data.totalVotos || 0;
+                var promedioActual = data.promedio || 0;
+                var sumaTotal = promedioActual * totalVotos;
+                var nuevaSuma = sumaTotal + nuevoVoto;
+                var nuevoTotalVotos = totalVotos + 1;
+                var nuevoPromedio = nuevaSuma / nuevoTotalVotos;
+                
+                return materiaRef.update({
+                    promedio: nuevoPromedio,
+                    totalVotos: nuevoTotalVotos,
+                    ultimaActualizacion: new Date().toISOString()
+                });
+            } else {
+                return materiaRef.set({
+                    nombre: currentMateriaNombre,
+                    promedio: nuevoVoto,
+                    totalVotos: 1,
+                    ultimaActualizacion: new Date().toISOString()
+                });
             }
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
+        });
+    }
+    
+    window.closeVoteModal = function() {
+        document.getElementById('voteModal').classList.add('hidden');
+        selectedMateria = null;
+        selectedVote = null;
+        currentMateriaId = null;
+        currentMateriaNombre = null;
+    };
+    
+    document.querySelectorAll('#voteStars .vote-star').forEach(function(star) {
+        star.addEventListener('click', function() {
+            var value = parseInt(this.getAttribute('data-value'));
+            selectedVote = value;
+            
+            document.querySelectorAll('#voteStars .vote-star').forEach(function(s, index) {
+                if (index < value) {
+                    s.classList.add('selected');
+                } else {
+                    s.classList.remove('selected');
+                }
+            });
+        });
     });
-
-    // ==================== DATOS DE MATERIAS ====================
+    
+    // ==================== RENDER DE MATERIAS CON RATING ====================
     var data = {
         "PRIMER AÑO": [
             {n: "Taller Inicial Común: Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1jLUf7D_7GzXwwXl0mkE0WJLmK3ydxtfb?usp=drive_link", req: ""},
@@ -694,14 +913,28 @@
                 var safeReq = m.req ? sanitizeHTML(m.req) : '';
                 var safeLink = encodeURIComponent(m.l);
                 var safeNameForAttr = m.n.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                return '<div class="materia-item" onclick="openDoc(\'' + safeNameForAttr + '\', \'' + safeLink + '\')">' +
+                var materiaId = generarIdValido(m.n);
+                
+                return '<div class="materia-item">' +
                     '<div class="materia-info">' +
-                        '<span class="materia-name">' + safeName + '</span>' +
+                        '<span class="materia-name" onclick="openDoc(\'' + safeNameForAttr + '\', \'' + safeLink + '\')">' + safeName + '</span>' +
                         '<div class="correlativas-text">' +
                             (safeReq ? '<span class="req-badge"><i data-lucide="lock" style="width:10px;height:10px;"></i> Req: ' + safeReq + '</span>' : '') +
                         '</div>' +
+                        '<div class="materia-rating" data-materia-id="' + materiaId + '" data-materia-nombre="' + safeNameForAttr + '">' +
+                            '<div class="stars-container">' +
+                                '<span class="star" data-value="1">★</span>' +
+                                '<span class="star" data-value="2">★</span>' +
+                                '<span class="star" data-value="3">★</span>' +
+                                '<span class="star" data-value="4">★</span>' +
+                                '<span class="star" data-value="5">★</span>' +
+                            '</div>' +
+                            '<span class="rating-average">0.0</span>' +
+                            '<span class="vote-count">(0)</span>' +
+                            '<button class="btn-vote" data-materia-nombre="' + safeNameForAttr + '" data-materia-id="' + materiaId + '">Votar</button>' +
+                        '</div>' +
                     '</div>' +
-                    '<span class="materia-action">Ver recursos <i data-lucide="arrow-right" class="icon-sm"></i></span>' +
+                    '<span class="materia-action" onclick="openDoc(\'' + safeNameForAttr + '\', \'' + safeLink + '\')">Ver recursos <i data-lucide="arrow-right" class="icon-sm"></i></span>' +
                 '</div>';
             }).join('');
             section.innerHTML =
@@ -710,6 +943,18 @@
             container.appendChild(section);
         }
         if (typeof lucide !== 'undefined') lucide.createIcons();
+        
+        // Agregar event listeners a los botones de votar después de renderizar
+        document.querySelectorAll('.btn-vote').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var materiaNombre = this.getAttribute('data-materia-nombre');
+                var materiaId = this.getAttribute('data-materia-id');
+                abrirModalVotacion(materiaNombre, materiaId);
+            });
+        });
+        
+        cargarEstadisticasMaterias();
     }
 
     window.toggleYear = function(el) {
@@ -765,8 +1010,167 @@
         applyTheme(current === 'dark' ? 'light' : 'dark');
     };
 
+    // ==================== TABS DEL MODAL ====================
+    window.switchTab = function(tab) {
+        document.querySelectorAll('.login-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.login-panel').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('loginError').textContent = '';
+        document.getElementById('registerError').textContent = '';
+        if (tab === 'login') {
+            document.querySelectorAll('.login-tab')[0].classList.add('active');
+            document.getElementById('panelLogin').classList.add('active');
+        } else {
+            document.querySelectorAll('.login-tab')[1].classList.add('active');
+            document.getElementById('panelRegister').classList.add('active');
+        }
+    };
+
+    function authErrorMsg(code) {
+        var msgs = {
+            'auth/user-not-found': 'No existe una cuenta con ese correo.',
+            'auth/wrong-password': 'Contraseña incorrecta.',
+            'auth/email-already-in-use': 'Ese correo ya tiene una cuenta. Ingresá en la pestaña "Ingresar".',
+            'auth/invalid-email': 'El correo no tiene un formato válido.',
+            'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+            'auth/popup-closed-by-user': 'Cerraste la ventana de Google antes de terminar.',
+            'auth/network-request-failed': 'Error de red. Revisá tu conexión.',
+            'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+            'auth/unauthorized-domain': 'Dominio no autorizado. Agregá tu dominio en Firebase Console.'
+        };
+        return msgs[code] || 'Ocurrió un error. Intentá de nuevo.';
+    }
+
+    function doGoogleLogin() {
+        auth.signInWithPopup(googleProvider)
+            .then(function(result) {
+                console.log("Login con Google exitoso:", result.user.email);
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+                marcarUsuarioActivo();
+            })
+            .catch(function(error) {
+                console.error("Error en Google Login:", error.code);
+                document.getElementById('loginError').textContent = authErrorMsg(error.code);
+            });
+    }
+
+    function doEmailLogin() {
+        var email = document.getElementById('loginEmail').value.trim();
+        var pass = document.getElementById('loginPassword').value;
+        document.getElementById('loginError').textContent = '';
+        
+        if (!email || !pass) {
+            document.getElementById('loginError').textContent = 'Completá el correo y la contraseña.';
+            return;
+        }
+        
+        if (!validateEmail(email)) {
+            document.getElementById('loginError').textContent = 'Ingresá un email válido (ej: usuario@dominio.com).';
+            return;
+        }
+        
+        if (pass.length < 6) {
+            document.getElementById('loginError').textContent = 'La contraseña debe tener al menos 6 caracteres.';
+            return;
+        }
+        
+        auth.signInWithEmailAndPassword(email, pass)
+            .then(function() {
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+                marcarUsuarioActivo();
+            })
+            .catch(function(error) {
+                document.getElementById('loginError').textContent = authErrorMsg(error.code);
+            });
+    }
+
+    function doEmailRegister() {
+        var email = document.getElementById('registerEmail').value.trim();
+        var pass = document.getElementById('registerPassword').value;
+        var pass2 = document.getElementById('registerPassword2').value;
+        document.getElementById('registerError').textContent = '';
+        
+        if (!email || !pass) {
+            document.getElementById('registerError').textContent = 'Completá todos los campos.';
+            return;
+        }
+        
+        if (!validateEmail(email)) {
+            document.getElementById('registerError').textContent = 'Ingresá un email válido (ej: usuario@dominio.com).';
+            return;
+        }
+        
+        if (pass !== pass2) {
+            document.getElementById('registerError').textContent = 'Las contraseñas no coinciden.';
+            return;
+        }
+        
+        if (pass.length < 6) {
+            document.getElementById('registerError').textContent = 'La contraseña debe tener al menos 6 caracteres.';
+            return;
+        }
+        
+        auth.createUserWithEmailAndPassword(email, pass)
+            .then(function() {
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+                marcarUsuarioActivo();
+            })
+            .catch(function(error) {
+                document.getElementById('registerError').textContent = authErrorMsg(error.code);
+            });
+    }
+
+    document.getElementById('btnGoogleLogin').onclick = doGoogleLogin;
+    document.getElementById('btnGoogleRegister').onclick = doGoogleLogin;
+    document.getElementById('btnEmailLogin').onclick = doEmailLogin;
+    document.getElementById('btnEmailRegister').onclick = doEmailRegister;
+
+    document.getElementById('sidebarLoginBtn').onclick = function() {
+        document.getElementById('loginModal').classList.remove('hidden');
+    };
+    document.getElementById('sidebarLogoutBtn').onclick = function() {
+        auth.signOut().then(function() {
+            sessionStorage.removeItem('guestMode');
+            location.reload();
+        });
+    };
+
+    window.closeLoginModal = function() {
+        document.getElementById('loginModal').classList.add('hidden');
+        sessionStorage.setItem('guestMode', 'true');
+    };
+
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
+            var safeName = sanitizeText(nombre);
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + safeName;
+            document.getElementById('sidebarLoginBtn').style.display = 'none';
+            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+            document.getElementById('loginModal').classList.add('hidden');
+            marcarUsuarioActivo();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        } else {
+            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
+            document.getElementById('sidebarLoginBtn').style.display = 'flex';
+            document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            if (!sessionStorage.getItem('guestMode')) {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    });
+
     render();
+    initFocusSocial();
     if (typeof lucide !== 'undefined') lucide.createIcons();
+    
+    // Marcar usuario activo si ya está logueado
+    if (auth.currentUser) {
+        marcarUsuarioActivo();
+    }
 </script>
 </body>
 </html>
