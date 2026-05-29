@@ -100,28 +100,7 @@
         header h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; font-size: 2.5rem;}
         header p { color: #9ca3af; margin-bottom: 25px; }
 
-        /* Focus Social - Contador de usuarios activos */
-        .social-counter {
-            background: linear-gradient(135deg, rgba(255,140,0,0.1), rgba(255,140,0,0.05));
-            border: 1px solid rgba(255,140,0,0.2);
-            border-radius: 40px;
-            padding: 8px 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            backdrop-filter: blur(10px);
-        }
 
-        .social-counter i {
-            color: var(--primary);
-        }
-
-        .social-counter .count {
-            font-weight: 700;
-            color: var(--primary);
-        }
 
         .launchpad-container { display: flex; gap: 15px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
         .launchpad-btn {
@@ -555,12 +534,7 @@
     <header>
         <h1>La Biblioteca de ADE</h1>
         <p>Digitalizando el conocimiento de Administración de Empresas - UNGS</p>
-        
-        <div class="social-counter" id="socialCounter">
-            <i data-lucide="users" class="icon-sm"></i>
-            <span><span id="activeUsersCount" class="count">0</span> estudiantes están estudiando en Knowy ahora mismo</span>
-        </div>
-        
+                
         <div class="launchpad-container">
             <a href="https://inscripciones.ungs.edu.ar/" target="_blank" class="launchpad-btn">
                 <i data-lucide="monitor" class="icon-sm text-primary"></i> SIU Guaraní
@@ -790,45 +764,7 @@
             });
     };
 
-    // ==================== FOCUS SOCIAL ====================
-    var activeUsersUnsubscribe = null;
-    
-function initFocusSocial() {
-        if (activeUsersUnsubscribe) {
-            activeUsersUnsubscribe();
-        }
-        
-        activeUsersUnsubscribe = db.collection('usuarios_activos')
-            .onSnapshot(function(snapshot) {
-                var count = snapshot.size;
-                document.getElementById('activeUsersCount').textContent = count;
-            }, function(error) {
-                console.error("Error en Focus Social:", error);
-            });
-    }
-    
-    // 👇 ¡ESTA ES LA LÍNEA QUE FALTABA! 
-    // Ejecuta la función apenas carga la página para que todos (invitados y logueados) vean el contador.
-    initFocusSocial();
-    
-    function marcarUsuarioActivo() {
-        var user = auth.currentUser;
-        if (!user) return;
-        
-        var userRef = db.collection('usuarios_activos').doc(user.uid);
-        userRef.set({
-            uid: user.uid,
-            nombre: user.displayName || user.email.split('@')[0],
-            ultimaActividad: new Date().toISOString()
-        }).catch(function(error) {
-            console.error("Error marcando usuario activo:", error);
-        });
-        
-        // Eliminar al cerrar la página
-        window.addEventListener('beforeunload', function() {
-            userRef.delete().catch(function() {});
-        });
-    }
+
     
     // ==================== RANKING DE DIFICULTAD ====================
     var selectedMateria = null;
@@ -1261,7 +1197,6 @@ function initFocusSocial() {
                 console.log("Login con Google exitoso:", result.user.email);
                 document.getElementById('loginModal').classList.add('hidden');
                 sessionStorage.removeItem('guestMode');
-                marcarUsuarioActivo();
                 cargarMateriasUsuario(result.user);
             })
             .catch(function(error) {
@@ -1294,7 +1229,6 @@ function initFocusSocial() {
             .then(function(result) {
                 document.getElementById('loginModal').classList.add('hidden');
                 sessionStorage.removeItem('guestMode');
-                marcarUsuarioActivo();
                 cargarMateriasUsuario(result.user);
             })
             .catch(function(error) {
@@ -1332,7 +1266,6 @@ function initFocusSocial() {
             .then(function(result) {
                 document.getElementById('loginModal').classList.add('hidden');
                 sessionStorage.removeItem('guestMode');
-                marcarUsuarioActivo();
                 cargarMateriasUsuario(result.user);
             })
             .catch(function(error) {
@@ -1368,7 +1301,6 @@ function initFocusSocial() {
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
-            marcarUsuarioActivo();
             cargarMateriasUsuario(user); // Carga y renderiza filtrando
             if (typeof lucide !== 'undefined') lucide.createIcons();
         } else {
