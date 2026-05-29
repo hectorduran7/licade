@@ -697,7 +697,7 @@
     var userMateriasConfig = null; 
 
     function cargarMateriasUsuario(user) {
-        db.collection('usuarios_materias').doc(user.uid).get()
+        db.collection('users_grades').doc(user.uid).get()
             .then(function(doc) {
                 if (doc.exists) {
                     userMateriasConfig = doc.data();
