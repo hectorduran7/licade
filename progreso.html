@@ -21,12 +21,10 @@
         document.documentElement.setAttribute('data-theme', theme);
     </script>
 
-    <!-- Firebase COMPAT v10.13.0 (ESTANDARIZADO) -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
     
-    <!-- Firebase App Check (PROTECCIÓN API) -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
 
     <style>
@@ -229,13 +227,11 @@
 </head>
 <body>
 
-<!-- Loading Overlay -->
 <div id="loadingOverlay" class="loading-overlay hidden">
     <div class="spinner"></div>
     <p>Sincronizando datos...</p>
 </div>
 
-<!-- MODAL LOGIN -->
 <div id="loginModal" class="login-modal hidden">
     <div class="login-modal-content">
         <i data-lucide="lock" class="icon-lg" style="color: var(--primary); width: 40px; height: 40px;"></i>
@@ -336,7 +332,9 @@
         </div>
 
         <div class="calc-row">
-            <input type="text" id="subjIn" class="calc-input" placeholder="Nombre de la Materia">
+            <select id="subjIn" class="calc-input">
+                <option value="">Seleccioná una materia...</option>
+                </select>
             <input type="text" id="gradeIn" class="calc-input" placeholder="Nota (1-10 o 'A')">
             <button onclick="addEntry()" class="btn-sidebar btn-primary-solid" style="margin:0; width:auto; padding:0 25px; justify-content:center;">
                 <i data-lucide="plus" class="icon-sm"></i>
@@ -363,9 +361,80 @@
 </div>
 
 <script>
+    // ==================== LISTA MAESTRA DE MATERIAS ====================
+    // Mantenemos la misma estructura que en index.html para estandarizar
+    var dataMaterias = {
+        "PRIMER AÑO": [
+            {n: "Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Taller Inicial Orientado: Ciencias Exactas"},
+            {n: "Teoría de la Organización"},
+            {n: "Problemas Socioeconómicos Contemporáneos"},
+            {n: "Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "Introducción a la Economía"}
+        ],
+        "SEGUNDO AÑO": [
+            {n: "Economía Clásica"},
+            {n: "Diseño Estructural y Procesos"},
+            {n: "Matemática para Economistas I"},
+            {n: "Economía Neoclásica"},
+            {n: "Sistemas de Información Contable I"},
+            {n: "Historia Económica y Social Mundial y Latinoamericana"}
+        ],
+        "TERCER AÑO": [
+            {n: "Economía Keynesiana"},
+            {n: "Estadística para Economistas"},
+            {n: "Planeamiento y Control Organizacional"},
+            {n: "Matemática para Economistas II"},
+            {n: "Laboratorio Interdisciplinario"},
+            {n: "Sistemas de Información"}
+        ],
+        "CUARTO AÑO": [
+            {n: "Derecho Administrativo"},
+            {n: "Organización Industrial"},
+            {n: "Gestión de Recursos Humanos (Material Viejo)"},
+            {n: "Dirección Estratégica (Material Viejo)"},
+            {n: "Tópicos de Comercialización"},
+            {n: "Planificación y Proceso Decisorio en las Organizaciones"},
+            {n: "Teoría de la Innovación y del Cambio Tecnológico"}
+        ],
+        "QUINTO AÑO": [
+            {n: "Matemática para Economistas III"},
+            {n: "Costos Industriales"},
+            {n: "Sistemas de Información Contable II"},
+            {n: "Gestión en Economía Mixta"},
+            {n: "Empresas Públicas"},
+            {n: "Ingeniería Financiera"}
+        ],
+        "SEXTO AÑO": [
+            {n: "Sociología Industrial"},
+            {n: "Régimen Tributario"},
+            {n: "Desarrollo y Gestión de Proyectos Emprendedores"}
+        ],
+        "EXTRACURRICULARES": [
+            {n: "Taller de Utilitarios"},
+            {n: "IPE 1"},
+            {n: "IPE 2"},
+            {n: "IPE 3"}
+        ]
+    };
+
+    // Función para inyectar las materias en el <select>
+    function cargarListaMaterias() {
+        var select = document.getElementById('subjIn');
+        for (var year in dataMaterias) {
+            var optGroup = document.createElement('optgroup');
+            optGroup.label = year;
+            dataMaterias[year].forEach(function(materia) {
+                var option = document.createElement('option');
+                option.value = materia.n;
+                option.textContent = materia.n;
+                optGroup.appendChild(option);
+            });
+            select.appendChild(optGroup);
+        }
+    }
+
     // ==================== FUNCIONES DE SEGURIDAD ====================
-    
-    // Función para sanitizar HTML (previene XSS)
     function sanitizeHTML(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -376,7 +445,6 @@
         });
     }
     
-    // Función para sanitizar texto plano (para innerText)
     function sanitizeText(str) {
         if (!str) return '';
         return str.replace(/[<>]/g, function(m) {
@@ -386,19 +454,14 @@
         });
     }
     
-    // Función para validar y sanitizar el nombre de materia (solo letras, números, espacios y caracteres comunes)
     function sanitizeSubjectName(name) {
         if (!name) return '';
-        // Permite letras (incluyendo acentos), números, espacios, guiones, puntos, comas, paréntesis y dos puntos
         let cleaned = name.replace(/[^\w\s\u00C0-\u00FF\-\.\,\(\)\:]/gi, '');
-        // Limitar longitud
         if (cleaned.length > 100) cleaned = cleaned.substring(0, 100);
         return cleaned.trim();
     }
     
-    // ==================== FIN FUNCIONES DE SEGURIDAD ====================
-    
-    // ── FIREBASE CONFIG v10.13.0 ──
+    // ==================== FIREBASE CONFIG v10.13.0 ====================
     var firebaseConfig = {
         apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
         authDomain: "knowy-13079.firebaseapp.com",
@@ -424,7 +487,6 @@
         console.error("❌ Error activando App Check:", error);
     }
     
-    // ✅ PERSISTENCIA LOCAL - Mantiene sesión entre páginas
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .then(function() { console.log("✅ Persistencia LOCAL configurada"); })
         .catch(function(error) { console.error("❌ Error configurando persistencia:", error); });
@@ -434,9 +496,9 @@
 
     // ── VARIABLES GLOBALES ──
     const totalMaterias = 38;
-    let entries = [];           // Array de calificaciones
-    let currentUser = null;    // Usuario actual
-    let isLoading = false;      // Evitar cargas múltiples
+    let entries = [];
+    let currentUser = null;
+    let isLoading = false;
 
     // ── ELEMENTOS DOM ──
     var loadingOverlay = document.getElementById('loadingOverlay');
@@ -449,11 +511,10 @@
         }
     }
 
-    // ── GUARDAR EN FIRESTORE (USANDO UID COMO ID DEL DOCUMENTO - SEGURO) ──
+    // ── GUARDAR EN FIRESTORE ──
     function saveToFirestore() {
         if (!currentUser) return;
         
-        // Usar el UID como ID del documento para cumplir con las reglas de seguridad
         var userDocRef = db.collection('users_grades').doc(currentUser.uid);
         userDocRef.set({
             email: currentUser.email,
@@ -480,7 +541,6 @@
             .then(function(doc) {
                 if (doc.exists) {
                     var data = doc.data();
-                    // Sanitizar entries al cargar desde Firestore
                     entries = (data.entries || []).map(function(entry) {
                         return {
                             subj: sanitizeSubjectName(entry.subj),
@@ -523,19 +583,17 @@
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    // ── AUTH STATE (CON SANITIZACIÓN DE NOMBRE DE USUARIO) ──
+    // ── AUTH STATE ──
     auth.onAuthStateChanged(function(user) {
         if (user) {
             currentUser = user;
             var displayName = user.displayName || user.email.split('@')[0];
-            // SANITIZAR: usar sanitizeText para innerHTML seguro
             var safeName = sanitizeText(displayName.split(' ')[0]);
             document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + safeName;
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
             
-            // Cargar datos desde Firestore
             loadFromFirestore(user);
             
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -545,12 +603,10 @@
             document.getElementById('sidebarLoginBtn').style.display = 'flex';
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
             
-            // Modo invitado: cargar desde sessionStorage (más seguro que localStorage)
             var savedEntries = sessionStorage.getItem('ungs_grades_backup_guest');
             if (savedEntries) {
                 try {
                     var parsed = JSON.parse(savedEntries);
-                    // Sanitizar entries al cargar
                     entries = (parsed || []).map(function(entry) {
                         return {
                             subj: sanitizeSubjectName(entry.subj),
@@ -579,14 +635,13 @@
     document.getElementById('sidebarLoginBtn').onclick = doGoogleLogin;
     document.getElementById('sidebarLogoutBtn').onclick = function() {
         auth.signOut().then(function() {
-            // Limpiar datos del usuario al salir
             entries = [];
             saveAndRender();
             location.reload();
         });
     };
 
-    // ── CALCULADORA (CON SANITIZACIÓN DE ENTRADA) ──
+    // ── CALCULADORA ──
     window.addEntry = function() {
         let subj = document.getElementById('subjIn').value.trim();
         const gradeRaw = document.getElementById('gradeIn').value.trim().toUpperCase();
@@ -594,10 +649,23 @@
         const isNumeric = !isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 10;
         const isApproved = gradeRaw === 'A' || gradeRaw === 'AP' || gradeRaw === 'APROBADO';
 
-        if (!subj) { alert('Ingresá el nombre de la materia.'); return; }
-        if (!isNumeric && !isApproved) { alert("Ingresá una nota válida del 1 al 10 o la letra 'A'."); return; }
+        if (!subj) { 
+            alert('Seleccioná una materia de la lista.'); 
+            return; 
+        }
         
-        // SANITIZAR: limpiar el nombre de la materia
+        // Validación para evitar materias duplicadas
+        let isDuplicate = entries.some(function(e) { return e.subj === subj; });
+        if (isDuplicate) {
+            alert('Ya cargaste esta materia en tu progreso.');
+            return;
+        }
+
+        if (!isNumeric && !isApproved) { 
+            alert("Ingresá una nota válida del 1 al 10 o la letra 'A'."); 
+            return; 
+        }
+        
         subj = sanitizeSubjectName(subj);
         if (!subj) {
             alert('El nombre de la materia contiene caracteres no válidos.');
@@ -613,11 +681,9 @@
         
         saveAndRender();
         
-        // Guardar en Firestore si hay usuario
         if (currentUser) {
             saveToFirestore();
         } else {
-            // Backup en sessionStorage para modo invitado
             sessionStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
         }
         
@@ -639,7 +705,6 @@
     };
 
     function saveAndRender() {
-        // Renderizar lista con sanitización
         const list = document.getElementById('gradeList');
         if (entries.length === 0) {
             list.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;">' +
@@ -660,7 +725,6 @@
             }).join('');
         }
 
-        // Calcular promedio
         var numericEntries = entries.filter(function(entry) { return entry.isNumeric; });
         var average = numericEntries.length
             ? (numericEntries.reduce(function(acc, item) { return acc + Number(item.grade); }, 0) / numericEntries.length).toFixed(2)
@@ -668,17 +732,14 @@
 
         document.getElementById('avgOut').innerText = average;
         
-        // Calcular progreso
         var completed = entries.length;
         var percentage = Math.min((completed / totalMaterias) * 100, 100).toFixed(1);
         document.getElementById('progressBar').style.width = percentage + '%';
         document.getElementById('progressText').innerText = completed + ' / ' + totalMaterias + ' materias completadas (' + percentage + '%)';
         
-        // Recargar íconos
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
     
-    // Función para escapar HTML (seguridad)
     function escapeHtml(text) {
         var div = document.createElement('div');
         div.textContent = text;
@@ -709,6 +770,7 @@
     });
 
     // ── INICIALIZAR ──
+    cargarListaMaterias(); // Inyecta las materias en el select al iniciar
     saveAndRender();
     if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
