@@ -793,7 +793,7 @@
     // ==================== FOCUS SOCIAL ====================
     var activeUsersUnsubscribe = null;
     
-    function initFocusSocial() {
+function initFocusSocial() {
         if (activeUsersUnsubscribe) {
             activeUsersUnsubscribe();
         }
@@ -806,6 +806,10 @@
                 console.error("Error en Focus Social:", error);
             });
     }
+    
+    // 👇 ¡ESTA ES LA LÍNEA QUE FALTABA! 
+    // Ejecuta la función apenas carga la página para que todos (invitados y logueados) vean el contador.
+    initFocusSocial();
     
     function marcarUsuarioActivo() {
         var user = auth.currentUser;
