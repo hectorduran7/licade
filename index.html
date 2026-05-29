@@ -20,12 +20,10 @@
         document.documentElement.setAttribute('data-theme', theme);
     </script>
 
-    <!-- Firebase COMPAT v10.13.0 -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
     
-    <!-- Firebase App Check -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
 
     <style>
@@ -183,6 +181,20 @@
         }
         [data-theme="dark"] .materia-item:hover { background-color: rgba(25, 25, 25, 0.8); }
         
+        /* Estilos para materias aprobadas */
+        .materia-item.aprobada {
+            opacity: 0.75;
+            border-left: 4px solid #22c55e;
+            background: rgba(34, 197, 94, 0.02);
+        }
+        .materia-item.aprobada:hover {
+            opacity: 1;
+            border-color: rgba(34, 197, 94, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(34, 197, 94, 0.15);
+        }
+        .badge-aprobada { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); margin-left: 8px; }
+        .badge-cursando { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 140, 0, 0.1); color: var(--primary); border: 1px solid rgba(255, 140, 0, 0.2); margin-left: 8px; }
+
         .materia-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
         .materia-name { font-weight: 600; font-size: 15px; cursor: pointer; }
         .materia-name:hover { color: var(--primary); }
@@ -361,6 +373,26 @@
         .btn-google svg { width: 18px; height: 18px; }
         .login-error { color: #ff4a4a; font-size: 12px; margin-bottom: 10px; min-height: 16px; }
 
+        /* Estilos del Modal de Personalización de Materias */
+        .pers-list-container {
+            display: flex; flex-direction: column; gap: 5px;
+        }
+        .pers-list-container.hidden { display: none; }
+        .pers-year-header {
+            font-weight: 700; color: var(--primary); margin: 10px 0 5px 0;
+            font-size: 13px; border-bottom: 1px solid var(--border); padding-bottom: 3px;
+        }
+        .pers-item {
+            display: flex; align-items: center; gap: 10px; padding: 6px 8px;
+            font-size: 14px; color: var(--text); border-radius: 6px; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .pers-item:hover { background: rgba(255, 140, 0, 0.05); }
+        .pers-item input[type="checkbox"] {
+            accent-color: var(--primary);
+            width: 16px; height: 16px; cursor: pointer;
+        }
+
         @media (max-width: 768px) {
             .materia-rating { flex-wrap: wrap; }
             .stars-container { order: 1; }
@@ -372,7 +404,6 @@
 </head>
 <body>
 
-<!-- ===== MODAL DE LOGIN ===== -->
 <div id="loginModal" class="login-modal hidden">
     <div class="login-modal-content">
         <i data-lucide="lock" class="icon-lg" style="color: var(--primary); margin-bottom: 15px; width: 40px; height: 40px;"></i>
@@ -429,6 +460,29 @@
     </div>
 </div>
 
+<div id="persModal" class="login-modal hidden" style="z-index: 2005;">
+    <div class="login-modal-content" style="max-width: 550px; max-height: 90vh; display: flex; flex-direction: column;">
+        <h2 style="margin-bottom: 5px;">Personalizá tu experiencia</h2>
+        <p style="margin-bottom: 20px;">Seleccioná qué materias querés ver en tu inicio para no distraerte.</p>
+        
+        <div class="login-tabs">
+            <button class="login-tab active" id="tabCursando" onclick="switchPersTab('cursando')">Cursando Actualmente</button>
+            <button class="login-tab" id="tabAprobadas" onclick="switchPersTab('aprobadas')">Ya Aprobadas</button>
+        </div>
+
+        <div id="persListCursando" class="pers-list-container" style="overflow-y: auto; flex: 1; text-align: left; border: 1px solid var(--border); border-radius: 8px; padding: 10px 15px; margin-bottom: 15px; background: var(--bg);">
+            </div>
+        
+        <div id="persListAprobadas" class="pers-list-container hidden" style="overflow-y: auto; flex: 1; text-align: left; border: 1px solid var(--border); border-radius: 8px; padding: 10px 15px; margin-bottom: 15px; background: var(--bg);">
+            </div>
+
+        <div class="vote-modal-buttons">
+            <button onclick="cerrarModalPersonalizacion()" class="btn-dark" style="padding: 10px 20px;">Cancelar</button>
+            <button onclick="guardarPersonalizacion()" class="btn-primary-solid" style="padding: 10px 20px;">Guardar materias</button>
+        </div>
+    </div>
+</div>
+
 <button class="toggle-btn" onclick="toggleSidebar()"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
 <button class="theme-btn" onclick="toggleTheme()"><i data-lucide="moon" class="icon-sm"></i> Tema</button>
 
@@ -451,9 +505,14 @@
     
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
 
-    <a href="index.html" class="btn-sidebar btn-primary-solid">
+    <a href="index.html" class="btn-sidebar btn-primary-solid" style="margin-bottom: 5px;">
         <i data-lucide="search" class="icon-sm"></i> Buscar Materias
     </a>
+    
+    <a href="#" onclick="abrirModalPersonalizacion(); return false;" class="btn-sidebar btn-dark" id="btnEditarMaterias" style="display:none; margin-bottom: 12px; border-style: dashed;">
+        <i data-lucide="sliders" class="icon-sm"></i> Mis Materias
+    </a>
+
     <a href="progreso.html" class="btn-sidebar btn-dark">
         <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
     </a>
@@ -497,7 +556,6 @@
         <h1>La Biblioteca de ADE</h1>
         <p>Digitalizando el conocimiento de Administración de Empresas - UNGS</p>
         
-        <!-- Focus Social - Contador de usuarios activos -->
         <div class="social-counter" id="socialCounter">
             <i data-lucide="users" class="icon-sm"></i>
             <span><span id="activeUsersCount" class="count">0</span> estudiantes están estudiando en Knowy ahora mismo</span>
@@ -543,7 +601,6 @@
     </div>
 </div>
 
-<!-- ===== MODAL DE VOTACIÓN ===== -->
 <div id="voteModal" class="vote-modal hidden">
     <div class="vote-modal-content">
         <h3 id="voteMateriaTitle">¿Qué tan difícil es esta materia?</h3>
@@ -635,6 +692,104 @@
     var googleProvider = new firebase.auth.GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
 
+    // ==================== CONFIGURACIÓN DE MATERIAS DEL USUARIO ====================
+    // userMateriasConfig contendrá { cursando: [], aprobadas: [] }. Si es null, muestra todo.
+    var userMateriasConfig = null; 
+
+    function cargarMateriasUsuario(user) {
+        db.collection('usuarios_materias').doc(user.uid).get()
+            .then(function(doc) {
+                if (doc.exists) {
+                    userMateriasConfig = doc.data();
+                    render();
+                    document.getElementById('btnEditarMaterias').style.display = 'flex';
+                } else {
+                    userMateriasConfig = { cursando: [], aprobadas: [] };
+                    abrirModalPersonalizacion();
+                    document.getElementById('btnEditarMaterias').style.display = 'flex';
+                }
+            })
+            .catch(function(error) {
+                console.error("Error al cargar configuración de materias:", error);
+            });
+    }
+
+    // Modal de Personalización (Lógica)
+    window.switchPersTab = function(tab) {
+        document.getElementById('tabCursando').classList.toggle('active', tab === 'cursando');
+        document.getElementById('tabAprobadas').classList.toggle('active', tab === 'aprobadas');
+        document.getElementById('persListCursando').classList.toggle('hidden', tab !== 'cursando');
+        document.getElementById('persListAprobadas').classList.toggle('hidden', tab !== 'aprobadas');
+    };
+
+    window.abrirModalPersonalizacion = function() {
+        var htmlCursando = '';
+        var htmlAprobadas = '';
+        
+        for (var year in data) {
+            htmlCursando += '<div class="pers-year-header">' + sanitizeHTML(year) + '</div>';
+            htmlAprobadas += '<div class="pers-year-header">' + sanitizeHTML(year) + '</div>';
+            
+            data[year].forEach(function(m) {
+                var checkedCursando = (userMateriasConfig && userMateriasConfig.cursando && userMateriasConfig.cursando.includes(m.n)) ? 'checked' : '';
+                var checkedAprobadas = (userMateriasConfig && userMateriasConfig.aprobadas && userMateriasConfig.aprobadas.includes(m.n)) ? 'checked' : '';
+                
+                var safeName = sanitizeHTML(m.n);
+                
+                htmlCursando += 
+                    '<label class="pers-item">' +
+                        '<input type="checkbox" value="' + safeName + '" class="chk-cursando" ' + checkedCursando + '>' +
+                        safeName +
+                    '</label>';
+                
+                htmlAprobadas += 
+                    '<label class="pers-item">' +
+                        '<input type="checkbox" value="' + safeName + '" class="chk-aprobadas" ' + checkedAprobadas + '>' +
+                        safeName +
+                    '</label>';
+            });
+        }
+        
+        document.getElementById('persListCursando').innerHTML = htmlCursando;
+        document.getElementById('persListAprobadas').innerHTML = htmlAprobadas;
+        document.getElementById('persModal').classList.remove('hidden');
+    };
+
+    window.cerrarModalPersonalizacion = function() {
+        document.getElementById('persModal').classList.add('hidden');
+    };
+
+    window.guardarPersonalizacion = function() {
+        var cursandoEls = document.querySelectorAll('.chk-cursando:checked');
+        var aprobadasEls = document.querySelectorAll('.chk-aprobadas:checked');
+        
+        var cursandoArr = [];
+        var aprobadasArr = [];
+        
+        for(var i=0; i<cursandoEls.length; i++) cursandoArr.push(cursandoEls[i].value);
+        for(var j=0; j<aprobadasEls.length; j++) aprobadasArr.push(aprobadasEls[j].value);
+        
+        var user = auth.currentUser;
+        if (!user) return;
+        
+        var newData = {
+            cursando: cursandoArr,
+            aprobadas: aprobadasArr,
+            ultimaActualizacion: new Date().toISOString()
+        };
+        
+        db.collection('usuarios_materias').doc(user.uid).set(newData)
+            .then(function() {
+                userMateriasConfig = newData;
+                cerrarModalPersonalizacion();
+                render();
+            })
+            .catch(function(error) {
+                console.error("Error guardando personalización:", error);
+                alert("Ocurrió un error al guardar tus materias.");
+            });
+    };
+
     // ==================== FOCUS SOCIAL ====================
     var activeUsersUnsubscribe = null;
     
@@ -696,7 +851,10 @@
     function actualizarRatingEnPagina(materiaNombre, promedio, totalVotos) {
         var elementosMateria = document.querySelectorAll('.materia-name');
         for (var i = 0; i < elementosMateria.length; i++) {
-            if (elementosMateria[i].innerText === materiaNombre) {
+            // El innerText puede tener contenido de tags extras si hay badges, así que comparamos la data-attribute o el string limpio.
+            // Para ser seguros, validaremos el texto base
+            var rawName = elementosMateria[i].childNodes[0].textContent.trim();
+            if (rawName === materiaNombre) {
                 var materiaItem = elementosMateria[i].closest('.materia-item');
                 var ratingContainer = materiaItem.querySelector('.materia-rating');
                 if (ratingContainer) {
@@ -714,7 +872,7 @@
                     if (avgSpan) avgSpan.textContent = promedio.toFixed(1);
                     if (countSpan) countSpan.textContent = '(' + totalVotos + ')';
                 }
-                break;
+                break; // Removemos break si la materia puede estar duplicada, aunque en data no lo está.
             }
         }
     }
@@ -844,7 +1002,7 @@
         });
     });
     
-    // ==================== RENDER DE MATERIAS CON RATING ====================
+    // ==================== RENDER DE MATERIAS ====================
     var data = {
         "PRIMER AÑO": [
             {n: "Taller Inicial Común: Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1jLUf7D_7GzXwwXl0mkE0WJLmK3ydxtfb?usp=drive_link", req: ""},
@@ -903,21 +1061,46 @@
     function render() {
         var container = document.getElementById('accordionContainer');
         container.innerHTML = '';
+        
+        var materiasMostradas = 0;
+
         for (var year in data) {
             var mats = data[year];
-            var section = document.createElement('div');
-            section.className = 'year-section';
             var safeYear = sanitizeHTML(year);
-            var items = mats.map(function(m) {
+            
+            // Filtrar las materias según la configuración del usuario
+            var itemsHtml = mats.filter(function(m) {
+                if (!userMateriasConfig) return true; // Si no hay conf, muestra todas
+                var estaCursando = userMateriasConfig.cursando && userMateriasConfig.cursando.includes(m.n);
+                var estaAprobada = userMateriasConfig.aprobadas && userMateriasConfig.aprobadas.includes(m.n);
+                return estaCursando || estaAprobada;
+            }).map(function(m) {
                 var safeName = sanitizeHTML(m.n);
                 var safeReq = m.req ? sanitizeHTML(m.req) : '';
                 var safeLink = encodeURIComponent(m.l);
                 var safeNameForAttr = m.n.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 var materiaId = generarIdValido(m.n);
                 
-                return '<div class="materia-item">' +
+                var esAprobada = userMateriasConfig && userMateriasConfig.aprobadas && userMateriasConfig.aprobadas.includes(m.n);
+                var esCursando = userMateriasConfig && userMateriasConfig.cursando && userMateriasConfig.cursando.includes(m.n);
+                
+                var claseExtra = esAprobada ? " aprobada" : "";
+                var badgesHtml = "";
+                
+                if (esAprobada) {
+                    badgesHtml += '<span class="badge-aprobada"><i data-lucide="check-circle" style="width:12px;height:12px;"></i> Aprobada</span>';
+                } else if (esCursando) {
+                    badgesHtml += '<span class="badge-cursando"><i data-lucide="book-open" style="width:12px;height:12px;"></i> Cursando</span>';
+                }
+                
+                materiasMostradas++;
+
+                return '<div class="materia-item' + claseExtra + '">' +
                     '<div class="materia-info">' +
-                        '<span class="materia-name" onclick="openDoc(\'' + safeNameForAttr + '\', \'' + safeLink + '\')">' + safeName + '</span>' +
+                        '<div style="display:flex; align-items:center; flex-wrap:wrap; gap:5px;">' +
+                            '<span class="materia-name" onclick="openDoc(\'' + safeNameForAttr + '\', \'' + safeLink + '\')">' + safeName + '</span>' +
+                            badgesHtml +
+                        '</div>' +
                         '<div class="correlativas-text">' +
                             (safeReq ? '<span class="req-badge"><i data-lucide="lock" style="width:10px;height:10px;"></i> Req: ' + safeReq + '</span>' : '') +
                         '</div>' +
@@ -937,11 +1120,29 @@
                     '<span class="materia-action" onclick="openDoc(\'' + safeNameForAttr + '\', \'' + safeLink + '\')">Ver recursos <i data-lucide="arrow-right" class="icon-sm"></i></span>' +
                 '</div>';
             }).join('');
-            section.innerHTML =
-                '<div class="year-header" onclick="toggleYear(this)">' + safeYear + ' <span>+</span></div>' +
-                '<div class="materia-container">' + items + '</div>';
-            container.appendChild(section);
+            
+            // Solo dibujamos la sección (AÑO) si tiene materias para mostrar
+            if (itemsHtml !== '') {
+                var section = document.createElement('div');
+                section.className = 'year-section';
+                section.innerHTML =
+                    '<div class="year-header" onclick="toggleYear(this)">' + safeYear + ' <span>+</span></div>' +
+                    '<div class="materia-container" style="display:block;">' + itemsHtml + '</div>'; // Por defecto abierto si hay filtro
+                container.appendChild(section);
+            }
         }
+        
+        // Si el usuario configuró y no tiene NADA marcado, le mostramos un mensaje bonito
+        if (materiasMostradas === 0 && userMateriasConfig) {
+            container.innerHTML = '<div style="text-align:center; padding: 50px 20px; color:#9ca3af; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);">' +
+                '<i data-lucide="book-x" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 15px; display:inline-block;"></i>' +
+                '<p>No seleccionaste ninguna materia para mostrar.</p>' +
+                '<button onclick="abrirModalPersonalizacion()" class="btn-primary-solid" style="padding: 10px 20px; border:none; border-radius:8px; margin-top:15px; cursor:pointer; display:inline-flex; align-items:center; gap:8px;">' +
+                    '<i data-lucide="sliders" class="icon-sm"></i> Configurar mis materias' +
+                '</button>' +
+            '</div>';
+        }
+
         if (typeof lucide !== 'undefined') lucide.createIcons();
         
         // Agregar event listeners a los botones de votar después de renderizar
@@ -977,16 +1178,26 @@
         for (var i = 0; i < items.length; i++) {
             var titleElem = items[i].querySelector('.materia-name');
             if (titleElem) {
-                var title = titleElem.innerText.toLowerCase();
+                // Al tener los badges adentro, nos aseguramos de leer solo el texto base del span de nombre
+                var title = titleElem.childNodes[0].textContent.trim().toLowerCase();
                 items[i].style.display = title.includes(input) ? "" : "none";
             }
         }
         for (var j = 0; j < sections.length; j++) {
             var panel = sections[j].querySelector('.materia-container');
             if (panel) {
-                panel.style.display = input ? "block" : "none";
+                // Si hay búsqueda, forzar apertura. Si no, dejar abierto/cerrado como esté
+                if (input) panel.style.display = "block";
                 var span = sections[j].querySelector('span');
-                if (span) span.innerText = input ? "-" : "+";
+                if (span) span.innerText = (panel.style.display === "block") ? "-" : "+";
+                
+                // Ocultar sección completa si todos sus items están display:none
+                var sectionItems = panel.querySelectorAll('.materia-item');
+                var hasVisible = false;
+                sectionItems.forEach(function(si) {
+                    if (si.style.display !== "none") hasVisible = true;
+                });
+                sections[j].style.display = hasVisible ? "block" : "none";
             }
         }
     };
@@ -1012,15 +1223,15 @@
 
     // ==================== TABS DEL MODAL ====================
     window.switchTab = function(tab) {
-        document.querySelectorAll('.login-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.login-tab:not(#tabCursando):not(#tabAprobadas)').forEach(function(t) { t.classList.remove('active'); });
         document.querySelectorAll('.login-panel').forEach(function(p) { p.classList.remove('active'); });
         document.getElementById('loginError').textContent = '';
         document.getElementById('registerError').textContent = '';
         if (tab === 'login') {
-            document.querySelectorAll('.login-tab')[0].classList.add('active');
+            document.querySelectorAll('.login-tab:not(#tabCursando):not(#tabAprobadas)')[0].classList.add('active');
             document.getElementById('panelLogin').classList.add('active');
-        } else {
-            document.querySelectorAll('.login-tab')[1].classList.add('active');
+        } else if (tab === 'register') {
+            document.querySelectorAll('.login-tab:not(#tabCursando):not(#tabAprobadas)')[1].classList.add('active');
             document.getElementById('panelRegister').classList.add('active');
         }
     };
@@ -1047,6 +1258,7 @@
                 document.getElementById('loginModal').classList.add('hidden');
                 sessionStorage.removeItem('guestMode');
                 marcarUsuarioActivo();
+                cargarMateriasUsuario(result.user);
             })
             .catch(function(error) {
                 console.error("Error en Google Login:", error.code);
@@ -1075,10 +1287,11 @@
         }
         
         auth.signInWithEmailAndPassword(email, pass)
-            .then(function() {
+            .then(function(result) {
                 document.getElementById('loginModal').classList.add('hidden');
                 sessionStorage.removeItem('guestMode');
                 marcarUsuarioActivo();
+                cargarMateriasUsuario(result.user);
             })
             .catch(function(error) {
                 document.getElementById('loginError').textContent = authErrorMsg(error.code);
@@ -1112,10 +1325,11 @@
         }
         
         auth.createUserWithEmailAndPassword(email, pass)
-            .then(function() {
+            .then(function(result) {
                 document.getElementById('loginModal').classList.add('hidden');
                 sessionStorage.removeItem('guestMode');
                 marcarUsuarioActivo();
+                cargarMateriasUsuario(result.user);
             })
             .catch(function(error) {
                 document.getElementById('registerError').textContent = authErrorMsg(error.code);
@@ -1151,26 +1365,22 @@
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
             marcarUsuarioActivo();
+            cargarMateriasUsuario(user); // Carga y renderiza filtrando
             if (typeof lucide !== 'undefined') lucide.createIcons();
         } else {
             document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
             document.getElementById('sidebarLoginBtn').style.display = 'flex';
             document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            document.getElementById('btnEditarMaterias').style.display = 'none';
+            userMateriasConfig = null; // Reinicia para mostrar todo
             if (!sessionStorage.getItem('guestMode')) {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
+            render(); // Muestra todas las materias para el invitado
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
     });
 
-    render();
-    initFocusSocial();
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-    
-    // Marcar usuario activo si ya está logueado
-    if (auth.currentUser) {
-        marcarUsuarioActivo();
-    }
 </script>
 </body>
 </html>
