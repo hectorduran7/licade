@@ -778,7 +778,7 @@
             ultimaActualizacion: new Date().toISOString()
         };
         
-        db.collection('usuarios_materias').doc(user.uid).set(newData)
+        db.collection('users_grades').doc(user.uid).set(newData)
             .then(function() {
                 userMateriasConfig = newData;
                 cerrarModalPersonalizacion();
