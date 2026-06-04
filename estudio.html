@@ -20,12 +20,10 @@
         document.documentElement.setAttribute('data-theme', theme);
     </script>
 
-    <!-- Firebase COMPAT v10.13.0 -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
     
-    <!-- Firebase App Check -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
 
     <style>
@@ -745,7 +743,6 @@
 </head>
 <body>
 
-<!-- LOGIN MODAL -->
 <div id="loginModal" class="login-modal hidden">
     <div class="login-modal-content">
         <i data-lucide="lock" class="icon-lg" style="color: var(--primary); width: 40px; height: 40px; margin-bottom: 15px;"></i>
@@ -771,7 +768,6 @@
     Tema
 </button>
 
-<!-- Botón Modo sin distracciones -->
 <button id="distractionFreeBtn" class="distraction-free-btn" onclick="enterDistractionFreeMode()">
     <i data-lucide="maximize-2" class="icon-sm"></i>
     Modo sin distracciones
@@ -831,7 +827,6 @@
         <p>Temporizador Pomodoro y seguimiento de estudio</p>
     </header>
 
-    <!-- SELECTOR DE MATERIA -->
     <div class="subject-selector">
         <label>
             <i data-lucide="book-open" class="icon-sm"></i>
@@ -850,7 +845,6 @@
         <div id="currentSubjectDisplay" class="current-subject"></div>
     </div>
 
-    <!-- SELECTOR DE DURACIÓN -->
     <div class="duration-selector">
         <div class="duration-header">
             <i data-lucide="clock" class="icon-sm"></i>
@@ -886,7 +880,6 @@
         </div>
     </div>
 
-    <!-- TIMER PRINCIPAL -->
     <div class="timer-container">
         <div class="timer-display" id="timerDisplay">25:00</div>
 
@@ -912,7 +905,6 @@
         </div>
     </div>
 
-    <!-- TÉCNICAS DE ESTUDIO (NUEVO - SOLO PRÓXIMAMENTE) -->
     <div class="techniques-container">
         <div class="techniques-title">
             <i data-lucide="lightbulb" class="icon-md"></i>
@@ -946,7 +938,6 @@
         </div>
     </div>
 
-    <!-- ESTADÍSTICAS -->
     <div class="stats-container">
         <div class="stats-title">
             <i data-lucide="bar-chart-3" class="icon-md"></i>
@@ -978,7 +969,6 @@
         </div>
     </div>
 
-    <!-- HISTORIAL -->
     <div class="history-container">
         <div class="history-title">
             <i data-lucide="history" class="icon-md"></i>
@@ -1139,13 +1129,18 @@
     var unlimitedCheck = document.getElementById('unlimitedMode');
     var presetBtns = document.querySelectorAll('.preset-btn');
 
+    // ==================== VARIABLES DE ESTADO Y TIEMPO ====================
     var currentSubject = '';
     var timerRunning = false;
     var timerInterval = null;
     var currentSeconds = 25 * 60;
     var isUnlimited = false;
     var initialDurationSeconds = 25 * 60;
-    var sessionStartTime = null;
+    
+    // Nuevas variables con Date.now() para solucionar el lag de pestañas
+    var targetEndTime = null;
+    var chronoStartTime = null;
+    var chronoAccumulated = 0;
 
     // ==================== AUTOCOMPLETADO ====================
     function filterSubjects(searchText) {
@@ -1203,18 +1198,10 @@
         currentSubjectDisplay.classList.add('show');
         if (typeof lucide !== 'undefined') lucide.createIcons();
         showNotification('Materia seleccionada: ' + currentSubject);
+        saveTimerLocalState(); // Guardar en local
     });
 
     // ==================== CONTROL DE DURACIÓN ====================
-    function updateDurationDisplay(minutes) {
-        durationNumber.textContent = minutes;
-        if (!unlimitedCheck.checked && !timerRunning) {
-            currentSeconds = minutes * 60;
-            initialDurationSeconds = currentSeconds;
-            updateDisplay();
-        }
-    }
-
     durationMinus.addEventListener('click', function() {
         var current = parseInt(durationNumber.textContent);
         if (current > 1) {
@@ -1225,6 +1212,7 @@
                 currentSeconds = newVal * 60;
                 initialDurationSeconds = currentSeconds;
                 updateDisplay();
+                clearTimerLocalState();
             }
         }
     });
@@ -1239,6 +1227,7 @@
                 currentSeconds = newVal * 60;
                 initialDurationSeconds = currentSeconds;
                 updateDisplay();
+                clearTimerLocalState();
             }
         }
     });
@@ -1253,6 +1242,7 @@
                 currentSeconds = minutes * 60;
                 initialDurationSeconds = currentSeconds;
                 updateDisplay();
+                clearTimerLocalState();
             }
         });
     });
@@ -1278,9 +1268,91 @@
                 updateDisplay();
             }
         }
+        clearTimerLocalState(); // Limpiar guardado previo para no arrastrar errores
     });
 
-    // ==================== TIMER FUNCTIONS ====================
+    // ==================== PERSISTENCIA DEL TIMER (NUEVO) ====================
+    function saveTimerLocalState() {
+        var state = {
+            running: timerRunning,
+            subject: currentSubject,
+            unlimited: isUnlimited,
+            initialDuration: initialDurationSeconds,
+            currentSecs: currentSeconds,
+            targetEnd: targetEndTime,
+            chronoStart: chronoStartTime,
+            chronoAcc: chronoAccumulated
+        };
+        localStorage.setItem('ungs_timer_state', JSON.stringify(state));
+    }
+
+    function clearTimerLocalState() {
+        localStorage.removeItem('ungs_timer_state');
+    }
+
+    function loadTimerLocalState() {
+        var saved = localStorage.getItem('ungs_timer_state');
+        if (saved) {
+            try {
+                var state = JSON.parse(saved);
+                currentSubject = state.subject || '';
+                isUnlimited = state.unlimited || false;
+                initialDurationSeconds = state.initialDuration || 25 * 60;
+                currentSeconds = state.currentSecs || 25 * 60;
+                targetEndTime = state.targetEnd || null;
+                chronoStartTime = state.chronoStart || null;
+                chronoAccumulated = state.chronoAcc || 0;
+
+                if (currentSubject) {
+                    subjectInput.value = currentSubject;
+                    currentSubjectDisplay.innerHTML = '<i data-lucide="check-circle" class="icon-sm" style="margin-right: 5px;"></i> Estudiando: ' + sanitizeHTML(currentSubject);
+                    currentSubjectDisplay.classList.add('show');
+                }
+
+                if (isUnlimited) {
+                    unlimitedCheck.checked = true;
+                    durationMinus.disabled = true;
+                    durationPlus.disabled = true;
+                    presetBtns.forEach(function(btn) { btn.disabled = true; });
+                } else {
+                    var mins = Math.floor(initialDurationSeconds / 60);
+                    durationNumber.textContent = mins;
+                    presetBtns.forEach(function(btn) {
+                        if (parseInt(btn.getAttribute('data-minutes')) === mins) {
+                            btn.classList.add('active');
+                        } else {
+                            btn.classList.remove('active');
+                        }
+                    });
+                }
+
+                if (state.running) {
+                    timerRunning = true;
+                    playBtn.disabled = true;
+                    pauseBtn.disabled = false;
+                    finishBtn.disabled = false;
+                    
+                    // Restauramos el intervalo usando los timestamps guardados
+                    if (!timerInterval) {
+                        timerInterval = setInterval(timerTick, 250);
+                    }
+                } else {
+                    updateDisplay();
+                }
+            } catch(e) {
+                console.error("Error restaurando el temporizador:", e);
+            }
+        }
+    }
+
+    // Guardar estado al salir o refrescar la página
+    window.addEventListener('beforeunload', function() {
+        if (timerRunning || currentSeconds > 0 || currentSubject) {
+            saveTimerLocalState();
+        }
+    });
+
+    // ==================== LOGICA TIMER MEJORADA ====================
     function updateDisplay() {
         var mins = Math.floor(currentSeconds / 60);
         var secs = currentSeconds % 60;
@@ -1301,22 +1373,39 @@
         pauseBtn.disabled = false;
         finishBtn.disabled = false;
         
+        // Asignación de timestamps
+        if (isUnlimited) {
+            chronoStartTime = Date.now();
+        } else {
+            targetEndTime = Date.now() + (currentSeconds * 1000);
+        }
+
+        saveTimerLocalState();
+        
         if (!timerInterval) {
-            sessionStartTime = Date.now();
-            timerInterval = setInterval(function() {
-                if (isUnlimited) {
-                    currentSeconds++;
-                    updateDisplay();
-                } else {
-                    if (currentSeconds > 0) {
-                        currentSeconds--;
-                        updateDisplay();
-                    }
-                    if (currentSeconds === 0 && !isUnlimited) {
-                        completeSession();
-                    }
-                }
-            }, 1000);
+            timerInterval = setInterval(timerTick, 250); // Se actualiza 4 veces por seg para fluidez
+        }
+    }
+
+    function timerTick() {
+        var now = Date.now();
+        
+        if (isUnlimited) {
+            // Modo cronómetro: Calculamos tiempo real transcurrido
+            var totalMs = chronoAccumulated + (now - chronoStartTime);
+            currentSeconds = Math.floor(totalMs / 1000);
+            updateDisplay();
+        } else {
+            // Modo cuenta regresiva
+            var diffMs = targetEndTime - now;
+            if (diffMs <= 0) {
+                currentSeconds = 0;
+                updateDisplay();
+                completeSession();
+            } else {
+                currentSeconds = Math.ceil(diffMs / 1000);
+                updateDisplay();
+            }
         }
     }
 
@@ -1326,22 +1415,36 @@
         timerInterval = null;
         playBtn.disabled = false;
         pauseBtn.disabled = true;
+
+        if (isUnlimited) {
+            chronoAccumulated += (Date.now() - chronoStartTime);
+        }
+        saveTimerLocalState();
     }
 
     function resetTimer() {
         pauseTimer();
         if (isUnlimited) {
             currentSeconds = 0;
+            chronoAccumulated = 0;
+            chronoStartTime = null;
         } else {
             var minutes = parseInt(durationNumber.textContent);
             currentSeconds = minutes * 60;
             initialDurationSeconds = currentSeconds;
+            targetEndTime = null;
         }
         updateDisplay();
+        clearTimerLocalState();
+        finishBtn.disabled = true;
     }
 
     function finishSession() {
         if (!timerRunning && currentSeconds === initialDurationSeconds && !isUnlimited) {
+            showNotification('No hay ninguna sesión en curso');
+            return;
+        }
+        if (!timerRunning && currentSeconds === 0 && isUnlimited) {
             showNotification('No hay ninguna sesión en curso');
             return;
         }
@@ -1351,6 +1454,11 @@
         
         var studiedSeconds = 0;
         if (isUnlimited) {
+            if (timerRunning) {
+                 var now = Date.now();
+                 var totalMs = chronoAccumulated + (now - chronoStartTime);
+                 currentSeconds = Math.floor(totalMs / 1000);
+            }
             studiedSeconds = currentSeconds;
         } else {
             studiedSeconds = initialDurationSeconds - currentSeconds;
@@ -1362,6 +1470,7 @@
         
         pauseTimer();
         resetTimer();
+        clearTimerLocalState();
         showNotification('Sesión finalizada');
     }
 
@@ -1377,6 +1486,7 @@
         pauseBtn.disabled = true;
         finishBtn.disabled = true;
         
+        clearTimerLocalState();
         showNotification('Tiempo completado');
     }
 
@@ -1594,6 +1704,7 @@
     });
 
     // ==================== INICIALIZAR ====================
+    loadTimerLocalState(); // <--- Ahora restauramos el tiempo o materia si refresca
     updateDisplay();
     if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
