@@ -1273,6 +1273,7 @@
 
     // ==================== PERSISTENCIA DEL TIMER (NUEVO) ====================
     function saveTimerLocalState() {
+        // SOLO GUARDAMOS VARIABLES DEL TIMER ACTIVO, NADA DE ESTADÍSTICAS
         var state = {
             running: timerRunning,
             subject: currentSubject,
@@ -1295,6 +1296,7 @@
         if (saved) {
             try {
                 var state = JSON.parse(saved);
+                // SOLO RESTAURAMOS VARIABLES DEL TIMER ACTIVO
                 currentSubject = state.subject || '';
                 isUnlimited = state.unlimited || false;
                 initialDurationSeconds = state.initialDuration || 25 * 60;
@@ -1332,7 +1334,6 @@
                     pauseBtn.disabled = false;
                     finishBtn.disabled = false;
                     
-                    // Restauramos el intervalo usando los timestamps guardados
                     if (!timerInterval) {
                         timerInterval = setInterval(timerTick, 250);
                     }
@@ -1345,7 +1346,6 @@
         }
     }
 
-    // Guardar estado al salir o refrescar la página
     window.addEventListener('beforeunload', function() {
         if (timerRunning || currentSeconds > 0 || currentSubject) {
             saveTimerLocalState();
@@ -1373,7 +1373,6 @@
         pauseBtn.disabled = false;
         finishBtn.disabled = false;
         
-        // Asignación de timestamps
         if (isUnlimited) {
             chronoStartTime = Date.now();
         } else {
@@ -1383,7 +1382,7 @@
         saveTimerLocalState();
         
         if (!timerInterval) {
-            timerInterval = setInterval(timerTick, 250); // Se actualiza 4 veces por seg para fluidez
+            timerInterval = setInterval(timerTick, 250);
         }
     }
 
@@ -1391,12 +1390,10 @@
         var now = Date.now();
         
         if (isUnlimited) {
-            // Modo cronómetro: Calculamos tiempo real transcurrido
             var totalMs = chronoAccumulated + (now - chronoStartTime);
             currentSeconds = Math.floor(totalMs / 1000);
             updateDisplay();
         } else {
-            // Modo cuenta regresiva
             var diffMs = targetEndTime - now;
             if (diffMs <= 0) {
                 currentSeconds = 0;
@@ -1597,20 +1594,22 @@
         }).catch(function(error) { console.error("Firestore error:", error); });
     }
 
+    // AHORA ESTA FUNCIÓN RETORNA UNA PROMESA PARA ESPERAR A QUE TERMINE DE CARGAR
     function loadFromFirestore(user) {
-        if (!user) return;
+        if (!user) return Promise.resolve();
         var today = new Date();
         var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
         var userDocRef = db.collection('users_pomodoro').doc(user.uid);
-        userDocRef.get().then(function(doc) {
+        
+        var p1 = userDocRef.get().then(function(doc) {
             if (doc.exists) {
                 var data = doc.data();
                 timerState.streak = data.streak || 0;
                 timerState.lastStudyDate = data.lastStudyDate || null;
-                document.getElementById('statStreak').textContent = timerState.streak;
             }
         }).catch(function(error) { console.error("Error cargando racha:", error); });
-        userDocRef.collection('daily').doc(dateStr).get().then(function(doc) {
+        
+        var p2 = userDocRef.collection('daily').doc(dateStr).get().then(function(doc) {
             if (doc.exists) {
                 var data = doc.data();
                 timerState.sessionsCompleted = data.sessionsCompleted || 0;
@@ -1623,10 +1622,14 @@
                         subject: sanitizeText(entry.subject || 'Sin materia')
                     };
                 });
-                updateStats();
-                updateHistory();
             }
         }).catch(function(error) { console.error("Error cargando desde Firestore:", error); });
+
+        // Devolvemos la promesa y al final llamamos a updateStats y updateHistory
+        return Promise.all([p1, p2]).then(function() {
+            updateStats();
+            updateHistory();
+        });
     }
 
     function showNotification(message) {
@@ -1671,7 +1674,14 @@
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
-            loadFromFirestore(user);
+            
+            // PRIMERO cargamos los datos de Firestore y actualizamos stats
+            // LUEGO restauramos el timer local
+            loadFromFirestore(user).then(function() {
+                loadTimerLocalState();
+                updateDisplay();
+            });
+            
             if (typeof lucide !== 'undefined') lucide.createIcons();
         } else {
             document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display:inline;"></i> Invitado';
@@ -1680,6 +1690,11 @@
             if (!sessionStorage.getItem('guestMode')) {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
+            
+            // Para invitados, simplemente cargamos el timer local sin consultar la base de datos
+            loadTimerLocalState();
+            updateDisplay();
+            
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
     });
@@ -1704,8 +1719,7 @@
     });
 
     // ==================== INICIALIZAR ====================
-    loadTimerLocalState(); // <--- Ahora restauramos el tiempo o materia si refresca
-    updateDisplay();
+    // loadTimerLocalState() se quitó de aquí para forzar el orden correcto dentro de onAuthStateChanged
     if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
 </body>
