@@ -991,13 +991,11 @@
 <script>
     // ==================== MODOS ====================
     
-    // Modo sin distracciones (pantalla completa + ocultar todo excepto timer y botones)
     function enterDistractionFreeMode() {
         document.body.classList.add('distraction-free');
         document.getElementById('distractionFreeBtn').style.display = 'none';
         document.getElementById('exitDistractionBtn').style.display = 'flex';
         
-        // Intentar pantalla completa
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
         }
@@ -1010,7 +1008,6 @@
         document.getElementById('distractionFreeBtn').style.display = 'flex';
         document.getElementById('exitDistractionBtn').style.display = 'none';
         
-        // Salir de pantalla completa
         if (document.exitFullscreen) {
             document.exitFullscreen();
         }
@@ -1137,7 +1134,6 @@
     var isUnlimited = false;
     var initialDurationSeconds = 25 * 60;
     
-    // Nuevas variables con Date.now() para solucionar el lag de pestañas
     var targetEndTime = null;
     var chronoStartTime = null;
     var chronoAccumulated = 0;
@@ -1198,7 +1194,7 @@
         currentSubjectDisplay.classList.add('show');
         if (typeof lucide !== 'undefined') lucide.createIcons();
         showNotification('Materia seleccionada: ' + currentSubject);
-        saveTimerLocalState(); // Guardar en local
+        saveTimerLocalState();
     });
 
     // ==================== CONTROL DE DURACIÓN ====================
@@ -1268,12 +1264,11 @@
                 updateDisplay();
             }
         }
-        clearTimerLocalState(); // Limpiar guardado previo para no arrastrar errores
+        clearTimerLocalState();
     });
 
-    // ==================== PERSISTENCIA DEL TIMER (NUEVO) ====================
+    // ==================== PERSISTENCIA DEL TIMER ====================
     function saveTimerLocalState() {
-        // SOLO GUARDAMOS VARIABLES DEL TIMER ACTIVO, NADA DE ESTADÍSTICAS
         var state = {
             running: timerRunning,
             subject: currentSubject,
@@ -1296,7 +1291,7 @@
         if (saved) {
             try {
                 var state = JSON.parse(saved);
-                // SOLO RESTAURAMOS VARIABLES DEL TIMER ACTIVO
+                
                 currentSubject = state.subject || '';
                 isUnlimited = state.unlimited || false;
                 initialDurationSeconds = state.initialDuration || 25 * 60;
@@ -1594,7 +1589,6 @@
         }).catch(function(error) { console.error("Firestore error:", error); });
     }
 
-    // AHORA ESTA FUNCIÓN RETORNA UNA PROMESA PARA ESPERAR A QUE TERMINE DE CARGAR
     function loadFromFirestore(user) {
         if (!user) return Promise.resolve();
         var today = new Date();
@@ -1625,7 +1619,6 @@
             }
         }).catch(function(error) { console.error("Error cargando desde Firestore:", error); });
 
-        // Devolvemos la promesa y al final llamamos a updateStats y updateHistory
         return Promise.all([p1, p2]).then(function() {
             updateStats();
             updateHistory();
@@ -1675,10 +1668,10 @@
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
             
-            // PRIMERO cargamos los datos de Firestore y actualizamos stats
-            // LUEGO restauramos el timer local
             loadFromFirestore(user).then(function() {
                 loadTimerLocalState();
+                updateStats();
+                updateHistory();
                 updateDisplay();
             });
             
@@ -1691,8 +1684,9 @@
                 document.getElementById('loginModal').classList.remove('hidden');
             }
             
-            // Para invitados, simplemente cargamos el timer local sin consultar la base de datos
             loadTimerLocalState();
+            updateStats();
+            updateHistory();
             updateDisplay();
             
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1719,7 +1713,6 @@
     });
 
     // ==================== INICIALIZAR ====================
-    // loadTimerLocalState() se quitó de aquí para forzar el orden correcto dentro de onAuthStateChanged
     if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
 </body>
