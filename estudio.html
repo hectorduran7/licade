@@ -140,13 +140,15 @@
         .btn-primary-solid { background: var(--primary); color: white; border: none; box-shadow: 0 4px 15px rgba(255,140,0,.2); }
         .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
 
-        .subject-selector, .duration-selector, .timer-container, .stats-container, .history-container, .techniques-container {
+        .duration-selector, .timer-container, .stats-container, .history-container, .techniques-container {
             background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
             padding: 20px; margin-bottom: 25px; backdrop-filter: blur(10px);
         }
 
         /* CORRECCIÓN DE Z-INDEX PARA LA LISTA DESPLEGABLE */
         .subject-selector {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
+            padding: 20px; margin-bottom: 25px; backdrop-filter: blur(10px);
             position: relative;
             z-index: 50; 
         }
@@ -758,7 +760,7 @@
         timerState.globalSessions++;
         timerState.globalTime += secs;
         timerState.globalHistory.unshift(newSession);
-        if (timerState.globalHistory.length > 50) timerState.globalHistory.pop(); // límite de 50 para no pesar mucho
+        if (timerState.globalHistory.length > 50) timerState.globalHistory.pop();
 
         updateStreak(); updateStats(); updateHistory(); saveToFirestore();
         showNotification('Guardado: ' + currentSubject + ' (' + mins + 'm)');
@@ -780,12 +782,10 @@
     }
 
     function updateStats() {
-        // Hoy
         document.getElementById('statStreak').textContent = timerState.streak;
         document.getElementById('statSessions').textContent = timerState.sessionsCompleted;
         document.getElementById('statTime').textContent = Math.floor(timerState.totalWorkSeconds / 60) + 'm';
         
-        // Global
         document.getElementById('statGlobalStreak').textContent = timerState.streak;
         document.getElementById('statGlobalSessions').textContent = timerState.globalSessions;
         document.getElementById('statGlobalTime').textContent = formatGlobalTime(timerState.globalTime);
@@ -827,14 +827,12 @@
         var dateStr = new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0')+'-'+String(new Date().getDate()).padStart(2,'0');
         var userRef = db.collection('users_pomodoro').doc(user.uid);
         
-        // Guardar Totales Globales
         userRef.set({
             streak: timerState.streak, lastStudyDate: timerState.lastStudyDate,
             globalSessions: timerState.globalSessions, globalTime: timerState.globalTime,
             globalHistory: timerState.globalHistory, lastUpdated: new Date()
         }, { merge: true });
         
-        // Guardar Hoy
         userRef.collection('daily').doc(dateStr).set({
             userId: user.uid, date: new Date(),
             sessionsCompleted: timerState.sessionsCompleted, totalWorkSeconds: timerState.totalWorkSeconds,
@@ -842,27 +840,74 @@
         });
     }
 
+    // CARGA SECUENCIAL Y RECONSTRUCCIÓN DEL HISTORIAL GLOBAL
     function loadFromFirestore(user) {
         if (!user) return Promise.resolve();
         var dateStr = new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0')+'-'+String(new Date().getDate()).padStart(2,'0');
         var userRef = db.collection('users_pomodoro').doc(user.uid);
         
-        var p1 = userRef.get().then(function(doc) {
+        return userRef.get().then(function(doc) {
             if (doc.exists) {
                 var d = doc.data();
-                timerState.streak = d.streak || 0; timerState.lastStudyDate = d.lastStudyDate || null;
-                timerState.globalSessions = d.globalSessions || 0; timerState.globalTime = d.globalTime || 0;
+                timerState.streak = d.streak || 0; 
+                timerState.lastStudyDate = d.lastStudyDate || null;
+                timerState.globalSessions = d.globalSessions || 0; 
+                timerState.globalTime = d.globalTime || 0;
                 timerState.globalHistory = d.globalHistory || [];
             }
-        });
-        var p2 = userRef.collection('daily').doc(dateStr).get().then(function(doc) {
-            if (doc.exists) {
+            // Retornamos la llamada para que el .then() espere
+            return userRef.collection('daily').get();
+        }).then(function(snapshot) {
+            var docs = [];
+            snapshot.forEach(function(doc) { docs.push(doc); });
+            // Ordenar por ID de documento (YYYY-MM-DD) para que quede cronológico
+            docs.sort(function(a, b) { return a.id.localeCompare(b.id); });
+
+            var calcGlobalSessions = 0;
+            var calcGlobalTime = 0;
+            var calcGlobalHistory = [];
+
+            docs.forEach(function(doc) {
                 var d = doc.data();
-                timerState.sessionsCompleted = d.sessionsCompleted || 0; timerState.totalWorkSeconds = d.totalWorkSeconds || 0;
-                timerState.sessionHistory = d.sessionHistory || [];
+                var docDate = doc.id; // EJ: 2026-06-06
+
+                if (doc.id === dateStr) {
+                    timerState.sessionsCompleted = d.sessionsCompleted || 0; 
+                    timerState.totalWorkSeconds = d.totalWorkSeconds || 0;
+                    timerState.sessionHistory = d.sessionHistory || [];
+                }
+
+                calcGlobalSessions += (d.sessionsCompleted || 0);
+                calcGlobalTime += (d.totalWorkSeconds || 0);
+
+                var hist = d.sessionHistory || [];
+                hist.forEach(function(h) {
+                    if (!h.date) {
+                        var parts = docDate.split('-');
+                        h.date = parts[2] + '/' + parts[1] + '/' + parts[0];
+                    }
+                    calcGlobalHistory.push(h); // Se insertan los más viejos primero
+                });
+            });
+
+            // MIGRACIÓN: Si el global actual es menor al calculado o está vacío, actualizamos el global
+            if (timerState.globalSessions < calcGlobalSessions || timerState.globalHistory.length === 0) {
+                timerState.globalSessions = calcGlobalSessions;
+                timerState.globalTime = calcGlobalTime;
+                
+                // Invertimos la lista para mostrar el más reciente arriba, y cortamos a los últimos 50
+                timerState.globalHistory = calcGlobalHistory.reverse().slice(0, 50);
+
+                userRef.set({
+                    globalSessions: timerState.globalSessions,
+                    globalTime: timerState.globalTime,
+                    globalHistory: timerState.globalHistory
+                }, { merge: true });
             }
+            
+            updateStats(); 
+            updateHistory();
         });
-        return Promise.all([p1, p2]).then(function() { updateStats(); updateHistory(); });
     }
 
     function showNotification(msg) {
