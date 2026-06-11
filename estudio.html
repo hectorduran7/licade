@@ -61,163 +61,69 @@
         }
 
         /* ===== MODO SIN DISTRACCIONES ===== */
-        body.distraction-free .sidebar {
-            display: none !important;
-        }
-
+        body.distraction-free .sidebar { display: none !important; }
         body.distraction-free .main-content {
-            margin-left: auto !important;
-            margin-right: auto !important;
-            max-width: 100% !important;
-            padding: 20px !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: center !important;
-            min-height: 100vh !important;
+            margin-left: auto !important; margin-right: auto !important;
+            max-width: 100% !important; padding: 20px !important;
+            display: flex !important; flex-direction: column !important;
+            justify-content: center !important; min-height: 100vh !important;
         }
-
         body.distraction-free .toggle-btn,
-        body.distraction-free .theme-btn {
-            display: none !important;
-        }
-
+        body.distraction-free .theme-btn,
         body.distraction-free .subject-selector,
         body.distraction-free .duration-selector,
         body.distraction-free .stats-container,
         body.distraction-free .history-container,
         body.distraction-free .techniques-container,
         body.distraction-free .footer,
-        body.distraction-free header p {
-            display: none !important;
-        }
-
-        body.distraction-free header {
-            margin-bottom: 0 !important;
-        }
-
-        body.distraction-free .timer-container {
-            margin-bottom: 0 !important;
-            box-shadow: none !important;
-            background: transparent !important;
-        }
-
-        body.distraction-free .timer-display {
-            font-size: 180px !important;
-        }
-
-        body.distraction-free .controls {
-            margin-top: 50px !important;
-        }
+        body.distraction-free header p { display: none !important; }
+        body.distraction-free header { margin-bottom: 0 !important; }
+        body.distraction-free .timer-container { margin-bottom: 0 !important; box-shadow: none !important; background: transparent !important; }
+        body.distraction-free .timer-display { font-size: 180px !important; }
+        body.distraction-free .controls { margin-top: 50px !important; }
 
         .distraction-free-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1100;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
+            position: fixed; bottom: 20px; right: 20px; z-index: 1100;
+            background: var(--primary); color: white; border: none; padding: 12px 18px;
+            border-radius: 8px; cursor: pointer; font-weight: 600; display: flex;
+            align-items: center; gap: 8px; transition: all 0.3s ease;
         }
-
-        .distraction-free-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        body.distraction-free .distraction-free-btn {
-            display: none !important;
-        }
+        .distraction-free-btn:hover { transform: translateY(-2px); }
+        body.distraction-free .distraction-free-btn { display: none !important; }
 
         #exitDistractionBtn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1100;
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 12px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: none;
-            align-items: center;
-            gap: 8px;
+            position: fixed; bottom: 20px; right: 20px; z-index: 1100;
+            background: var(--danger); color: white; border: none; padding: 12px 18px;
+            border-radius: 8px; cursor: pointer; font-weight: 600; display: none;
+            align-items: center; gap: 8px;
         }
-
-        body.distraction-free #exitDistractionBtn {
-            display: flex !important;
-        }
+        body.distraction-free #exitDistractionBtn { display: flex !important; }
 
         .icon-sm { width: 16px; height: 16px; }
         .icon-md { width: 20px; height: 20px; }
         .icon-lg { width: 24px; height: 24px; }
 
         .sidebar {
-            width: var(--sidebar-width);
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 30px 20px 100px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--border);
-            backdrop-filter: blur(20px);
-            transition: transform .4s cubic-bezier(.4,0,.2,1);
+            width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+            z-index: 1000; overflow-y: auto; padding: 30px 20px 100px;
+            background: var(--sidebar-bg); border-right: 1px solid var(--border);
+            backdrop-filter: blur(20px); transition: transform .4s cubic-bezier(.4,0,.2,1);
         }
         .sidebar.hidden { transform: translateX(-100%); }
 
         .main-content {
-            width: 100%;
-            max-width: 900px;
-            margin-left: var(--sidebar-width);
-            margin-right: auto;
-            padding: 50px 20px 100px;
-            transition: margin-left .4s cubic-bezier(.4,0,.2,1);
+            width: 100%; max-width: 900px; margin-left: var(--sidebar-width);
+            margin-right: auto; padding: 50px 20px 100px; transition: margin-left .4s cubic-bezier(.4,0,.2,1);
         }
         .main-content.expanded { margin-left: auto; }
 
         .toggle-btn, .theme-btn {
-            position: fixed;
-            z-index: 1100;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: .25s ease;
+            position: fixed; z-index: 1100; border: none; cursor: pointer; display: flex;
+            align-items: center; gap: 8px; border-radius: 10px; font-weight: 600; transition: .25s ease;
         }
-
-        .toggle-btn {
-            left: 15px;
-            bottom: 20px;
-            padding: 12px 18px;
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(255,140,0,.3);
-        }
+        .toggle-btn { left: 15px; bottom: 20px; padding: 12px 18px; background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255,140,0,.3); }
         .toggle-btn:hover { transform: translateY(-2px); }
-
-        .theme-btn {
-            top: 20px;
-            right: 20px;
-            padding: 10px 14px;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            color: var(--text);
-            backdrop-filter: blur(10px);
-        }
+        .theme-btn { top: 20px; right: 20px; padding: 10px 14px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); backdrop-filter: blur(10px); }
         .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
 
         header { text-align: center; margin-bottom: 40px; }
@@ -234,361 +140,68 @@
         .btn-primary-solid { background: var(--primary); color: white; border: none; box-shadow: 0 4px 15px rgba(255,140,0,.2); }
         .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
 
-        /* Selector de materia */
+        .subject-selector, .duration-selector, .timer-container, .stats-container, .history-container, .techniques-container {
+            background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
+            padding: 20px; margin-bottom: 25px; backdrop-filter: blur(10px);
+        }
+
+        /* CORRECCIÓN DE Z-INDEX PARA LA LISTA DESPLEGABLE */
         .subject-selector {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-
-        .subject-selector label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        .subject-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .subject-input-wrapper {
             position: relative;
-            flex: 1;
+            z-index: 50; 
         }
 
-        .subject-input-wrapper input {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-        }
+        .subject-selector label { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); margin-bottom: 15px; font-size: 14px; }
+        .subject-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .subject-input-wrapper { position: relative; flex: 1; min-width: 200px; }
+        .subject-input-wrapper input { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; }
+        .subject-input-wrapper input:focus { outline: none; border-color: var(--primary); }
 
-        .subject-input-wrapper input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
+        .btn-confirm { padding: 12px 24px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255,140,0,0.3); }
 
-        .btn-confirm {
-            padding: 12px 24px;
-            border-radius: 10px;
-            border: none;
-            background: var(--primary);
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
+        .btn-libre { padding: 12px 15px; border-radius: 10px; border: 1px dashed var(--primary); background: rgba(255,140,0,0.05); color: var(--primary); font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .btn-libre:hover { background: var(--primary); color: white; }
 
-        .btn-confirm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(255,140,0,0.3);
-        }
+        .current-subject { margin-top: 12px; padding: 8px 12px; background: rgba(255,140,0,0.1); border-radius: 8px; font-size: 13px; color: var(--primary); display: none; }
+        .current-subject.show { display: block; }
 
-        .current-subject {
-            margin-top: 12px;
-            padding: 8px 12px;
-            background: rgba(255,140,0,0.1);
-            border-radius: 8px;
-            font-size: 13px;
-            color: var(--primary);
-            display: none;
+        /* LISTA DESPLEGABLE Z-INDEX ALTO */
+        .suggestions-box { 
+            position: absolute; top: calc(100% + 5px); left: 0; right: 0; 
+            background: var(--bg); border: 1px solid var(--border); border-radius: 10px; 
+            max-height: 200px; overflow-y: auto; z-index: 9999; display: none; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
         }
-
-        .current-subject.show {
-            display: block;
-        }
-
-        .suggestions-box {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
         .suggestions-box.show { display: block; }
-        .suggestion-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-size: 13px;
-            border-bottom: 1px solid var(--border);
-        }
+        .suggestion-item { padding: 10px 15px; cursor: pointer; transition: background 0.2s; font-size: 13px; border-bottom: 1px solid var(--border); }
         .suggestion-item:hover { background: rgba(255,140,0,0.1); color: var(--primary); }
 
-        /* Selector de duración */
-        .duration-selector {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
+        .duration-header { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); margin-bottom: 20px; font-size: 14px; }
+        .duration-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
+        .duration-input-group { display: flex; align-items: center; gap: 5px; background: var(--bg); border: 1px solid var(--border); border-radius: 40px; padding: 4px; }
+        .duration-btn-decrement, .duration-btn-increment { width: 40px; height: 40px; border-radius: 40px; border: none; background: var(--card-bg); color: var(--text); font-size: 20px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
+        .duration-btn-decrement:hover, .duration-btn-increment:hover { background: var(--primary); color: white; }
+        .duration-value { min-width: 80px; text-align: center; font-size: 24px; font-weight: 700; color: var(--primary); }
+        .duration-unit { font-size: 14px; font-weight: 500; color: #9ca3af; margin-left: 4px; }
 
-        .duration-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .duration-controls {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .duration-input-group {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 40px;
-            padding: 4px;
-        }
-
-        .duration-btn-decrement, .duration-btn-increment {
-            width: 40px;
-            height: 40px;
-            border-radius: 40px;
-            border: none;
-            background: var(--card-bg);
-            color: var(--text);
-            font-size: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .duration-btn-decrement:hover, .duration-btn-increment:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        .duration-value {
-            min-width: 80px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .duration-unit {
-            font-size: 14px;
-            font-weight: 500;
-            color: #9ca3af;
-            margin-left: 4px;
-        }
-
-        .unlimited-toggle {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            color: var(--text);
-        }
-
+        .unlimited-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: var(--text); }
         .unlimited-toggle input { display: none; }
-        .toggle-slider {
-            width: 44px;
-            height: 24px;
-            background: var(--border);
-            border-radius: 24px;
-            position: relative;
-            transition: 0.3s;
-        }
-        .toggle-slider::after {
-            content: '';
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 2px;
-            left: 3px;
-            transition: 0.3s;
-        }
+        .toggle-slider { width: 44px; height: 24px; background: var(--border); border-radius: 24px; position: relative; transition: 0.3s; }
+        .toggle-slider::after { content: ''; width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 3px; transition: 0.3s; }
         .unlimited-toggle input:checked + .toggle-slider { background: var(--primary); }
         .unlimited-toggle input:checked + .toggle-slider::after { left: 21px; }
 
-        .duration-presets {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 5px;
-        }
-
-        .preset-btn {
-            padding: 8px 16px;
-            border-radius: 30px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
+        .duration-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
+        .preset-btn { padding: 8px 16px; border-radius: 30px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; }
         .preset-btn:hover { border-color: var(--primary); color: var(--primary); }
-        .preset-btn.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
+        .preset-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
 
-        /* Técnicas de estudio */
-        .techniques-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 40px;
-        }
-
-        .techniques-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--text);
-        }
-        .techniques-title i { color: var(--primary); }
-
-        .techniques-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .technique-card {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            opacity: 0.6;
-            cursor: default;
-        }
-
-        .technique-card i {
-            width: 40px;
-            height: 40px;
-            color: #9ca3af;
-            margin-bottom: 12px;
-        }
-
-        .technique-card h4 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text);
-        }
-
-        .technique-card p {
-            font-size: 11px;
-            color: #9ca3af;
-        }
-
-        .technique-card.coming-soon {
-            background: rgba(156, 163, 175, 0.1);
-            border-color: rgba(156, 163, 175, 0.3);
-        }
-
-        .coming-badge {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 4px 10px;
-            background: rgba(156, 163, 175, 0.2);
-            border-radius: 20px;
-            font-size: 10px;
-            color: #9ca3af;
-        }
-
-        /* ===== TIMER ===== */
-        .timer-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 50px 30px;
-            margin-bottom: 40px;
-            text-align: center;
-            box-shadow: 0 20px 50px -20px rgba(0,0,0,0.2);
-        }
-
-        .timer-display {
-            font-size: 120px;
-            font-weight: 800;
-            font-family: 'Inter', monospace;
-            letter-spacing: 8px;
-            color: var(--primary);
-            margin: 30px 0;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .controls {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin: 30px 0;
-            flex-wrap: wrap;
-        }
-
-        .control-btn {
-            padding: 14px 32px;
-            border-radius: 10px;
-            border: none;
-            background: var(--primary);
-            color: white;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 14px;
-            transition: all .25s ease;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(255,140,0,.2);
-        }
-
+        /* Timer */
+        .timer-container { padding: 50px 30px; text-align: center; box-shadow: 0 20px 50px -20px rgba(0,0,0,0.2); border-radius: 20px; }
+        .timer-display { font-size: 120px; font-weight: 800; font-family: 'Inter', monospace; letter-spacing: 8px; color: var(--primary); margin: 30px 0; font-variant-numeric: tabular-nums; }
+        .controls { display: flex; gap: 12px; justify-content: center; margin: 30px 0; flex-wrap: wrap; }
+        .control-btn { padding: 14px 32px; border-radius: 10px; border: none; background: var(--primary); color: white; cursor: pointer; font-weight: 700; font-size: 14px; transition: all .25s ease; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(255,140,0,.2); }
         .control-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
         .control-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .control-btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); box-shadow: none; }
@@ -596,134 +209,49 @@
         .control-btn-danger { background: var(--danger); box-shadow: none; }
         .control-btn-danger:hover { background: #e04444; }
 
-        /* ===== ESTADÍSTICAS ===== */
-        .stats-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 40px;
-        }
+        /* Técnicas de estudio */
+        .techniques-title { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+        .techniques-title i { color: var(--primary); }
+        .techniques-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .technique-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; opacity: 0.6; cursor: default; }
+        .technique-card i { width: 40px; height: 40px; color: #9ca3af; margin-bottom: 12px; }
+        .technique-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+        .technique-card p { font-size: 11px; color: #9ca3af; margin-bottom: 0;}
+        .technique-card.coming-soon { background: rgba(156, 163, 175, 0.1); border-color: rgba(156, 163, 175, 0.3); }
+        .coming-badge { display: inline-block; margin-top: 10px; padding: 4px 10px; background: rgba(156, 163, 175, 0.2); border-radius: 20px; font-size: 10px; color: #9ca3af; }
 
-        .stats-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 25px;
-            color: var(--text);
-        }
+        /* Pestañas de Secciones (Hoy / Global) */
+        .section-tabs { display: flex; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 8px; border: 1px solid var(--border); }
+        .section-tab { border: none; background: transparent; color: #9ca3af; padding: 6px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .section-tab.active { background: var(--primary); color: white; }
+
+        /* Estadísticas */
+        .stats-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px; }
+        .stats-title { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; color: var(--text); }
         .stats-title i { color: var(--primary); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; }
+        .stats-grid.hidden { display: none; }
+        .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-value { font-size: 32px; font-weight: 800; color: var(--primary); margin: 10px 0; }
+        .stat-label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+        .streak-card { background: linear-gradient(135deg, rgba(255,140,0,0.1), rgba(255,140,0,0.05)); border: 2px solid var(--primary); }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-card {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--primary);
-            margin: 10px 0;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #9ca3af;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .streak-card {
-            background: linear-gradient(135deg, rgba(255,140,0,0.1), rgba(255,140,0,0.05));
-            border: 2px solid var(--primary);
-        }
-
-        /* ===== HISTORIAL ===== */
-        .history-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 40px;
-        }
-
-        .history-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-        .history-title i { color: var(--primary); }
-
-        .history-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border-bottom: 1px solid var(--border);
-            border-radius: 10px;
-            transition: .2s ease;
-        }
+        /* Historial */
+        .history-list { max-height: 400px; overflow-y: auto; }
+        .history-list.hidden { display: none; }
+        .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); border-radius: 10px; transition: .2s ease; }
         .history-item:hover { background: rgba(255,140,0,.05); }
-
         .history-info { flex: 1; }
         .history-materia { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
         .history-date { font-size: 12px; color: #9ca3af; }
         .history-time { font-weight: 700; color: var(--primary); font-size: 16px; }
 
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--primary);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(255,140,0,.3);
-            z-index: 2000;
-            animation: slideIn .3s ease;
-        }
+        .notification { position: fixed; top: 20px; right: 20px; background: var(--primary); color: white; padding: 16px 24px; border-radius: 10px; box-shadow: 0 4px 15px rgba(255,140,0,.3); z-index: 2000; animation: slideIn .3s ease; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .login-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(5px);
-            z-index: 2001; display: flex; justify-content: center; align-items: center;
-            transition: opacity .3s ease;
-        }
+        .login-modal { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(5px); z-index: 2001; display: flex; justify-content: center; align-items: center; transition: opacity .3s ease; }
         .login-modal.hidden { opacity: 0; pointer-events: none; }
-        .login-modal-content {
-            width: 90%; max-width: 400px; background: var(--bg); border: 1px solid var(--border);
-            border-radius: 18px; padding: 40px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,.3);
-        }
-        .login-modal-content h2 { margin: 15px 0 10px; font-weight: 800; }
-        .login-modal-content p { color: #9ca3af; line-height: 1.5; margin-bottom: 25px; font-size: 14px; }
-
-        .footer { margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border); text-align: center; color: #9ca3af; font-size: 13px; }
+        .login-modal-content { width: 90%; max-width: 400px; background: var(--bg); border: 1px solid var(--border); border-radius: 18px; padding: 40px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,.3); }
 
         @media (max-width: 768px) {
             .main-content { margin-left: 0; padding: 90px 15px 100px; }
@@ -733,11 +261,8 @@
             .timer-container { padding: 30px 20px; }
             .controls { flex-direction: column; }
             .control-btn { width: 100%; justify-content: center; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .subject-row { flex-direction: column; }
-            .btn-confirm { width: 100%; justify-content: center; }
+            .subject-row { flex-direction: column; align-items: stretch; }
             .duration-controls { flex-direction: column; align-items: stretch; }
-            .techniques-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -747,10 +272,9 @@
     <div class="login-modal-content">
         <i data-lucide="lock" class="icon-lg" style="color: var(--primary); width: 40px; height: 40px; margin-bottom: 15px;"></i>
         <h2>Inicia Sesión</h2>
-        <p>Para guardar tu progreso de estudio en la nube, iniciá sesión con tu cuenta.</p>
+        <p>Para guardar tu historial global de estudio en la nube, iniciá sesión con tu cuenta.</p>
         <button id="btnModalLogin" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
-            <i data-lucide="log-in" class="icon-sm"></i>
-            Ingresar con Google
+            <i data-lucide="log-in" class="icon-sm"></i> Ingresar con Google
         </button>
         <button onclick="closeLoginModal()" class="btn-sidebar btn-dark" style="justify-content:center;">
             Continuar sin guardar
@@ -759,35 +283,28 @@
 </div>
 
 <button class="toggle-btn" onclick="toggleSidebar()">
-    <i data-lucide="menu" class="icon-md"></i>
-    Herramientas
+    <i data-lucide="menu" class="icon-md"></i> Herramientas
 </button>
-
 <button class="theme-btn" onclick="toggleTheme()">
-    <i data-lucide="moon" class="icon-sm"></i>
-    Tema
+    <i data-lucide="moon" class="icon-sm"></i> Tema
 </button>
 
 <button id="distractionFreeBtn" class="distraction-free-btn" onclick="enterDistractionFreeMode()">
-    <i data-lucide="maximize-2" class="icon-sm"></i>
-    Modo sin distracciones
+    <i data-lucide="maximize-2" class="icon-sm"></i> Modo sin distracciones
 </button>
 <button id="exitDistractionBtn" onclick="exitDistractionFreeMode()">
-    <i data-lucide="minimize-2" class="icon-sm"></i>
-    Salir del modo
+    <i data-lucide="minimize-2" class="icon-sm"></i> Salir del modo
 </button>
 
 <aside class="sidebar hidden" id="sidebar">
-    <div id="userProfile" style="margin-bottom:25px; padding:15px; background:var(--card-bg); border:1px solid var(--border); border-radius:12px; text-align:center; backdrop-filter:blur(10px);">
+    <div id="userProfile" style="margin-bottom:25px; padding:15px; background:var(--card-bg); border:1px solid var(--border); border-radius:12px; text-align:center;">
         <i data-lucide="user-circle" class="icon-lg" style="color:var(--primary); margin-bottom:8px;"></i>
         <p id="userName" style="font-weight:700; margin-bottom:12px;">Invitado</p>
         <button id="sidebarLoginBtn" class="btn-sidebar btn-primary-solid" style="justify-content:center; margin-bottom:10px;">
-            <i data-lucide="log-in" class="icon-sm"></i>
-            Ingresar
+            <i data-lucide="log-in" class="icon-sm"></i> Ingresar
         </button>
         <button id="sidebarLogoutBtn" class="btn-sidebar btn-dark" style="justify-content:center; display:none;">
-            <i data-lucide="log-out" class="icon-sm"></i>
-            Salir
+            <i data-lucide="log-out" class="icon-sm"></i> Salir
         </button>
     </div>
 
@@ -797,28 +314,16 @@
     <p style="color:#9ca3af; font-size:14px; margin-bottom:20px;">Navegación</p>
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
 
-    <a href="index.html" class="btn-sidebar btn-dark">
-        <i data-lucide="search" class="icon-sm"></i> Buscar Materias
-    </a>
-    <a href="progreso.html" class="btn-sidebar btn-dark">
-        <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
-    </a>
-    <a href="estudio.html" class="btn-sidebar btn-primary-solid">
-        <i data-lucide="timer" class="icon-sm"></i> Sesión de Estudio
-    </a>
-    <a href="calendario.html" class="btn-sidebar btn-dark">
-        <i data-lucide="calendar" class="icon-sm"></i> Calendario
-    </a>
+    <a href="index.html" class="btn-sidebar btn-dark"><i data-lucide="search" class="icon-sm"></i> Buscar Materias</a>
+    <a href="progreso.html" class="btn-sidebar btn-dark"><i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso</a>
+    <a href="estudio.html" class="btn-sidebar btn-primary-solid"><i data-lucide="timer" class="icon-sm"></i> Sesión de Estudio</a>
+    <a href="calendario.html" class="btn-sidebar btn-dark"><i data-lucide="calendar" class="icon-sm"></i> Calendario</a>
 
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
     <p style="color:#9ca3af; font-size:13px; font-weight:600; margin-bottom:15px;">Oportunidades</p>
 
-    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark">
-        <i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo
-    </a>
-    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark">
-        <i data-lucide="building" class="icon-sm"></i> Pasantías UNGS
-    </a>
+    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark"><i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo</a>
+    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark"><i data-lucide="building" class="icon-sm"></i> Pasantías UNGS</a>
 </aside>
 
 <div class="main-content expanded" id="mainContent">
@@ -828,18 +333,17 @@
     </header>
 
     <div class="subject-selector">
-        <label>
-            <i data-lucide="book-open" class="icon-sm"></i>
-            Qué vas a estudiar
-        </label>
+        <label><i data-lucide="book-open" class="icon-sm"></i> Qué vas a estudiar</label>
         <div class="subject-row">
             <div class="subject-input-wrapper">
-                <input type="text" id="subjectInput" placeholder="Escribí el nombre o abreviatura..." autocomplete="off">
+                <input type="text" id="subjectInput" placeholder="Escribí tu materia o tema libre..." autocomplete="off">
                 <div id="suggestionsBox" class="suggestions-box"></div>
             </div>
             <button class="btn-confirm" id="confirmSubjectBtn">
-                <i data-lucide="check" class="icon-sm"></i>
-                Aceptar
+                <i data-lucide="check" class="icon-sm"></i> Aceptar
+            </button>
+            <button class="btn-libre" id="freeStudyBtn">
+                <i data-lucide="zap" class="icon-sm"></i> Libre
             </button>
         </div>
         <div id="currentSubjectDisplay" class="current-subject"></div>
@@ -847,27 +351,19 @@
 
     <div class="duration-selector">
         <div class="duration-header">
-            <i data-lucide="clock" class="icon-sm"></i>
-            <span>Duración de la sesión</span>
+            <i data-lucide="clock" class="icon-sm"></i> <span>Duración de la sesión</span>
         </div>
-        
         <div class="duration-controls">
             <div class="duration-input-group">
                 <button class="duration-btn-decrement" id="durationMinus">-</button>
-                <div class="duration-value">
-                    <span id="durationNumber">25</span>
-                    <span class="duration-unit">min</span>
-                </div>
+                <div class="duration-value"><span id="durationNumber">25</span><span class="duration-unit">min</span></div>
                 <button class="duration-btn-increment" id="durationPlus">+</button>
             </div>
-            
             <label class="unlimited-toggle">
                 <input type="checkbox" id="unlimitedMode">
-                <span class="toggle-slider"></span>
-                <span class="toggle-label">Sin límite (cronómetro)</span>
+                <span class="toggle-slider"></span> <span class="toggle-label">Sin límite (cronómetro)</span>
             </label>
         </div>
-        
         <div class="duration-presets">
             <button class="preset-btn" data-minutes="10">10</button>
             <button class="preset-btn" data-minutes="15">15</button>
@@ -882,26 +378,11 @@
 
     <div class="timer-container">
         <div class="timer-display" id="timerDisplay">25:00</div>
-
         <div class="controls">
-            <button class="control-btn" id="playBtn" onclick="startTimer()">
-                <i data-lucide="play" class="icon-sm"></i> Iniciar
-            </button>
-            <button class="control-btn control-btn-secondary" id="pauseBtn" onclick="pauseTimer()" disabled>
-                <i data-lucide="pause" class="icon-sm"></i> Pausar
-            </button>
-            <button class="control-btn control-btn-secondary" onclick="resetTimer()">
-                <i data-lucide="rotate-ccw" class="icon-sm"></i> Reiniciar
-            </button>
-            <button class="control-btn control-btn-danger" id="finishBtn" onclick="finishSession()" disabled>
-                <i data-lucide="flag" class="icon-sm"></i> Terminar
-            </button>
-        </div>
-
-        <div style="margin-top: 20px; padding: 15px; background: rgba(255,140,0,0.1); border-radius: 10px; border: 1px solid rgba(255,140,0,0.2);">
-            <p style="font-size: 12px; color: #9ca3af; margin: 0;">
-                Consejo: Trabaja sin distracciones durante el tiempo de estudio. Usa los descansos para recargar energía.
-            </p>
+            <button class="control-btn" id="playBtn" onclick="startTimer()"><i data-lucide="play" class="icon-sm"></i> Iniciar</button>
+            <button class="control-btn control-btn-secondary" id="pauseBtn" onclick="pauseTimer()" disabled><i data-lucide="pause" class="icon-sm"></i> Pausar</button>
+            <button class="control-btn control-btn-secondary" onclick="resetTimer()"><i data-lucide="rotate-ccw" class="icon-sm"></i> Reiniciar</button>
+            <button class="control-btn control-btn-danger" id="finishBtn" onclick="finishSession()" disabled><i data-lucide="flag" class="icon-sm"></i> Terminar</button>
         </div>
     </div>
 
@@ -929,158 +410,103 @@
                 <p>Nuevas técnicas de estudio</p>
                 <span class="coming-badge">En desarrollo</span>
             </div>
-            <div class="technique-card coming-soon">
-                <i data-lucide="lock"></i>
-                <h4>Próximamente</h4>
-                <p>Nuevas técnicas de estudio</p>
-                <span class="coming-badge">En desarrollo</span>
-            </div>
         </div>
     </div>
 
     <div class="stats-container">
-        <div class="stats-title">
-            <i data-lucide="bar-chart-3" class="icon-md"></i>
-            Estadísticas de Hoy
+        <div class="stats-header">
+            <div class="stats-title"><i data-lucide="bar-chart-3" class="icon-md"></i> Estadísticas</div>
+            <div class="section-tabs">
+                <button class="section-tab active" id="tabStatsHoy" onclick="toggleStats('hoy')">Hoy</button>
+                <button class="section-tab" id="tabStatsGlobal" onclick="toggleStats('global')">Histórico</button>
+            </div>
         </div>
         
-        <div class="stats-grid">
+        <div class="stats-grid" id="statsGridHoy">
             <div class="stat-card streak-card">
                 <div class="stat-label">Racha actual</div>
                 <div class="stat-value" id="statStreak">0</div>
-                <div class="stat-label">días seguidos estudiando</div>
+                <div class="stat-label">días seguidos</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Sesiones Completadas</div>
+                <div class="stat-label">Sesiones (Hoy)</div>
                 <div class="stat-value" id="statSessions">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Tiempo de Estudio</div>
+                <div class="stat-label">Tiempo (Hoy)</div>
                 <div class="stat-value" id="statTime">0m</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Descansos</div>
-                <div class="stat-value" id="statBreaks">0</div>
+        </div>
+
+        <div class="stats-grid hidden" id="statsGridGlobal">
+            <div class="stat-card streak-card">
+                <div class="stat-label">Racha actual</div>
+                <div class="stat-value" id="statGlobalStreak">0</div>
+                <div class="stat-label">días seguidos</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Productividad</div>
-                <div class="stat-value" id="statProductivity">0%</div>
+                <div class="stat-label">Sesiones Totales</div>
+                <div class="stat-value" id="statGlobalSessions">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Tiempo Total</div>
+                <div class="stat-value" id="statGlobalTime">0m</div>
             </div>
         </div>
     </div>
 
     <div class="history-container">
-        <div class="history-title">
-            <i data-lucide="history" class="icon-md"></i>
-            Historial de Hoy
+        <div class="stats-header">
+            <div class="stats-title"><i data-lucide="history" class="icon-md"></i> Historial de Estudio</div>
+            <div class="section-tabs">
+                <button class="section-tab active" id="tabHistoryHoy" onclick="toggleHistory('hoy')">Hoy</button>
+                <button class="section-tab" id="tabHistoryGlobal" onclick="toggleHistory('global')">Global</button>
+            </div>
         </div>
         
-        <div class="history-list" id="historyList">
-            <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
-                <i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i>
-                <p>Sin sesiones completadas aún.</p>
-            </div>
+        <div class="history-list" id="historyListHoy">
+            <div style="text-align:center; padding:40px; color:#9ca3af;"><p>Sin sesiones completadas hoy.</p></div>
+        </div>
+
+        <div class="history-list hidden" id="historyListGlobal">
+            <div style="text-align:center; padding:40px; color:#9ca3af;"><p>Sin historial global aún.</p></div>
         </div>
     </div>
 
-    <div class="footer">
-        <p>Tus datos de estudio se guardan de forma segura en la nube cuando iniciás sesión.</p>
-    </div>
 </div>
 
 <script>
-    // ==================== MODOS ====================
-    
     function enterDistractionFreeMode() {
         document.body.classList.add('distraction-free');
-        document.getElementById('distractionFreeBtn').style.display = 'none';
-        document.getElementById('exitDistractionBtn').style.display = 'flex';
-        
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        }
-        
-        showNotification('Modo sin distracciones activado');
+        if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
     }
-    
     function exitDistractionFreeMode() {
         document.body.classList.remove('distraction-free');
-        document.getElementById('distractionFreeBtn').style.display = 'flex';
-        document.getElementById('exitDistractionBtn').style.display = 'none';
-        
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-        
-        showNotification('Modo normal restaurado');
+        if (document.exitFullscreen) document.exitFullscreen();
     }
     
-    window.enterDistractionFreeMode = enterDistractionFreeMode;
-    window.exitDistractionFreeMode = exitDistractionFreeMode;
-    
-    // ==================== LISTA DE MATERIAS ADE ====================
+    // Lista de sugerencias
     var materiasADE = [
-        "Taller Inicial Común: Taller de Lectura y Escritura",
-        "Taller Inicial Orientado: Ciencias Exactas",
-        "Teoría de la Organización",
-        "Problemas Socioeconómicos Contemporáneos",
-        "Taller de Lectura y Escritura en las Disciplinas",
-        "Introducción a la Economía",
-        "Economía Clásica",
-        "Diseño Estructural y Procesos",
-        "Matemática para Economistas I",
-        "Economía Neoclásica",
-        "Sistemas de Información Contable I",
-        "Historia Económica y Social Mundial y Latinoamericana",
-        "Economía Keynesiana",
-        "Estadística para Economistas",
-        "Planeamiento y Control Organizacional",
-        "Matemática para Economistas II",
-        "Laboratorio Interdisciplinario",
-        "Sistemas de Información",
-        "Derecho Administrativo",
-        "Organización Industrial",
-        "Gestión de Recursos Humanos",
-        "Dirección Estratégica",
-        "Tópicos de Comercialización",
-        "Planificación y Proceso Decisorio en las Organizaciones",
-        "Teoría de la Innovación y del Cambio Tecnológico",
-        "Matemática para Economistas III",
-        "Costos Industriales",
-        "Sistemas de Información Contable II",
-        "Gestión en Economía Mixta",
-        "Empresas Públicas",
-        "Ingeniería Financiera",
-        "Sociología Industrial",
-        "Régimen Tributario",
-        "Desarrollo y Gestión de Proyectos Emprendedores",
-        "Taller de Utilitarios",
-        "IPE 1",
-        "IPE 2",
-        "IPE 3"
+        "Taller Inicial Común: Taller de Lectura y Escritura", "Taller Inicial Orientado: Ciencias Exactas",
+        "Teoría de la Organización", "Problemas Socioeconómicos Contemporáneos",
+        "Taller de Lectura y Escritura en las Disciplinas", "Introducción a la Economía",
+        "Economía Clásica", "Diseño Estructural y Procesos", "Matemática para Economistas I",
+        "Economía Neoclásica", "Sistemas de Información Contable I",
+        "Historia Económica y Social Mundial y Latinoamericana", "Economía Keynesiana",
+        "Estadística para Economistas", "Planeamiento y Control Organizacional",
+        "Matemática para Economistas II", "Laboratorio Interdisciplinario",
+        "Sistemas de Información", "Derecho Administrativo", "Organización Industrial",
+        "Gestión de Recursos Humanos", "Dirección Estratégica", "Tópicos de Comercialización",
+        "Planificación y Proceso Decisorio en las Organizaciones", "Teoría de la Innovación y del Cambio Tecnológico",
+        "Matemática para Economistas III", "Costos Industriales", "Sistemas de Información Contable II",
+        "Gestión en Economía Mixta", "Empresas Públicas", "Ingeniería Financiera",
+        "Sociología Industrial", "Régimen Tributario", "Desarrollo y Gestión de Proyectos Emprendedores",
+        "Taller de Utilitarios", "IPE 1", "IPE 2", "IPE 3"
     ];
 
-    // ==================== FUNCIONES DE SEGURIDAD ====================
-    function sanitizeHTML(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
+    function sanitizeHTML(str) { return str ? str.replace(/[&<>]/g, function(m) { return m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'; }) : ''; }
+    function sanitizeText(str) { return str ? str.replace(/[<>]/g, function(m) { return m==='<'?'&lt;':'&gt;'; }) : ''; }
     
-    function sanitizeText(str) {
-        if (!str) return '';
-        return str.replace(/[<>]/g, function(m) {
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-    
-    // ==================== FIREBASE ====================
     var firebaseConfig = {
         apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
         authDomain: "knowy-13079.firebaseapp.com",
@@ -1095,23 +521,11 @@
     var auth = firebase.auth();
     var db = firebase.firestore();
     
-    var SITE_KEY = "6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u";
-    
-    try {
-        var appCheck = firebase.appCheck();
-        appCheck.activate(SITE_KEY, true);
-        console.log("App Check activado");
-    } catch (error) {
-        console.error("Error App Check:", error);
-    }
-
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .catch(function(error) { console.error("Persistencia error:", error); });
-
+    try { firebase.appCheck().activate("6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u", true); } catch (e) {}
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(e){});
     var googleProvider = new firebase.auth.GoogleAuthProvider();
-    googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-    // ==================== ELEMENTOS DOM ====================
+    // DOM
     var subjectInput = document.getElementById('subjectInput');
     var suggestionsBox = document.getElementById('suggestionsBox');
     var confirmSubjectBtn = document.getElementById('confirmSubjectBtn');
@@ -1119,36 +533,25 @@
     var finishBtn = document.getElementById('finishBtn');
     var playBtn = document.getElementById('playBtn');
     var pauseBtn = document.getElementById('pauseBtn');
-
     var durationNumber = document.getElementById('durationNumber');
     var durationMinus = document.getElementById('durationMinus');
     var durationPlus = document.getElementById('durationPlus');
     var unlimitedCheck = document.getElementById('unlimitedMode');
     var presetBtns = document.querySelectorAll('.preset-btn');
 
-    // ==================== VARIABLES DE ESTADO Y TIEMPO ====================
+    // Variables Timer
     var currentSubject = '';
-    var timerRunning = false;
-    var timerInterval = null;
-    var currentSeconds = 25 * 60;
-    var isUnlimited = false;
-    var initialDurationSeconds = 25 * 60;
-    
-    var targetEndTime = null;
-    var chronoStartTime = null;
-    var chronoAccumulated = 0;
+    var timerRunning = false, timerInterval = null;
+    var currentSeconds = 25 * 60, initialDurationSeconds = 25 * 60;
+    var isUnlimited = false, targetEndTime = null, chronoStartTime = null, chronoAccumulated = 0;
 
-    // ==================== AUTOCOMPLETADO ====================
+    // ==================== AUTOCOMPLETADO (LISTA DESPLEGABLE) ====================
     function filterSubjects(searchText) {
-        if (!searchText || searchText.length < 1) {
-            suggestionsBox.classList.remove('show');
-            return [];
-        }
+        if (!searchText) return materiasADE; // Si está vacío, mostramos todas
         var lowerSearch = searchText.toLowerCase();
-        var filtered = materiasADE.filter(function(materia) {
+        return materiasADE.filter(function(materia) {
             return materia.toLowerCase().includes(lowerSearch);
         });
-        return filtered.slice(0, 8);
     }
 
     function showSuggestions(suggestions) {
@@ -1170,550 +573,333 @@
         suggestionsBox.classList.add('show');
     }
 
-    subjectInput.addEventListener('input', function() {
-        var searchText = this.value;
-        var suggestions = filterSubjects(searchText);
+    // Mostrar todas al hacer clic en la barra
+    subjectInput.addEventListener('focus', function() {
+        var suggestions = filterSubjects(this.value);
         showSuggestions(suggestions);
     });
 
+    // Filtrar a medida que se escribe
+    subjectInput.addEventListener('input', function() {
+        var suggestions = filterSubjects(this.value);
+        showSuggestions(suggestions);
+    });
+
+    // Ocultar si se hace clic en cualquier otro lado
     document.addEventListener('click', function(e) {
         if (e.target !== subjectInput && !suggestionsBox.contains(e.target)) {
             suggestionsBox.classList.remove('show');
         }
     });
 
-    // ==================== CONFIRMAR MATERIA ====================
+    // Confirmar o Estudio Libre
     confirmSubjectBtn.addEventListener('click', function() {
         var subject = sanitizeText(subjectInput.value.trim());
-        if (!subject) {
-            showNotification('Escribí o seleccioná una materia primero');
-            return;
-        }
+        if (!subject) { showNotification('Escribí o seleccioná una materia primero'); return; }
         currentSubject = subject;
         currentSubjectDisplay.innerHTML = '<i data-lucide="check-circle" class="icon-sm" style="margin-right: 5px;"></i> Estudiando: ' + sanitizeHTML(currentSubject);
         currentSubjectDisplay.classList.add('show');
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-        showNotification('Materia seleccionada: ' + currentSubject);
+        if(typeof lucide !== 'undefined') lucide.createIcons();
         saveTimerLocalState();
     });
 
-    // ==================== CONTROL DE DURACIÓN ====================
-    durationMinus.addEventListener('click', function() {
-        var current = parseInt(durationNumber.textContent);
-        if (current > 1) {
-            var newVal = current - 1;
-            durationNumber.textContent = newVal;
-            presetBtns.forEach(function(btn) { btn.classList.remove('active'); });
-            if (!unlimitedCheck.checked && !timerRunning) {
-                currentSeconds = newVal * 60;
-                initialDurationSeconds = currentSeconds;
-                updateDisplay();
-                clearTimerLocalState();
-            }
-        }
+    document.getElementById('freeStudyBtn').addEventListener('click', function() {
+        subjectInput.value = "Estudio Libre";
+        confirmSubjectBtn.click();
     });
 
-    durationPlus.addEventListener('click', function() {
-        var current = parseInt(durationNumber.textContent);
-        if (current < 180) {
-            var newVal = current + 1;
-            durationNumber.textContent = newVal;
-            presetBtns.forEach(function(btn) { btn.classList.remove('active'); });
-            if (!unlimitedCheck.checked && !timerRunning) {
-                currentSeconds = newVal * 60;
-                initialDurationSeconds = currentSeconds;
-                updateDisplay();
-                clearTimerLocalState();
-            }
+    // Duración
+    function updateDuration(val) {
+        durationNumber.textContent = val;
+        presetBtns.forEach(function(b){ b.classList.toggle('active', parseInt(b.getAttribute('data-minutes')) === val); });
+        if(!unlimitedCheck.checked && !timerRunning) {
+            currentSeconds = val * 60; initialDurationSeconds = currentSeconds;
+            updateDisplay(); clearTimerLocalState();
         }
-    });
+    }
 
-    presetBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var minutes = parseInt(this.getAttribute('data-minutes'));
-            durationNumber.textContent = minutes;
-            presetBtns.forEach(function(b) { b.classList.remove('active'); });
-            this.classList.add('active');
-            if (!unlimitedCheck.checked && !timerRunning) {
-                currentSeconds = minutes * 60;
-                initialDurationSeconds = currentSeconds;
-                updateDisplay();
-                clearTimerLocalState();
-            }
-        });
-    });
+    durationMinus.addEventListener('click', function() { var v = parseInt(durationNumber.textContent); if(v > 1) updateDuration(v-1); });
+    durationPlus.addEventListener('click', function() { var v = parseInt(durationNumber.textContent); if(v < 180) updateDuration(v+1); });
+    presetBtns.forEach(function(btn) { btn.addEventListener('click', function() { updateDuration(parseInt(this.getAttribute('data-minutes'))); }); });
 
     unlimitedCheck.addEventListener('change', function() {
         isUnlimited = this.checked;
-        if (isUnlimited) {
-            durationMinus.disabled = true;
-            durationPlus.disabled = true;
-            presetBtns.forEach(function(btn) { btn.disabled = true; });
-            if (!timerRunning) {
-                currentSeconds = 0;
-                updateDisplay();
-            }
-        } else {
-            durationMinus.disabled = false;
-            durationPlus.disabled = false;
-            presetBtns.forEach(function(btn) { btn.disabled = false; });
-            if (!timerRunning) {
-                var minutes = parseInt(durationNumber.textContent);
-                currentSeconds = minutes * 60;
-                initialDurationSeconds = currentSeconds;
-                updateDisplay();
-            }
+        durationMinus.disabled = isUnlimited; durationPlus.disabled = isUnlimited;
+        presetBtns.forEach(function(b){ b.disabled = isUnlimited; });
+        if(!timerRunning) {
+            currentSeconds = isUnlimited ? 0 : parseInt(durationNumber.textContent) * 60;
+            initialDurationSeconds = currentSeconds;
+            updateDisplay();
         }
         clearTimerLocalState();
     });
 
-    // ==================== PERSISTENCIA DEL TIMER ====================
+    // Persistencia Timer
     function saveTimerLocalState() {
-        var state = {
-            running: timerRunning,
-            subject: currentSubject,
-            unlimited: isUnlimited,
-            initialDuration: initialDurationSeconds,
-            currentSecs: currentSeconds,
-            targetEnd: targetEndTime,
-            chronoStart: chronoStartTime,
-            chronoAcc: chronoAccumulated
-        };
-        localStorage.setItem('ungs_timer_state', JSON.stringify(state));
+        localStorage.setItem('ungs_timer_state', JSON.stringify({
+            running: timerRunning, subject: currentSubject, unlimited: isUnlimited,
+            initialDuration: initialDurationSeconds, currentSecs: currentSeconds,
+            targetEnd: targetEndTime, chronoStart: chronoStartTime, chronoAcc: chronoAccumulated
+        }));
     }
-
-    function clearTimerLocalState() {
-        localStorage.removeItem('ungs_timer_state');
-    }
-
+    function clearTimerLocalState() { localStorage.removeItem('ungs_timer_state'); }
     function loadTimerLocalState() {
         var saved = localStorage.getItem('ungs_timer_state');
         if (saved) {
             try {
                 var state = JSON.parse(saved);
-                
                 currentSubject = state.subject || '';
                 isUnlimited = state.unlimited || false;
-                initialDurationSeconds = state.initialDuration || 25 * 60;
-                currentSeconds = state.currentSecs || 25 * 60;
-                targetEndTime = state.targetEnd || null;
-                chronoStartTime = state.chronoStart || null;
-                chronoAccumulated = state.chronoAcc || 0;
+                initialDurationSeconds = state.initialDuration || 25*60;
+                currentSeconds = state.currentSecs || 25*60;
+                targetEndTime = state.targetEnd || null; chronoStartTime = state.chronoStart || null; chronoAccumulated = state.chronoAcc || 0;
 
                 if (currentSubject) {
                     subjectInput.value = currentSubject;
-                    currentSubjectDisplay.innerHTML = '<i data-lucide="check-circle" class="icon-sm" style="margin-right: 5px;"></i> Estudiando: ' + sanitizeHTML(currentSubject);
+                    currentSubjectDisplay.innerHTML = '<i data-lucide="check-circle" class="icon-sm"></i> Estudiando: ' + sanitizeHTML(currentSubject);
                     currentSubjectDisplay.classList.add('show');
                 }
 
                 if (isUnlimited) {
-                    unlimitedCheck.checked = true;
-                    durationMinus.disabled = true;
-                    durationPlus.disabled = true;
-                    presetBtns.forEach(function(btn) { btn.disabled = true; });
+                    unlimitedCheck.checked = true; durationMinus.disabled = true; durationPlus.disabled = true;
+                    presetBtns.forEach(function(b){ b.disabled = true; });
                 } else {
-                    var mins = Math.floor(initialDurationSeconds / 60);
-                    durationNumber.textContent = mins;
-                    presetBtns.forEach(function(btn) {
-                        if (parseInt(btn.getAttribute('data-minutes')) === mins) {
-                            btn.classList.add('active');
-                        } else {
-                            btn.classList.remove('active');
-                        }
-                    });
+                    updateDuration(Math.floor(initialDurationSeconds/60));
                 }
 
                 if (state.running) {
-                    timerRunning = true;
-                    playBtn.disabled = true;
-                    pauseBtn.disabled = false;
-                    finishBtn.disabled = false;
-                    
-                    if (!timerInterval) {
-                        timerInterval = setInterval(timerTick, 250);
-                    }
-                } else {
-                    updateDisplay();
-                }
-            } catch(e) {
-                console.error("Error restaurando el temporizador:", e);
-            }
+                    timerRunning = true; playBtn.disabled = true; pauseBtn.disabled = false; finishBtn.disabled = false;
+                    if(!timerInterval) timerInterval = setInterval(timerTick, 250);
+                } else { updateDisplay(); }
+            } catch(e) {}
         }
     }
+    window.addEventListener('beforeunload', function() { if(timerRunning || currentSeconds>0 || currentSubject) saveTimerLocalState(); });
 
-    window.addEventListener('beforeunload', function() {
-        if (timerRunning || currentSeconds > 0 || currentSubject) {
-            saveTimerLocalState();
-        }
-    });
-
-    // ==================== LOGICA TIMER MEJORADA ====================
+    // Lógica Timer
     function updateDisplay() {
-        var mins = Math.floor(currentSeconds / 60);
-        var secs = currentSeconds % 60;
-        document.getElementById('timerDisplay').textContent = 
-            String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        var m = Math.floor(currentSeconds/60), s = currentSeconds%60;
+        document.getElementById('timerDisplay').textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
     }
 
     function startTimer() {
-        if (timerRunning) return;
-        
-        if (!currentSubject) {
-            showNotification('Primero seleccioná una materia');
-            return;
-        }
-        
-        timerRunning = true;
-        playBtn.disabled = true;
-        pauseBtn.disabled = false;
-        finishBtn.disabled = false;
-        
-        if (isUnlimited) {
-            chronoStartTime = Date.now();
-        } else {
-            targetEndTime = Date.now() + (currentSeconds * 1000);
-        }
-
+        if(timerRunning) return;
+        if(!currentSubject) { showNotification('Primero seleccioná una materia (o elegí Libre)'); return; }
+        timerRunning = true; playBtn.disabled = true; pauseBtn.disabled = false; finishBtn.disabled = false;
+        if(isUnlimited) chronoStartTime = Date.now(); else targetEndTime = Date.now() + (currentSeconds*1000);
         saveTimerLocalState();
-        
-        if (!timerInterval) {
-            timerInterval = setInterval(timerTick, 250);
-        }
+        if(!timerInterval) timerInterval = setInterval(timerTick, 250);
     }
 
     function timerTick() {
         var now = Date.now();
-        
         if (isUnlimited) {
-            var totalMs = chronoAccumulated + (now - chronoStartTime);
-            currentSeconds = Math.floor(totalMs / 1000);
+            currentSeconds = Math.floor((chronoAccumulated + (now - chronoStartTime))/1000);
             updateDisplay();
         } else {
-            var diffMs = targetEndTime - now;
-            if (diffMs <= 0) {
-                currentSeconds = 0;
-                updateDisplay();
-                completeSession();
-            } else {
-                currentSeconds = Math.ceil(diffMs / 1000);
-                updateDisplay();
-            }
+            var diff = targetEndTime - now;
+            if (diff <= 0) { currentSeconds = 0; updateDisplay(); completeSession(); }
+            else { currentSeconds = Math.ceil(diff/1000); updateDisplay(); }
         }
     }
 
     function pauseTimer() {
-        timerRunning = false;
-        clearInterval(timerInterval);
-        timerInterval = null;
-        playBtn.disabled = false;
-        pauseBtn.disabled = true;
-
-        if (isUnlimited) {
-            chronoAccumulated += (Date.now() - chronoStartTime);
-        }
+        timerRunning = false; clearInterval(timerInterval); timerInterval = null;
+        playBtn.disabled = false; pauseBtn.disabled = true;
+        if(isUnlimited) chronoAccumulated += (Date.now() - chronoStartTime);
         saveTimerLocalState();
     }
 
     function resetTimer() {
         pauseTimer();
-        if (isUnlimited) {
-            currentSeconds = 0;
-            chronoAccumulated = 0;
-            chronoStartTime = null;
-        } else {
-            var minutes = parseInt(durationNumber.textContent);
-            currentSeconds = minutes * 60;
-            initialDurationSeconds = currentSeconds;
-            targetEndTime = null;
-        }
-        updateDisplay();
-        clearTimerLocalState();
-        finishBtn.disabled = true;
+        if(isUnlimited) { currentSeconds = 0; chronoAccumulated = 0; chronoStartTime = null; }
+        else { currentSeconds = parseInt(durationNumber.textContent)*60; initialDurationSeconds = currentSeconds; targetEndTime = null; }
+        updateDisplay(); clearTimerLocalState(); finishBtn.disabled = true;
     }
 
     function finishSession() {
-        if (!timerRunning && currentSeconds === initialDurationSeconds && !isUnlimited) {
-            showNotification('No hay ninguna sesión en curso');
-            return;
-        }
-        if (!timerRunning && currentSeconds === 0 && isUnlimited) {
-            showNotification('No hay ninguna sesión en curso');
-            return;
-        }
+        if (!timerRunning && currentSeconds===initialDurationSeconds && !isUnlimited) return showNotification('No hay sesión en curso');
+        if (!timerRunning && currentSeconds===0 && isUnlimited) return showNotification('No hay sesión en curso');
+        if (!confirm('¿Terminar la sesión ahora? Se guardará el tiempo estudiado hasta el momento.')) return;
         
-        var confirmFinish = confirm('¿Terminar la sesión ahora? Se guardará el tiempo estudiado hasta el momento.');
-        if (!confirmFinish) return;
-        
-        var studiedSeconds = 0;
-        if (isUnlimited) {
-            if (timerRunning) {
-                 var now = Date.now();
-                 var totalMs = chronoAccumulated + (now - chronoStartTime);
-                 currentSeconds = Math.floor(totalMs / 1000);
-            }
-            studiedSeconds = currentSeconds;
-        } else {
-            studiedSeconds = initialDurationSeconds - currentSeconds;
-        }
-        
-        if (studiedSeconds > 0) {
-            saveCompletedSession(studiedSeconds);
-        }
-        
-        pauseTimer();
-        resetTimer();
-        clearTimerLocalState();
-        showNotification('Sesión finalizada');
+        var studied = isUnlimited ? (timerRunning ? Math.floor((chronoAccumulated+(Date.now()-chronoStartTime))/1000) : currentSeconds) : (initialDurationSeconds - currentSeconds);
+        if (studied > 0) saveCompletedSession(studied);
+        pauseTimer(); resetTimer(); clearTimerLocalState();
     }
 
     function completeSession() {
-        clearInterval(timerInterval);
-        timerInterval = null;
-        timerRunning = false;
-        
-        var studiedSeconds = initialDurationSeconds;
-        saveCompletedSession(studiedSeconds);
-        
-        playBtn.disabled = false;
-        pauseBtn.disabled = true;
-        finishBtn.disabled = true;
-        
-        clearTimerLocalState();
-        showNotification('Tiempo completado');
+        clearInterval(timerInterval); timerInterval = null; timerRunning = false;
+        saveCompletedSession(initialDurationSeconds);
+        playBtn.disabled = false; pauseBtn.disabled = true; finishBtn.disabled = true;
+        clearTimerLocalState(); showNotification('¡Tiempo completado!');
     }
 
-    function saveCompletedSession(secondsStudied) {
-        var minutesStudied = Math.floor(secondsStudied / 60);
-        if (minutesStudied < 1 && secondsStudied > 0) minutesStudied = 1;
-        
-        var now = new Date();
-        var timeText = now.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
-        var durationText = minutesStudied + ' min';
-        
-        timerState.sessionHistory.push({
-            mode: 'Estudio',
-            time: sanitizeText(timeText),
-            duration: sanitizeText(durationText),
-            subject: sanitizeText(currentSubject)
-        });
-        
-        timerState.sessionsCompleted++;
-        timerState.totalWorkSeconds += secondsStudied;
-        
-        updateStreak();
-        updateStats();
-        updateHistory();
-        saveToFirestore();
-        
-        showNotification('Estudiado: ' + currentSubject + ' - ' + durationText);
-    }
-
-    // ==================== ESTADO DEL TIMER ====================
+    // ESTADO Y ESTADÍSTICAS (Hoy y Global)
     var timerState = {
-        sessionsCompleted: 0,
-        totalWorkSeconds: 0,
-        breaksTotal: 0,
-        sessionHistory: [],
-        streak: 0,
-        lastStudyDate: null
+        sessionsCompleted: 0, totalWorkSeconds: 0, sessionHistory: [],
+        globalSessions: 0, globalTime: 0, globalHistory: [],
+        streak: 0, lastStudyDate: null
     };
 
-    function calculateStreak(lastDate, todayDate) {
-        if (!lastDate) return 1;
-        var last = new Date(lastDate);
-        var today = new Date(todayDate);
-        last.setHours(0, 0, 0, 0);
-        today.setHours(0, 0, 0, 0);
-        var diffDays = (today - last) / (1000 * 60 * 60 * 24);
-        if (diffDays === 1) return timerState.streak + 1;
-        if (diffDays === 0) return timerState.streak;
-        return 1;
+    function saveCompletedSession(secs) {
+        var mins = Math.max(1, Math.floor(secs/60));
+        var newSession = {
+            mode: 'Estudio', time: new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'}),
+            duration: mins + ' min', subject: sanitizeText(currentSubject),
+            date: new Date().toLocaleDateString('es-ES')
+        };
+        
+        // Stats de HOY
+        timerState.sessionHistory.push(newSession);
+        timerState.sessionsCompleted++;
+        timerState.totalWorkSeconds += secs;
+
+        // Stats GLOBALES
+        timerState.globalSessions++;
+        timerState.globalTime += secs;
+        timerState.globalHistory.unshift(newSession);
+        if (timerState.globalHistory.length > 50) timerState.globalHistory.pop(); // límite de 50 para no pesar mucho
+
+        updateStreak(); updateStats(); updateHistory(); saveToFirestore();
+        showNotification('Guardado: ' + currentSubject + ' (' + mins + 'm)');
     }
 
     function updateStreak() {
         var today = new Date().toDateString();
-        var newStreak = calculateStreak(timerState.lastStudyDate, today);
-        timerState.streak = newStreak;
+        var last = timerState.lastStudyDate ? new Date(timerState.lastStudyDate) : null;
+        var diff = last ? (new Date(today) - new Date(last.toDateString())) / 86400000 : null;
+        if (diff === 1) timerState.streak++;
+        else if (diff !== 0) timerState.streak = 1;
         timerState.lastStudyDate = today;
-        document.getElementById('statStreak').textContent = timerState.streak;
+    }
+
+    function formatGlobalTime(totalSeconds) {
+        var totalMins = Math.floor(totalSeconds / 60);
+        var h = Math.floor(totalMins / 60), m = totalMins % 60;
+        return h > 0 ? (h + 'h ' + m + 'm') : (m + 'm');
     }
 
     function updateStats() {
+        // Hoy
+        document.getElementById('statStreak').textContent = timerState.streak;
         document.getElementById('statSessions').textContent = timerState.sessionsCompleted;
         document.getElementById('statTime').textContent = Math.floor(timerState.totalWorkSeconds / 60) + 'm';
-        var productivity = timerState.sessionsCompleted > 0 ? Math.min((timerState.sessionsCompleted / 10) * 100, 100).toFixed(0) : '0';
-        document.getElementById('statProductivity').textContent = productivity + '%';
-        document.getElementById('statStreak').textContent = timerState.streak;
+        
+        // Global
+        document.getElementById('statGlobalStreak').textContent = timerState.streak;
+        document.getElementById('statGlobalSessions').textContent = timerState.globalSessions;
+        document.getElementById('statGlobalTime').textContent = formatGlobalTime(timerState.globalTime);
+    }
+
+    function renderHistoryList(arr, containerId, emptyMsg) {
+        var container = document.getElementById(containerId);
+        if (arr.length === 0) { container.innerHTML = '<div style="text-align:center; padding:40px; color:#9ca3af;"><p>'+emptyMsg+'</p></div>'; return; }
+        container.innerHTML = arr.map(function(s) {
+            return '<div class="history-item"><div class="history-info">' +
+                '<div class="history-materia">' + sanitizeHTML(s.subject) + '</div>' +
+                '<div class="history-date">' + sanitizeHTML(s.date) + ' a las ' + sanitizeHTML(s.time) + '</div>' +
+                '</div><div class="history-time">' + sanitizeHTML(s.duration) + '</div></div>';
+        }).join('');
     }
 
     function updateHistory() {
-        var list = document.getElementById('historyList');
-        if (timerState.sessionHistory.length === 0) {
-            list.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;"><i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i><p>Sin sesiones completadas aún.</p></div>';
-            return;
-        }
-        list.innerHTML = timerState.sessionHistory.map(function(session) {
-            var safeMode = sanitizeHTML(session.mode);
-            var safeMateria = sanitizeHTML(session.subject);
-            var safeTime = sanitizeHTML(session.time);
-            var safeDuration = sanitizeHTML(session.duration);
-            return '<div class="history-item">' +
-                '<div class="history-info">' +
-                    '<div class="history-materia">' + safeMode + ' - ' + safeMateria + '</div>' +
-                    '<div class="history-date">' + safeTime + '</div>' +
-                '</div>' +
-                '<div class="history-time">' + safeDuration + '</div>' +
-            '</div>';
-        }).reverse().join('');
-        if (typeof lucide !== 'undefined') lucide.createIcons();
+        renderHistoryList(timerState.sessionHistory.slice().reverse(), 'historyListHoy', 'Sin sesiones completadas hoy.');
+        renderHistoryList(timerState.globalHistory, 'historyListGlobal', 'Sin historial global aún.');
     }
 
+    // Tabs de UI
+    window.toggleStats = function(view) {
+        document.getElementById('tabStatsHoy').classList.toggle('active', view==='hoy');
+        document.getElementById('tabStatsGlobal').classList.toggle('active', view==='global');
+        document.getElementById('statsGridHoy').classList.toggle('hidden', view!=='hoy');
+        document.getElementById('statsGridGlobal').classList.toggle('hidden', view!=='global');
+    };
+    window.toggleHistory = function(view) {
+        document.getElementById('tabHistoryHoy').classList.toggle('active', view==='hoy');
+        document.getElementById('tabHistoryGlobal').classList.toggle('active', view==='global');
+        document.getElementById('historyListHoy').classList.toggle('hidden', view!=='hoy');
+        document.getElementById('historyListGlobal').classList.toggle('hidden', view!=='global');
+    };
+
+    // Firebase Sync
     function saveToFirestore() {
-        var user = auth.currentUser;
-        if (!user) return;
-        var today = new Date();
-        var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-        var userDocRef = db.collection('users_pomodoro').doc(user.uid);
-        userDocRef.set({
-            streak: timerState.streak,
-            lastStudyDate: timerState.lastStudyDate,
-            lastUpdated: new Date()
+        var user = auth.currentUser; if (!user) return;
+        var dateStr = new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0')+'-'+String(new Date().getDate()).padStart(2,'0');
+        var userRef = db.collection('users_pomodoro').doc(user.uid);
+        
+        // Guardar Totales Globales
+        userRef.set({
+            streak: timerState.streak, lastStudyDate: timerState.lastStudyDate,
+            globalSessions: timerState.globalSessions, globalTime: timerState.globalTime,
+            globalHistory: timerState.globalHistory, lastUpdated: new Date()
         }, { merge: true });
-        userDocRef.collection('daily').doc(dateStr).set({
-            userId: user.uid,
-            date: new Date(today.toDateString()),
-            sessionsCompleted: timerState.sessionsCompleted,
-            totalWorkSeconds: timerState.totalWorkSeconds,
-            sessionHistory: timerState.sessionHistory,
-            lastUpdated: new Date()
-        }).catch(function(error) { console.error("Firestore error:", error); });
+        
+        // Guardar Hoy
+        userRef.collection('daily').doc(dateStr).set({
+            userId: user.uid, date: new Date(),
+            sessionsCompleted: timerState.sessionsCompleted, totalWorkSeconds: timerState.totalWorkSeconds,
+            sessionHistory: timerState.sessionHistory, lastUpdated: new Date()
+        });
     }
 
     function loadFromFirestore(user) {
         if (!user) return Promise.resolve();
-        var today = new Date();
-        var dateStr = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
-        var userDocRef = db.collection('users_pomodoro').doc(user.uid);
+        var dateStr = new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0')+'-'+String(new Date().getDate()).padStart(2,'0');
+        var userRef = db.collection('users_pomodoro').doc(user.uid);
         
-        var p1 = userDocRef.get().then(function(doc) {
+        var p1 = userRef.get().then(function(doc) {
             if (doc.exists) {
-                var data = doc.data();
-                timerState.streak = data.streak || 0;
-                timerState.lastStudyDate = data.lastStudyDate || null;
+                var d = doc.data();
+                timerState.streak = d.streak || 0; timerState.lastStudyDate = d.lastStudyDate || null;
+                timerState.globalSessions = d.globalSessions || 0; timerState.globalTime = d.globalTime || 0;
+                timerState.globalHistory = d.globalHistory || [];
             }
-        }).catch(function(error) { console.error("Error cargando racha:", error); });
-        
-        var p2 = userDocRef.collection('daily').doc(dateStr).get().then(function(doc) {
+        });
+        var p2 = userRef.collection('daily').doc(dateStr).get().then(function(doc) {
             if (doc.exists) {
-                var data = doc.data();
-                timerState.sessionsCompleted = data.sessionsCompleted || 0;
-                timerState.totalWorkSeconds = data.totalWorkSeconds || 0;
-                timerState.sessionHistory = (data.sessionHistory || []).map(function(entry) {
-                    return {
-                        mode: sanitizeText(entry.mode),
-                        time: sanitizeText(entry.time),
-                        duration: sanitizeText(entry.duration),
-                        subject: sanitizeText(entry.subject || 'Sin materia')
-                    };
-                });
+                var d = doc.data();
+                timerState.sessionsCompleted = d.sessionsCompleted || 0; timerState.totalWorkSeconds = d.totalWorkSeconds || 0;
+                timerState.sessionHistory = d.sessionHistory || [];
             }
-        }).catch(function(error) { console.error("Error cargando desde Firestore:", error); });
-
-        return Promise.all([p1, p2]).then(function() {
-            updateStats();
-            updateHistory();
         });
+        return Promise.all([p1, p2]).then(function() { updateStats(); updateHistory(); });
     }
 
-    function showNotification(message) {
-        var notif = document.createElement('div');
-        notif.className = 'notification';
-        notif.textContent = message;
-        document.body.appendChild(notif);
-        setTimeout(function() { notif.remove(); }, 3000);
+    function showNotification(msg) {
+        var n = document.createElement('div'); n.className = 'notification'; n.textContent = msg;
+        document.body.appendChild(n); setTimeout(function(){n.remove();}, 3000);
     }
 
-    // ==================== AUTENTICACIÓN ====================
-    function doGoogleLogin() {
-        auth.signInWithPopup(googleProvider)
-            .then(function() { 
-                document.getElementById('loginModal').classList.add('hidden');
-                sessionStorage.removeItem('guestMode');
-            })
-            .catch(function(error) { console.error("Login error:", error); });
-    }
-
-    document.getElementById('btnModalLogin').onclick = doGoogleLogin;
-    document.getElementById('sidebarLoginBtn').onclick = function() {
-        document.getElementById('loginModal').classList.remove('hidden');
+    // Login
+    document.getElementById('btnModalLogin').onclick = function() {
+        auth.signInWithPopup(googleProvider).then(function() { document.getElementById('loginModal').classList.add('hidden'); sessionStorage.removeItem('guestMode'); });
     };
-    document.getElementById('sidebarLogoutBtn').onclick = function() {
-        auth.signOut().then(function() {
-            sessionStorage.removeItem('guestMode');
-            location.reload();
-        });
-    };
-
-    window.closeLoginModal = function() {
-        document.getElementById('loginModal').classList.add('hidden');
-        sessionStorage.setItem('guestMode', 'true');
-    };
+    document.getElementById('sidebarLoginBtn').onclick = function() { document.getElementById('loginModal').classList.remove('hidden'); };
+    document.getElementById('sidebarLogoutBtn').onclick = function() { auth.signOut().then(function(){ sessionStorage.removeItem('guestMode'); location.reload(); }); };
+    window.closeLoginModal = function() { document.getElementById('loginModal').classList.add('hidden'); sessionStorage.setItem('guestMode', 'true'); };
 
     auth.onAuthStateChanged(function(user) {
         if (user) {
-            var name = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
-            var safeName = sanitizeText(name);
-            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + safeName;
-            document.getElementById('sidebarLoginBtn').style.display = 'none';
-            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + sanitizeText(user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0]);
+            document.getElementById('sidebarLoginBtn').style.display = 'none'; document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
-            
-            loadFromFirestore(user).then(function() {
-                loadTimerLocalState();
-                updateStats();
-                updateHistory();
-                updateDisplay();
-            });
-            
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            loadFromFirestore(user).then(function() { loadTimerLocalState(); updateDisplay(); });
+            if(typeof lucide !== 'undefined') lucide.createIcons();
         } else {
             document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display:inline;"></i> Invitado';
-            document.getElementById('sidebarLoginBtn').style.display = 'flex';
-            document.getElementById('sidebarLogoutBtn').style.display = 'none';
-            if (!sessionStorage.getItem('guestMode')) {
-                document.getElementById('loginModal').classList.remove('hidden');
-            }
-            
-            loadTimerLocalState();
-            updateStats();
-            updateHistory();
-            updateDisplay();
-            
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            document.getElementById('sidebarLoginBtn').style.display = 'flex'; document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            if(!sessionStorage.getItem('guestMode')) document.getElementById('loginModal').classList.remove('hidden');
+            loadTimerLocalState(); updateStats(); updateHistory(); updateDisplay();
+            if(typeof lucide !== 'undefined') lucide.createIcons();
         }
     });
 
-    window.toggleSidebar = function() {
-        document.getElementById('sidebar').classList.toggle('hidden');
-        document.getElementById('mainContent').classList.toggle('expanded');
-    };
+    window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('hidden'); document.getElementById('mainContent').classList.toggle('expanded'); };
+    function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); localStorage.setItem('ungs_theme', t); }
+    window.toggleTheme = function() { applyTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'); };
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) { if(!localStorage.getItem('ungs_theme')) applyTheme(e.matches?'dark':'light'); });
 
-    function applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('ungs_theme', theme);
-    }
-
-    window.toggleTheme = function() {
-        var current = document.documentElement.getAttribute('data-theme');
-        applyTheme(current === 'dark' ? 'light' : 'dark');
-    };
-
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-        if (!localStorage.getItem('ungs_theme')) applyTheme(e.matches ? 'dark' : 'light');
-    });
-
-    // ==================== INICIALIZAR ====================
-    if (typeof lucide !== 'undefined') lucide.createIcons();
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 </script>
 </body>
 </html>
