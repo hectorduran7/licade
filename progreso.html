@@ -743,6 +743,10 @@
     // ── INICIALIZAR ──
     cargarListaMaterias(); // Inyecta las materias en el select al iniciar
     saveAndRender();
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
     if (typeof lucide !== 'undefined') lucide.createIcons();
 </script>
 

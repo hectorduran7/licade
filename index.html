@@ -1305,6 +1305,12 @@
         });
     }
 
+    // Asegurar la inicialización de iconos al cargar el DOM y al final del script
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
 </script>
 </body>
 </html>
