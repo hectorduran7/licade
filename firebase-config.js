@@ -52,26 +52,19 @@ var googleProvider;
         return;
     }
 
-    const config = window.FIREBASE_CONFIG;
+    const firebaseConfig = window.FIREBASE_CONFIG;
     const siteKey = window.APP_CHECK_SITE_KEY && !window.APP_CHECK_SITE_KEY.startsWith('{{') ? window.APP_CHECK_SITE_KEY : null;
 
     // Inicializar Firebase si no ha sido inicializado antes
     if (!firebase.apps.length) {
-        firebase.initializeApp(config);
+        firebase.initializeApp(firebaseConfig);
         console.log("🔥 Firebase inicializado con éxito");
     }
 
-    // Inicializar y exportar instancias globalmente para todos los HTML
     window.auth = firebase.auth();
+    window.db = firebase.firestore();
     auth = window.auth;
-    
-    // Verificación defensiva para páginas que no importan Firestore
-    if (typeof firebase.firestore === 'function') {
-        window.db = firebase.firestore();
-        db = window.db;
-    } else {
-        console.log("ℹ️ Firestore no está cargado en esta página");
-    }
+    db = window.db;
 
     // Activar App Check si la clave está disponible
     if (siteKey) {
