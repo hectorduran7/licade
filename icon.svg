@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF9F1C" />
+      <stop offset="100%" stop-color="#FF6B35" />
+    </linearGradient>
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.15" />
+    </filter>
+  </defs>
+  
+  <!-- Base Background -->
+  <rect width="512" height="512" rx="112" fill="url(#orangeGrad)" />
+  
+  <!-- Book Motif & Graduation Details -->
+  <g filter="url(#dropShadow)">
+    <!-- Book pages / back -->
+    <path d="M140 130c0-11 9-20 20-20h192c11 0 20 9 20 20v252c0 11-9 20-20 20H160c-11 0-20-9-20-20V130z" fill="#FFFFFF" />
+    <!-- Book spine outline -->
+    <path d="M140 130c0-11 5-20 12-20h8v272h-8c-7 0-12-9-12-20V130z" fill="#E2E8F0" />
+    
+    <!-- Lines symbolizing text -->
+    <rect x="180" y="170" width="152" height="14" rx="7" fill="#FF8C00" />
+    <rect x="180" y="210" width="152" height="14" rx="7" fill="#FF8C00" />
+    <rect x="180" y="250" width="112" height="14" rx="7" fill="#FF8C00" />
+    
+    <!-- Graduation Cap / UNGS Representation -->
+    <path d="M256 295 l45 20 l-45 20 l-45 -20 z" fill="#FF6B35" />
+    <line x1="256" y1="315" x2="256" y2="350" stroke="#FF6B35" stroke-width="6" stroke-linecap="round" />
+    <circle cx="256" cy="350" r="6" fill="#FF6B35" />
+  </g>
+</svg>

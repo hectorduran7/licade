@@ -25,6 +25,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
+    <script src="config.js"></script>
+    <script src="firebase-config.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -509,23 +511,7 @@
     function sanitizeHTML(str) { return str ? str.replace(/[&<>]/g, function(m) { return m==='&'?'&amp;':m==='<'?'&lt;':'&gt;'; }) : ''; }
     function sanitizeText(str) { return str ? str.replace(/[<>]/g, function(m) { return m==='<'?'&lt;':'&gt;'; }) : ''; }
     
-    var firebaseConfig = {
-        apiKey: "AIzaSy" + "DoFacVfYeZp" + "NVIvbBqlcXtlZ" + "kbeg_UeVg",
-        authDomain: "knowy-13079.firebaseapp.com",
-        projectId: "knowy-13079",
-        storageBucket: "knowy-13079.firebasestorage.app",
-        messagingSenderId: "645341817520",
-        appId: "1:645341817520:web:799733f87a0ad1a0382975",
-        measurementId: "G-PQGH6R9SZC"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    var auth = firebase.auth();
-    var db = firebase.firestore();
-    
-    try { firebase.appCheck().activate("6LfID_gsAAAAAKmzqRSBMcJR4HDICrTlo-F3Yd3u", true); } catch (e) {}
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(e){});
-    var googleProvider = new firebase.auth.GoogleAuthProvider();
+    // Las instancias de auth, db y googleProvider son provistas de forma global por firebase-config.js
 
     // DOM
     var subjectInput = document.getElementById('subjectInput');
