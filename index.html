@@ -467,7 +467,7 @@
     </div>
 </div>
 
-<button class="toggle-btn" onclick="toggleSidebar()"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
+<button id="toggleSidebarBtn" class="toggle-btn"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
 <button class="theme-btn" onclick="toggleTheme()"><i data-lucide="moon" class="icon-sm"></i> Tema</button>
 
 <aside class="sidebar hidden" id="sidebar">
@@ -533,6 +533,9 @@
     <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="margin-top: 15px; border-style: dashed;">
         <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos
     </a>
+    <button id="pwaInstallBtn" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
+        <i data-lucide="download" class="icon-sm"></i> Instalar App
+    </button>
 </aside>
 
 <div class="main-content expanded" id="mainContent">
@@ -1311,7 +1314,56 @@
     });
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
+    // Lógica de Instalación de PWA
+    var deferredPrompt;
+    var pwaInstallBtn = document.getElementById('pwaInstallBtn');
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (pwaInstallBtn) {
+            pwaInstallBtn.style.display = 'flex';
+        }
+    });
+
+    if (pwaInstallBtn) {
+        pwaInstallBtn.addEventListener('click', function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function(choiceResult) {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Usuario aceptó instalar la PWA');
+                    } else {
+                        console.log('Usuario rechazó instalar la PWA');
+                    }
+                    deferredPrompt = null;
+                    pwaInstallBtn.style.display = 'none';
+                });
+            }
+        });
+    }
+
+    window.addEventListener('appinstalled', function(evt) {
+        console.log('Biblioteca-ADE fue instalada correctamente');
+        if (pwaInstallBtn) {
+            pwaInstallBtn.style.display = 'none';
+        }
+    });
+
 </script>
-<script>document.addEventListener('DOMContentLoaded', () => { if (typeof lucide !== 'undefined') lucide.createIcons(); });</script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('toggleSidebarBtn');
+        const sidebar = document.getElementById('sidebar');
+        const content = document.getElementById('mainContent');
+        if (btn) {
+            btn.addEventListener('click', () => {
+                sidebar.classList.toggle('hidden');
+                content.classList.toggle('expanded');
+            });
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
+</script>
 </body>
 </html>
