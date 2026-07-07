@@ -1,6 +1,6 @@
 // firebase-config.js — Biblioteca-ADE
 // Inicialización centralizada y garantizada de Firebase.
-// Este archivo DEBE cargarse en el <head> ANTES que cualquier script de página.
+// Este archivo DEBE cargarse al final del body o con el orden correcto.
 
 // 1. Inicializar window.auth, window.db y window.googleProvider a null como señal segura.
 //    Esto evita ReferenceError en cualquier script que los verifique antes de tiempo.
@@ -60,7 +60,7 @@ window.googleProvider = null;
             '❌ Firebase: configuración inválida. ' +
             'Verifica config.js y las variables de entorno de Vercel.'
         );
-        return; // Salimos; window.auth sigue en null — los scripts de página deben comprobarlo
+        return; // Salimos; window.auth sigue en null
     }
 
     // ── PASO 3 + 4: Inicializar y exponer instancias de forma segura ──
@@ -85,19 +85,10 @@ window.googleProvider = null;
                 console.error('❌ Error al configurar persistencia:', e);
             });
 
-        // ── PASO 6: App Check (ejecución directa — el DOM ya está listo al final del body) ──
-        try {
-            const appCheck = firebase.appCheck();
-            // Usamos la misma apiKey de tu configuración de Firebase si no hay una clave app check separada
-            appCheck.activate(
-                new firebase.appCheck.ReCaptchaV3Provider(firebaseConfig.apiKey),
-                true
-            );
-            console.log('✅ App Check activado correctamente con API Key real');
-        } catch (error) {
-            console.error('❌ Error activando App Check:', error);
-        }
+        // ── PASO 6: App Check Desactivado Temporalmente para Evitar Errores 400 ──
+        console.log('🔒 App Check omitido temporalmente para asegurar el Login.');
+        
     } else {
-        console.error('❌ Firebase SDK no cargado. Verifica los scripts del <head>.');
+        console.error('❌ Firebase SDK no cargado. Verifica los scripts.');
     }
 })();
