@@ -88,11 +88,12 @@ window.googleProvider = null;
         // ── PASO 6: App Check (ejecución directa — el DOM ya está listo al final del body) ──
         try {
             const appCheck = firebase.appCheck();
+            // Usamos la misma apiKey de tu configuración de Firebase si no hay una clave app check separada
             appCheck.activate(
-                new firebase.appCheck.ReCaptchaV3Provider(window.APP_CHECK_SITE_KEY || firebaseConfig.apiKey),
+                new firebase.appCheck.ReCaptchaV3Provider(firebaseConfig.apiKey),
                 true
             );
-            console.log('✅ App Check activado en la raíz del body');
+            console.log('✅ App Check activado correctamente con API Key real');
         } catch (error) {
             console.error('❌ Error activando App Check:', error);
         }

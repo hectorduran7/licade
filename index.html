@@ -1341,42 +1341,35 @@
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
     // Lógica de Instalación de PWA (sidebar + footer)
-    var deferredPrompt;
-    var pwaInstallBtn       = document.getElementById('pwaInstallBtn');
-    var pwaInstallBtnFooter = document.getElementById('pwaInstallBtnFooter');
+    let deferredPrompt;
+    const pwaBtnFooter = document.getElementById('pwaInstallBtnFooter');
 
-    function triggerPwaInstall() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then(function(choiceResult) {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('Usuario aceptó instalar la PWA');
-                } else {
-                    console.log('Usuario rechazó instalar la PWA');
-                }
-                deferredPrompt = null;
-                if (pwaInstallBtn)       pwaInstallBtn.style.display = 'none';
-                if (pwaInstallBtnFooter) pwaInstallBtnFooter.style.display = 'none';
-            });
-        }
+    // Forzamos que se renderice el botón en el DOM para asegurar que exista visualmente
+    if (pwaBtnFooter) {
+        pwaBtnFooter.style.display = 'inline-flex'; 
     }
 
-    window.addEventListener('beforeinstallprompt', function(e) {
+    window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        // Forzar visibilidad con setProperty para ignorar cualquier regla CSS que pueda ocultarlos
-        if (pwaInstallBtn)       pwaInstallBtn.style.setProperty('display', 'flex', 'important');
-        if (pwaInstallBtnFooter) pwaInstallBtnFooter.style.setProperty('display', 'flex', 'important');
+        console.log(' PWA: Evento beforeinstallprompt capturado');
     });
 
-    if (pwaInstallBtn)       pwaInstallBtn.addEventListener('click', triggerPwaInstall);
-    if (pwaInstallBtnFooter) pwaInstallBtnFooter.addEventListener('click', triggerPwaInstall);
-
-    window.addEventListener('appinstalled', function(evt) {
-        console.log('Biblioteca-ADE fue instalada correctamente');
-        if (pwaInstallBtn)       pwaInstallBtn.style.display = 'none';
-        if (pwaInstallBtnFooter) pwaInstallBtnFooter.style.display = 'none';
-    });
+    if (pwaBtnFooter) {
+        pwaBtnFooter.addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Usuario aceptó la instalación');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert('Para instalar en iOS/Safari usa "Compartir" -> "Agregar a inicio". En Android/PC, asegúrate de usar un navegador compatible como Chrome.');
+            }
+        });
+    }
 
 </script>
 <script>
