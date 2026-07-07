@@ -85,23 +85,16 @@ window.googleProvider = null;
                 console.error('❌ Error al configurar persistencia:', e);
             });
 
-        // ── PASO 6: App Check (diferido a 'load' para que el DOM esté listo) ──
-        // reCAPTCHA v3 necesita inyectar elementos en el DOM; si se ejecuta antes
-        // de que la página termine de cargar lanza "Cannot read properties of null".
-        var siteKey = window.APP_CHECK_SITE_KEY;
-        if (siteKey && !siteKey.startsWith('{{') && !siteKey.startsWith('%')) {
-            window.addEventListener('load', function () {
-                try {
-                    var appCheck = firebase.appCheck();
-                    appCheck.activate(
-                        new firebase.appCheck.ReCaptchaV3Provider(siteKey),
-                        true // isTokenAutoRefreshEnabled
-                    );
-                    console.log('✅ App Check activado correctamente en el evento load');
-                } catch (error) {
-                    console.error('❌ Error activando App Check:', error);
-                }
-            });
+        // ── PASO 6: App Check (ejecución directa — el DOM ya está listo al final del body) ──
+        try {
+            const appCheck = firebase.appCheck();
+            appCheck.activate(
+                new firebase.appCheck.ReCaptchaV3Provider(window.APP_CHECK_SITE_KEY || firebaseConfig.apiKey),
+                true
+            );
+            console.log('✅ App Check activado en la raíz del body');
+        } catch (error) {
+            console.error('❌ Error activando App Check:', error);
         }
     } else {
         console.error('❌ Firebase SDK no cargado. Verifica los scripts del <head>.');
