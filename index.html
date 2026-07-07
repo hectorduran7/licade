@@ -580,6 +580,9 @@
         <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="btn-sugerencias" target="_blank">
             <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para mejorar la web
         </a>
+        <button id="pwaInstallBtnFooter" class="btn-sugerencias" style="display: none; background: transparent; cursor: pointer; width: 100%; max-width: 280px; justify-content: center;">
+            <i data-lucide="download" class="icon-sm"></i> Descargar aplicación
+        </button>
     </div>
 </div>
 
@@ -1251,10 +1254,33 @@
             });
     }
 
-    document.getElementById('btnGoogleLogin').onclick = doGoogleLogin;
     document.getElementById('btnGoogleRegister').onclick = doGoogleLogin;
     document.getElementById('btnEmailLogin').onclick = doEmailLogin;
     document.getElementById('btnEmailRegister').onclick = doEmailRegister;
+
+    // btnGoogleLogin usa addEventListener con guard de window.auth para mayor robustez
+    document.addEventListener('DOMContentLoaded', () => {
+        const googleLoginBtn = document.getElementById('btnGoogleLogin');
+        if (googleLoginBtn) {
+            googleLoginBtn.addEventListener('click', () => {
+                if (window.auth && window.googleProvider) {
+                    window.auth.signInWithPopup(window.googleProvider)
+                        .then((result) => {
+                            console.log("Login con Google exitoso:", result.user.email);
+                            document.getElementById('loginModal').classList.add('hidden');
+                            sessionStorage.removeItem('guestMode');
+                            cargarMateriasUsuario(result.user);
+                        })
+                        .catch((error) => {
+                            console.error("Error en Google Login:", error.code);
+                            document.getElementById('loginError').textContent = authErrorMsg(error.code);
+                        });
+                } else {
+                    console.error("window.auth no está listo todavía.");
+                }
+            });
+        }
+    });
 
     document.getElementById('sidebarLoginBtn').onclick = function() {
         document.getElementById('loginModal').classList.remove('hidden');
@@ -1314,40 +1340,41 @@
     });
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // Lógica de Instalación de PWA
+    // Lógica de Instalación de PWA (sidebar + footer)
     var deferredPrompt;
-    var pwaInstallBtn = document.getElementById('pwaInstallBtn');
+    var pwaInstallBtn       = document.getElementById('pwaInstallBtn');
+    var pwaInstallBtnFooter = document.getElementById('pwaInstallBtnFooter');
+
+    function triggerPwaInstall() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(choiceResult) {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('Usuario aceptó instalar la PWA');
+                } else {
+                    console.log('Usuario rechazó instalar la PWA');
+                }
+                deferredPrompt = null;
+                if (pwaInstallBtn)       pwaInstallBtn.style.display = 'none';
+                if (pwaInstallBtnFooter) pwaInstallBtnFooter.style.display = 'none';
+            });
+        }
+    }
 
     window.addEventListener('beforeinstallprompt', function(e) {
         e.preventDefault();
         deferredPrompt = e;
-        if (pwaInstallBtn) {
-            pwaInstallBtn.style.display = 'flex';
-        }
+        if (pwaInstallBtn)       pwaInstallBtn.style.display = 'flex';
+        if (pwaInstallBtnFooter) pwaInstallBtnFooter.style.display = 'flex';
     });
 
-    if (pwaInstallBtn) {
-        pwaInstallBtn.addEventListener('click', function() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(function(choiceResult) {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Usuario aceptó instalar la PWA');
-                    } else {
-                        console.log('Usuario rechazó instalar la PWA');
-                    }
-                    deferredPrompt = null;
-                    pwaInstallBtn.style.display = 'none';
-                });
-            }
-        });
-    }
+    if (pwaInstallBtn)       pwaInstallBtn.addEventListener('click', triggerPwaInstall);
+    if (pwaInstallBtnFooter) pwaInstallBtnFooter.addEventListener('click', triggerPwaInstall);
 
     window.addEventListener('appinstalled', function(evt) {
         console.log('Biblioteca-ADE fue instalada correctamente');
-        if (pwaInstallBtn) {
-            pwaInstallBtn.style.display = 'none';
-        }
+        if (pwaInstallBtn)       pwaInstallBtn.style.display = 'none';
+        if (pwaInstallBtnFooter) pwaInstallBtnFooter.style.display = 'none';
     });
 
 </script>

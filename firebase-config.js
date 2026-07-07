@@ -63,41 +63,40 @@ window.googleProvider = null;
         return; // Salimos; window.auth sigue en null — los scripts de página deben comprobarlo
     }
 
-    // ── PASO 3: Inicializar Firebase (solo una vez) ──
-    if (!firebase.apps.length) {
-        firebase.initializeApp(window.FIREBASE_CONFIG);
-        console.log('🔥 Firebase inicializado con éxito');
-    }
-
-    // ── PASO 4: Exponer instancias como propiedades de window ──
-    // Se asignan directamente a window para que estén accesibles desde CUALQUIER script,
-    // independientemente del orden de carga o del scope donde se llamen.
-    window.auth           = firebase.auth();
-    window.db             = firebase.firestore();
-    window.googleProvider = new firebase.auth.GoogleAuthProvider();
-    window.googleProvider.setCustomParameters({ prompt: 'select_account' });
-
-    console.log('✅ window.auth, window.db y window.googleProvider listos');
-
-    // ── PASO 5: Forzar persistencia LOCAL (mantiene sesión entre páginas y recargas) ──
-    window.auth
-        .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(function () {
-            console.log('🔑 Persistencia LOCAL activada — el usuario permanece logueado entre páginas');
-        })
-        .catch(function (e) {
-            console.error('❌ Error al configurar persistencia:', e);
-        });
-
-    // ── PASO 6: App Check (opcional, si la clave está disponible) ──
-    var siteKey = window.APP_CHECK_SITE_KEY;
-    if (siteKey && !siteKey.startsWith('{{')) {
-        try {
-            var appCheck = firebase.appCheck();
-            appCheck.activate(siteKey, true);
-            console.log('✅ App Check activado');
-        } catch (e) {
-            console.error('❌ Error activando App Check:', e);
+    // ── PASO 3 + 4: Inicializar y exponer instancias de forma segura ──
+    if (typeof firebase !== 'undefined') {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(window.FIREBASE_CONFIG);
         }
+        var app = firebase.app();
+        window.auth           = firebase.auth(app);
+        window.db             = firebase.firestore(app);
+        window.googleProvider = new firebase.auth.GoogleAuthProvider();
+        window.googleProvider.setCustomParameters({ prompt: 'select_account' });
+        console.log('✅ Firebase inicializado correctamente con:', app.name);
+
+        // ── PASO 5: Persistencia LOCAL (mantiene sesión entre páginas) ──
+        window.auth
+            .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .then(function () {
+                console.log('🔑 Persistencia LOCAL activada');
+            })
+            .catch(function (e) {
+                console.error('❌ Error al configurar persistencia:', e);
+            });
+
+        // ── PASO 6: App Check (opcional) ──
+        var siteKey = window.APP_CHECK_SITE_KEY;
+        if (siteKey && !siteKey.startsWith('{{')) {
+            try {
+                var appCheck = firebase.appCheck();
+                appCheck.activate(siteKey, true);
+                console.log('✅ App Check activado');
+            } catch (e) {
+                console.error('❌ Error activando App Check:', e);
+            }
+        }
+    } else {
+        console.error('❌ Firebase SDK no cargado. Verifica los scripts del <head>.');
     }
 })();
