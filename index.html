@@ -1173,16 +1173,28 @@
     }
 
     function doGoogleLogin() {
+        if (!window.auth || !window.googleProvider) {
+            console.error("❌ window.auth o window.googleProvider no están listos.");
+            alert("Los servicios de autenticación aún se están inicializando. Aguarda un instante por favor.");
+            return;
+        }
+
+        console.log("🚀 Iniciando sesión con Google Popup...");
         window.auth.signInWithPopup(window.googleProvider)
             .then(function(result) {
-                console.log("Login con Google exitoso:", result.user.email);
+                console.log("✅ Login con Google exitoso:", result.user.email);
                 document.getElementById('loginModal').classList.add('hidden');
                 sessionStorage.removeItem('guestMode');
-                cargarMateriasUsuario(result.user);
+                if (typeof cargarMateriasUsuario === 'function') {
+                    cargarMateriasUsuario(result.user);
+                } else if (typeof render === 'function') {
+                    render();
+                }
             })
             .catch(function(error) {
-                console.error("Error en Google Login:", error.code);
-                document.getElementById('loginError').textContent = authErrorMsg(error.code);
+                console.error("❌ Error en Google Login:", error);
+                var msg = error && error.code ? authErrorMsg(error.code) : 'Error al conectar con Google.';
+                document.getElementById('loginError').textContent = msg;
             });
     }
 
@@ -1254,70 +1266,69 @@
             });
     }
 
-    document.getElementById('btnGoogleRegister').onclick = doGoogleLogin;
-    document.getElementById('btnEmailLogin').onclick = doEmailLogin;
-    document.getElementById('btnEmailRegister').onclick = doEmailRegister;
+    // Vincular todos los clics de forma segura una vez cargado el DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        var googleLoginBtn = document.getElementById('btnGoogleLogin');
+        if (googleLoginBtn) googleLoginBtn.onclick = doGoogleLogin;
 
-    // btnGoogleLogin usa addEventListener con guard de window.auth para mayor robustez
-    document.addEventListener('DOMContentLoaded', () => {
-        const googleLoginBtn = document.getElementById('btnGoogleLogin');
-        if (googleLoginBtn) {
-            googleLoginBtn.addEventListener('click', () => {
-                if (window.auth && window.googleProvider) {
-                    window.auth.signInWithPopup(window.googleProvider)
-                        .then((result) => {
-                            console.log("Login con Google exitoso:", result.user.email);
-                            document.getElementById('loginModal').classList.add('hidden');
-                            sessionStorage.removeItem('guestMode');
-                            cargarMateriasUsuario(result.user);
-                        })
-                        .catch((error) => {
-                            console.error("Error en Google Login:", error.code);
-                            document.getElementById('loginError').textContent = authErrorMsg(error.code);
-                        });
-                } else {
-                    console.error("window.auth no está listo todavía.");
-                }
-            });
+        var googleRegisterBtn = document.getElementById('btnGoogleRegister');
+        if (googleRegisterBtn) googleRegisterBtn.onclick = doGoogleLogin;
+
+        var emailLoginBtn = document.getElementById('btnEmailLogin');
+        if (emailLoginBtn) emailLoginBtn.onclick = doEmailLogin;
+
+        var emailRegisterBtn = document.getElementById('btnEmailRegister');
+        if (emailRegisterBtn) emailRegisterBtn.onclick = doEmailRegister;
+
+        var sidebarLoginBtn = document.getElementById('sidebarLoginBtn');
+        if (sidebarLoginBtn) {
+            sidebarLoginBtn.onclick = function() {
+                document.getElementById('loginModal').classList.remove('hidden');
+            };
+        }
+
+        var sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
+        if (sidebarLogoutBtn) {
+            sidebarLogoutBtn.onclick = function() {
+                window.auth.signOut().then(function() {
+                    sessionStorage.removeItem('guestMode');
+                    location.reload();
+                });
+            };
         }
     });
-
-    document.getElementById('sidebarLoginBtn').onclick = function() {
-        document.getElementById('loginModal').classList.remove('hidden');
-    };
-    document.getElementById('sidebarLogoutBtn').onclick = function() {
-        window.auth.signOut().then(function() {
-            sessionStorage.removeItem('guestMode');
-            location.reload();
-        });
-    };
 
     window.closeLoginModal = function() {
         document.getElementById('loginModal').classList.add('hidden');
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    window.auth.onAuthStateChanged(function(user) {
-        if (user) {
-            var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
-            var safeName = sanitizeText(nombre);
-            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + safeName;
-            document.getElementById('sidebarLoginBtn').style.display = 'none';
-            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
-            document.getElementById('loginModal').classList.add('hidden');
-            cargarMateriasUsuario(user); // Carga y renderiza filtrando
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        } else {
-            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
-            document.getElementById('sidebarLoginBtn').style.display = 'flex';
-            document.getElementById('sidebarLogoutBtn').style.display = 'none';
-            document.getElementById('btnEditarMaterias').style.display = 'none';
-            userMateriasConfig = null; // Reinicia para mostrar todo
-            if (!sessionStorage.getItem('guestMode')) {
-                document.getElementById('loginModal').classList.remove('hidden');
-            }
-            render(); // Muestra todas las materias para el invitado
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+    // Escuchar el cambio de estado de sesión globalmente de forma segura
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.auth) {
+            window.auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
+                    var safeName = sanitizeText(nombre);
+                    document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + safeName;
+                    document.getElementById('sidebarLoginBtn').style.display = 'none';
+                    document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+                    document.getElementById('loginModal').classList.add('hidden');
+                    if (typeof cargarMateriasUsuario === 'function') cargarMateriasUsuario(user);
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                } else {
+                    document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
+                    document.getElementById('sidebarLoginBtn').style.display = 'flex';
+                    document.getElementById('sidebarLogoutBtn').style.display = 'none';
+                    if (document.getElementById('btnEditarMaterias')) document.getElementById('btnEditarMaterias').style.display = 'none';
+                    userMateriasConfig = null;
+                    if (!sessionStorage.getItem('guestMode')) {
+                        document.getElementById('loginModal').classList.remove('hidden');
+                    }
+                    if (typeof render === 'function') render();
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                }
+            });
         }
     });
 
