@@ -1364,8 +1364,9 @@
     window.addEventListener('beforeinstallprompt', function(e) {
         e.preventDefault();
         deferredPrompt = e;
-        if (pwaInstallBtn)       pwaInstallBtn.style.display = 'flex';
-        if (pwaInstallBtnFooter) pwaInstallBtnFooter.style.display = 'flex';
+        // Forzar visibilidad con setProperty para ignorar cualquier regla CSS que pueda ocultarlos
+        if (pwaInstallBtn)       pwaInstallBtn.style.setProperty('display', 'flex', 'important');
+        if (pwaInstallBtnFooter) pwaInstallBtnFooter.style.setProperty('display', 'flex', 'important');
     });
 
     if (pwaInstallBtn)       pwaInstallBtn.addEventListener('click', triggerPwaInstall);
