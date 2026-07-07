@@ -1,95 +1,103 @@
-// firebase-config.js
-// Centralized configuration for Firebase and App Check (Biblioteca-ADE)
+// firebase-config.js — Biblioteca-ADE
+// Inicialización centralizada y garantizada de Firebase.
+// Este archivo DEBE cargarse en el <head> ANTES que cualquier script de página.
 
-// Declarar variables globales con 'var' para compatibilidad total y evitar ReferenceError
-var auth;
-var db;
-var googleProvider;
+// 1. Inicializar window.auth, window.db y window.googleProvider a null como señal segura.
+//    Esto evita ReferenceError en cualquier script que los verifique antes de tiempo.
+window.auth = null;
+window.db = null;
+window.googleProvider = null;
 
-(function() {
-    // Si la configuración no es válida o tiene placeholders, intentamos cargarla del archivo .env local (para desarrollo en local)
-    if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.apiKey || window.FIREBASE_CONFIG.apiKey.startsWith('{{')) {
+(function () {
+    'use strict';
+
+    // ── PASO 1: Cargar configuración desde .env si los placeholders no fueron reemplazados ──
+    if (
+        !window.FIREBASE_CONFIG ||
+        !window.FIREBASE_CONFIG.apiKey ||
+        window.FIREBASE_CONFIG.apiKey.startsWith('{{')
+    ) {
         try {
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', '.env', false); // Petición síncrona
+            xhr.open('GET', '.env', false); // Síncrono: bloquea hasta recibir la respuesta
             xhr.send(null);
             if (xhr.status === 200) {
-                var envText = xhr.responseText;
                 var env = {};
-                envText.split('\n').forEach(function(line) {
-                    var trimmedLine = line.trim();
-                    if (trimmedLine && !trimmedLine.startsWith('#')) {
-                        var parts = trimmedLine.split('=');
-                        if (parts.length >= 2) {
-                            var key = parts[0].trim();
-                            var value = parts.slice(1).join('=').trim();
-                            env[key] = value;
+                xhr.responseText.split('\n').forEach(function (line) {
+                    var t = line.trim();
+                    if (t && !t.startsWith('#')) {
+                        var idx = t.indexOf('=');
+                        if (idx > 0) {
+                            env[t.slice(0, idx).trim()] = t.slice(idx + 1).trim();
                         }
                     }
                 });
-                
                 if (env.FIREBASE_API_KEY) {
                     window.FIREBASE_CONFIG = {
-                        apiKey: env.FIREBASE_API_KEY,
-                        authDomain: env.FIREBASE_AUTH_DOMAIN,
-                        projectId: env.FIREBASE_PROJECT_ID,
-                        storageBucket: env.FIREBASE_STORAGE_BUCKET,
+                        apiKey:            env.FIREBASE_API_KEY,
+                        authDomain:        env.FIREBASE_AUTH_DOMAIN,
+                        projectId:         env.FIREBASE_PROJECT_ID,
+                        storageBucket:     env.FIREBASE_STORAGE_BUCKET,
                         messagingSenderId: env.FIREBASE_MESSAGING_SENDER_ID,
-                        appId: env.FIREBASE_APP_ID
+                        appId:             env.FIREBASE_APP_ID
                     };
-                    window.APP_CHECK_SITE_KEY = env.APP_CHECK_SITE_KEY || "";
-                    console.log("🔥 Firebase: Configuración cargada localmente desde el archivo .env");
+                    window.APP_CHECK_SITE_KEY = env.APP_CHECK_SITE_KEY || '';
+                    console.log('🔥 Firebase: configuración cargada desde .env local');
                 }
             }
         } catch (e) {
-            console.warn("⚠️ No se pudo cargar el archivo .env de forma local:", e);
+            console.warn('⚠️ No se pudo leer .env:', e);
         }
     }
 
-    // Comprobar si existe la configuración global
-    if (!window.FIREBASE_CONFIG || !window.FIREBASE_CONFIG.apiKey || window.FIREBASE_CONFIG.apiKey.startsWith('{{')) {
-        console.error("❌ Firebase: No se detectó configuración válida en window.FIREBASE_CONFIG. Revisa la carga de config.js y tus variables de entorno.");
-        return;
+    // ── PASO 2: Validar que la configuración existe ──
+    if (
+        !window.FIREBASE_CONFIG ||
+        !window.FIREBASE_CONFIG.apiKey ||
+        window.FIREBASE_CONFIG.apiKey.startsWith('{{')
+    ) {
+        console.error(
+            '❌ Firebase: configuración inválida. ' +
+            'Verifica config.js y las variables de entorno de Vercel.'
+        );
+        return; // Salimos; window.auth sigue en null — los scripts de página deben comprobarlo
     }
 
-    const firebaseConfig = window.FIREBASE_CONFIG;
-    const siteKey = window.APP_CHECK_SITE_KEY && !window.APP_CHECK_SITE_KEY.startsWith('{{') ? window.APP_CHECK_SITE_KEY : null;
-
-    // Inicializar Firebase si no ha sido inicializado antes
+    // ── PASO 3: Inicializar Firebase (solo una vez) ──
     if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-        console.log("🔥 Firebase inicializado con éxito");
+        firebase.initializeApp(window.FIREBASE_CONFIG);
+        console.log('🔥 Firebase inicializado con éxito');
     }
 
-    window.auth = firebase.auth();
-    window.db = firebase.firestore();
-    auth = window.auth;
-    db = window.db;
-
-    // Activar App Check si la clave está disponible
-    if (siteKey) {
-        try {
-            const appCheck = firebase.appCheck();
-            appCheck.activate(siteKey, true);
-            console.log("✅ App Check activado correctamente");
-        } catch (error) {
-            console.error("❌ Error activando App Check:", error);
-        }
-    } else {
-        console.warn("⚠️ App Check: Site Key no disponible. Omitiendo activación.");
-    }
-
-    // Configurar persistencia local para la sesión del usuario
-    window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(function() { 
-            console.log("🔑 Persistencia LOCAL de Autenticación configurada"); 
-        })
-        .catch(function(error) { 
-            console.error("❌ Error configurando persistencia de autenticación:", error); 
-        });
-
-    // Configurar el proveedor de Google Auth
+    // ── PASO 4: Exponer instancias como propiedades de window ──
+    // Se asignan directamente a window para que estén accesibles desde CUALQUIER script,
+    // independientemente del orden de carga o del scope donde se llamen.
+    window.auth           = firebase.auth();
+    window.db             = firebase.firestore();
     window.googleProvider = new firebase.auth.GoogleAuthProvider();
     window.googleProvider.setCustomParameters({ prompt: 'select_account' });
-    googleProvider = window.googleProvider;
+
+    console.log('✅ window.auth, window.db y window.googleProvider listos');
+
+    // ── PASO 5: Forzar persistencia LOCAL (mantiene sesión entre páginas y recargas) ──
+    window.auth
+        .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(function () {
+            console.log('🔑 Persistencia LOCAL activada — el usuario permanece logueado entre páginas');
+        })
+        .catch(function (e) {
+            console.error('❌ Error al configurar persistencia:', e);
+        });
+
+    // ── PASO 6: App Check (opcional, si la clave está disponible) ──
+    var siteKey = window.APP_CHECK_SITE_KEY;
+    if (siteKey && !siteKey.startsWith('{{')) {
+        try {
+            var appCheck = firebase.appCheck();
+            appCheck.activate(siteKey, true);
+            console.log('✅ App Check activado');
+        } catch (e) {
+            console.error('❌ Error activando App Check:', e);
+        }
+    }
 })();

@@ -1345,7 +1345,7 @@
     
     // ==================== AUTENTICACIÓN ====================
     function doGoogleLogin() {
-        auth.signInWithPopup(googleProvider)
+        window.auth.signInWithPopup(window.googleProvider)
             .then(function() { 
                 document.getElementById('loginModal').classList.add('hidden');
                 sessionStorage.removeItem('guestMode');
@@ -1358,7 +1358,7 @@
         document.getElementById('loginModal').classList.remove('hidden');
     };
     document.getElementById('sidebarLogoutBtn').onclick = function() {
-        auth.signOut().then(function() {
+        window.auth.signOut().then(function() {
             sessionStorage.removeItem('guestMode');
             location.reload();
         });
@@ -1369,7 +1369,7 @@
         sessionStorage.setItem('guestMode', 'true');
     };
     
-    auth.onAuthStateChanged(function(user) {
+    window.auth.onAuthStateChanged(function(user) {
         if (user) {
             var name = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
             var safeName = sanitizeText(name);

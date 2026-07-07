@@ -498,7 +498,7 @@
     // Las instancias de auth, db y googleProvider son provistas de forma global por firebase-config.js
 
     function doGoogleLogin() {
-        auth.signInWithPopup(googleProvider)
+        window.auth.signInWithPopup(window.googleProvider)
             .then(function(result) {
                 console.log("Login con Google exitoso:", result.user.email);
                 document.getElementById('loginModal').classList.add('hidden');
@@ -515,7 +515,7 @@
         document.getElementById('loginModal').classList.remove('hidden');
     };
     document.getElementById('sidebarLogoutBtn').onclick = function() {
-        auth.signOut().then(function() {
+        window.auth.signOut().then(function() {
             sessionStorage.removeItem('guestMode');
             location.reload();
         });
@@ -526,7 +526,7 @@
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    auth.onAuthStateChanged(function(user) {
+    window.auth.onAuthStateChanged(function(user) {
         if (user) {
             var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
             var safeName = sanitizeText(nombre);
