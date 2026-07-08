@@ -375,6 +375,106 @@
             .rating-average { order: 2; }
             .vote-count { order: 3; }
             .btn-vote { order: 4; }
+            .tips-banner { flex-direction: column; }
+            .tips-banner-close { top: 8px; right: 8px; }
+        }
+
+        /* ===== BANNER DE RECOMENDACIONES ===== */
+        .tips-banner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 45px 16px 20px;
+            margin-bottom: 24px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(255, 140, 0, 0.08) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            position: relative;
+            animation: tipsBannerSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
+        }
+        .tips-banner:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.12); }
+        @keyframes tipsBannerSlideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tips-banner-icon {
+            flex-shrink: 0;
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, #8b5cf6, var(--primary));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white;
+        }
+        .tips-banner-text { flex: 1; }
+        .tips-banner-text strong { color: var(--primary); font-size: 14px; }
+        .tips-banner-text p { color: #9ca3af; font-size: 13px; margin: 3px 0 0 0; line-height: 1.4; }
+        .tips-banner-close {
+            position: absolute; top: 12px; right: 12px;
+            background: transparent; border: none; color: #9ca3af;
+            cursor: pointer; padding: 4px; border-radius: 6px;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .tips-banner-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+        /* ===== TIPS Y CONSEJOS POR MATERIA ===== */
+        .tips-section {
+            margin-top: 10px;
+            padding: 14px 0 4px 0;
+            border-top: 1px dashed var(--border);
+        }
+        .tips-section-header {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 13px; font-weight: 600; color: var(--primary);
+            margin-bottom: 10px; cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .tips-section-header:hover { opacity: 0.8; }
+        .tips-input-row {
+            display: flex; gap: 8px; margin-bottom: 12px; align-items: center;
+        }
+        .tips-input-row input {
+            flex: 1; padding: 10px 14px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--card-bg);
+            color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+        .tips-input-row input:focus { outline: none; border-color: var(--primary); }
+        .tips-input-row input::placeholder { color: #9ca3af; }
+        .tips-input-row button {
+            padding: 10px 16px; border-radius: 8px; border: none;
+            background: var(--primary); color: white; font-weight: 600;
+            font-size: 12px; cursor: pointer; white-space: nowrap;
+            transition: all 0.2s; font-family: 'Inter', sans-serif;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .tips-input-row button:hover { box-shadow: 0 4px 12px rgba(255,140,0,0.3); transform: translateY(-1px); }
+        .tips-input-row button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .tips-list { display: flex; flex-direction: column; gap: 8px; }
+        .tip-bubble {
+            background: rgba(139, 92, 246, 0.06);
+            border: 1px solid rgba(139, 92, 246, 0.12);
+            border-radius: 10px; padding: 10px 14px;
+            animation: tipFadeIn 0.3s ease;
+        }
+        @keyframes tipFadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tip-bubble-text { font-size: 13px; color: var(--text); line-height: 1.45; margin: 0; }
+        .tip-bubble-meta {
+            display: flex; align-items: center; gap: 8px;
+            margin-top: 5px; font-size: 11px; color: #9ca3af;
+        }
+        .tips-empty {
+            font-size: 12px; color: #9ca3af; font-style: italic;
+            padding: 6px 0;
+        }
+        .tips-toggle-body { display: none; }
+        .tips-toggle-body.open { display: block; }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -556,6 +656,20 @@
         <a href="mailto:hectorjoseduran@gmail.com?subject=Consulta%20Clases%20Particulares" class="promo-btn">
             <i data-lucide="megaphone" class="icon-sm"></i> Más información
         </a>
+    </div>
+
+    <!-- Banner de Recomendaciones -->
+    <div class="tips-banner" id="tipsBanner">
+        <div class="tips-banner-icon">
+            <i data-lucide="sparkles" style="width:20px;height:20px;"></i>
+        </div>
+        <div class="tips-banner-text">
+            <strong>💡 ¿Tenés un consejo para la cursada?</strong>
+            <p>Ayudá a la comunidad dejando tu recomendación general desde el botón <em>"Dejar Recomendación"</em> en la barra lateral.</p>
+        </div>
+        <button class="tips-banner-close" id="tipsBannerClose" title="Cerrar">
+            <i data-lucide="x" style="width:16px;height:16px;"></i>
+        </button>
     </div>
 
     <div class="search-container">
@@ -1381,6 +1495,23 @@
             }
         });
     }
+
+    // ==================== BANNER DE RECOMENDACIONES ====================
+    (function initTipsBanner() {
+        var banner = document.getElementById('tipsBanner');
+        var closeBtn = document.getElementById('tipsBannerClose');
+        if (!banner || !closeBtn) return;
+        if (sessionStorage.getItem('tipsBannerClosed')) {
+            banner.style.display = 'none';
+            return;
+        }
+        closeBtn.addEventListener('click', function() {
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(-10px)';
+            setTimeout(function() { banner.style.display = 'none'; }, 300);
+            sessionStorage.setItem('tipsBannerClosed', '1');
+        });
+    })();
 
 </script>
 <script>

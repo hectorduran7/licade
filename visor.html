@@ -292,6 +292,119 @@
         .drive-frame.hide {
             display: none;
         }
+
+        /* ===== TIPS Y CONSEJOS DE ALUMNOS ===== */
+        .tips-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-top: 24px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 30px -10px rgba(0,0,0,0.1);
+            animation: tipCardIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes tipCardIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .tips-card-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 20px; padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .tips-card-header-icon {
+            width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+            background: linear-gradient(135deg, #8b5cf6, #FF8C00);
+            display: flex; align-items: center; justify-content: center; color: white;
+        }
+        .tips-card-header h3 {
+            margin: 0; font-size: 16px; font-weight: 700; color: var(--text);
+        }
+        .tips-card-header p {
+            margin: 2px 0 0 0; font-size: 12px; color: #9ca3af;
+        }
+        /* Input area */
+        .tips-form {
+            margin-bottom: 24px;
+        }
+        .tips-form-label {
+            font-size: 12px; font-weight: 600; color: #9ca3af;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 8px; display: block;
+        }
+        .tips-textarea {
+            width: 100%; padding: 12px 16px;
+            border-radius: 10px; border: 1px solid var(--border);
+            background: var(--card-bg); color: var(--text);
+            font-size: 13px; font-family: 'Inter', sans-serif;
+            resize: none; transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box; line-height: 1.5;
+        }
+        .tips-textarea:focus {
+            outline: none; border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139,92,246,0.12);
+        }
+        .tips-textarea::placeholder { color: #9ca3af; }
+        .tips-form-row {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 10px; gap: 12px; flex-wrap: wrap;
+        }
+        .tips-char-count { font-size: 11px; color: #9ca3af; }
+        .tips-char-count.warn { color: #f59e0b; }
+        .tips-char-count.over { color: #ff4a4a; }
+        .tips-send-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border-radius: 8px; border: none;
+            background: linear-gradient(135deg, #8b5cf6, #FF8C00);
+            color: white; font-weight: 700; font-size: 13px;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .tips-send-btn:hover { box-shadow: 0 4px 14px rgba(139,92,246,0.4); transform: translateY(-1px); }
+        .tips-send-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        /* Guest notice */
+        .tips-guest-notice {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; border-radius: 10px; margin-bottom: 20px;
+            background: rgba(139,92,246,0.06); border: 1px dashed rgba(139,92,246,0.2);
+            font-size: 13px; color: #9ca3af;
+        }
+        /* List */
+        .tips-divider {
+            font-size: 11px; font-weight: 700; color: #9ca3af;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 14px;
+        }
+        .tips-list-container { display: flex; flex-direction: column; gap: 10px; }
+        .tip-bubble {
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.12);
+            border-radius: 12px; padding: 12px 16px;
+            animation: tipFadeIn 0.3s ease;
+        }
+        @keyframes tipFadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        [data-theme="dark"] .tip-bubble {
+            background: rgba(139, 92, 246, 0.08);
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+        .tip-bubble-text { font-size: 14px; color: var(--text); line-height: 1.5; margin: 0 0 8px 0; }
+        .tip-bubble-meta {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 11px; color: #9ca3af;
+        }
+        .tip-bubble-meta-dot { font-size: 10px; }
+        .tips-empty-state {
+            text-align: center; padding: 32px 20px;
+            color: #9ca3af; font-size: 13px; line-height: 1.6;
+        }
+        .tips-empty-state i { margin-bottom: 10px; }
+        .tips-loading { font-size: 13px; color: #9ca3af; text-align: center; padding: 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -440,6 +553,32 @@
         </div>
     </div>
     
+    <!-- TIPS Y CONSEJOS DE ALUMNOS -->
+    <div class="tips-card" id="tipsContainer" style="display: none;">
+        <div class="tips-card-header">
+            <div class="tips-card-header-icon">
+                <i data-lucide="message-circle" style="width:20px;height:20px;"></i>
+            </div>
+            <div>
+                <h3>Tips y Consejos de Alumnos</h3>
+                <p>Recomendaciones útiles sobre esta materia dejadas por otros estudiantes.</p>
+            </div>
+        </div>
+
+        <div class="tips-form" id="tipsInputWrapper">
+            <!-- Renderizado por JS -->
+        </div>
+
+        <div class="tips-divider">Consejos de la comunidad</div>
+        
+        <div class="tips-list-container" id="tipsList">
+            <div class="tips-loading">
+                <i data-lucide="loader" style="width:20px;height:20px;animation:spin 1s linear infinite;"></i>
+                <p>Cargando tips...</p>
+            </div>
+        </div>
+    </div>
+    
     <div class="footer-donate">
         <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="btn-sugerencias" target="_blank">
             <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para mejorar la web
@@ -534,6 +673,7 @@
             document.getElementById('sidebarLoginBtn').style.display = 'none';
             document.getElementById('sidebarLogoutBtn').style.display = 'flex';
             document.getElementById('loginModal').classList.add('hidden');
+            if (typeof renderTipsInput === 'function') renderTipsInput();
             if (typeof lucide !== 'undefined') lucide.createIcons();
         } else {
             document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
@@ -542,6 +682,7 @@
             if (!sessionStorage.getItem('guestMode')) {
                 document.getElementById('loginModal').classList.remove('hidden');
             }
+            if (typeof renderTipsInput === 'function') renderTipsInput();
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
     });
@@ -735,7 +876,145 @@
         if (pwaInstallBtn) {
             pwaInstallBtn.style.display = 'none';
         }
-    });
+    // ==================== TIPS Y CONSEJOS POR MATERIA ====================
+    var currentMateriaId = null;
+    if (nombreMateria) {
+        var safeNombreParaId = sanitizeText(nombreMateria);
+        currentMateriaId = safeNombreParaId.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/, '').substring(0, 100);
+        
+        if (currentMateriaId) {
+            document.getElementById('tipsContainer').style.display = 'block';
+            renderTipsInput();
+            cargarTipsMateria();
+        }
+    }
+
+    window.renderTipsInput = function() {
+        var wrapper = document.getElementById('tipsInputWrapper');
+        if (!wrapper) return;
+
+        var user = window.auth ? window.auth.currentUser : null;
+        if (user) {
+            wrapper.innerHTML =
+                '<label class="tips-form-label">Dejar un consejo sobre ' + sanitizeHTML(nombreMateria) + '</label>' +
+                '<textarea class="tips-textarea" id="tipInput" rows="3" placeholder="Ej: El profesor de los martes toma mucho el capítulo 3..." maxlength="300" oninput="updateCharCount()"></textarea>' +
+                '<div class="tips-form-row">' +
+                    '<span class="tips-char-count" id="tipCharCount">0 / 300</span>' +
+                    '<button onclick="enviarTip()" class="tips-send-btn" id="tipBtn">' +
+                        '<i data-lucide="send" style="width:14px;height:14px;"></i> Publicar Consejo' +
+                    '</button>' +
+                '</div>';
+        } else {
+            wrapper.innerHTML =
+                '<div class="tips-guest-notice">' +
+                    '<i data-lucide="info" style="width:16px;height:16px;color:#8b5cf6;"></i>' +
+                    'Iniciá sesión para compartir tus consejos con la comunidad.' +
+                '</div>';
+        }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    window.updateCharCount = function() {
+        var input = document.getElementById('tipInput');
+        var count = document.getElementById('tipCharCount');
+        if (!input || !count) return;
+        var len = input.value.length;
+        count.textContent = len + ' / 300';
+        if (len >= 290) {
+            count.className = 'tips-char-count over';
+        } else if (len >= 250) {
+            count.className = 'tips-char-count warn';
+        } else {
+            count.className = 'tips-char-count';
+        }
+    };
+
+    window.enviarTip = function() {
+        var input = document.getElementById('tipInput');
+        var btn = document.getElementById('tipBtn');
+        if (!input || !btn || !currentMateriaId) return;
+
+        var texto = input.value.trim();
+        if (!texto) {
+            input.style.borderColor = '#ff4a4a';
+            setTimeout(function() { input.style.borderColor = ''; }, 1500);
+            return;
+        }
+        if (texto.length > 300) {
+            alert('El tip no puede superar los 300 caracteres.');
+            return;
+        }
+
+        var user = window.auth ? window.auth.currentUser : null;
+        if (!user) { alert('Debés iniciar sesión.'); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader" style="width:14px;height:14px;animation:spin 1s linear infinite;"></i> Publicando...';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        var textoSafe = sanitizeHTML(texto);
+
+        db.collection('tips_materias').add({
+            materiaId: currentMateriaId,
+            texto: textoSafe,
+            autor: user.displayName || user.email || 'Anónimo',
+            fecha: firebase.firestore.FieldValue.serverTimestamp(),
+            uid: user.uid
+        }).then(function() {
+            input.value = '';
+            updateCharCount();
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="send" style="width:14px;height:14px;"></i> Publicar Consejo';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            cargarTipsMateria();
+        }).catch(function(err) {
+            console.error('Error al enviar tip:', err);
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="send" style="width:14px;height:14px;"></i> Publicar Consejo';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            alert('Error al enviar el tip. Intentá de nuevo.');
+        });
+    };
+
+    window.cargarTipsMateria = function() {
+        var listEl = document.getElementById('tipsList');
+        if (!listEl || !currentMateriaId) return;
+
+        listEl.innerHTML = '<div class="tips-loading"><i data-lucide="loader" style="width:20px;height:20px;animation:spin 1s linear infinite;"></i><p>Cargando tips...</p></div>';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        db.collection('tips_materias')
+            .where('materiaId', '==', currentMateriaId)
+            .orderBy('fecha', 'desc')
+            .get()
+            .then(function(querySnapshot) {
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<div class="tips-empty-state"><i data-lucide="message-square-dashed" style="width:32px;height:32px;color:#8b5cf6;"></i><p>Aún no hay consejos para esta materia.<br>¡Sé el primero en ayudar a otros estudiantes!</p></div>';
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                    return;
+                }
+                var html = '';
+                querySnapshot.forEach(function(doc) {
+                    var tip = doc.data();
+                    var fecha = tip.fecha ? tip.fecha.toDate() : new Date();
+                    var fechaStr = fecha.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' });
+                    html += '<div class="tip-bubble">' +
+                        '<p class="tip-bubble-text">' + sanitizeHTML(tip.texto) + '</p>' +
+                        '<div class="tip-bubble-meta">' +
+                            '<strong>' + sanitizeHTML(tip.autor) + '</strong>' +
+                            '<span class="tip-bubble-meta-dot">•</span>' +
+                            '<span>' + fechaStr + '</span>' +
+                        '</div>' +
+                    '</div>';
+                });
+                listEl.innerHTML = html;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            })
+            .catch(function(err) {
+                console.error('Error cargando tips para ' + currentMateriaId + ':', err);
+                listEl.innerHTML = '<div class="tips-empty-state"><p>No se pudieron cargar los tips. Verificá la conexión.</p></div>';
+            });
+    }
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
