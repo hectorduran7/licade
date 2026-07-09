@@ -891,21 +891,25 @@
             return;
         }
     
-        // Crear un documento estructurado limpio con fondo blanco y tipografía oscura
+        // Generamos la tabla limpia estructurada directamente desde los datos
         var printWrapper = document.createElement('div');
-        printWrapper.style.padding = '40px';
+        printWrapper.id = 'pwa-pdf-print-zone';
+        printWrapper.style.position = 'fixed';
+        printWrapper.style.top = '0';
+        printWrapper.style.left = '0';
+        printWrapper.style.width = '700px';
+        printWrapper.style.opacity = '0.01'; // Visible para el navegador pero casi invisible para el ojo humano
+        printWrapper.style.zIndex = '-1';     // Detrás de la interfaz para que no parpadee
         printWrapper.style.background = '#ffffff';
         printWrapper.style.color = '#1a1a1a';
+        printWrapper.style.padding = '40px';
         printWrapper.style.fontFamily = "'Inter', sans-serif";
-        printWrapper.style.width = '700px';
     
-        // Encabezado institucional
         var html = '<div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #FF8C00; padding-bottom: 15px;">' +
-            '<h2 style="margin: 0; font-size: 22px; color: #1a1a1a; font-weight: 800; letter-spacing: -0.5px;">KNOWY - REPORTE ACADÉMICO</h2>' +
+            '<h2 style="margin: 0; font-size: 22px; color: #1a1a1a; font-weight: 800;">KNOWY - REPORTE ACADÉMICO</h2>' +
             '<p style="margin: 5px 0 0 0; font-size: 13px; color: #666666;">Propuesta: Licenciatura en Administración de Empresas (UNGS)</p>' +
         '</div>';
     
-        // Tabla de contenidos
         html += '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">' +
             '<thead>' +
                 '<tr style="background: #f4f4f5; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 12px; font-weight: 700;">' +
@@ -915,17 +919,15 @@
             '</thead>' +
             '<tbody>';
     
-        // Mapeo directo del array asegurando escapar HTML (Prevención de XSS)
         entries.forEach(function(entry) {
             html += '<tr style="border-bottom: 1px solid #f3f4f6; font-size: 13px;">' +
-                '<td style="padding: 12px 10px; color: #1a1a1a; font-weight: 500;">' + escapeHtml(entry.subj) + '</td>' +
-                '<td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #FF8C00;">' + escapeHtml(String(entry.grade)) + '</td>' +
+                '<td style="padding: 12px 10px; color: #1a1a1a; font-weight: 500;">' + sanitizeHTML(entry.subj) + '</td>' +
+                '<td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #FF8C00;">' + sanitizeHTML(String(entry.grade)) + '</td>' +
             '</tr>';
         });
     
         html += '</tbody></table>';
     
-        // Pie de página con el promedio de la pantalla
         var currentAvg = document.getElementById('avgOut').innerText;
         html += '<div style="text-align: right; margin-top: 30px; padding-top: 20px; border-top: 2px dashed #e5e7eb; font-size: 15px; font-weight: 800; color: #1a1a1a;">' +
             'PROMEDIO ACADÉMICO HISTÓRICO: <span style="color: #FF8C00; font-size: 18px; margin-left: 5px;">' + currentAvg + '</span>' +
@@ -938,14 +940,16 @@
             margin:       15,
             filename:     'Historial_Academico_Knowy.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+            html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
     
-        // Renderizar y remover el elemento de inmediato
-        html2pdf().set(opt).from(printWrapper).save().then(function() {
-            printWrapper.remove();
-        });
+        // Le damos 100ms de retraso para garantizar que el motor de renderizado de WebKit/Blink dibuje el texto antes del disparo
+        setTimeout(function() {
+            html2pdf().set(opt).from(printWrapper).save().then(function() {
+                printWrapper.remove();
+            });
+        }, 100);
     };
 </script>
 

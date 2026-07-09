@@ -1,5 +1,5 @@
 // Usamos la fecha y hora de la última modificación para que el nombre de la caché cambie solo en cada push
-const CACHE_VERSION = '2026-07-09-01'; // <-- Cambia esta fecha fija si quieres forzar un reinicio completo, o déjalo automatizado
+const CACHE_VERSION = '2026-07-09-02'; // <-- Cambia esta fecha fija si quieres forzar un reinicio completo, o déjalo automatizado
 const CACHE_NAME = 'biblioteca-ade-cache-' + CACHE_VERSION;[cite: 10]
 
 const ASSETS = [[cite: 10]
