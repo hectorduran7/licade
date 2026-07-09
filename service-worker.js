@@ -46,8 +46,14 @@ self.addEventListener('activate', event => {
 
 // Fetch Event
 self.addEventListener('fetch', event => {
-  // Evitar interceptar solicitudes que no sean de tipo GET o de Firebase/Analytics
-  if (event.request.method !== 'GET' || event.request.url.includes('firestore') || event.request.url.includes('google-analytics')) {
+  // Evitar interceptar solicitudes que no sean GET o que pertenezcan a Firebase Auth/Firestore/Analytics
+  if (
+    event.request.method !== 'GET' || 
+    event.request.url.includes('firestore') || 
+    event.request.url.includes('google-analytics') ||
+    event.request.url.includes('googleapis.com') ||
+    event.request.url.includes('securetoken')
+  ) {
     return;
   }
 

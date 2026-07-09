@@ -915,11 +915,11 @@
             '</thead>' +
             '<tbody>';
     
-        // Mapeo directo del array para asegurar que no se pierdan datos en el render
+        // Mapeo directo del array asegurando escapar HTML (Prevención de XSS)
         entries.forEach(function(entry) {
             html += '<tr style="border-bottom: 1px solid #f3f4f6; font-size: 13px;">' +
-                '<td style="padding: 12px 10px; color: #1a1a1a; font-weight: 500;">' + entry.subj + '</td>' +
-                '<td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #FF8C00;">' + entry.grade + '</td>' +
+                '<td style="padding: 12px 10px; color: #1a1a1a; font-weight: 500;">' + escapeHtml(entry.subj) + '</td>' +
+                '<td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #FF8C00;">' + escapeHtml(String(entry.grade)) + '</td>' +
             '</tr>';
         });
     

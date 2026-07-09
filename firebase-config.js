@@ -85,8 +85,17 @@ window.googleProvider = null;
                 console.error('❌ Error al configurar persistencia:', e);
             });
 
-        // ── PASO 6: App Check Desactivado Temporalmente para Evitar Errores 400 ──
-        console.log('🔒 App Check omitido temporalmente para asegurar el Login.');
+        // ── PASO 6: Inicializar App Check (Seguridad contra scraping y bots) ──
+        if (window.APP_CHECK_SITE_KEY) {
+            var appCheck = firebase.appCheck();
+            appCheck.activate(
+                new firebase.appCheck.ReCaptchaEnterpriseProvider(window.APP_CHECK_SITE_KEY),
+                true // isTokenAutoRefreshEnabled
+            );
+            console.log('🔒 App Check inicializado de forma segura.');
+        } else {
+            console.warn('⚠️ App Check no activado. Falta APP_CHECK_SITE_KEY en el entorno.');
+        }
         
     } else {
         console.error('❌ Firebase SDK no cargado. Verifica los scripts.');
