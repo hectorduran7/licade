@@ -776,6 +776,7 @@
     saveAndRender();
     
     document.addEventListener('DOMContentLoaded', function() {
+        saveAndRender();
         if (typeof lucide !== 'undefined') lucide.createIcons();
     });
     if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -881,23 +882,84 @@
         }, 3000);
     };
     window.descargarPDF = function() {
-        var element = document.getElementById('gradeList');
         if (entries.length === 0) {
             alert('Primero agrega al menos una materia para poder exportar tu historial.');
             return;
         }
     
-        // Configuración estética del PDF para html2pdf
+        // Crear un contenedor temporal oculto estructurado como un analítico formal limpio (fondo blanco)
+        var printContainer = document.createElement('div');
+        printContainer.style.padding = '30px';
+        printContainer.style.background = '#ffffff';
+        printContainer.style.color = '#1a1a1a';
+        printContainer.style.fontFamily = "'Inter', sans-serif";
+    
+        // Encabezado del reporte institucional
+        var htmlContent = '<div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #FF8C00; padding-bottom: 15px;">' +
+            '<h2 style="margin: 0; font-size: 20px; color: #1a1a1a; font-weight: 800;">KNOWY - HISTORIAL ACADÉMICO</h2>' +
+            '<p style="margin: 5px 0 0 0; font-size: 13px; color: #666666;">Propuesta: Licenciatura en Administración de Empresas (UNGS)</p>' +
+        '</div>';
+    
+        // Estructura de tabla prolija
+        htmlContent += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">' +
+            '<thead>' +
+                '<tr style="background: #f4f4f5; text-align: left; font-size: 12px; border-bottom: 1px solid #e5e7eb;">' +
+                    '<th style="padding: 10px;">ACTIVIDAD / MATERIA</th>' +
+                    '<th style="padding: 10px; text-align: right;">NOTA FINAL</th>' +
+                '</tr>' +
+            '</thead>' +
+            '<tbody>';
+    
+        // Inyectar de forma limpia cada materia del array sin elementos visuales de la web (como botones de borrar)
+        entries.forEach(function(entry) {
+            htmlContent += '<tr style="border-bottom: 1px solid #e5e7eb; font-size: 13px;">' +
+                '<td style="padding: 12px 10px; color: #1a1a1a;">' + entry.subj + '</td>' +
+                '<td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #FF8C00;">' + entry.grade + '</td>' +
+            '</tr>';
+        });
+    
+        // Calcular promedio exacto duplicado en tiempo real para el reporte escrito
+        var notasPorMateria = {};
+        entries.forEach(function(e) {
+            var gStr = String(e.grade).trim().toLowerCase();
+            if (gStr === 'a' || gStr === 'aprobado' || gStr === 'ausente' || gStr === '') return;
+            var gNum = Number(e.grade);
+            if (!isNaN(gNum)) {
+                var sKey = e.subj.trim().toLowerCase();
+                if (!notasPorMateria[sKey] || gNum > notasPorMateria[sKey]) notasPorMateria[sKey] = gNum;
+            }
+        });
+        var s = 0, c = 0;
+        for (var k in notasPorMateria) { s += notasPorMateria[k]; c++; }
+        var rAvg = c > 0 ? (s / c).toFixed(2) : '0.00';
+    
+        htmlContent += '</tbody></table>';
+    
+        // Pie con el Promedio Oficial
+        htmlContent += '<div style="text-align: right; margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e5e7eb; font-size: 14px; font-weight: 700;">' +
+            'PROMEDIO HISTÓRICO COMPRENSIVO: <span style="color: #FF8C00; font-size: 16px;">' + rAvg + '</span>' +
+        '</div>';
+    
+        printContainer.innerHTML = htmlContent;
+        
+        // Lo posicionamos fuera de la pantalla para que no moleste visualmente antes de ser eliminado
+        printContainer.style.position = 'absolute';
+        printContainer.style.left = '-9999px';
+        document.body.appendChild(printContainer);
+    
+        // Configuración de renderizado limpia en fondo blanco
         var opt = {
-            margin:       15,
-            filename:     'Mi_Progreso_Academico_Knowy.pdf',
+            margin:       10,
+            filename:     'Historial_Academico_Knowy.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#080808' },
+            html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
     
-        // Ejecutar la descarga nativa en el frontend
-        html2pdf().set(opt).from(element).save();
+        // Ejecutar descarga y remover el contenedor temporal
+        html2pdf().set(opt).from(printContainer).save().then(function() {
+            printContainer.remove();
+        });
     };
 </script>
 
