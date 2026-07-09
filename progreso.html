@@ -220,6 +220,7 @@
             .calc-row { flex-direction: column; }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -285,7 +286,7 @@
     </a>
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
     <a href="estudio.html" class="btn-sidebar btn-dark">
-        <i data-lucide="timer" class="icon-sm"></i> 🍅 Sesión de Estudio
+        <i data-lucide="timer" class="icon-sm"></i> Sesión de Estudio
     </a>
     <a href="javascript:void(0)" onclick="showComingSoonAlert(event)" class="btn-sidebar btn-dark" style="opacity: 0.6; cursor: not-allowed; position: relative;">
         <i data-lucide="lock" class="icon-sm" style="color: #9ca3af;"></i> Calendario
@@ -346,6 +347,9 @@
         <div class="avg-display">
             Promedio Histórico: <span id="avgOut">0.00</span>
         </div>
+        <button onclick="descargarPDF()" class="btn-primary-solid" style="width: 100%; margin-top: 15px; padding: 12px; justify-content: center; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">
+            <i data-lucide="download" class="icon-sm"></i> Descargar Historial (PDF)
+        </button>
 
         <p style="text-align:right; font-size:12px; color:#9ca3af; margin-top:5px;">
             *Las materias marcadas como "Aprobado" no afectan el promedio.
@@ -471,13 +475,13 @@
     
     // Las instancias de auth, db y googleProvider son provistas de forma global por firebase-config.js
 
-    // ── VARIABLES GLOBALES ──
+    // â”€â”€ VARIABLES GLOBALES â”€â”€
     const totalMaterias = 38;
     let entries = [];
     let currentUser = null;
     let isLoading = false;
 
-    // ── ELEMENTOS DOM ──
+    // â”€â”€ ELEMENTOS DOM â”€â”€
     var loadingOverlay = document.getElementById('loadingOverlay');
 
     function showLoading(show) {
@@ -488,7 +492,7 @@
         }
     }
 
-    // ── GUARDAR EN FIRESTORE ──
+    // â”€â”€ GUARDAR EN FIRESTORE â”€â”€
     function saveToFirestore() {
         if (!currentUser) return;
         
@@ -500,14 +504,14 @@
             lastUpdated: new Date()
         })
         .then(function() {
-            console.log("✅ Datos guardados en Firestore");
+            console.log("âœ… Datos guardados en Firestore");
         })
         .catch(function(error) {
-            console.error("❌ Error guardando en Firestore:", error);
+            console.error("âŒ Error guardando en Firestore:", error);
         });
     }
 
-    // ── CARGAR DESDE FIRESTORE ──
+    // â”€â”€ CARGAR DESDE FIRESTORE â”€â”€
     function loadFromFirestore(user) {
         if (!user) return Promise.resolve();
         
@@ -526,41 +530,41 @@
                             date: entry.date
                         };
                     });
-                    console.log("✅ Datos cargados desde Firestore:", entries.length, "materias");
+                    console.log("âœ… Datos cargados desde Firestore:", entries.length, "materias");
                 } else {
                     entries = [];
-                    console.log("📭 No hay datos previos en Firestore, comenzando desde cero");
+                    console.log("ðŸ“­ No hay datos previos en Firestore, comenzando desde cero");
                 }
                 saveAndRender();
                 showLoading(false);
             })
             .catch(function(error) {
-                console.error("❌ Error cargando desde Firestore:", error);
+                console.error("âŒ Error cargando desde Firestore:", error);
                 showLoading(false);
             });
     }
 
-    // ── GOOGLE LOGIN ──
+    // â”€â”€ GOOGLE LOGIN â”€â”€
     function doGoogleLogin() {
         window.auth.signInWithPopup(window.googleProvider)
             .then(function(result) {
-                console.log("✅ Login con Google exitoso:", result.user.email);
+                console.log("âœ… Login con Google exitoso:", result.user.email);
                 document.getElementById('loginModal').classList.add('hidden');
                 sessionStorage.removeItem('guestMode');
             })
             .catch(function(error) {
-                console.error("❌ Error:", error.code);
+                console.error("âŒ Error:", error.code);
                 alert("Error en login: " + error.message);
             });
     }
 
-    // ── CLOSE MODAL ──
+    // â”€â”€ CLOSE MODAL â”€â”€
     window.closeLoginModal = function() {
         document.getElementById('loginModal').classList.add('hidden');
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    // ── AUTH STATE ──
+    // â”€â”€ AUTH STATE â”€â”€
     window.auth.onAuthStateChanged(function(user) {
         if (user) {
             currentUser = user;
@@ -607,7 +611,7 @@
         }
     });
 
-    // ── EVENT LISTENERS ──
+    // â”€â”€ EVENT LISTENERS â”€â”€
     document.getElementById('btnModalLogin').onclick = doGoogleLogin;
     document.getElementById('sidebarLoginBtn').onclick = doGoogleLogin;
     document.getElementById('sidebarLogoutBtn').onclick = function() {
@@ -618,7 +622,7 @@
         });
     };
 
-    // ── CALCULADORA ──
+    // â”€â”€ CALCULADORA â”€â”€
     window.addEntry = function() {
         let subj = document.getElementById('subjIn').value.trim();
         const gradeRaw = document.getElementById('gradeIn').value.trim().toUpperCase();
@@ -702,17 +706,38 @@
             }).join('');
         }
 
-        var numericEntries = entries.filter(function(entry) { return entry.isNumeric; });
-        var average = numericEntries.length
-            ? (numericEntries.reduce(function(acc, item) { return acc + Number(item.grade); }, 0) / numericEntries.length).toFixed(2)
-            : '0.00';
+        // Filtro 1, 2 y 3: Promedio exacto agrupando por materia y filtrando textos/ausentes
+        var notasPorMateria = {};
+        entries.forEach(function(entry) {
+            var gradeStr = String(entry.grade).trim().toLowerCase();
+            // Ignorar textos, vacíos y ausentes
+            if (gradeStr === 'a' || gradeStr === 'aprobado' || gradeStr === 'ausente' || gradeStr === '') return;
+            
+            var gradeNum = Number(entry.grade);
+            if (!isNaN(gradeNum)) {
+                var subj = entry.subj.trim().toLowerCase();
+                // Si la materia ya tiene una nota cargada, guardamos la más alta
+                if (!notasPorMateria[subj] || gradeNum > notasPorMateria[subj]) {
+                    notasPorMateria[subj] = gradeNum;
+                }
+            }
+        });
+
+        var sum = 0;
+        var count = 0;
+        for (var key in notasPorMateria) {
+            sum += notasPorMateria[key];
+            count++;
+        }
+        var average = count > 0 ? (sum / count).toFixed(2) : '0.00';
 
         document.getElementById('avgOut').innerText = average;
         
         var completed = entries.length;
         var percentage = Math.min((completed / totalMaterias) * 100, 100).toFixed(1);
         document.getElementById('progressBar').style.width = percentage + '%';
-        document.getElementById('progressText').innerText = completed + ' / ' + totalMaterias + ' materias completadas (' + percentage + '%)';
+
+                document.getElementById('progressText').innerText = completed + ' / ' + totalMaterias + ' materias completadas (' + percentage + '%)';
         
         if (typeof lucide !== 'undefined') lucide.createIcons();
     }
@@ -723,13 +748,13 @@
         return div.innerHTML;
     }
 
-    // ── SIDEBAR ──
+    // â”€â”€ SIDEBAR â”€â”€
     window.toggleSidebar = function() {
         document.getElementById('sidebar').classList.toggle('hidden');
         document.getElementById('mainContent').classList.toggle('expanded');
     };
 
-    // ── TEMA ──
+    // â”€â”€ TEMA â”€â”€
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('ungs_theme', theme);
@@ -746,7 +771,7 @@
         }
     });
 
-    // ── INICIALIZAR ──
+    // â”€â”€ INICIALIZAR â”€â”€
     cargarListaMaterias(); // Inyecta las materias en el select al iniciar
     saveAndRender();
     
@@ -839,7 +864,7 @@
         toast.style.transform = 'translateY(-10px)';
         toast.style.opacity = '0';
     
-        toast.innerHTML = '<i data-lucide="bell-ring" style="color: var(--primary); width: 16px; height: 16px;"></i> ¡Próximamente! Estamos automatizando las notificaciones de exámenes.';
+        toast.innerHTML = '<i data-lucide="bell-ring" style="color: var(--primary); width: 16px; height: 16px;"></i> Â¡Próximamente! Estamos automatizando las notificaciones de exámenes.';
     
         document.body.appendChild(toast);
         if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -854,6 +879,25 @@
             toast.style.opacity = '0';
             setTimeout(function() { toast.remove(); }, 300);
         }, 3000);
+    };
+    window.descargarPDF = function() {
+        var element = document.getElementById('gradeList');
+        if (entries.length === 0) {
+            alert('Primero agrega al menos una materia para poder exportar tu historial.');
+            return;
+        }
+    
+        // Configuración estética del PDF para html2pdf
+        var opt = {
+            margin:       15,
+            filename:     'Mi_Progreso_Academico_Knowy.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#080808' },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+    
+        // Ejecutar la descarga nativa en el frontend
+        html2pdf().set(opt).from(element).save();
     };
 </script>
 

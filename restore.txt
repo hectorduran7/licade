@@ -1,0 +1,397 @@
+            </button>
+        </div>
+
+        <div class="grade-list" id="gradeList"></div>
+
+        <div class="avg-display">
+            Promedio Histórico: <span id="avgOut">0.00</span>
+        </div>
+        <button onclick="descargarPDF()" class="btn-primary-solid" style="width: 100%; margin-top: 15px; padding: 12px; justify-content: center; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">
+            <i data-lucide="download" class="icon-sm"></i> Descargar Historial (PDF)
+        </button>
+
+        <p style="text-align:right; font-size:12px; color:#9ca3af; margin-top:5px;">
+            *Las materias marcadas como "Aprobado" no afectan el promedio.
+        </p>
+    </div>
+
+    <div class="footer-donate">
+        <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="btn-sugerencias" target="_blank">
+            <i data-lucide="lightbulb" class="icon-sm"></i>
+            Sugerencias para mejorar la web
+        </a>
+    </div>
+</div>
+
+<!-- Firebase SDK + Config (cargados al final del body para acceso seguro al DOM) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
+<script src="config.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+    // ==================== LISTA MAESTRA DE MATERIAS ====================
+    // Mantenemos la misma estructura que en index.html para estandarizar
+    var dataMaterias = {
+        "PRIMER AÑO": [
+            {n: "Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Taller Inicial Orientado: Ciencias Exactas"},
+            {n: "Teoría de la Organización"},
+            {n: "Problemas Socioeconómicos Contemporáneos"},
+            {n: "Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "Introducción a la Economía"}
+        ],
+        "SEGUNDO AÑO": [
+            {n: "Economía Clásica"},
+            {n: "Diseño Estructural y Procesos"},
+            {n: "Matemática para Economistas I"},
+            {n: "Economía Neoclásica"},
+            {n: "Sistemas de Información Contable I"},
+            {n: "Historia Económica y Social Mundial y Latinoamericana"}
+        ],
+        "TERCER AÑO": [
+            {n: "Economía Keynesiana"},
+            {n: "Estadística para Economistas"},
+            {n: "Planeamiento y Control Organizacional"},
+            {n: "Matemática para Economistas II"},
+            {n: "Laboratorio Interdisciplinario"},
+            {n: "Sistemas de Información"}
+        ],
+        "CUARTO AÑO": [
+            {n: "Derecho Administrativo"},
+            {n: "Organización Industrial"},
+            {n: "Gestión de Recursos Humanos (Material Viejo)"},
+            {n: "Dirección Estratégica (Material Viejo)"},
+            {n: "Tópicos de Comercialización"},
+            {n: "Planificación y Proceso Decisorio en las Organizaciones"},
+            {n: "Teoría de la Innovación y del Cambio Tecnológico"}
+        ],
+        "QUINTO AÑO": [
+            {n: "Matemática para Economistas III"},
+            {n: "Costos Industriales"},
+            {n: "Sistemas de Información Contable II"},
+            {n: "Gestión en Economía Mixta"},
+            {n: "Empresas Públicas"},
+            {n: "Ingeniería Financiera"}
+        ],
+        "SEXTO AÑO": [
+            {n: "Sociología Industrial"},
+            {n: "Régimen Tributario"},
+            {n: "Desarrollo y Gestión de Proyectos Emprendedores"}
+        ],
+        "EXTRACURRICULARES": [
+            {n: "Taller de Utilitarios"},
+            {n: "IPE 1"},
+            {n: "IPE 2"},
+            {n: "IPE 3"}
+        ]
+    };
+
+    // Función para inyectar las materias en el <select>
+    function cargarListaMaterias() {
+        var select = document.getElementById('subjIn');
+        for (var year in dataMaterias) {
+            var optGroup = document.createElement('optgroup');
+            optGroup.label = year;
+            dataMaterias[year].forEach(function(materia) {
+                var option = document.createElement('option');
+                option.value = materia.n;
+                option.textContent = materia.n;
+                optGroup.appendChild(option);
+            });
+            select.appendChild(optGroup);
+        }
+    }
+
+    // ==================== FUNCIONES DE SEGURIDAD ====================
+    function sanitizeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function sanitizeText(str) {
+        if (!str) return '';
+        return str.replace(/[<>]/g, function(m) {
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function sanitizeSubjectName(name) {
+        if (!name) return '';
+        let cleaned = name.replace(/[^\w\s\u00C0-\u00FF\-\.\,\(\)\:]/gi, '');
+        if (cleaned.length > 100) cleaned = cleaned.substring(0, 100);
+        return cleaned.trim();
+    }
+    
+    // Las instancias de auth, db y googleProvider son provistas de forma global por firebase-config.js
+
+    // ── VARIABLES GLOBALES ──
+    const totalMaterias = 38;
+    let entries = [];
+    let currentUser = null;
+    let isLoading = false;
+
+    // ── ELEMENTOS DOM ──
+    var loadingOverlay = document.getElementById('loadingOverlay');
+
+    function showLoading(show) {
+        if (show) {
+            loadingOverlay.classList.remove('hidden');
+        } else {
+            loadingOverlay.classList.add('hidden');
+        }
+    }
+
+    // ── GUARDAR EN FIRESTORE ──
+    function saveToFirestore() {
+        if (!currentUser) return;
+        
+        var userDocRef = db.collection('users_grades').doc(currentUser.uid);
+        userDocRef.set({
+            email: currentUser.email,
+            entries: entries,
+            totalMaterias: totalMaterias,
+            lastUpdated: new Date()
+        })
+        .then(function() {
+            console.log("✅ Datos guardados en Firestore");
+        })
+        .catch(function(error) {
+            console.error("❌ Error guardando en Firestore:", error);
+        });
+    }
+
+    // ── CARGAR DESDE FIRESTORE ──
+    function loadFromFirestore(user) {
+        if (!user) return Promise.resolve();
+        
+        showLoading(true);
+        
+        var userDocRef = db.collection('users_grades').doc(user.uid);
+        return userDocRef.get()
+            .then(function(doc) {
+                if (doc.exists) {
+                    var data = doc.data();
+                    entries = (data.entries || []).map(function(entry) {
+                        return {
+                            subj: sanitizeSubjectName(entry.subj),
+                            grade: entry.grade,
+                            isNumeric: entry.isNumeric,
+                            date: entry.date
+                        };
+                    });
+                    console.log("✅ Datos cargados desde Firestore:", entries.length, "materias");
+                } else {
+                    entries = [];
+                    console.log("📭 No hay datos previos en Firestore, comenzando desde cero");
+                }
+                saveAndRender();
+                showLoading(false);
+            })
+            .catch(function(error) {
+                console.error("❌ Error cargando desde Firestore:", error);
+                showLoading(false);
+            });
+    }
+
+    // ── GOOGLE LOGIN ──
+    function doGoogleLogin() {
+        window.auth.signInWithPopup(window.googleProvider)
+            .then(function(result) {
+                console.log("✅ Login con Google exitoso:", result.user.email);
+                document.getElementById('loginModal').classList.add('hidden');
+                sessionStorage.removeItem('guestMode');
+            })
+            .catch(function(error) {
+                console.error("❌ Error:", error.code);
+                alert("Error en login: " + error.message);
+            });
+    }
+
+    // ── CLOSE MODAL ──
+    window.closeLoginModal = function() {
+        document.getElementById('loginModal').classList.add('hidden');
+        sessionStorage.setItem('guestMode', 'true');
+    };
+
+    // ── AUTH STATE ──
+    window.auth.onAuthStateChanged(function(user) {
+        if (user) {
+            currentUser = user;
+            var displayName = user.displayName || user.email.split('@')[0];
+            var safeName = sanitizeText(displayName.split(' ')[0]);
+            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + safeName;
+            document.getElementById('sidebarLoginBtn').style.display = 'none';
+            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
+            document.getElementById('loginModal').classList.add('hidden');
+            
+            loadFromFirestore(user);
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        } else {
+            currentUser = null;
+            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display:inline;"></i> Invitado';
+            document.getElementById('sidebarLoginBtn').style.display = 'flex';
+            document.getElementById('sidebarLogoutBtn').style.display = 'none';
+            
+            var savedEntries = sessionStorage.getItem('ungs_grades_backup_guest');
+            if (savedEntries) {
+                try {
+                    var parsed = JSON.parse(savedEntries);
+                    entries = (parsed || []).map(function(entry) {
+                        return {
+                            subj: sanitizeSubjectName(entry.subj),
+                            grade: entry.grade,
+                            isNumeric: entry.isNumeric,
+                            date: entry.date
+                        };
+                    });
+                } catch(e) {
+                    entries = [];
+                }
+            } else {
+                entries = [];
+            }
+            saveAndRender();
+            
+            if (!sessionStorage.getItem('guestMode')) {
+                document.getElementById('loginModal').classList.remove('hidden');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    });
+
+    // ── EVENT LISTENERS ──
+    document.getElementById('btnModalLogin').onclick = doGoogleLogin;
+    document.getElementById('sidebarLoginBtn').onclick = doGoogleLogin;
+    document.getElementById('sidebarLogoutBtn').onclick = function() {
+        window.auth.signOut().then(function() {
+            entries = [];
+            saveAndRender();
+            location.reload();
+        });
+    };
+
+    // ── CALCULADORA ──
+    window.addEntry = function() {
+        let subj = document.getElementById('subjIn').value.trim();
+        const gradeRaw = document.getElementById('gradeIn').value.trim().toUpperCase();
+        const gradeNum = parseFloat(gradeRaw);
+        const isNumeric = !isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 10;
+        const isApproved = gradeRaw === 'A' || gradeRaw === 'AP' || gradeRaw === 'APROBADO';
+
+        if (!subj) { 
+            alert('Seleccioná una materia de la lista.'); 
+            return; 
+        }
+        
+        // Validación para evitar materias duplicadas
+        let isDuplicate = entries.some(function(e) { return e.subj === subj; });
+        if (isDuplicate) {
+            alert('Ya cargaste esta materia en tu progreso.');
+            return;
+        }
+
+        if (!isNumeric && !isApproved) { 
+            alert("Ingresá una nota válida del 1 al 10 o la letra 'A'."); 
+            return; 
+        }
+        
+        subj = sanitizeSubjectName(subj);
+        if (!subj) {
+            alert('El nombre de la materia contiene caracteres no válidos.');
+            return;
+        }
+
+        entries.push({ 
+            subj: subj, 
+            grade: isNumeric ? gradeNum : 'Aprobado', 
+            isNumeric: isNumeric,
+            date: new Date().toISOString()
+        });
+        
+        saveAndRender();
+        
+        if (currentUser) {
+            saveToFirestore();
+        } else {
+            sessionStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
+        }
+        
+        document.getElementById('subjIn').value = '';
+        document.getElementById('gradeIn').value = '';
+    };
+
+    window.removeEntry = function(index) {
+        if (index >= 0 && index < entries.length) {
+            entries.splice(index, 1);
+            saveAndRender();
+            
+            if (currentUser) {
+                saveToFirestore();
+            } else {
+                sessionStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
+            }
+        }
+    };
+
+    function saveAndRender() {
+        const list = document.getElementById('gradeList');
+        if (entries.length === 0) {
+            list.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: #9ca3af;">' +
+                '<i data-lucide="inbox" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 10px; display: block;"></i>' +
+                '<p>No hay materias cargadas aún. Agregá tu primera materia arriba.</p>' +
+            '</div>';
+        } else {
+            list.innerHTML = entries.map(function(entry, index) {
+                return '<div class="grade-item">' +
+                    '<span style="font-weight:500;">' + escapeHtml(entry.subj) + '</span>' +
+                    '<span style="display:flex; align-items:center; gap:10px;">' +
+                        '<b style="color:var(--primary);">' + escapeHtml(String(entry.grade)) + '</b>' +
+                        '<span class="btn-del" onclick="removeEntry(' + index + ')" title="Eliminar materia">' +
+                            '<i data-lucide="trash-2" class="icon-sm"></i>' +
+                        '</span>' +
+                    '</span>' +
+                '</div>';
+            }).join('');
+        }
+
+        // Filtro 1, 2 y 3: Promedio exacto agrupando por materia y filtrando textos/ausentes
+        var notasPorMateria = {};
+        entries.forEach(function(entry) {
+            var gradeStr = String(entry.grade).trim().toLowerCase();
+            // Ignorar textos, vacíos y ausentes
+            if (gradeStr === 'a' || gradeStr === 'aprobado' || gradeStr === 'ausente' || gradeStr === '') return;
+            
+            var gradeNum = Number(entry.grade);
+            if (!isNaN(gradeNum)) {
+                var subj = entry.subj.trim().toLowerCase();
+                // Si la materia ya tiene una nota cargada, guardamos la más alta
+                if (!notasPorMateria[subj] || gradeNum > notasPorMateria[subj]) {
+                    notasPorMateria[subj] = gradeNum;
+                }
+            }
+        });
+
+        var sum = 0;
+        var count = 0;
+        for (var key in notasPorMateria) {
+            sum += notasPorMateria[key];
+            count++;
+        }
+        var average = count > 0 ? (sum / count).toFixed(2) : '0.00';
+
+        document.getElementById('avgOut').innerText = average;
+        
+        var completed = entries.length;
+        var percentage = Math.min((completed / totalMaterias) * 100, 100).toFixed(1);
+        document.getElementById('progressBar').style.width = percentage + '%';
