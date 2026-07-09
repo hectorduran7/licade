@@ -504,42 +504,44 @@
             lastUpdated: new Date()
         })
         .then(function() {
-            console.log("âœ… Datos guardados en Firestore");
+            console.log("✅ Datos guardados en Firestore");
         })
         .catch(function(error) {
-            console.error("âŒ Error guardando en Firestore:", error);
+            console.error("❌ Error guardando en Firestore:", error);
         });
     }
 
     // â”€â”€ CARGAR DESDE FIRESTORE â”€â”€
     function loadFromFirestore(user) {
         if (!user) return Promise.resolve();
-        
         showLoading(true);
-        
         var userDocRef = db.collection('users_grades').doc(user.uid);
         return userDocRef.get()
             .then(function(doc) {
                 if (doc.exists) {
                     var data = doc.data();
                     entries = (data.entries || []).map(function(entry) {
+                        // Limpieza institucional de nombres duplicados desde la base de datos
+                        let cleanName = sanitizeSubjectName(entry.subj)
+                            .replace(/\s*\(material viejo\)\s*/gi, '')
+                            .replace(/\s+/g, ' ')
+                            .trim();
                         return {
-                            subj: sanitizeSubjectName(entry.subj),
+                            subj: cleanName,
                             grade: entry.grade,
                             isNumeric: entry.isNumeric,
                             date: entry.date
                         };
                     });
-                    console.log("âœ… Datos cargados desde Firestore:", entries.length, "materias");
+                    console.log("Datos cargados y normalizados.");
                 } else {
                     entries = [];
-                    console.log("ðŸ“­ No hay datos previos en Firestore, comenzando desde cero");
                 }
                 saveAndRender();
                 showLoading(false);
             })
             .catch(function(error) {
-                console.error("âŒ Error cargando desde Firestore:", error);
+                console.error("Error:", error);
                 showLoading(false);
             });
     }
@@ -891,15 +893,8 @@
             return;
         }
     
-        // Generamos la tabla limpia estructurada directamente desde los datos
         var printWrapper = document.createElement('div');
         printWrapper.id = 'pwa-pdf-print-zone';
-        printWrapper.style.position = 'fixed';
-        printWrapper.style.top = '0';
-        printWrapper.style.left = '0';
-        printWrapper.style.width = '700px';
-        printWrapper.style.opacity = '0.01'; // Visible para el navegador pero casi invisible para el ojo humano
-        printWrapper.style.zIndex = '-1';     // Detrás de la interfaz para que no parpadee
         printWrapper.style.background = '#ffffff';
         printWrapper.style.color = '#1a1a1a';
         printWrapper.style.padding = '40px';
@@ -940,16 +935,16 @@
             margin:       15,
             filename:     'Historial_Academico_Knowy.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+            html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
     
-        // Le damos 100ms de retraso para garantizar que el motor de renderizado de WebKit/Blink dibuje el texto antes del disparo
+        // Le damos un pequeño delay para asegurar que el navegador dibuje el HTML antes de capturarlo
         setTimeout(function() {
             html2pdf().set(opt).from(printWrapper).save().then(function() {
                 printWrapper.remove();
             });
-        }, 100);
+        }, 150);
     };
 </script>
 
