@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -706,7 +706,7 @@
     });
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
-    // Lógica de Instalación de PWA
+    // Logica de Instalacion de PWA
     var deferredPrompt;
     var pwaInstallBtn = document.getElementById('pwaInstallBtn');
 
@@ -723,14 +723,15 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then(function(choiceResult) {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Usuario aceptó instalar la PWA');
-                    } else {
-                        console.log('Usuario rechazó instalar la PWA');
-                    }
                     deferredPrompt = null;
                     pwaInstallBtn.style.display = 'none';
                 });
+            } else {
+                var modalInst = document.getElementById('pwaInstructionsModal');
+                if (modalInst) {
+                    modalInst.classList.remove('hidden');
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                }
             }
         });
     }
@@ -755,6 +756,6 @@
         }
         if (typeof lucide !== 'undefined') lucide.createIcons();
     });
-</script>
+</script><div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;"><div class="login-modal-content" style="max-width: 450px; text-align: left;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3><button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button></div><p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p><div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(255, 140, 0, 0.1); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone/iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> en Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">En Opera, Brave u otros en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div><button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button></div></div>
 </body>
 </html>
