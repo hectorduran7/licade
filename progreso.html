@@ -711,20 +711,24 @@
         entries.forEach(function(entry) {
             if (!entry.subj || !entry.grade) return;
             var gradeStr = String(entry.grade).trim().toUpperCase();
-
-            // Filtro estricto institucional
+        
+            // Filtro institucional estricto de textos y ausentes
             if (gradeStr === 'A' || gradeStr === 'APROBADO' || gradeStr === 'AUSENTE' || gradeStr === '') return;
-
+        
             var gradeNum = Number(entry.grade);
             if (!isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 10) {
-                // Normalizamos el nombre eliminando espacios extras para que agrupe bien
-                var subjKey = entry.subj.trim().toLowerCase().replace(/\s+/g, ' ');
+                // NORMALIZACIÓN: Removemos espacios extras y leyendas como '(Material Viejo)' para asegurar la agrupación perfecta
+                var subjKey = entry.subj.trim()
+                    .toLowerCase()
+                    .replace(/\s*\(material viejo\)\s*/g, '')
+                    .replace(/\s+/g, ' ');
+        
                 if (!notasPorMateria[subjKey] || gradeNum > notasPorMateria[subjKey]) {
                     notasPorMateria[subjKey] = gradeNum;
                 }
             }
         });
-
+        
         var sum = 0, count = 0;
         for (var key in notasPorMateria) {
             sum += notasPorMateria[key];
@@ -883,48 +887,53 @@
     };
     window.descargarPDF = function() {
         if (entries.length === 0) {
-            alert('Primero agrega al menos una materia.');
+            alert('Primero agrega al menos una materia para exportar.');
             return;
         }
-
-        var element = document.getElementById('gradeList');
-
-        // Clonamos temporalmente la lista para aplicarle estilos forzados de impresión limpios
-        var clone = element.cloneNode(true);
-        clone.style.background = '#ffffff';
-        clone.style.color = '#1a1a1a';
-        clone.style.padding = '20px';
-        clone.style.width = '600px';
-        clone.style.fontFamily = "'Inter', sans-serif";
-
-        // Inyectar el título formal arriba
-        var header = document.createElement('div');
-        header.innerHTML = '<h2 style="margin: 0 0 20px 0; font-size: 20px; color: #1a1a1a; font-weight: 800; text-align: center; border-bottom: 2px solid #FF8C00; padding-bottom: 10px;">KNOWY - REPORTE ACADÉMICO</h2>';
-        clone.insertBefore(header, clone.firstChild);
-
-        // Inyectar el promedio al final
-        var avgValue = document.getElementById('avgOut').innerText;
-        var footer = document.createElement('div');
-        footer.innerHTML = '<div style="text-align: right; margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e5e7eb; font-size: 14px; font-weight: 700;">Promedio Histórico: <span style="color: #FF8C00; font-size: 16px;">' + avgValue + '</span></div>';
-        clone.appendChild(footer);
-
-        // Forzar a que cada ítem dentro del clon tenga texto oscuro legible
-        var items = clone.querySelectorAll('.grade-item, span, b');
-        items.forEach(function(el) {
-            el.style.color = '#1a1a1a';
-            el.style.background = '#ffffff';
+    
+        // Crear un documento estructurado limpio con fondo blanco y tipografía oscura
+        var printWrapper = document.createElement('div');
+        printWrapper.style.padding = '40px';
+        printWrapper.style.background = '#ffffff';
+        printWrapper.style.color = '#1a1a1a';
+        printWrapper.style.fontFamily = "'Inter', sans-serif";
+        printWrapper.style.width = '700px';
+    
+        // Encabezado institucional
+        var html = '<div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #FF8C00; padding-bottom: 15px;">' +
+            '<h2 style="margin: 0; font-size: 22px; color: #1a1a1a; font-weight: 800; letter-spacing: -0.5px;">KNOWY - REPORTE ACADÉMICO</h2>' +
+            '<p style="margin: 5px 0 0 0; font-size: 13px; color: #666666;">Propuesta: Licenciatura en Administración de Empresas (UNGS)</p>' +
+        '</div>';
+    
+        // Tabla de contenidos
+        html += '<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">' +
+            '<thead>' +
+                '<tr style="background: #f4f4f5; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 12px; font-weight: 700;">' +
+                    '<th style="padding: 12px 10px; color: #4b5563;">ACTIVIDAD / MATERIA</th>' +
+                    '<th style="padding: 12px 10px; text-align: right; color: #4b5563; width: 120px;">NOTA FINAL</th>' +
+                '</tr>' +
+            '</thead>' +
+            '<tbody>';
+    
+        // Mapeo directo del array para asegurar que no se pierdan datos en el render
+        entries.forEach(function(entry) {
+            html += '<tr style="border-bottom: 1px solid #f3f4f6; font-size: 13px;">' +
+                '<td style="padding: 12px 10px; color: #1a1a1a; font-weight: 500;">' + entry.subj + '</td>' +
+                '<td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #FF8C00;">' + entry.grade + '</td>' +
+            '</tr>';
         });
-
-        // Ocultamos los botones de eliminar del clon para que no salgan en el PDF
-        var delBtns = clone.querySelectorAll('.btn-del');
-        delBtns.forEach(function(btn) { btn.remove(); });
-
-        var wrapper = document.createElement('div');
-        wrapper.style.position = 'absolute';
-        wrapper.style.left = '-9999px';
-        wrapper.appendChild(clone);
-        document.body.appendChild(wrapper);
-
+    
+        html += '</tbody></table>';
+    
+        // Pie de página con el promedio de la pantalla
+        var currentAvg = document.getElementById('avgOut').innerText;
+        html += '<div style="text-align: right; margin-top: 30px; padding-top: 20px; border-top: 2px dashed #e5e7eb; font-size: 15px; font-weight: 800; color: #1a1a1a;">' +
+            'PROMEDIO ACADÉMICO HISTÓRICO: <span style="color: #FF8C00; font-size: 18px; margin-left: 5px;">' + currentAvg + '</span>' +
+        '</div>';
+    
+        printWrapper.innerHTML = html;
+        document.body.appendChild(printWrapper);
+    
         var opt = {
             margin:       15,
             filename:     'Historial_Academico_Knowy.pdf',
@@ -932,9 +941,10 @@
             html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-
-        html2pdf().set(opt).from(clone).save().then(function() {
-            wrapper.remove();
+    
+        // Renderizar y remover el elemento de inmediato
+        html2pdf().set(opt).from(printWrapper).save().then(function() {
+            printWrapper.remove();
         });
     };
 </script>
