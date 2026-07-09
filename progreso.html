@@ -942,29 +942,29 @@
 <div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;">    <div class="login-modal-content" style="max-width: 450px; text-align: left;">        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">            <h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3>            <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button>        </div>        <p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p>        <div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(255, 140, 0, 0.1); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone / iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> abajo en tu navegador Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en Opera, Brave u otros navegadores en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div>        <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button>    </div></div>
 <script>
 if ('serviceWorker' in navigator) {
-    // Registramos el Service Worker asegurando que busque la última versión en el servidor
-    navigator.serviceWorker.register('service-worker.js?cb=' + Date.now())
+    // Registramos el Service Worker con su ruta estática para evitar el bucle infinito
+    navigator.serviceWorker.register('service-worker.js')
         .then(function(reg) {
-            console.log('Service Worker registrado.');
+            console.log('Service Worker registrado correctamente.');
 
+            // Escuchar si hay una actualización real lista en el servidor
             reg.addEventListener('updatefound', function() {
                 var newWorker = reg.installing;
                 if (newWorker) {
                     newWorker.addEventListener('statechange', function() {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // Lanzamos el aviso flotante estético antes de actualizar
-                            if (typeof showNotification === 'function') {
-                                showNotification('🚀 ¡Knowy se actualizó a la última versión!');
-                            } else {
-                                alert('🚀 ¡Knowy se actualizó a la última versión!');
-                            }
+                            // Usar un aviso nativo limpio ya que showNotification no está declarado en este archivo
+                            alert('🚀 ¡Knowy se actualizó a la última versión disponible!');
                             setTimeout(function() {
                                 window.location.reload();
-                            }, 1500);
+                            }, 500);
                         }
                     });
                 }
             });
+        })
+        .catch(function(err) {
+            console.error('Error al registrar el Service Worker:', err);
         });
 }
 </script>

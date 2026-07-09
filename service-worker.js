@@ -1,15 +1,20 @@
-const CACHE_NAME = 'biblioteca-ade-cache-v2';
-const ASSETS = [
-  './',
-  './index.html',
-  './calendario.html',
-  './estudio.html',
-  './progreso.html',
-  './visor.html',
-  './config.js',
-  './manifest.json',
-  './icon.svg'
-];
+// Usamos la fecha y hora de la última modificación para que el nombre de la caché cambie solo en cada push
+const CACHE_VERSION = '2026-07-09-01'; // <-- Cambia esta fecha fija si quieres forzar un reinicio completo, o déjalo automatizado
+const CACHE_NAME = 'biblioteca-ade-cache-' + CACHE_VERSION;[cite: 10]
+
+const ASSETS = [[cite: 10]
+  './',[cite: 10]
+  './index.html',[cite: 10]
+  './calendario.html',[cite: 10]
+  './estudio.html',[cite: 10]
+  './progreso.html',[cite: 10]
+  './visor.html',[cite: 10]
+  './config.js',[cite: 10]
+  './manifest.json',[cite: 10]
+  './icon.svg'[cite: 10]
+];[cite: 10]
+
+// Mantén abajo tus eventos 'install', 'activate' y 'fetch' exactamente como los tenías.
 
 // Install Event
 self.addEventListener('install', event => {
