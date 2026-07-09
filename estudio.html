@@ -263,6 +263,7 @@
             .duration-controls { flex-direction: column; align-items: stretch; }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
@@ -382,6 +383,7 @@
 
     <div class="timer-container">
         <div class="timer-display" id="timerDisplay">25:00</div>
+        <div id="breakMessage" style="display: none; color: #8b5cf6; font-size: 14px; margin-top: -10px; margin-bottom: 20px; font-weight: 600; text-align: center;">☕ ¡Momento de descansar! Desconectá hasta que suene la alarma.</div>
         <div class="controls">
             <button class="control-btn" id="playBtn" onclick="startTimer()"><i data-lucide="play" class="icon-sm"></i> Iniciar</button>
             <button class="control-btn control-btn-secondary" id="pauseBtn" onclick="pauseTimer()" disabled><i data-lucide="pause" class="icon-sm"></i> Pausar</button>
@@ -711,6 +713,9 @@
         if(isUnlimited) { currentSeconds = 0; chronoAccumulated = 0; chronoStartTime = null; }
         else { currentSeconds = parseInt(durationNumber.textContent)*60; initialDurationSeconds = currentSeconds; targetEndTime = null; }
         updateDisplay(); clearTimerLocalState(); finishBtn.disabled = true;
+        
+        var breakMsg = document.getElementById('breakMessage');
+        if (breakMsg) breakMsg.style.display = 'none';
     }
 
     function finishSession() {
@@ -724,10 +729,55 @@
     }
 
     function completeSession() {
-        clearInterval(timerInterval); timerInterval = null; timerRunning = false;
+        clearInterval(timerInterval);
+        timerInterval = null;
+        timerRunning = false;
+    
+        // 1. Guardar la sesión en el historial y Firestore
         saveCompletedSession(initialDurationSeconds);
-        playBtn.disabled = false; pauseBtn.disabled = true; finishBtn.disabled = true;
-        clearTimerLocalState(); showNotification('¡Tiempo completado!');
+        playBtn.disabled = false;
+        pauseBtn.disabled = true;
+        finishBtn.disabled = true;
+        clearTimerLocalState();
+    
+        // 2. Ejecutar Vibración Física (Si el dispositivo y navegador lo soportan, ej: Android)
+        if (navigator.vibrate) {
+            // Vibra 500ms, pausa 250ms, vibra 500ms
+            navigator.vibrate([500, 250, 500]);
+        }
+    
+        // 3. Reproducir Alarma de audio integrada de forma nativa (Costo Cero)
+        try {
+            var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            var osc = audioContext.createOscillator();
+            var gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+    
+            // Sonido tipo campana electrónica sutil
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioContext.currentTime); // Nota La
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+    
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.8);
+        } catch (e) {
+            console.log("No se pudo reproducir el audio automático por políticas del navegador.");
+        }
+    
+        // 4. Lluvia de Confeti Visual (Efecto Celebración)
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#FF8C00', '#8b5cf6', '#22c55e', '#ffffff']
+            });
+        }
+    
+        // 5. Cartel / Modal Estético de Descanso Obligatorio
+        showBreakModal();
     }
 
     // ESTADO Y ESTADÍSTICAS (Hoy y Global)
@@ -947,6 +997,31 @@
     var deferredPrompt;
     var pwaInstallBtn = document.getElementById('pwaInstallBtn');
 
+    // Registro Inteligente del Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+            .then(function(reg) {
+                console.log('Service Worker registrado con éxito.');
+    
+                // Escuchar si hay un Service Worker nuevo esperando para activarse
+                reg.addEventListener('updatefound', function() {
+                    var newWorker = reg.installing;
+                    if (newWorker) {
+                        newWorker.addEventListener('statechange', function() {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Hay una nueva versión disponible. Forzamos la recarga de la página de inmediato
+                                console.log('Nueva versión detectada en Vercel. Actualizando aplicación...');
+                                window.location.reload();
+                            }
+                        });
+                    }
+                });
+            })
+            .catch(function(err) {
+                console.error('Error al registrar el Service Worker:', err);
+            });
+    }
+
     window.addEventListener('beforeinstallprompt', function(e) {
         e.preventDefault();
         deferredPrompt = e;
@@ -1035,6 +1110,44 @@
             toast.style.opacity = '0';
             setTimeout(function() { toast.remove(); }, 300);
         }, 3000);
+    };
+
+    window.startBreak = function(minutes) {
+        var modal = document.getElementById('breakModal');
+        if(modal) modal.remove();
+        
+        updateDuration(minutes);
+        
+        var breakMsg = document.getElementById('breakMessage');
+        if(breakMsg) breakMsg.style.display = 'block';
+        
+        startTimer();
+    };
+
+    window.showBreakModal = function() {
+        // Eliminar modal viejo si quedó colgado
+        var oldModal = document.getElementById('breakModal');
+        if (oldModal) oldModal.remove();
+    
+        var modal = document.createElement('div');
+        modal.id = 'breakModal';
+        modal.className = 'login-modal'; // Reutiliza los estilos visuales oscuros que ya tenés
+        modal.style.zIndex = '9999';
+    
+        modal.innerHTML = 
+            '<div class="login-modal-content" style="max-width: 400px;">' +
+                '<i data-lucide="party-popper" style="color: var(--primary); width: 48px; height: 48px; margin-bottom: 15px;"></i>' +
+                '<h2 style="color: var(--text); font-weight: 800; margin-bottom: 10px;">¡Meta Cumplida! 🎉</h2>' +
+                '<p style="color: var(--text); font-size: 15px; margin-bottom: 5px;">¡Excelente sesión enfocada de estudio!</p>' +
+                '<p style="color: #9ca3af; font-size: 13px; margin-bottom: 25px;">Tu cerebro procesó un montón de información. Te ganaste un descanso antes de seguir.</p>' +
+                '<div style="display: flex; gap: 10px; flex-direction: column;">' +
+                    '<button onclick="startBreak(5)" class="btn-primary-solid" style="width: 100%; padding: 12px; justify-content: center; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">Descanso Corto (5 min)</button>' +
+                    '<button onclick="startBreak(10)" class="btn-sidebar btn-dark" style="width: 100%; padding: 12px; justify-content: center; border-radius: 8px; font-weight: bold; border: 1px solid var(--border); cursor: pointer; color: var(--text); background: rgba(255,255,255,0.05);">Descanso Largo (10 min)</button>' +
+                '</div>' +
+            '</div>';
+    
+        document.body.appendChild(modal);
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     };
 </script>
 
