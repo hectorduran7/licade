@@ -709,28 +709,28 @@
         // Filtro 1, 2 y 3: Promedio exacto agrupando por materia y filtrando textos/ausentes
         var notasPorMateria = {};
         entries.forEach(function(entry) {
-            var gradeStr = String(entry.grade).trim().toLowerCase();
-            // Ignorar textos, vacíos y ausentes
-            if (gradeStr === 'a' || gradeStr === 'aprobado' || gradeStr === 'ausente' || gradeStr === '') return;
-            
+            if (!entry.subj || !entry.grade) return;
+            var gradeStr = String(entry.grade).trim().toUpperCase();
+
+            // Filtro estricto institucional
+            if (gradeStr === 'A' || gradeStr === 'APROBADO' || gradeStr === 'AUSENTE' || gradeStr === '') return;
+
             var gradeNum = Number(entry.grade);
-            if (!isNaN(gradeNum)) {
-                var subj = entry.subj.trim().toLowerCase();
-                // Si la materia ya tiene una nota cargada, guardamos la más alta
-                if (!notasPorMateria[subj] || gradeNum > notasPorMateria[subj]) {
-                    notasPorMateria[subj] = gradeNum;
+            if (!isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 10) {
+                // Normalizamos el nombre eliminando espacios extras para que agrupe bien
+                var subjKey = entry.subj.trim().toLowerCase().replace(/\s+/g, ' ');
+                if (!notasPorMateria[subjKey] || gradeNum > notasPorMateria[subjKey]) {
+                    notasPorMateria[subjKey] = gradeNum;
                 }
             }
         });
 
-        var sum = 0;
-        var count = 0;
+        var sum = 0, count = 0;
         for (var key in notasPorMateria) {
             sum += notasPorMateria[key];
             count++;
         }
         var average = count > 0 ? (sum / count).toFixed(2) : '0.00';
-
         document.getElementById('avgOut').innerText = average;
         
         var completed = entries.length;
@@ -883,86 +883,90 @@
     };
     window.descargarPDF = function() {
         if (entries.length === 0) {
-            alert('Primero agrega al menos una materia para poder exportar tu historial.');
+            alert('Primero agrega al menos una materia.');
             return;
         }
-    
-        // Crear un contenedor temporal oculto estructurado como un analítico formal limpio (fondo blanco)
-        var printContainer = document.createElement('div');
-        printContainer.style.padding = '30px';
-        printContainer.style.background = '#ffffff';
-        printContainer.style.color = '#1a1a1a';
-        printContainer.style.fontFamily = "'Inter', sans-serif";
-    
-        // Encabezado del reporte institucional
-        var htmlContent = '<div style="text-align: center; margin-bottom: 25px; border-bottom: 2px solid #FF8C00; padding-bottom: 15px;">' +
-            '<h2 style="margin: 0; font-size: 20px; color: #1a1a1a; font-weight: 800;">KNOWY - HISTORIAL ACADÉMICO</h2>' +
-            '<p style="margin: 5px 0 0 0; font-size: 13px; color: #666666;">Propuesta: Licenciatura en Administración de Empresas (UNGS)</p>' +
-        '</div>';
-    
-        // Estructura de tabla prolija
-        htmlContent += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">' +
-            '<thead>' +
-                '<tr style="background: #f4f4f5; text-align: left; font-size: 12px; border-bottom: 1px solid #e5e7eb;">' +
-                    '<th style="padding: 10px;">ACTIVIDAD / MATERIA</th>' +
-                    '<th style="padding: 10px; text-align: right;">NOTA FINAL</th>' +
-                '</tr>' +
-            '</thead>' +
-            '<tbody>';
-    
-        // Inyectar de forma limpia cada materia del array sin elementos visuales de la web (como botones de borrar)
-        entries.forEach(function(entry) {
-            htmlContent += '<tr style="border-bottom: 1px solid #e5e7eb; font-size: 13px;">' +
-                '<td style="padding: 12px 10px; color: #1a1a1a;">' + entry.subj + '</td>' +
-                '<td style="padding: 12px 10px; text-align: right; font-weight: 700; color: #FF8C00;">' + entry.grade + '</td>' +
-            '</tr>';
+
+        var element = document.getElementById('gradeList');
+
+        // Clonamos temporalmente la lista para aplicarle estilos forzados de impresión limpios
+        var clone = element.cloneNode(true);
+        clone.style.background = '#ffffff';
+        clone.style.color = '#1a1a1a';
+        clone.style.padding = '20px';
+        clone.style.width = '600px';
+        clone.style.fontFamily = "'Inter', sans-serif";
+
+        // Inyectar el título formal arriba
+        var header = document.createElement('div');
+        header.innerHTML = '<h2 style="margin: 0 0 20px 0; font-size: 20px; color: #1a1a1a; font-weight: 800; text-align: center; border-bottom: 2px solid #FF8C00; padding-bottom: 10px;">KNOWY - REPORTE ACADÉMICO</h2>';
+        clone.insertBefore(header, clone.firstChild);
+
+        // Inyectar el promedio al final
+        var avgValue = document.getElementById('avgOut').innerText;
+        var footer = document.createElement('div');
+        footer.innerHTML = '<div style="text-align: right; margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e5e7eb; font-size: 14px; font-weight: 700;">Promedio Histórico: <span style="color: #FF8C00; font-size: 16px;">' + avgValue + '</span></div>';
+        clone.appendChild(footer);
+
+        // Forzar a que cada ítem dentro del clon tenga texto oscuro legible
+        var items = clone.querySelectorAll('.grade-item, span, b');
+        items.forEach(function(el) {
+            el.style.color = '#1a1a1a';
+            el.style.background = '#ffffff';
         });
-    
-        // Calcular promedio exacto duplicado en tiempo real para el reporte escrito
-        var notasPorMateria = {};
-        entries.forEach(function(e) {
-            var gStr = String(e.grade).trim().toLowerCase();
-            if (gStr === 'a' || gStr === 'aprobado' || gStr === 'ausente' || gStr === '') return;
-            var gNum = Number(e.grade);
-            if (!isNaN(gNum)) {
-                var sKey = e.subj.trim().toLowerCase();
-                if (!notasPorMateria[sKey] || gNum > notasPorMateria[sKey]) notasPorMateria[sKey] = gNum;
-            }
-        });
-        var s = 0, c = 0;
-        for (var k in notasPorMateria) { s += notasPorMateria[k]; c++; }
-        var rAvg = c > 0 ? (s / c).toFixed(2) : '0.00';
-    
-        htmlContent += '</tbody></table>';
-    
-        // Pie con el Promedio Oficial
-        htmlContent += '<div style="text-align: right; margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e5e7eb; font-size: 14px; font-weight: 700;">' +
-            'PROMEDIO HISTÓRICO COMPRENSIVO: <span style="color: #FF8C00; font-size: 16px;">' + rAvg + '</span>' +
-        '</div>';
-    
-        printContainer.innerHTML = htmlContent;
-        
-        // Lo posicionamos fuera de la pantalla para que no moleste visualmente antes de ser eliminado
-        printContainer.style.position = 'absolute';
-        printContainer.style.left = '-9999px';
-        document.body.appendChild(printContainer);
-    
-        // Configuración de renderizado limpia en fondo blanco
+
+        // Ocultamos los botones de eliminar del clon para que no salgan en el PDF
+        var delBtns = clone.querySelectorAll('.btn-del');
+        delBtns.forEach(function(btn) { btn.remove(); });
+
+        var wrapper = document.createElement('div');
+        wrapper.style.position = 'absolute';
+        wrapper.style.left = '-9999px';
+        wrapper.appendChild(clone);
+        document.body.appendChild(wrapper);
+
         var opt = {
-            margin:       10,
+            margin:       15,
             filename:     'Historial_Academico_Knowy.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-    
-        // Ejecutar descarga y remover el contenedor temporal
-        html2pdf().set(opt).from(printContainer).save().then(function() {
-            printContainer.remove();
+
+        html2pdf().set(opt).from(clone).save().then(function() {
+            wrapper.remove();
         });
     };
 </script>
 
 <div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;">    <div class="login-modal-content" style="max-width: 450px; text-align: left;">        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">            <h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3>            <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button>        </div>        <p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p>        <div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(255, 140, 0, 0.1); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone / iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> abajo en tu navegador Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en Opera, Brave u otros navegadores en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div>        <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button>    </div></div>
+<script>
+if ('serviceWorker' in navigator) {
+    // Registramos el Service Worker asegurando que busque la última versión en el servidor
+    navigator.serviceWorker.register('service-worker.js?cb=' + Date.now())
+        .then(function(reg) {
+            console.log('Service Worker registrado.');
+
+            reg.addEventListener('updatefound', function() {
+                var newWorker = reg.installing;
+                if (newWorker) {
+                    newWorker.addEventListener('statechange', function() {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // Lanzamos el aviso flotante estético antes de actualizar
+                            if (typeof showNotification === 'function') {
+                                showNotification('🚀 ¡Knowy se actualizó a la última versión!');
+                            } else {
+                                alert('🚀 ¡Knowy se actualizó a la última versión!');
+                            }
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1500);
+                        }
+                    });
+                }
+            });
+        });
+}
+</script>
 </body>
 </html>
