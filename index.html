@@ -480,68 +480,52 @@
 .tour-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    z-index: 9998;
+    background: rgba(0,0,0,0.85);
+    z-index: 10000;
     transition: opacity 0.3s ease;
 }
-.tour-highlight {
-    position: relative;
-    z-index: 9999 !important;
-    box-shadow: 0 0 0 4px rgba(255,140,0,0.4) !important;
-    border-radius: inherit;
-    background: var(--card-bg) !important;
-    pointer-events: none;
-}
-.tour-tooltip {
+.tour-modal {
     position: fixed;
-    z-index: 10000;
-    background: #1f2937;
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    z-index: 10001;
+    background: #121212;
     border: 1px solid var(--primary);
     border-radius: 12px;
-    padding: 20px;
-    width: 300px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    padding: 30px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
     color: #F5F5F5;
-    transition: all 0.3s ease;
-    opacity: 0;
-    pointer-events: auto;
+    text-align: center;
 }
-.tour-tooltip.active {
-    opacity: 1;
-}
-.tour-tooltip h3 {
-    margin: 0 0 10px 0;
+.tour-modal h3 {
+    margin: 0 0 15px 0;
     color: var(--primary);
-    font-size: 18px;
-    display: flex; align-items: center; gap: 8px;
+    font-size: 22px;
+    display: flex; justify-content: center; align-items: center; gap: 10px;
 }
-.tour-tooltip p {
-    font-size: 14px;
+.tour-modal p {
+    font-size: 15px;
     color: #9CA3AF;
-    line-height: 1.5;
-    margin: 0 0 20px 0;
+    line-height: 1.6;
+    margin: 0 0 25px 0;
 }
+.tour-dots {
+    display: flex; justify-content: center; gap: 8px; margin-bottom: 25px;
+}
+.tour-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #4B5563;
+}
+.tour-dot.active { background: var(--primary); }
 .tour-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between; align-items: center;
 }
 .tour-btn-skip {
-    background: transparent;
-    border: none;
-    color: #9CA3AF;
-    cursor: pointer;
-    font-size: 13px;
+    background: transparent; border: none; color: #9CA3AF; cursor: pointer; font-size: 14px;
 }
 .tour-btn-skip:hover { color: #fff; }
 .tour-btn-next {
-    background: var(--primary);
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
+    background: var(--primary); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;
 }
 .tour-btn-next:hover { background: #e67e00; }
 </style>
@@ -1663,9 +1647,10 @@
 <div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;">    <div class="login-modal-content" style="max-width: 450px; text-align: left;">        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">            <h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3>            <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button>        </div>        <p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p>        <div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(255, 140, 0, 0.1); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone / iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> abajo en tu navegador Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en Opera, Brave u otros navegadores en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div>        <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button>    </div></div>
 <!-- ONBOARDING TOUR TEMPLATE -->
 <div id="tourOverlay" class="tour-overlay" style="display: none;"></div>
-<div id="tourTooltip" class="tour-tooltip" style="display: none;">
+<div id="tourTooltip" class="tour-modal" style="display: none;">
     <h3 id="tourTitle"></h3>
     <p id="tourText"></p>
+    <div class="tour-dots" id="tourDots"></div>
     <div class="tour-footer">
         <button id="tourBtnSkip" class="tour-btn-skip">Omitir</button>
         <button id="tourBtnNext" class="tour-btn-next">Siguiente</button>
@@ -1675,46 +1660,39 @@
 <script>
 var tourSteps = [
     {
-        title: "¡Te damos la bienvenida!",
+        title: "¡Bienvenido!",
         text: "Diseñamos este espacio colaborativo para facilitarte la cursada. Vamos a dar un paseo rápido por sus funciones principales.",
-        target: null,
         icon: "sparkles"
     },
     {
-        title: "Tus Materias del Cuatrimestre",
-        text: "Con el botón 'Mis materias' podés elegir y marcar exactamente qué materias estás cursando este cuatrimestre. Así, tu panel principal se adaptará para mostrarte solo lo que necesitás tener a mano en tu día a día.",
-        target: "#btnEditarMaterias",
+        title: "Tus Materias",
+        text: "Utiliza el botón 'Mis Materias' para elegir y marcar exactamente qué materias estás cursando este cuatrimestre y personalizar tu panel.",
         icon: "sliders"
     },
     {
-        title: "Carpetas de Materiales",
-        text: "Aquí tenés acceso directo a todas las carpetas organizadas por año con apuntes, resúmenes, parciales y recursos clave de cada materia.",
-        target: "#accordionContainer",
+        title: "Material de Apoyo",
+        text: "Aquí tenés acceso directo a las carpetas organizadas por año con apuntes, resúmenes, parciales y recursos clave.",
         icon: "folder"
     },
     {
-        title: "Comunidad y Tips de Cursada",
-        text: "Desde la barra lateral podés abrir la guía de recomendaciones para saber cómo es cada docente. También podés dejar tus propios consejos en el formulario o donar nuevo material para seguir haciendo crecer el espacio.",
-        target: 'a[href="Recomendaciones_docentes.pdf"]',
+        title: "Recomendaciones",
+        text: "Desde la barra lateral podés abrir la guía en PDF sobre docentes y dejar tus propios consejos o donar material.",
         icon: "users"
     },
     {
-        title: "Calculá tu Promedio",
-        text: "Iniciá sesión con tu cuenta para registrar tus materias aprobadas. El sistema calculará automáticamente tu promedio (con y sin aplazos) y tu porcentaje de avance.",
-        target: 'a[href="progreso.html"]',
+        title: "Progreso y Promedio",
+        text: "Registrá tus materias aprobadas y el sistema calculará automáticamente tu promedio y porcentaje de avance.",
         icon: "trending-up"
     },
     {
         title: "Zona de Enfoque",
-        text: "Accedé a la sección de estudio donde vas a encontrar el temporizador Pomodoro para organizar tus sesiones de lectura, calendario de fechas importantes y accesos directos al SIU y Moodle.",
-        target: 'a[href="estudio.html"]',
+        text: "Accedé a tu sesión de estudio con temporizador Pomodoro, calendario y accesos directos al SIU y Moodle.",
         icon: "timer",
         last: true
     }
 ];
 
 var currentTourStep = 0;
-var currentHighlightElement = null;
 
 function initTour() {
     document.getElementById("tourOverlay").style.display = "block";
@@ -1727,11 +1705,6 @@ function initTour() {
 }
 
 function showTourStep(index) {
-    if(currentHighlightElement) {
-        currentHighlightElement.classList.remove("tour-highlight");
-        currentHighlightElement = null;
-    }
-    
     var step = tourSteps[index];
     document.getElementById("tourTitle").innerHTML = '<i data-lucide="' + step.icon + '" class="icon-sm"></i> ' + step.title;
     document.getElementById("tourText").textContent = step.text;
@@ -1741,87 +1714,31 @@ function showTourStep(index) {
     } else {
         document.getElementById("tourBtnNext").textContent = "Siguiente";
     }
+    
+    var dotsHtml = "";
+    for(var i=0; i<tourSteps.length; i++) {
+        dotsHtml += '<div class="tour-dot ' + (i === index ? 'active' : '') + '"></div>';
+    }
+    document.getElementById("tourDots").innerHTML = dotsHtml;
+    
     lucide.createIcons();
-    
-    var tooltip = document.getElementById("tourTooltip");
-    
-    // Abrir automáticamente el sidebar si el objetivo está allí adentro
-    if (step.target) {
-        var el = document.querySelector(step.target);
-        if(el && document.getElementById('sidebar').contains(el)) {
-            document.getElementById('sidebar').classList.remove('hidden');
-        } else {
-            // Cerrar si estamos en mobile y el objetivo no está en el sidebar
-            if (window.innerWidth <= 768) {
-                document.getElementById('sidebar').classList.add('hidden');
-            }
-        }
-    }
-    
-    if(!step.target) {
-        tooltip.style.top = "50%";
-        tooltip.style.left = "50%";
-        tooltip.style.transform = "translate(-50%, -50%)";
-    } else {
-        var targetEl = document.querySelector(step.target);
-        if(targetEl) {
-            targetEl.classList.add("tour-highlight");
-            currentHighlightElement = targetEl;
-            targetEl.scrollIntoView({behavior: "smooth", block: "center"});
-            
-            setTimeout(function() {
-                var rect = targetEl.getBoundingClientRect();
-                tooltip.style.transform = "none";
-                
-                var topPos = rect.bottom + 15;
-                if(topPos + tooltip.offsetHeight > window.innerHeight) {
-                    topPos = rect.top - tooltip.offsetHeight - 15;
-                }
-                
-                var leftPos = rect.left;
-                if(leftPos + tooltip.offsetWidth > window.innerWidth) {
-                    leftPos = window.innerWidth - tooltip.offsetWidth - 15;
-                }
-                if(leftPos < 0) leftPos = 15;
-                
-                tooltip.style.top = topPos + "px";
-                tooltip.style.left = leftPos + "px";
-                tooltip.classList.add("active");
-            }, 300);
-            return;
-        } else {
-            // Fallback de seguridad
-            tooltip.style.top = "50%";
-            tooltip.style.left = "50%";
-            tooltip.style.transform = "translate(-50%, -50%)";
-        }
-    }
-    
-    setTimeout(function() { tooltip.classList.add("active"); }, 50);
 }
 
 function nextTourStep() {
-    document.getElementById("tourTooltip").classList.remove("active");
-    setTimeout(function() {
-        currentTourStep++;
-        if(currentTourStep >= tourSteps.length) {
-            endTour();
-        } else {
-            showTourStep(currentTourStep);
-        }
-    }, 300);
+    currentTourStep++;
+    if(currentTourStep >= tourSteps.length) {
+        endTour();
+    } else {
+        showTourStep(currentTourStep);
+    }
 }
 
 function endTour() {
     localStorage.setItem('tour_completado', 'true');
-    document.getElementById("tourOverlay").style.display = "none";
-    document.getElementById("tourTooltip").style.display = "none";
-    if(currentHighlightElement) {
-        currentHighlightElement.classList.remove("tour-highlight");
-    }
-    if (window.innerWidth <= 768) {
-        document.getElementById('sidebar').classList.add('hidden');
-    }
+    var overlay = document.getElementById("tourOverlay");
+    var tooltip = document.getElementById("tourTooltip");
+    if(overlay) overlay.remove();
+    if(tooltip) tooltip.remove();
 }
 </script>
 </body>
