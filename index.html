@@ -481,20 +481,20 @@
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.7);
-    z-index: 4000;
+    z-index: 9998;
     transition: opacity 0.3s ease;
 }
 .tour-highlight {
     position: relative;
-    z-index: 4001 !important;
+    z-index: 9999 !important;
     box-shadow: 0 0 0 4px rgba(255,140,0,0.4) !important;
     border-radius: inherit;
     background: var(--card-bg) !important;
     pointer-events: none;
 }
 .tour-tooltip {
-    position: absolute;
-    z-index: 4002;
+    position: fixed;
+    z-index: 10000;
     background: #1f2937;
     border: 1px solid var(--primary);
     border-radius: 12px;
@@ -1745,10 +1745,16 @@ function showTourStep(index) {
     
     var tooltip = document.getElementById("tourTooltip");
     
-    if (step.target && window.innerWidth <= 768) {
+    // Abrir automáticamente el sidebar si el objetivo está allí adentro
+    if (step.target) {
         var el = document.querySelector(step.target);
         if(el && document.getElementById('sidebar').contains(el)) {
             document.getElementById('sidebar').classList.remove('hidden');
+        } else {
+            // Cerrar si estamos en mobile y el objetivo no está en el sidebar
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.add('hidden');
+            }
         }
     }
     
@@ -1784,6 +1790,7 @@ function showTourStep(index) {
             }, 300);
             return;
         } else {
+            // Fallback de seguridad
             tooltip.style.top = "50%";
             tooltip.style.left = "50%";
             tooltip.style.transform = "translate(-50%, -50%)";
