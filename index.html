@@ -476,7 +476,75 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-    </style>
+    /* --- ONBOARDING TOUR CSS --- */
+.tour-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 4000;
+    transition: opacity 0.3s ease;
+}
+.tour-highlight {
+    position: relative;
+    z-index: 4001 !important;
+    box-shadow: 0 0 0 4px rgba(255,140,0,0.4) !important;
+    border-radius: inherit;
+    background: var(--card-bg) !important;
+    pointer-events: none;
+}
+.tour-tooltip {
+    position: absolute;
+    z-index: 4002;
+    background: #1f2937;
+    border: 1px solid var(--primary);
+    border-radius: 12px;
+    padding: 20px;
+    width: 300px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    color: #F5F5F5;
+    transition: all 0.3s ease;
+    opacity: 0;
+    pointer-events: auto;
+}
+.tour-tooltip.active {
+    opacity: 1;
+}
+.tour-tooltip h3 {
+    margin: 0 0 10px 0;
+    color: var(--primary);
+    font-size: 18px;
+    display: flex; align-items: center; gap: 8px;
+}
+.tour-tooltip p {
+    font-size: 14px;
+    color: #9CA3AF;
+    line-height: 1.5;
+    margin: 0 0 20px 0;
+}
+.tour-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.tour-btn-skip {
+    background: transparent;
+    border: none;
+    color: #9CA3AF;
+    cursor: pointer;
+    font-size: 13px;
+}
+.tour-btn-skip:hover { color: #fff; }
+.tour-btn-next {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.tour-btn-next:hover { background: #e67e00; }
+</style>
 </head>
 <body>
 
@@ -491,6 +559,7 @@
             <button class="login-tab" onclick="switchTab('register')">Registrarse</button>
         </div>
 
+    
         <div id="panelLogin" class="login-panel active">
             <button class="btn-google" id="btnGoogleLogin">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -623,7 +692,7 @@
     <a href="Recomendaciones_docentes.pdf" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
         <i data-lucide="book-open-check" class="icon-sm"></i> Ver Recomendaciones
     </a>
-    <a href="mailto:hectorjoseduran@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="margin-top: 15px; border-style: dashed;">
+    <a href="mailto:bibliotecaadeungs@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="margin-top: 15px; border-style: dashed;">
         <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos
     </a>
 <button id="pwaInstallBtn" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
@@ -660,7 +729,7 @@
             <h4><i data-lucide="graduation-cap" class="icon-md"></i> ¿Das clases particulares?</h4>
             <p>Llegá a más alumnos.</p>
         </div>
-        <a href="mailto:hectorjoseduran@gmail.com?subject=Consulta%20Clases%20Particulares" class="promo-btn">
+        <a href="mailto:bibliotecaadeungs@gmail.com?subject=Consulta%20Clases%20Particulares" class="promo-btn">
             <i data-lucide="megaphone" class="icon-sm"></i> Más información
         </a>
     </div>
@@ -1047,56 +1116,56 @@
     // ==================== RENDER DE MATERIAS ====================
     var data = {
         "PRIMER AÑO": [
-            {n: "Taller Inicial Común: Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1jLUf7D_7GzXwwXl0mkE0WJLmK3ydxtfb?usp=drive_link", req: ""},
-            {n: "Taller Inicial Orientado: Ciencias Exactas", l: "https://drive.google.com/drive/folders/1zRWjRQCmkwYRaJEk44JEp3j6litaBMxy?usp=drive_link", req: ""},
-            {n: "Teoría de la Organización", l: "https://drive.google.com/drive/folders/1VGkLpmiodcpVpNBCb8GzU_Pg9zG6GSby?usp=drive_link", req: ""},
-            {n: "Problemas Socioeconómicos Contemporáneos", l: "https://drive.google.com/drive/folders/1X1QrBi6AmALlNCXb4S6LHUMoFgDjboLS?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura"},
-            {n: "Taller de Lectura y Escritura en las Disciplinas", l: "https://drive.google.com/drive/folders/132vYVDu8zE6qICc6X1Ru_4CnH-M252kn?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura"},
-            {n: "Introducción a la Economía", l: "https://drive.google.com/drive/folders/1Qm-QVfLihmRHPjLnIxUoLO3G886n7vGH?usp=drive_link", req: ""}
+            {n: "Taller Inicial Común: Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1YphnRCiVML6CFc5VHpnvYXHqIshk2oUt?usp=sharing", req: ""},
+            {n: "Taller Inicial Orientado: Ciencias Exactas", l: "https://drive.google.com/drive/folders/14SzZyw5-XuRLiBdKb6yJHOvc5mvhcmJK?usp=drive_link", req: ""},
+            {n: "Teoría de la Organización", l: "https://drive.google.com/drive/folders/1uN_Tu_Yznry7eI8PvBepNz7yrvea5Swl?usp=drive_link", req: ""},
+            {n: "Problemas Socioeconómicos Contemporáneos", l: "https://drive.google.com/drive/folders/1fhibs5LbR292hOGh2VDz5c-Gnx6EtvsO?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Taller de Lectura y Escritura en las Disciplinas", l: "https://drive.google.com/drive/folders/1b9kAJwwN7-Y4C9O93dduOsAFYRqWasW3?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Introducción a la Economía", l: "https://drive.google.com/drive/folders/176l2YI5QaKpyLCPeAlhP6B6N6Pe9KmhL?usp=drive_link", req: ""}
         ],
         "SEGUNDO AÑO": [
-            {n: "Economía Clásica", l: "https://drive.google.com/drive/folders/1Ff9KD0Gamjk-_UmtdDLHWi0xi8mzIqpI?usp=drive_link", req: "Introducción a la Economía | Taller Inicial Común: Taller de Lectura y Escritura"},
-            {n: "Diseño Estructural y Procesos", l: "https://drive.google.com/drive/folders/138Mzk3D_2qv3S6Qp6EueLi_tZ2Bq5gi-?usp=drive_link", req: "Teoría de la Organización | Taller Inicial Orientado: Ciencias Exactas"},
-            {n: "Matemática para Economistas I", l: "https://drive.google.com/drive/folders/1-6QvTwuabzMhp-QWSMMNB9KSBZ4mXBfM?usp=drive_link", req: "Taller Inicial Orientado: Ciencias Exactas | Taller Inicial Común: Taller de Lectura y Escritura"},
-            {n: "Economía Neoclásica", l: "https://drive.google.com/drive/folders/1wdSmGl7UVgNozz1Ktyux06b8e9QhSV2W?usp=drive_link", req: "Economía Clásica | Matemática para Economistas I"},
-            {n: "Sistemas de Información Contable I", l: "https://drive.google.com/drive/folders/1Nhfp3LT5WnUOUoS3JSMAy31gq88x4R0j?usp=drive_link", req: "Diseño Estructural y Procesos | Taller Inicial Común: Taller de Lectura y Escritura"},
-            {n: "Historia Económica y Social Mundial y Latinoamericana", l: "https://drive.google.com/drive/folders/1P9snlibfSL62as1Sz-OX2gKe__1EOBSl?usp=drive_link", req: "Introducción a la Economía | Taller de Lectura y Escritura en las Disciplinas | Problemas Socioeconómicos Contemporáneos"}
+            {n: "Economía Clásica", l: "https://drive.google.com/drive/folders/1ILQm8QyMEt_DFQBYNY2GdozIz3YOLZKu?usp=drive_link", req: "Introducción a la Economía | Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Diseño Estructural y Procesos", l: "https://drive.google.com/drive/folders/1mAdBvtNRDoQgXw8gJ3AOobneZ-mGbzyM?usp=drive_link", req: "Teoría de la Organización | Taller Inicial Orientado: Ciencias Exactas"},
+            {n: "Matemática para Economistas I", l: "https://drive.google.com/drive/folders/1waKEQNk0lCfsOTNEyBsdDOrBW5Fs3aNO?usp=drive_link", req: "Taller Inicial Orientado: Ciencias Exactas | Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Economía Neoclásica", l: "https://drive.google.com/drive/folders/1-heihJrJScrPeJkxZwSnOPs3R3PvReZM?usp=drive_link", req: "Economía Clásica | Matemática para Economistas I"},
+            {n: "Sistemas de Información Contable I", l: "https://drive.google.com/drive/folders/1HIwknDtGyXjBeFJ16WqscFM1DSYmQcoU?usp=drive_link", req: "Diseño Estructural y Procesos | Taller Inicial Común: Taller de Lectura y Escritura"},
+            {n: "Historia Económica y Social Mundial y Latinoamericana", l: "https://drive.google.com/drive/folders/1WiqLnV6dxVOJMv6tQsnxf4tJkEDR-GZ5?usp=drive_link", req: "Introducción a la Economía | Taller de Lectura y Escritura en las Disciplinas | Problemas Socioeconómicos Contemporáneos"}
         ],
         "TERCER AÑO": [
-            {n: "Economía Keynesiana", l: "https://drive.google.com/drive/folders/1BDxNT2spCBZpZkZD106JRm7YF9sV7Ntx?usp=drive_link", req: "Economía Neoclásica"},
-            {n: "Estadística para Economistas", l: "https://drive.google.com/drive/folders/1OxeMyLnkVKfZLN9txxIIlx5eentl-OGZ?usp=drive_link", req: "Matemática para Economistas I"},
-            {n: "Planeamiento y Control Organizacional", l: "https://drive.google.com/drive/folders/1Jc-uLaSCaPtiOH9nfAbR8UI0eGbv4qZK?usp=drive_link", req: "Diseño Estructural y Procesos | Problemas Socioeconómicos Contemporáneos | Taller de Lectura y Escritura en las Disciplinas"},
-            {n: "Matemática para Economistas II", l: "https://drive.google.com/drive/folders/1NTAhvAECzPQB0de2dAdtNIzk_9_mA_cF?usp=drive_link", req: "Matemática para Economistas I"},
-            {n: "Laboratorio Interdisciplinario", l: "https://drive.google.com/drive/folders/1NdTpduQArGshJt976kRYwspdto-b4hG0?usp=drive_link", req: "13 (trece) materias de la carrera"},
-            {n: "Sistemas de Información", l: "https://drive.google.com/drive/folders/1nCsfZY8qNIgnmSk2LyDXW7Z2hHT9DLmb?usp=drive_link", req: "Sistemas de Información Contable I"}
+            {n: "Economía Keynesiana", l: "https://drive.google.com/drive/folders/10P3ydNM3F-JETDPNV7q5x_urFAP8ivsJ?usp=drive_link", req: "Economía Neoclásica"},
+            {n: "Estadística para Economistas", l: "https://drive.google.com/drive/folders/1ABAfD7Sp9hE6X5x-YsQMJydtLbPxqWcU?usp=drive_link", req: "Matemática para Economistas I"},
+            {n: "Planeamiento y Control Organizacional", l: "https://drive.google.com/drive/folders/1iyQ4fW44O7j8KhJosBajMW5Ssgx4_qE-?usp=drive_link", req: "Diseño Estructural y Procesos | Problemas Socioeconómicos Contemporáneos | Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "Matemática para Economistas II", l: "https://drive.google.com/drive/folders/1IrYSoak1ZFr_94UF-dnHTJhrJFNN5ZoS?usp=drive_link", req: "Matemática para Economistas I"},
+            {n: "Laboratorio Interdisciplinario", l: "https://drive.google.com/drive/folders/1xaFPX2uCNYN9yTsZ1lfhMLupHKm8LxKg?usp=drive_link", req: "13 (trece) materias de la carrera"},
+            {n: "Sistemas de Información", l: "https://drive.google.com/drive/folders/1X9Z7JIsI_KFDpXVeoJR8KTUNPg2JPqX1?usp=drive_link", req: "Sistemas de Información Contable I"}
         ],
         "CUARTO AÑO": [
-            {n: "Derecho Administrativo", l: "https://drive.google.com/drive/folders/1NQgXQTJW3lWX-GJH2XZL6kGwBBV8M9ce?usp=drive_link", req: "Diseño Estructural y Procesos"},
-            {n: "Organización Industrial", l: "https://drive.google.com/drive/folders/1xod_LTQ0ArN8ZXH8av29JqdQ5mpbLIRE?usp=drive_link", req: "Estadística para Economistas | Planeamiento y Control Organizacional"},
-            {n: "Gestión de Recursos Humanos (Material Viejo)", l: "https://drive.google.com/drive/folders/1n8lb2y-aomWoGNfYXUVGBaRTG-FCn4lz?usp=drive_link", req: "Planeamiento y Control Organizacional"},
-            {n: "Dirección Estratégica (Material Viejo)", l: "https://drive.google.com/drive/folders/1Nbgb0tiyIqdksPxxZVsCgYEtIKQ04OVx?usp=drive_link", req: "Planeamiento y Control Organizacional"},
-            {n: "Tópicos de Comercialización", l: "https://drive.google.com/drive/folders/13dSSC3d-Kttrr7E8MhmDxAyAHI66TAa4?usp=drive_link", req: "Planeamiento y Control Organizacional"},
-            {n: "Planificación y Proceso Decisorio en las Organizaciones", l: "https://drive.google.com/drive/folders/1ORmLF7_T-agImkCn3Se13sMFoGqM0WPF?usp=drive_link", req: "Estadística para Economistas | Planeamiento y Control Organizacional"},
-            {n: "Teoría de la Innovación y del Cambio Tecnológico", l: "https://drive.google.com/drive/folders/1BnY8s1GG8YAlTDNiBwv1Pj_tFgrabx3X?usp=drive_link", req: "Historia Económica y Social Mundial y Latinoamericana | Economía Keynesiana"}
+            {n: "Derecho Administrativo", l: "https://drive.google.com/drive/folders/11BR9gEMYLOZIvjVRLbyC57d9pNrMy0gl?usp=drive_link", req: "Diseño Estructural y Procesos"},
+            {n: "Organización Industrial", l: "https://drive.google.com/drive/folders/1zcDm2JhrqAChIBirkIn2YAUKuONRyTzc?usp=drive_link", req: "Estadística para Economistas | Planeamiento y Control Organizacional"},
+            {n: "Gestión de Recursos Humanos (Material Viejo)", l: "https://drive.google.com/drive/folders/1JZSHRjksEYOdiwVe1NERyv6Ge6BxAahO?usp=drive_link", req: "Planeamiento y Control Organizacional"},
+            {n: "Dirección Estratégica (Material Viejo)", l: "https://drive.google.com/drive/folders/10If8_PsQ6ezCadanSSCpE5R2-xEAFggc?usp=drive_link", req: "Planeamiento y Control Organizacional"},
+            {n: "Tópicos de Comercialización", l: "https://drive.google.com/drive/folders/1i5oewnsJg4PmKfNi4wOrs1QXmvreyU2v?usp=drive_link", req: "Planeamiento y Control Organizacional"},
+            {n: "Planificación y Proceso Decisorio en las Organizaciones", l: "https://drive.google.com/drive/folders/1veQ4f7FqtO1j5KQoUXDhtVNSJ_wWLEbm?usp=drive_link", req: "Estadística para Economistas | Planeamiento y Control Organizacional"},
+            {n: "Teoría de la Innovación y del Cambio Tecnológico", l: "https://drive.google.com/drive/folders/1b85hC50VVYTiGuv9_Li6eLfudhTxyixh?usp=drive_link", req: "Historia Económica y Social Mundial y Latinoamericana | Economía Keynesiana"}
         ],
         "QUINTO AÑO": [
-            {n: "Matemática para Economistas III", l: "https://drive.google.com/drive/folders/1vDdnc8NAd3OrWDzZbRalQNLqIV7AJYVd?usp=drive_link", req: "Matemática para Economistas II | Economía Neoclásica"},
-            {n: "Costos Industriales", l: "https://drive.google.com/drive/folders/1YeqqEX6VSe6015mAw-PAYy1dlpQB3MMs?usp=drive_link", req: "Planeamiento y Control Organizacional | Sistemas de Información Contable I"},
-            {n: "Sistemas de Información Contable II", l: "https://drive.google.com/drive/folders/1RorXYcziiTLhyZ5aC03bDSwiaadzlSQf?usp=drive_link", req: "Sistemas de Información Contable I"},
-            {n: "Gestión en Economía Mixta", l: "https://drive.google.com/drive/folders/1DvN2pJp7bvtpGxEVgWm0gCYZS9RoVi34?usp=drive_link", req: "Derecho Administrativo | Planeamiento y Control Organizacional"},
-            {n: "Empresas Públicas", l: "https://drive.google.com/drive/folders/1lTcdyE2KSOEpzDRonlVUSAvunniK4AMO?usp=drive_link", req: "Derecho Administrativo | Planeamiento y Control Organizacional"},
-            {n: "Ingeniería Financiera", l: "https://drive.google.com/drive/folders/1PnMt1NvDA_yvE2xlR7uhgk6S52LKBM7c?usp=drive_link", req: "Costos Industriales | Matemática para Economistas III"}
+            {n: "Matemática para Economistas III", l: "https://drive.google.com/drive/folders/1Ma89IvOq8pnaa3958dnMgg5-EKVCa7Fd?usp=drive_link", req: "Matemática para Economistas II | Economía Neoclásica"},
+            {n: "Costos Industriales", l: "https://drive.google.com/drive/folders/1Rk1I32zuJvzOUo4r02BNjVO4AJLfyyVk?usp=drive_link", req: "Planeamiento y Control Organizacional | Sistemas de Información Contable I"},
+            {n: "Sistemas de Información Contable II", l: "https://drive.google.com/drive/folders/1NkuA7OsBXfyKAvnv8hF53wyYVKAVIeJD?usp=drive_link", req: "Sistemas de Información Contable I"},
+            {n: "Gestión en Economía Mixta", l: "https://drive.google.com/drive/folders/1PFtl0vzuZxmxCIvMQparomsYbuWXpEp8?usp=drive_link", req: "Derecho Administrativo | Planeamiento y Control Organizacional"},
+            {n: "Empresas Públicas", l: "https://drive.google.com/drive/folders/1JPwPQXpjjIl2rTnogXCqox2ME3fJE0z6?usp=drive_link", req: "Derecho Administrativo | Planeamiento y Control Organizacional"},
+            {n: "Ingeniería Financiera", l: "https://drive.google.com/drive/folders/1Z0l-h9jcS5sft16IVmq0bW-xPqdBsxQS?usp=drive_link", req: "Costos Industriales | Matemática para Economistas III"}
         ],
         "SEXTO AÑO": [
-            {n: "Sociología Industrial", l: "https://drive.google.com/drive/folders/1Qf4sCTAMmCy4wMoE3CwtvW01-7VYSNGF?usp=drive_link", req: "Diseño Estructural y Procesos | Problemas Socioeconómicos Contemporáneos | Taller de Lectura y Escritura en las Disciplinas"},
-            {n: "Régimen Tributario", l: "https://drive.google.com/drive/folders/11JLYY480dlwRFwEGnhouSgSiARD0OoEs?usp=drive_link", req: "Gestión de Recursos Humanos | Dirección Estratégica"},
-            {n: "Desarrollo y Gestión de Proyectos Emprendedores", l: "https://drive.google.com/drive/folders/18A5q6-n7A4LRjI-COwMgzYLrcPU1EF2M?usp=drive_link", req: "Tópicos de Comercialización"}
+            {n: "Sociología Industrial", l: "https://drive.google.com/drive/folders/11itf3wSy0gnl80H7uWI5vPQl7dfnuqDa?usp=drive_link", req: "Diseño Estructural y Procesos | Problemas Socioeconómicos Contemporáneos | Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "Régimen Tributario", l: "https://drive.google.com/drive/folders/1U88aEXezZ9CVy5-TnQL-AegVC_xelFo1?usp=drive_link", req: "Gestión de Recursos Humanos | Dirección Estratégica"},
+            {n: "Desarrollo y Gestión de Proyectos Emprendedores", l: "https://drive.google.com/drive/folders/1GKzeqguzqMCa1yy9yDGAeW4nat_OnCp9?usp=drive_link", req: "Tópicos de Comercialización"}
         ],
         "EXTRACURRICULARES": [
-            {n: "Taller de Utilitarios", l: "https://drive.google.com/drive/folders/14XnFgwmu9W2tQXi5w3f6Cje3hyZgMfso?usp=drive_link", req: ""},
-            {n: "IPE 1", l: "https://drive.google.com/drive/folders/1BR5ZJZ5nQnokUQMhXq6zFb9jFHAH3LSf?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura | Teoría de la Organización"},
-            {n: "IPE 2", l: "https://drive.google.com/drive/folders/1EoMGzwjnB48FkPwiP1YDOBqmnZITqB1z?usp=drive_link", req: "IPE 1 | Taller de Lectura y Escritura en las Disciplinas"},
-            {n: "IPE 3", l: "https://drive.google.com/drive/folders/1QHgjzkXPurYb0WXJ1qSoX7F10c86rUS1?usp=drive_link", req: "IPE 2"}
+            {n: "Taller de Utilitarios", l: "https://drive.google.com/drive/folders/142cVy9hA8lW6GE8zwS1EMMe3JhJvR_3k?usp=drive_link", req: ""},
+            {n: "IPE 1", l: "https://drive.google.com/drive/folders/1LJf0u3l51Wu_nqcjnLH_MkW0RWrd9zvo?usp=drive_link", req: "Taller Inicial Común: Taller de Lectura y Escritura | Teoría de la Organización"},
+            {n: "IPE 2", l: "https://drive.google.com/drive/folders/1feA-qRQkwntpPv1We3WVNpr7UZyXZM14?usp=drive_link", req: "IPE 1 | Taller de Lectura y Escritura en las Disciplinas"},
+            {n: "IPE 3", l: "https://drive.google.com/drive/folders/1vt2RyH1_iZrBy8J2gt_Dv_MlPaXNzCyB?usp=drive_link", req: "IPE 2"}
         ]
     };
 
@@ -1437,6 +1506,10 @@
                     document.getElementById('loginModal').classList.add('hidden');
                     if (typeof cargarMateriasUsuario === 'function') cargarMateriasUsuario(user);
                     if (typeof lucide !== 'undefined') lucide.createIcons();
+                    
+                    if (!localStorage.getItem('tour_completado')) {
+                        setTimeout(initTour, 1500);
+                    }
                 } else {
                     document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
                     document.getElementById('sidebarLoginBtn').style.display = 'flex';
@@ -1588,5 +1661,161 @@
 </script>
 
 <div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;">    <div class="login-modal-content" style="max-width: 450px; text-align: left;">        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">            <h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3>            <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button>        </div>        <p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p>        <div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(255, 140, 0, 0.1); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone / iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> abajo en tu navegador Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en Opera, Brave u otros navegadores en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div>        <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button>    </div></div>
+<!-- ONBOARDING TOUR TEMPLATE -->
+<div id="tourOverlay" class="tour-overlay" style="display: none;"></div>
+<div id="tourTooltip" class="tour-tooltip" style="display: none;">
+    <h3 id="tourTitle"></h3>
+    <p id="tourText"></p>
+    <div class="tour-footer">
+        <button id="tourBtnSkip" class="tour-btn-skip">Omitir</button>
+        <button id="tourBtnNext" class="tour-btn-next">Siguiente</button>
+    </div>
+</div>
+
+<script>
+var tourSteps = [
+    {
+        title: "¡Te damos la bienvenida!",
+        text: "Diseñamos este espacio colaborativo para facilitarte la cursada. Vamos a dar un paseo rápido por sus funciones principales.",
+        target: null,
+        icon: "sparkles"
+    },
+    {
+        title: "Tus Materias del Cuatrimestre",
+        text: "Con el botón 'Mis materias' podés elegir y marcar exactamente qué materias estás cursando este cuatrimestre. Así, tu panel principal se adaptará para mostrarte solo lo que necesitás tener a mano en tu día a día.",
+        target: "#btnEditarMaterias",
+        icon: "sliders"
+    },
+    {
+        title: "Carpetas de Materiales",
+        text: "Aquí tenés acceso directo a todas las carpetas organizadas por año con apuntes, resúmenes, parciales y recursos clave de cada materia.",
+        target: "#accordionContainer",
+        icon: "folder"
+    },
+    {
+        title: "Comunidad y Tips de Cursada",
+        text: "Desde la barra lateral podés abrir la guía de recomendaciones para saber cómo es cada docente. También podés dejar tus propios consejos en el formulario o donar nuevo material para seguir haciendo crecer el espacio.",
+        target: 'a[href="Recomendaciones_docentes.pdf"]',
+        icon: "users"
+    },
+    {
+        title: "Calculá tu Promedio",
+        text: "Iniciá sesión con tu cuenta para registrar tus materias aprobadas. El sistema calculará automáticamente tu promedio (con y sin aplazos) y tu porcentaje de avance.",
+        target: 'a[href="progreso.html"]',
+        icon: "trending-up"
+    },
+    {
+        title: "Zona de Enfoque",
+        text: "Accedé a la sección de estudio donde vas a encontrar el temporizador Pomodoro para organizar tus sesiones de lectura, calendario de fechas importantes y accesos directos al SIU y Moodle.",
+        target: 'a[href="estudio.html"]',
+        icon: "timer",
+        last: true
+    }
+];
+
+var currentTourStep = 0;
+var currentHighlightElement = null;
+
+function initTour() {
+    document.getElementById("tourOverlay").style.display = "block";
+    document.getElementById("tourTooltip").style.display = "block";
+    
+    document.getElementById("tourBtnNext").addEventListener("click", nextTourStep);
+    document.getElementById("tourBtnSkip").addEventListener("click", endTour);
+    
+    showTourStep(0);
+}
+
+function showTourStep(index) {
+    if(currentHighlightElement) {
+        currentHighlightElement.classList.remove("tour-highlight");
+        currentHighlightElement = null;
+    }
+    
+    var step = tourSteps[index];
+    document.getElementById("tourTitle").innerHTML = '<i data-lucide="' + step.icon + '" class="icon-sm"></i> ' + step.title;
+    document.getElementById("tourText").textContent = step.text;
+    
+    if(step.last) {
+        document.getElementById("tourBtnNext").textContent = "¡Listo, empezar!";
+    } else {
+        document.getElementById("tourBtnNext").textContent = "Siguiente";
+    }
+    lucide.createIcons();
+    
+    var tooltip = document.getElementById("tourTooltip");
+    
+    if (step.target && window.innerWidth <= 768) {
+        var el = document.querySelector(step.target);
+        if(el && document.getElementById('sidebar').contains(el)) {
+            document.getElementById('sidebar').classList.remove('hidden');
+        }
+    }
+    
+    if(!step.target) {
+        tooltip.style.top = "50%";
+        tooltip.style.left = "50%";
+        tooltip.style.transform = "translate(-50%, -50%)";
+    } else {
+        var targetEl = document.querySelector(step.target);
+        if(targetEl) {
+            targetEl.classList.add("tour-highlight");
+            currentHighlightElement = targetEl;
+            targetEl.scrollIntoView({behavior: "smooth", block: "center"});
+            
+            setTimeout(function() {
+                var rect = targetEl.getBoundingClientRect();
+                tooltip.style.transform = "none";
+                
+                var topPos = rect.bottom + 15;
+                if(topPos + tooltip.offsetHeight > window.innerHeight) {
+                    topPos = rect.top - tooltip.offsetHeight - 15;
+                }
+                
+                var leftPos = rect.left;
+                if(leftPos + tooltip.offsetWidth > window.innerWidth) {
+                    leftPos = window.innerWidth - tooltip.offsetWidth - 15;
+                }
+                if(leftPos < 0) leftPos = 15;
+                
+                tooltip.style.top = topPos + "px";
+                tooltip.style.left = leftPos + "px";
+                tooltip.classList.add("active");
+            }, 300);
+            return;
+        } else {
+            tooltip.style.top = "50%";
+            tooltip.style.left = "50%";
+            tooltip.style.transform = "translate(-50%, -50%)";
+        }
+    }
+    
+    setTimeout(function() { tooltip.classList.add("active"); }, 50);
+}
+
+function nextTourStep() {
+    document.getElementById("tourTooltip").classList.remove("active");
+    setTimeout(function() {
+        currentTourStep++;
+        if(currentTourStep >= tourSteps.length) {
+            endTour();
+        } else {
+            showTourStep(currentTourStep);
+        }
+    }, 300);
+}
+
+function endTour() {
+    localStorage.setItem('tour_completado', 'true');
+    document.getElementById("tourOverlay").style.display = "none";
+    document.getElementById("tourTooltip").style.display = "none";
+    if(currentHighlightElement) {
+        currentHighlightElement.classList.remove("tour-highlight");
+    }
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.add('hidden');
+    }
+}
+</script>
 </body>
 </html>
