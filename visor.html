@@ -9,17 +9,6 @@
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
     <script>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor de Material | Biblioteca ADE</title>
-    
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
-    <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -170,7 +159,7 @@
             position: fixed; left: 15px; bottom: 20px; z-index: 1100;
             background: var(--primary); color: white; border: none; padding: 12px 20px;
             border-radius: 8px; cursor: pointer; font-weight: 600;
-            box-shadow: 0 4px 15px rgba(255, 140, 0, 0.3); transition: all 0.3s ease;
+            box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 35%, transparent); transition: all 0.3s ease;
             display: flex; align-items: center; gap: 8px;
         }
         .toggle-btn:hover { transform: translateY(-2px); }
@@ -251,8 +240,8 @@
         }
         .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
         .btn-dark:hover { background: var(--card-bg); border-color: var(--primary); color: var(--primary); }
-        .btn-primary-solid { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255, 140, 0, 0.2); }
-        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.3); }
+        .btn-primary-solid { background: var(--primary); color: white; box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 30%, transparent); }
+        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px color-mix(in srgb, var(--primary) 45%, transparent); }
 
         .footer-donate { 
             display: flex; flex-direction: column; align-items: center; gap: 20px;
@@ -267,7 +256,7 @@
         }
         .btn-sugerencias:hover {
             color: var(--primary) !important; border-color: var(--primary);
-            background: rgba(255,140,0,0.05); text-decoration: none !important;
+            background: color-mix(in srgb, var(--primary) 8%, transparent); text-decoration: none !important;
         }
 
         .login-modal { 
@@ -378,7 +367,7 @@
         .access-requested {
             margin-top: 20px;
             padding: 12px;
-            background: rgba(255, 140, 0, 0.1);
+            background: color-mix(in srgb, var(--primary) 12%, transparent);
             border-radius: 8px;
             font-size: 13px;
             color: var(--primary);
@@ -451,7 +440,7 @@
     
     <a href="javascript:void(0)" onclick="showComingSoonAlert(event)" class="btn-sidebar btn-dark" style="opacity: 0.6; cursor: not-allowed; position: relative;">
         <i data-lucide="lock" class="icon-sm" style="color: #9ca3af;"></i> Calendario
-        <span style="position: absolute; right: 12px; font-size: 10px; background: rgba(255, 140, 0, 0.15); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Próximamente</span>
+        <span style="position: absolute; right: 12px; font-size: 10px; background: color-mix(in srgb, var(--primary) 15%, transparent); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Próximamente</span>
     </a>
 
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
@@ -938,6 +927,6 @@
             }, 300);
         }, 3000);
     };
-</script><div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;"><div class="login-modal-content" style="max-width: 450px; text-align: left;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3><button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button></div><p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p><div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(255, 140, 0, 0.1); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone/iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> en Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">En Opera, Brave u otros en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div><button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button></div></div>
+</script><div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;"><div class="login-modal-content" style="max-width: 450px; text-align: left;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3><button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button></div><p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p><div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: color-mix(in srgb, var(--primary) 12%, transparent); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone/iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> en Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">En Opera, Brave u otros en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div><button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button></div></div>
 </body>
 </html>

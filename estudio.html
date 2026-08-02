@@ -201,7 +201,7 @@
             position: fixed; z-index: 1100; border: none; cursor: pointer; display: flex;
             align-items: center; gap: 8px; border-radius: 10px; font-weight: 600; transition: .25s ease;
         }
-        .toggle-btn { left: 15px; bottom: 20px; padding: 12px 18px; background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(255,140,0,.3); }
+        .toggle-btn { left: 15px; bottom: 20px; padding: 12px 18px; background: var(--primary); color: white; box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 35%, transparent); }
         .toggle-btn:hover { transform: translateY(-2px); }
         .theme-btn { top: 20px; right: 20px; padding: 10px 14px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); backdrop-filter: blur(10px); }
         .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
@@ -217,8 +217,8 @@
         }
         .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
         .btn-dark:hover { border-color: var(--primary); color: var(--primary); background: var(--card-bg); }
-        .btn-primary-solid { background: var(--primary); color: white; border: none; box-shadow: 0 4px 15px rgba(255,140,0,.2); }
-        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
+        .btn-primary-solid { background: var(--primary); color: white; border: none; box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 30%, transparent); }
+        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px color-mix(in srgb, var(--primary) 45%, transparent); }
 
         .duration-selector, .timer-container, .stats-container, .history-container, .techniques-container {
             background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px;
@@ -240,12 +240,12 @@
         .subject-input-wrapper input:focus { outline: none; border-color: var(--primary); }
 
         .btn-confirm { padding: 12px 24px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-        .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255,140,0,0.3); }
+        .btn-confirm:hover { transform: translateY(-2px); box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 35%, transparent); }
 
-        .btn-libre { padding: 12px 15px; border-radius: 10px; border: 1px dashed var(--primary); background: rgba(255,140,0,0.05); color: var(--primary); font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .btn-libre { padding: 12px 15px; border-radius: 10px; border: 1px dashed var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); color: var(--primary); font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
         .btn-libre:hover { background: var(--primary); color: white; }
 
-        .current-subject { margin-top: 12px; padding: 8px 12px; background: rgba(255,140,0,0.1); border-radius: 8px; font-size: 13px; color: var(--primary); display: none; }
+        .current-subject { margin-top: 12px; padding: 8px 12px; background: color-mix(in srgb, var(--primary) 12%, transparent); border-radius: 8px; font-size: 13px; color: var(--primary); display: none; }
         .current-subject.show { display: block; }
 
         /* LISTA DESPLEGABLE Z-INDEX ALTO */
@@ -257,7 +257,7 @@
         }
         .suggestions-box.show { display: block; }
         .suggestion-item { padding: 10px 15px; cursor: pointer; transition: background 0.2s; font-size: 13px; border-bottom: 1px solid var(--border); }
-        .suggestion-item:hover { background: rgba(255,140,0,0.1); color: var(--primary); }
+        .suggestion-item:hover { background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--primary); }
 
         .duration-header { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text); margin-bottom: 20px; font-size: 14px; }
         .duration-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; margin-bottom: 20px; }
@@ -283,8 +283,8 @@
         .timer-container { padding: 50px 30px; text-align: center; box-shadow: 0 20px 50px -20px rgba(0,0,0,0.2); border-radius: 20px; }
         .timer-display { font-size: 120px; font-weight: 800; font-family: 'Inter', monospace; letter-spacing: 8px; color: var(--primary); margin: 30px 0; font-variant-numeric: tabular-nums; }
         .controls { display: flex; gap: 12px; justify-content: center; margin: 30px 0; flex-wrap: wrap; }
-        .control-btn { padding: 14px 32px; border-radius: 10px; border: none; background: var(--primary); color: white; cursor: pointer; font-weight: 700; font-size: 14px; transition: all .25s ease; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(255,140,0,.2); }
-        .control-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,140,0,.3); }
+        .control-btn { padding: 14px 32px; border-radius: 10px; border: none; background: var(--primary); color: white; cursor: pointer; font-weight: 700; font-size: 14px; transition: all .25s ease; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 30%, transparent); }
+        .control-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px color-mix(in srgb, var(--primary) 45%, transparent); }
         .control-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .control-btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); box-shadow: none; }
         .control-btn-secondary:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
@@ -316,19 +316,19 @@
         .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
         .stat-value { font-size: 32px; font-weight: 800; color: var(--primary); margin: 10px 0; }
         .stat-label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
-        .streak-card { background: linear-gradient(135deg, rgba(255,140,0,0.1), rgba(255,140,0,0.05)); border: 2px solid var(--primary); }
+        .streak-card { background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 12%, transparent), color-mix(in srgb, var(--primary) 5%, transparent)); border: 2px solid var(--primary); }
 
         /* Historial */
         .history-list { max-height: 400px; overflow-y: auto; }
         .history-list.hidden { display: none; }
         .history-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); border-radius: 10px; transition: .2s ease; }
-        .history-item:hover { background: rgba(255,140,0,.05); }
+        .history-item:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); }
         .history-info { flex: 1; }
         .history-materia { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
         .history-date { font-size: 12px; color: #9ca3af; }
         .history-time { font-weight: 700; color: var(--primary); font-size: 16px; }
 
-        .notification { position: fixed; top: 20px; right: 20px; background: var(--primary); color: white; padding: 16px 24px; border-radius: 10px; box-shadow: 0 4px 15px rgba(255,140,0,.3); z-index: 2000; animation: slideIn .3s ease; }
+        .notification { position: fixed; top: 20px; right: 20px; background: var(--primary); color: white; padding: 16px 24px; border-radius: 10px; box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 35%, transparent); z-index: 2000; animation: slideIn .3s ease; }
         @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         .login-modal { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(5px); z-index: 2001; display: flex; justify-content: center; align-items: center; transition: opacity .3s ease; }
@@ -402,7 +402,7 @@
     <a href="estudio.html" class="btn-sidebar btn-primary-solid"><i data-lucide="timer" class="icon-sm"></i> Sesión de Estudio</a>
     <a href="javascript:void(0)" onclick="showComingSoonAlert(event)" class="btn-sidebar btn-dark" style="opacity: 0.6; cursor: not-allowed; position: relative;">
         <i data-lucide="lock" class="icon-sm" style="color: #9ca3af;"></i> Calendario
-        <span style="position: absolute; right: 12px; font-size: 10px; background: rgba(255, 140, 0, 0.15); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Próximamente</span>
+        <span style="position: absolute; right: 12px; font-size: 10px; background: color-mix(in srgb, var(--primary) 15%, transparent); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Próximamente</span>
     </a>
 
     <hr style="border:0; border-top:1px solid var(--border); margin:20px 0;">
@@ -410,6 +410,18 @@
 
     <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer"><i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo</a>
     <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer"><i data-lucide="building" class="icon-sm"></i> Pasantías UNGS</a>
+
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+
+    <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
+        <i data-lucide="message-square-plus" class="icon-sm"></i> Dejar Recomendación
+    </a>
+    <a href="Recomendaciones_docentes.pdf" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
+        <i data-lucide="book-open-check" class="icon-sm"></i> Ver Recomendaciones
+    </a>
+    <a href="mailto:bibliotecaadeungs@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="margin-top: 15px; border-style: dashed;">
+        <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos
+    </a>
     <button id="pwaInstallBtn" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
         <i data-lucide="download" class="icon-sm"></i> Instalar App
     </button>
@@ -1281,6 +1293,6 @@
     };
 </script>
 
-<div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;">    <div class="login-modal-content" style="max-width: 450px; text-align: left;">        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">            <h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3>            <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button>        </div>        <p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p>        <div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(255, 140, 0, 0.1); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone / iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> abajo en tu navegador Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en Opera, Brave u otros navegadores en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div>        <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button>    </div></div>
+<div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;">    <div class="login-modal-content" style="max-width: 450px; text-align: left;">        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">            <h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3>            <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button>        </div>        <p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p>        <div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: color-mix(in srgb, var(--primary) 12%, transparent); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone / iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> abajo en tu navegador Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en Opera, Brave u otros navegadores en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div>        <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button>    </div></div>
 </body>
 </html>
