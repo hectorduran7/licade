@@ -1608,36 +1608,26 @@
         if (window.auth) {
             window.auth.onAuthStateChanged(function(user) {
                 if (user) {
-                    var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
+                    // --- USUARIO AUTENTICADO ---
+                    console.log("Usuario autenticado:", user.email, "UID:", user.uid);
                     
-                    if (cachedAdmin === 'true') {
-                        var btn = document.getElementById('btnAdminSidebar');
-                        if (btn) btn.style.display = 'flex';
-                    } else if (cachedAdmin === 'false') {
-                        var btn = document.getElementById('btnAdminSidebar');
-                        if (btn) btn.style.display = 'none';
-                    } else {
-                        window.db.collection('roles_admin').doc(user.uid).get().then(function(doc) {
-                            var esAdmin = doc.exists && doc.data().rol === 'admin';
-                            sessionStorage.setItem('ungs_is_admin', esAdmin ? 'true' : 'false');
-                            var btn = document.getElementById('btnAdminSidebar');
-                            if (btn) btn.style.display = esAdmin ? 'flex' : 'none';
-                        }).catch(function(err) {
-                            console.error("Error verificando rol admin:", err);
-                            var btn = document.getElementById('btnAdminSidebar');
-                            if (btn) btn.style.display = 'none';
-                        });
+                    if (typeof actualizarUIUsuarioLogueado === 'function') {
+                        actualizarUIUsuarioLogueado(user);
                     }
-                    console.log('Usuario logueado:', user.email);
+                    if (typeof cargarDatosUsuarioRegistrado === 'function') {
+                        cargarDatosUsuarioRegistrado(user.uid);
+                    }
+                    
+                    verificarRolAdmin(user);
+                    
                     var loginModal = document.getElementById('loginModal');
-                    if (loginModal) {
-                        loginModal.classList.add('hidden');
-                    }
+                    if (loginModal) loginModal.classList.add('hidden');
                 } else {
+                    // --- USUARIO NO AUTENTICADO (INVITADO) ---
+                    console.log("Modo Invitado: Limpiando estados y caché privada...");
                     sessionStorage.removeItem('ungs_is_admin');
-                    var btn = document.getElementById('btnAdminSidebar');
-                    if (btn) btn.style.display = 'none';
-                    console.log('Usuario no logueado');
+                    sessionStorage.removeItem('ungs_user_uid');
+                    resetearInterfazModoInvitado();
                 }
             });;
         }
@@ -1874,5 +1864,67 @@ function endTour() {
     if(tooltip) tooltip.remove();
 }
 </script>
+
+        function resetearInterfazModoInvitado() {
+            var btnAdminSidebar = document.getElementById('btnAdminSidebar');
+            if (btnAdminSidebar) btnAdminSidebar.style.display = 'none';
+            
+            var userProfileName = document.getElementById('userProfileName');
+            if (userProfileName) userProfileName.textContent = 'Invitado';
+            
+            var btnLoginLogout = document.getElementById('btnLoginLogout');
+            if (btnLoginLogout) {
+                btnLoginLogout.textContent = 'Ingresar';
+                btnLoginLogout.onclick = function() { abrirModalLogin(); };
+            }
+
+            var badgesCursando = document.querySelectorAll('.badge-cursando');
+            badgesCursando.forEach(function(badge) { badge.style.display = 'none'; });
+            
+            var badgesAprobada = document.querySelectorAll('.badge-aprobada');
+            badgesAprobada.forEach(function(badge) { badge.style.display = 'none'; });
+
+            var elemProgreso = document.getElementById('porcentajeProgreso');
+            if (elemProgreso) elemProgreso.textContent = '0%';
+        }
+
+        function verificarRolAdmin(user) {
+            var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
+            var cachedUid = sessionStorage.getItem('ungs_user_uid');
+            
+            if (cachedAdmin === 'true' && cachedUid === user.uid) {
+                mostrarBotonAdmin(true);
+                return;
+            }
+            
+            window.db.collection('roles_admin').doc(user.uid).get().then(function(doc) {
+                var esAdmin = doc.exists && doc.data().rol === 'admin';
+                sessionStorage.setItem('ungs_is_admin', esAdmin ? 'true' : 'false');
+                sessionStorage.setItem('ungs_user_uid', user.uid);
+                mostrarBotonAdmin(esAdmin);
+            }).catch(function(err) {
+                console.error("Error al consultar permisos de administrador:", err);
+                mostrarBotonAdmin(false);
+            });
+        }
+
+        function mostrarBotonAdmin(esAdmin) {
+            var btnAdminSidebar = document.getElementById('btnAdminSidebar');
+            if (btnAdminSidebar) {
+                btnAdminSidebar.style.display = esAdmin ? 'flex' : 'none';
+            }
+        }
+        
+        function cerrarSesion() {
+            window.auth.signOut().then(function() {
+                sessionStorage.clear();
+                localStorage.removeItem('ungs_user_data');
+                console.log("Sesión cerrada correctamente.");
+                window.location.reload();
+            }).catch(function(error) {
+                console.error("Error al cerrar sesión:", error);
+            });
+        }
+
 </body>
 </html>
