@@ -26,17 +26,29 @@
             --bg: #f9fafb;
             --text: #1a1a1a;
             --card-bg: rgba(255, 255, 255, 0.7);
-            --sidebar-bg: rgba(244, 244, 244, 0.85);
             --border: #e5e7eb;
+            --danger: #ef4444;
+            --success: #22c55e;
         }
 
-        [data-theme="dark"], [data-theme="orange"] {
-            --bg: #080808; 
-            --text: #f5f5f5;
-            --card-bg: rgba(18, 18, 18, 0.6); 
-            --sidebar-bg: rgba(8, 8, 8, 0.85);
-            --border: #222222;
+        
+        /* Theme Variables */
+        [data-theme="orange"] { --primary: #FF8C00; }
+        [data-theme="emerald"] { --primary: #059669; }
+        [data-theme="midnight"] { --primary: #3B82F6; --bg: #0B132B; --card-bg: rgba(28, 37, 65, 0.6); }
+        [data-theme="purple"] { --primary: #8B5CF6; }
+        [data-theme="rose"] { --primary: #F43F5E; }
+        [data-theme="light"] { --primary: #FF8C00; --bg: #f9fafb; --text: #1a1a1a; --card-bg: rgba(255, 255, 255, 0.7); --border: #e5e7eb; }
+        
+        .theme-swatches {
+            display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 15px; margin-bottom: 20px;
         }
+        .theme-swatch {
+            width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.2s;
+        }
+        .theme-swatch:hover { transform: scale(1.1); }
+        .theme-swatch.active { border-color: var(--text); }
+
 
         body {
             background-color: var(--bg);
@@ -47,164 +59,101 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px;
         }
 
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            background: var(--card-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+            margin-bottom: 24px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary-solid {
-            background-color: var(--primary);
-            color: #1a1a1a;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            transition: 0.2s;
+            background-color: var(--primary); color: #1a1a1a; border: none; border-radius: 8px;
+            padding: 10px 20px; font-size: 14px; font-weight: 700; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;
         }
-
-        .btn-primary-solid:hover {
-            opacity: 0.9;
-        }
+        .btn-primary-solid:hover { opacity: 0.9; }
 
         .btn-dark {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            transition: 0.2s;
+            background: rgba(255, 255, 255, 0.1); color: var(--text); border: 1px solid var(--border);
+            border-radius: 8px; padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: 0.2s;
         }
-        
         .btn-dark:hover { background: rgba(255, 255, 255, 0.15); }
 
-        .btn-success { background-color: #22c55e; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
-        .btn-danger { background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
+        .btn-danger { background-color: var(--danger); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 5px;}
+        .btn-danger:hover { opacity: 0.9; }
 
-        input, select, textarea {
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px 16px;
-            color: var(--text);
-            width: 100%;
-            box-sizing: border-box;
-            outline: none;
-            font-family: 'Inter', sans-serif;
-            margin-bottom: 15px;
+        input, textarea {
+            background-color: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 8px;
+            padding: 12px 16px; color: var(--text); width: 100%; box-sizing: border-box; outline: none;
+            font-family: 'Inter', sans-serif; margin-bottom: 15px; margin-top: 5px;
         }
-        input:focus { border-color: var(--primary); }
+        input:focus, textarea:focus { border-color: var(--primary); }
+        label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); }
 
         /* Tabs */
         .tabs-nav {
-            display: flex;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 6px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            overflow-x: auto;
-            border: 1px solid var(--border);
+            display: flex; gap: 10px; background: rgba(255, 255, 255, 0.03); padding: 6px;
+            border-radius: 10px; margin-bottom: 30px; overflow-x: auto; border: 1px solid var(--border);
         }
-
         .tab-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: rgba(255,255,255,0.6);
-            padding: 12px 20px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            flex: 1; background: transparent; border: none; color: rgba(255,255,255,0.6); padding: 12px 20px;
+            font-weight: 600; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-
-        .tab-btn.active {
-            background: var(--primary);
-            color: #1a1a1a;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
+        .tab-btn.active { background: var(--primary); color: #1a1a1a; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .tab-btn:not(.active):hover { color: var(--text); background: rgba(255,255,255,0.1); }
 
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 15px; border-bottom: 1px solid var(--border); }
-        th { color: var(--primary); font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
-
-        /* Switch */
-        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.2); transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(20px); }
+        /* Lists */
+        .list-item {
+            padding: 15px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px;
+            background: rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        .list-item-content { flex: 1; margin-right: 15px; }
+        .list-item-title { font-weight: 700; margin-bottom: 5px; color: var(--primary); }
+        .list-item-desc { font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.4; }
     </style>
 </head>
 <body>
 
-    <!-- Verificación de Seguridad -->
     <div id="authOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <i data-lucide="loader-2" class="lucide-spin" style="animation: spin 2s linear infinite; width: 40px; height: 40px; margin-bottom: 20px; color: var(--primary);"></i>
         <h2 style="margin: 0; font-weight: 800;">Verificando Credenciales...</h2>
     </div>
 
-    <div class="container">
+    <div class="container" id="mainContainer" style="display: none;">
         <header class="header">
             <div>
                 <h1 style="margin: 0; font-weight: 900; color: var(--primary);">Panel de Administración</h1>
-                <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.6); font-weight: 600;">Gestión Segura - KNOWY ADE</p>
+                <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.6); font-weight: 600;">KNOWY - Modo Operativo</p>
             </div>
-            <a href="index.html" class="btn-dark">
-                <i data-lucide="log-out"></i> Volver a la Web
-            </a>
+            <a href="index.html" class="btn-dark"><i data-lucide="log-out"></i> Volver a la Web</a>
         </header>
+
+        <div class="theme-swatches">
+            <div class="theme-swatch" style="background-color: #FF8C00;" onclick="window.setCustomTheme('orange')"></div>
+            <div class="theme-swatch" style="background-color: #059669;" onclick="window.setCustomTheme('emerald')"></div>
+            <div class="theme-swatch" style="background-color: #3B82F6;" onclick="window.setCustomTheme('midnight')"></div>
+            <div class="theme-swatch" style="background-color: #8B5CF6;" onclick="window.setCustomTheme('purple')"></div>
+            <div class="theme-swatch" style="background-color: #F43F5E;" onclick="window.setCustomTheme('rose')"></div>
+        </div>
+
 
         <nav class="tabs-nav">
             <button class="tab-btn active" onclick="switchTab('metrics', this)"><i data-lucide="bar-chart-2"></i> Métricas</button>
-            <button class="tab-btn" onclick="switchTab('mod', this)"><i data-lucide="shield-check"></i> Moderación</button>
+            <button class="tab-btn" onclick="switchTab('mod', this)"><i data-lucide="shield-alert"></i> Moderación (Tips)</button>
             <button class="tab-btn" onclick="switchTab('donations', this)"><i data-lucide="gift"></i> Donaciones</button>
-            <button class="tab-btn" onclick="switchTab('ads', this)"><i data-lucide="megaphone"></i> Publicidad</button>
+            <button class="tab-btn" onclick="switchTab('ads', this)"><i data-lucide="megaphone"></i> Banners</button>
         </nav>
 
         <!-- Tab 1: Métricas -->
@@ -212,238 +161,288 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
                 <div class="card" style="text-align: center; border-bottom: 4px solid var(--primary);">
                     <i data-lucide="users" style="color: var(--primary); width: 36px; height: 36px; margin-bottom: 12px;"></i>
-                    <h2 style="font-size: 40px; font-weight: 900; margin: 0;" id="metric-users">--</h2>
+                    <h2 id="metric-users" style="font-size: 40px; font-weight: 900; margin: 0;">--</h2>
                     <p style="color: rgba(255,255,255,0.6); font-weight: 600; margin: 5px 0 0 0;">Usuarios Registrados</p>
                 </div>
                 <div class="card" style="text-align: center; border-bottom: 4px solid #22c55e;">
                     <i data-lucide="search" style="color: #22c55e; width: 36px; height: 36px; margin-bottom: 12px;"></i>
-                    <h2 style="font-size: 28px; font-weight: 900; margin: 0; padding-top: 10px;" id="metric-top-subject">--</h2>
+                    <h2 id="metric-top" style="font-size: 26px; font-weight: 900; margin: 0; padding-top: 10px;">--</h2>
                     <p style="color: rgba(255,255,255,0.6); font-weight: 600; margin: 7px 0 0 0;">Materia Top Buscada</p>
                 </div>
                 <div class="card" style="text-align: center; border-bottom: 4px solid #8b5cf6;">
                     <i data-lucide="download-cloud" style="color: #8b5cf6; width: 36px; height: 36px; margin-bottom: 12px;"></i>
-                    <h2 style="font-size: 40px; font-weight: 900; margin: 0;" id="metric-donations">--</h2>
+                    <h2 id="metric-donations" style="font-size: 40px; font-weight: 900; margin: 0;">--</h2>
                     <p style="color: rgba(255,255,255,0.6); font-weight: 600; margin: 5px 0 0 0;">Ingresos Donaciones</p>
                 </div>
             </div>
+            <button class="btn-dark" onclick="cargarMetricas()"><i data-lucide="refresh-cw"></i> Actualizar Métricas</button>
         </div>
 
         <!-- Tab 2: Moderación -->
         <div id="mod" class="tab-content">
-            <div class="card" style="overflow-x: auto;">
-                <h3 style="margin-top: 0; font-weight: 800;"><i data-lucide="inbox" style="display:inline; vertical-align:text-bottom;"></i> Recomendaciones Pendientes</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Docente / Materia</th>
-                            <th>Usuario</th>
-                            <th>Reseña enviada</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>García, Roberto</strong><br><span style="font-size: 13px; color: rgba(255,255,255,0.5);">Administración I</span></td>
-                            <td>lucas@ungs.edu.ar</td>
-                            <td>"Toma lo que da en clase, pero los finales son muy largos."</td>
-                            <td>
-                                <div style="display: flex; gap: 8px;">
-                                    <button class="btn-success">Aprobar</button>
-                                    <button class="btn-danger">Rechazar</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Gómez, Ana</strong><br><span style="font-size: 13px; color: rgba(255,255,255,0.5);">Microeconomía</span></td>
-                            <td>sofia@ungs.edu.ar</td>
-                            <td>"Excelente profesora, explica 10 puntos."</td>
-                            <td>
-                                <div style="display: flex; gap: 8px;">
-                                    <button class="btn-success">Aprobar</button>
-                                    <button class="btn-danger">Rechazar</button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="card">
+                <h3 style="margin-top: 0; font-weight: 800;"><i data-lucide="inbox" class="icon-sm"></i> Tips y Aportes Pendientes</h3>
+                <div id="tipsList">Cargando tips...</div>
             </div>
         </div>
 
         <!-- Tab 3: Donaciones -->
         <div id="donations" class="tab-content">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
-                <div class="card">
-                    <h3 style="margin-top: 0; font-weight: 800;"><i data-lucide="bar-chart" style="display:inline; vertical-align:text-bottom;"></i> Meta Comunitaria</h3>
-                    <label style="color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 600;">Monto actual recaudado / Archivos</label>
-                    <input type="number" value="342">
-                    
-                    <label style="color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 600; margin-top: 10px;">Meta final</label>
-                    <input type="number" value="500">
-                    
-                    <button class="btn-primary-solid" style="width: 100%; justify-content: center; margin-top: 10px;"><i data-lucide="save"></i> Guardar Progreso</button>
-                </div>
+            <div class="card" style="max-width: 600px;">
+                <h3 style="margin-top: 0; font-weight: 800;"><i data-lucide="bar-chart" class="icon-sm"></i> Meta y Muro de Leyendas</h3>
                 
-                <div class="card">
-                    <h3 style="margin-top: 0; font-weight: 800;"><i data-lucide="award" style="display:inline; vertical-align:text-bottom;"></i> Muro de Leyendas</h3>
-                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                        <input type="text" placeholder="Nombre del Donante..." style="margin-bottom: 0;">
-                        <button class="btn-primary-solid" style="padding: 0 20px;"><i data-lucide="user-plus"></i></button>
-                    </div>
-                    
-                    <ul style="list-style: none; padding: 0; margin: 0;">
-                        <li style="padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-weight: 600;">
-                            <span>✨ Tomás G.</span>
-                            <button style="background:none; border:none; color:var(--danger); cursor:pointer;"><i data-lucide="trash-2" class="icon-sm"></i></button>
-                        </li>
-                        <li style="padding: 12px 0; display: flex; justify-content: space-between; font-weight: 600;">
-                            <span>✨ Micaela R.</span>
-                            <button style="background:none; border:none; color:var(--danger); cursor:pointer;"><i data-lucide="trash-2" class="icon-sm"></i></button>
-                        </li>
-                    </ul>
-                </div>
+                <label>Monto actual recaudado ($)</label>
+                <input type="number" id="input-monto-acumulado" placeholder="Ej: 5000">
+                
+                <label>Meta mensual esperada ($)</label>
+                <input type="number" id="input-meta-monto" placeholder="Ej: 10000">
+                
+                <label>Muro de Leyendas (Nombres separados por comas)</label>
+                <textarea id="input-muro-leyendas" rows="3" placeholder="Tomas G, Micaela R, Juan P..."></textarea>
+                
+                <button class="btn-primary-solid" onclick="guardarDonaciones()" style="width: 100%; justify-content: center; margin-top: 10px;">
+                    <i data-lucide="save"></i> Guardar Cambios de Donaciones
+                </button>
             </div>
         </div>
 
         <!-- Tab 4: Gestor de Banners -->
         <div id="ads" class="tab-content">
             <div class="card">
-                <h3 style="margin-top: 0; font-weight: 800;"><i data-lucide="radio" style="display:inline; vertical-align:text-bottom;"></i> Gestor de Publicidad y Banners</h3>
+                <h3 style="margin-top: 0; font-weight: 800;"><i data-lucide="radio" class="icon-sm"></i> Gestor de Publicidad y Banners</h3>
                 
                 <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px dashed var(--primary);">
-                    <h4 style="margin-top: 0;">Nuevo Anuncio</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div>
-                            <label style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6);">Título del Aviso</label>
-                            <input type="text" placeholder="Ej: Clases Particulares de Conta">
-                        </div>
-                        <div>
-                            <label style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6);">Enlace (URL)</label>
-                            <input type="url" placeholder="https://...">
-                        </div>
-                    </div>
-                    <button class="btn-primary-solid" style="margin-top: 10px;"><i data-lucide="plus-circle"></i> Agregar a la web</button>
+                    <h4 style="margin-top: 0;">Publicar Nuevo Anuncio</h4>
+                    <label>Título del Anuncio</label>
+                    <input type="text" id="banner-titulo" placeholder="Ej: Clases Particulares de Análisis Matemático">
+                    
+                    <label>Descripción corta</label>
+                    <input type="text" id="banner-desc" placeholder="Breve detalle del anuncio">
+                    
+                    <label>Enlace de Contacto (URL / WhatsApp)</label>
+                    <input type="url" id="banner-link" placeholder="https://wa.me/123456789">
+                    
+                    <button class="btn-primary-solid" onclick="publicarBanner()"><i data-lucide="plus-circle"></i> Publicar Anuncio</button>
                 </div>
                 
-                <h4>Anuncios Activos en la Web</h4>
-                <div class="card" style="border-left: 4px solid var(--primary); padding: 20px; background: rgba(0,0,0,0.2);">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h4 style="margin: 0 0 5px 0; font-weight: 800;">Curso Intensivo Análisis Matemático I</h4>
-                            <p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500;">Promocionado por: Academia Alfa</p>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
+                <h4>Anuncios Activos en Firestore</h4>
+                <div id="bannersList">Cargando anuncios...</div>
             </div>
         </div>
-    </div>
+    
+        <!-- Tab 5: Gestión de Administradores -->
+        <div id="superadmin" class="tab-content">
+            <div class="card">
+                <h3 style="margin-top: 0; font-weight: 800;"><i data-lucide="user-plus" class="icon-sm"></i> Otorgar Permisos de Administrador</h3>
+                <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px dashed var(--primary);">
+                    <label>UID del Usuario de Firebase (Requerido)</label>
+                    <input type="text" id="admin-uid" placeholder="Ej: vUq8z... (Ver en Firebase Auth)">
+                    
+                    <label>Email del Usuario (Opcional)</label>
+                    <input type="email" id="admin-email" placeholder="usuario@ungs.edu.ar">
+                    
+                    <button class="btn-primary-solid" onclick="asignarAdmin()"><i data-lucide="shield"></i> Asignar Rol Admin</button>
+                </div>
+                
+                <h4 style="font-weight: 800;"><i data-lucide="shield-check" class="icon-sm"></i> Administradores Activos</h4>
+                <div id="adminsList">Cargando administradores...</div>
+            </div>
+        </div>
 
+    </div>
     <script>
         lucide.createIcons();
 
+        // 1. NAVEGACIÓN POR PESTAÑAS
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             btn.classList.add('active');
+            
+            // Cargar datos al cambiar de pestaña según corresponda
+            if(tabId === 'mod') cargarTips();
+            if(tabId === 'donations') cargarConfigDonaciones();
+            if(tabId === 'ads') cargarBanners();
+            if(tabId === 'superadmin') cargarAdministradores();
         }
 
+        // 6. SEGURIDAD Y VERIFICACIÓN
         document.addEventListener('DOMContentLoaded', () => {
-            // Seguridad: Verificar sesión y caching de rol con costo 0
-            const cachedAdmin = sessionStorage.getItem('ungs_is_admin');
-            
-            if (cachedAdmin === 'true') {
-                // Acceso instantáneo por caché
-                document.getElementById('authOverlay').style.display = 'none'; cargarMetricas();
-            } else {
-                // Esperar a que Firebase se inicialice para verificar sesión real
-                const checkAuth = setInterval(() => {
-                    if (window.auth && window.db) {
-                        clearInterval(checkAuth);
-                        
-                        window.auth.onAuthStateChanged(user => {
-                            if (user) {
-                                // Si no está en caché, consulta a Firestore como medida de seguridad
-                                window.db.collection('roles_admin').doc(user.uid).get()
-                                    .then(doc => {
-                                        if (doc.exists && doc.data().rol === 'admin') {
-                                            sessionStorage.setItem('ungs_is_admin', 'true');
-                                            document.getElementById('authOverlay').style.display = 'none'; cargarMetricas();
-                                        } else {
-                                            sessionStorage.setItem('ungs_is_admin', 'false');
-                                            alert("Acceso denegado: No tienes permisos de administrador.");
-                                            window.location.replace("index.html");
-                                        }
-                                    })
-                                    .catch(err => {
-                                        console.error("Error verificando permisos", err);
-                                        alert("Error verificando acceso.");
+            const checkAuth = setInterval(() => {
+                if (window.auth && window.db) {
+                    clearInterval(checkAuth);
+                    window.auth.onAuthStateChanged(user => {
+                        if (user) {
+                            window.db.collection('roles_admin').doc(user.uid).get()
+                                .then(doc => {
+                                    if (doc.exists && doc.data().rol === 'admin') {
+                                        // Es admin - Mostrar panel y cargar info principal
+                                        document.getElementById('authOverlay').style.display = 'none';
+                                        document.getElementById('mainContainer').style.display = 'block';
+                                        cargarMetricas();
+                                    } else {
+                                        alert("No tienes rol de administrador.");
                                         window.location.replace("index.html");
-                                    });
-                            } else {
-                                alert("Debes iniciar sesión para acceder al panel de administración.");
-                                window.location.replace("index.html");
-                            }
-                        });
-                    }
-                }, 100);
-                
-                // Fallback de timeout si falla firebase
-                setTimeout(() => {
-                    const overlay = document.getElementById('authOverlay');
-                    if (overlay && overlay.style.display !== 'none') {
-                        if (sessionStorage.getItem('ungs_is_admin') === 'true') {
-                            overlay.style.display = 'none';
+                                    }
+                                }).catch(err => {
+                                    alert("Error verificando permisos.");
+                                    window.location.replace("index.html");
+                                });
                         } else {
                             window.location.replace("index.html");
                         }
-                    }
-                }, 5000);
-            }
-        });
-    
-        function cargarMetricas() {
-            if (!window.db) return;
-
-            // 1. Usuarios Registrados (Count query)
-            window.db.collection('users_grades').count().get().then(snapshot => {
-                document.getElementById('metric-users').innerText = snapshot.data().count || '0';
-            }).catch(err => {
-                console.error("Error cargando usuarios:", err);
-                document.getElementById('metric-users').innerText = '0';
-            });
-
-            // 2. Materia más buscada (orderBy limite 1)
-            window.db.collection('materias_stats').orderBy('votos_total', 'desc').limit(1).get().then(snapshot => {
-                if (!snapshot.empty) {
-                    const topMateria = snapshot.docs[0];
-                    let nombre = topMateria.data().nombre || topMateria.id;
-                    if (nombre.length > 25) nombre = nombre.substring(0, 22) + '...';
-                    document.getElementById('metric-top-subject').innerText = nombre;
-                } else {
-                    document.getElementById('metric-top-subject').innerText = 'Sin registros';
+                    });
                 }
-            }).catch(err => {
-                console.error("Error cargando materia top:", err);
-                document.getElementById('metric-top-subject').innerText = 'N/A';
-            });
+            }, 100);
+        });
 
-            // 3. Ingresos por donaciones
+        // 2. MÉTRICAS EN TIEMPO REAL
+        function cargarMetricas() {
+            // Usuarios (get size)
+            window.db.collection('users_grades').get().then(snap => {
+                document.getElementById('metric-users').innerText = snap.size;
+            }).catch(() => document.getElementById('metric-users').innerText = '0');
+
+            // Top Materia
+            window.db.collection('materias_stats').orderBy('votos_total', 'desc').limit(1).get().then(snap => {
+                if (!snap.empty) {
+                    let top = snap.docs[0];
+                    let nombre = top.data().nombre || top.id;
+                    document.getElementById('metric-top').innerText = nombre.length > 25 ? nombre.substring(0,22)+'...' : nombre;
+                } else {
+                    document.getElementById('metric-top').innerText = 'Sin datos';
+                }
+            }).catch(() => document.getElementById('metric-top').innerText = 'N/A');
+
+            // Donaciones
             window.db.collection('config').doc('donaciones').get().then(doc => {
                 if (doc.exists && doc.data().monto_acumulado !== undefined) {
                     document.getElementById('metric-donations').innerText = '$' + doc.data().monto_acumulado.toLocaleString();
                 } else {
                     document.getElementById('metric-donations').innerText = '$0';
                 }
-            }).catch(err => {
-                console.error("Error cargando donaciones:", err);
-                document.getElementById('metric-donations').innerText = '$0';
+            }).catch(() => document.getElementById('metric-donations').innerText = '$0');
+        }
+
+        // 3. MODERACIÓN DE TIPS
+        function cargarTips() {
+            const list = document.getElementById('tipsList');
+            list.innerHTML = 'Cargando...';
+            window.db.collection('tips_materias').get().then(snap => {
+                if(snap.empty) {
+                    list.innerHTML = '<p>No hay tips pendientes.</p>';
+                    return;
+                }
+                let html = '';
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    html += `
+                        <div class="list-item" id="tip-${doc.id}">
+                            <div class="list-item-content">
+                                <div class="list-item-title">${data.materia_id || 'Materia Desconocida'}</div>
+                                <div class="list-item-desc">"${data.tip || data.texto || 'Sin contenido'}"</div>
+                            </div>
+                            <button class="btn-danger" onclick="eliminarTip('${doc.id}')"><i data-lucide="trash-2" class="icon-sm"></i> Rechazar</button>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+                lucide.createIcons();
             });
         }
 
+        function eliminarTip(id) {
+            if(confirm('¿Seguro que deseas eliminar/rechazar este tip?')) {
+                window.db.collection('tips_materias').doc(id).delete().then(() => {
+                    document.getElementById(`tip-${id}`).remove();
+                });
+            }
+        }
+
+        // 4. DONACIONES
+        function cargarConfigDonaciones() {
+            window.db.collection('config').doc('donaciones').get().then(doc => {
+                if(doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('input-monto-acumulado').value = data.monto_acumulado || '';
+                    document.getElementById('input-meta-monto').value = data.meta_monto || '';
+                    document.getElementById('input-muro-leyendas').value = (data.muro_leyendas || []).join(', ');
+                }
+            });
+        }
+
+        function guardarDonaciones() {
+            const monto = parseFloat(document.getElementById('input-monto-acumulado').value) || 0;
+            const meta = parseFloat(document.getElementById('input-meta-monto').value) || 0;
+            const muroRaw = document.getElementById('input-muro-leyendas').value;
+            const muro = muroRaw.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+            window.db.collection('config').doc('donaciones').set({
+                monto_acumulado: monto,
+                meta_monto: meta,
+                muro_leyendas: muro
+            }, { merge: true }).then(() => {
+                alert('¡Configuración de donaciones guardada correctamente!');
+                cargarMetricas();
+            }).catch(err => alert('Error guardando: ' + err));
+        }
+
+        // 5. BANNERS
+        function cargarBanners() {
+            const list = document.getElementById('bannersList');
+            list.innerHTML = 'Cargando banners...';
+            window.db.collection('banners').get().then(snap => {
+                if(snap.empty) {
+                    list.innerHTML = '<p>No hay banners activos.</p>';
+                    return;
+                }
+                let html = '';
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    html += `
+                        <div class="list-item" id="banner-${doc.id}">
+                            <div class="list-item-content">
+                                <div class="list-item-title">${data.titulo || 'Sin título'}</div>
+                                <div class="list-item-desc">${data.descripcion || ''} <br> <a href="${data.enlace || '#'}" target="_blank" style="color:var(--primary);">${data.enlace || ''}</a></div>
+                            </div>
+                            <button class="btn-danger" onclick="eliminarBanner('${doc.id}')"><i data-lucide="trash-2" class="icon-sm"></i> Eliminar</button>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+                lucide.createIcons();
+            });
+        }
+
+        function publicarBanner() {
+            const titulo = document.getElementById('banner-titulo').value;
+            const desc = document.getElementById('banner-desc').value;
+            const link = document.getElementById('banner-link').value;
+
+            if(!titulo) return alert('El título es obligatorio');
+
+            window.db.collection('banners').add({
+                titulo: titulo,
+                descripcion: desc,
+                enlace: link,
+                fecha_creacion: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert('Anuncio publicado!');
+                document.getElementById('banner-titulo').value = '';
+                document.getElementById('banner-desc').value = '';
+                document.getElementById('banner-link').value = '';
+                cargarBanners();
+            }).catch(err => alert('Error publicando: ' + err));
+        }
+
+        function eliminarBanner(id) {
+            if(confirm('¿Seguro que deseas eliminar este banner?')) {
+                window.db.collection('banners').doc(id).delete().then(() => {
+                    document.getElementById(`banner-${id}`).remove();
+                });
+            }
+        }
     </script>
 </body>
 </html>
