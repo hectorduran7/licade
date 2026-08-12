@@ -212,17 +212,17 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
                 <div class="card" style="text-align: center; border-bottom: 4px solid var(--primary);">
                     <i data-lucide="users" style="color: var(--primary); width: 36px; height: 36px; margin-bottom: 12px;"></i>
-                    <h2 style="font-size: 40px; font-weight: 900; margin: 0;">2,450</h2>
+                    <h2 style="font-size: 40px; font-weight: 900; margin: 0;" id="metric-users">--</h2>
                     <p style="color: rgba(255,255,255,0.6); font-weight: 600; margin: 5px 0 0 0;">Usuarios Registrados</p>
                 </div>
                 <div class="card" style="text-align: center; border-bottom: 4px solid #22c55e;">
                     <i data-lucide="search" style="color: #22c55e; width: 36px; height: 36px; margin-bottom: 12px;"></i>
-                    <h2 style="font-size: 28px; font-weight: 900; margin: 0; padding-top: 10px;">T. Lectura y Esc.</h2>
+                    <h2 style="font-size: 28px; font-weight: 900; margin: 0; padding-top: 10px;" id="metric-top-subject">--</h2>
                     <p style="color: rgba(255,255,255,0.6); font-weight: 600; margin: 7px 0 0 0;">Materia Top Buscada</p>
                 </div>
                 <div class="card" style="text-align: center; border-bottom: 4px solid #8b5cf6;">
                     <i data-lucide="download-cloud" style="color: #8b5cf6; width: 36px; height: 36px; margin-bottom: 12px;"></i>
-                    <h2 style="font-size: 40px; font-weight: 900; margin: 0;">$0</h2>
+                    <h2 style="font-size: 40px; font-weight: 900; margin: 0;" id="metric-donations">--</h2>
                     <p style="color: rgba(255,255,255,0.6); font-weight: 600; margin: 5px 0 0 0;">Ingresos Donaciones</p>
                 </div>
             </div>
@@ -357,7 +357,7 @@
             
             if (cachedAdmin === 'true') {
                 // Acceso instantáneo por caché
-                document.getElementById('authOverlay').style.display = 'none';
+                document.getElementById('authOverlay').style.display = 'none'; cargarMetricas();
             } else {
                 // Esperar a que Firebase se inicialice para verificar sesión real
                 const checkAuth = setInterval(() => {
@@ -371,7 +371,7 @@
                                     .then(doc => {
                                         if (doc.exists && doc.data().rol === 'admin') {
                                             sessionStorage.setItem('ungs_is_admin', 'true');
-                                            document.getElementById('authOverlay').style.display = 'none';
+                                            document.getElementById('authOverlay').style.display = 'none'; cargarMetricas();
                                         } else {
                                             sessionStorage.setItem('ungs_is_admin', 'false');
                                             alert("Acceso denegado: No tienes permisos de administrador.");
@@ -404,6 +404,46 @@
                 }, 5000);
             }
         });
+    
+        function cargarMetricas() {
+            if (!window.db) return;
+
+            // 1. Usuarios Registrados (Count query)
+            window.db.collection('users_grades').count().get().then(snapshot => {
+                document.getElementById('metric-users').innerText = snapshot.data().count || '0';
+            }).catch(err => {
+                console.error("Error cargando usuarios:", err);
+                document.getElementById('metric-users').innerText = '0';
+            });
+
+            // 2. Materia más buscada (orderBy limite 1)
+            window.db.collection('materias_stats').orderBy('votos_total', 'desc').limit(1).get().then(snapshot => {
+                if (!snapshot.empty) {
+                    const topMateria = snapshot.docs[0];
+                    let nombre = topMateria.data().nombre || topMateria.id;
+                    if (nombre.length > 25) nombre = nombre.substring(0, 22) + '...';
+                    document.getElementById('metric-top-subject').innerText = nombre;
+                } else {
+                    document.getElementById('metric-top-subject').innerText = 'Sin registros';
+                }
+            }).catch(err => {
+                console.error("Error cargando materia top:", err);
+                document.getElementById('metric-top-subject').innerText = 'N/A';
+            });
+
+            // 3. Ingresos por donaciones
+            window.db.collection('config').doc('donaciones').get().then(doc => {
+                if (doc.exists && doc.data().monto_acumulado !== undefined) {
+                    document.getElementById('metric-donations').innerText = '$' + doc.data().monto_acumulado.toLocaleString();
+                } else {
+                    document.getElementById('metric-donations').innerText = '$0';
+                }
+            }).catch(err => {
+                console.error("Error cargando donaciones:", err);
+                document.getElementById('metric-donations').innerText = '$0';
+            });
+        }
+
     </script>
 </body>
 </html>
