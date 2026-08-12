@@ -763,7 +763,13 @@
     <a href="mailto:bibliotecaadeungs@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="margin-top: 15px; border-style: dashed;">
         <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos
     </a>
-<button id="pwaInstallBtn" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
+
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+    <a href="admin.html" id="btnAdminSidebar" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary);">
+        <i data-lucide="shield-check" class="icon-sm"></i> Panel Admin
+    </a>
+
+    <button id="pwaInstallBtn" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
         <i data-lucide="download" class="icon-sm"></i> Instalar App
     </button>
 
@@ -794,15 +800,11 @@
             <a href="https://sso.ungs.edu.ar/moodle" target="_blank" class="launchpad-btn" rel="noopener noreferrer">
                 <i data-lucide="graduation-cap" class="icon-sm text-primary"></i> Campus Virtual
             </a>
-            <a href="https://www.ungs.edu.ar/wp-content/uploads/2025/12/calendario-academico-2026.pdf" target="_blank" class="launchpad-btn" rel="noopener noreferrer">
-                <i data-lucide="calendar" class="icon-sm text-primary"></i> Calendario 2026
-            </a>
+            
             <a href="Contactos_Docentes.pdf" target="_blank" class="launchpad-btn" rel="noopener noreferrer">
                 <i data-lucide="mail" class="icon-sm text-primary"></i> Mails de Profesores
             </a>
-            <a href="https://www.ungs.edu.ar/wp-content/uploads/2026/07/MESAS-DE-EXAMEN-JULIO-2026-CON-AULAS-1er-LLAMADO.pdf" target="_blank" class="launchpad-btn" rel="noopener noreferrer">
-                <i data-lucide="clipboard-list" class="icon-sm text-primary"></i> Mesas de Final
-            </a>
+            
         </div>
     </header>
 
@@ -1606,31 +1608,38 @@
         if (window.auth) {
             window.auth.onAuthStateChanged(function(user) {
                 if (user) {
-                    var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
-                    var safeName = sanitizeText(nombre);
-                    document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + safeName;
-                    document.getElementById('sidebarLoginBtn').style.display = 'none';
-                    document.getElementById('sidebarLogoutBtn').style.display = 'flex';
-                    document.getElementById('loginModal').classList.add('hidden');
-                    if (typeof cargarMateriasUsuario === 'function') cargarMateriasUsuario(user);
-                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                    var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
                     
-                    if (!localStorage.getItem('tour_completado')) {
-                        setTimeout(initTour, 1500);
+                    if (cachedAdmin === 'true') {
+                        var btn = document.getElementById('btnAdminSidebar');
+                        if (btn) btn.style.display = 'flex';
+                    } else if (cachedAdmin === 'false') {
+                        var btn = document.getElementById('btnAdminSidebar');
+                        if (btn) btn.style.display = 'none';
+                    } else {
+                        window.db.collection('roles_admin').doc(user.uid).get().then(function(doc) {
+                            var esAdmin = doc.exists && doc.data().rol === 'admin';
+                            sessionStorage.setItem('ungs_is_admin', esAdmin ? 'true' : 'false');
+                            var btn = document.getElementById('btnAdminSidebar');
+                            if (btn) btn.style.display = esAdmin ? 'flex' : 'none';
+                        }).catch(function(err) {
+                            console.error("Error verificando rol admin:", err);
+                            var btn = document.getElementById('btnAdminSidebar');
+                            if (btn) btn.style.display = 'none';
+                        });
+                    }
+                    console.log('Usuario logueado:', user.email);
+                    var loginModal = document.getElementById('loginModal');
+                    if (loginModal) {
+                        loginModal.classList.add('hidden');
                     }
                 } else {
-                    document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
-                    document.getElementById('sidebarLoginBtn').style.display = 'flex';
-                    document.getElementById('sidebarLogoutBtn').style.display = 'none';
-                    if (document.getElementById('btnEditarMaterias')) document.getElementById('btnEditarMaterias').style.display = 'none';
-                    userMateriasConfig = null;
-                    if (!sessionStorage.getItem('guestMode')) {
-                        document.getElementById('loginModal').classList.remove('hidden');
-                    }
-                    if (typeof render === 'function') render();
-                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                    sessionStorage.removeItem('ungs_is_admin');
+                    var btn = document.getElementById('btnAdminSidebar');
+                    if (btn) btn.style.display = 'none';
+                    console.log('Usuario no logueado');
                 }
-            });
+            });;
         }
     });
 
