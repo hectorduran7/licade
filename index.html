@@ -1727,7 +1727,7 @@
         sessionStorage.removeItem('ungs_user_uid');
         
         if (typeof resetearInterfazModoInvitado === 'function') {
-            resetearInterfazModoInvitado();
+            
         }
     }
 });;
@@ -1999,20 +1999,20 @@ function endTour() {
     var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
     var cachedUid = sessionStorage.getItem('ungs_user_uid');
 
-    // Usar caché si pertenece exactamente al usuario activo
+    // Si ya existe caché válida en memoria para este UID
     if (cachedAdmin === 'true' && cachedUid === user.uid) {
         mostrarBotonAdmin(true);
         return;
     }
 
-    // Consulta directa a Firestore roles_admin
+    // Consulta en Firestore solo si no hay caché
     window.db.collection('roles_admin').doc(user.uid).get().then(function(doc) {
         var esAdmin = doc.exists && doc.data().rol === 'admin';
         sessionStorage.setItem('ungs_is_admin', esAdmin ? 'true' : 'false');
         sessionStorage.setItem('ungs_user_uid', user.uid);
         mostrarBotonAdmin(esAdmin);
     }).catch(function(err) {
-        console.error("Error consultando rol admin en Firestore:", err);
+        console.error("[ADMIN CHECK ERROR]", err);
         mostrarBotonAdmin(false);
     });
 }
@@ -2020,17 +2020,15 @@ function endTour() {
         function mostrarBotonAdmin(esAdmin) {
     var btnFab = document.getElementById('btnAdminFloating');
     var btnSidebar = document.getElementById('btnAdminSidebar');
+    var displayVal = esAdmin ? 'flex' : 'none';
 
-    var displayValue = esAdmin ? 'flex' : 'none';
-
-    if (btnFab) btnFab.style.display = displayValue;
-    if (btnSidebar) btnSidebar.style.display = displayValue;
+    if (btnFab) btnFab.style.display = displayVal;
+    if (btnSidebar) btnSidebar.style.display = displayVal;
 }
-        }
         
         function cerrarSesion() {
             window.auth.signOut().then(function() {
-                sessionStorage.clear();
+                
                 localStorage.removeItem('ungs_user_data');
                 console.log("Sesión cerrada correctamente.");
                 window.location.reload();

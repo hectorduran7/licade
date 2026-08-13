@@ -76,14 +76,14 @@ window.googleProvider = null;
         console.log('✅ Firebase inicializado correctamente con:', app.name);
 
         // ── PASO 5: Persistencia LOCAL (mantiene sesión entre páginas) ──
-        window.auth
-            .setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-            .then(function () {
-                console.log('🔑 Persistencia LOCAL activada');
-            })
-            .catch(function (e) {
-                console.error('❌ Error al configurar persistencia:', e);
-            });
+        // Garantizar persistencia LOCAL en disco
+        window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+          .then(function() {
+            console.log("[FIREBASE] Persistencia LOCAL activada correctamente.");
+          })
+          .catch(function(error) {
+            console.error("[FIREBASE] Error al establecer persistencia:", error);
+          });
 
         // ── PASO 6: Inicializar App Check (Seguridad contra scraping y bots) ──
         if (window.APP_CHECK_SITE_KEY) {
