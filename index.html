@@ -627,7 +627,7 @@
             color: #ffffff;
             padding: 12px 20px;
             border-radius: 9999px;
-            display: flex;
+            display: none !important;
             align-items: center;
             gap: 8px;
             font-weight: 700;
@@ -639,6 +639,7 @@
         }
         .admin-fab:hover { transform: scale(1.05); }
         .admin-fab:active { transform: scale(0.95); }
+        #btnAdminSidebar { display: none !important; }
 
         @media (max-width: 768px) {
             body {
@@ -1674,64 +1675,73 @@
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    // Escuchar el cambio de estado de sesión globalmente de forma segura
+    // ==================== RENDERIZADO PÚBLICO OBLIGATORIO ====================
+    // La grilla de materias se dibuja SIEMPRE al cargar, sin depender de auth.
     document.addEventListener('DOMContentLoaded', function() {
-        if (window.auth) {
-            window.auth.onAuthStateChanged(function(user) {
-    console.log("[AUTH STATE CHANGE]", user ? ("Logueado como: " + user.email) : "Modo Invitado");
-    
-    var nameElem = document.getElementById('userProfileName');
-    var btnLogin = document.getElementById('btnLoginLogout');
-
-    if (user) {
-        // 1. Actualizar Nombre de Perfil
-        if (nameElem) {
-            var nombreMostrar = user.displayName || (user.email ? user.email.split('@')[0] : 'Estudiante');
-            nameElem.textContent = nombreMostrar;
+        if (typeof render === 'function') {
+            render();
         }
+    });
 
-        // 2. Transformar Botón a "Cerrar Sesión"
-        if (btnLogin) {
-            btnLogin.textContent = 'Cerrar Sesión';
-            btnLogin.onclick = function() { cerrarSesion(); };
-        }
+    // ==================== CONTROLADOR DE SESIÓN SEGURO ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!window.auth) return;
 
-        // 3. Cargar datos del usuario logueado
-        try {
-            if (typeof cargarDatosUsuarioRegistrado === 'function') {
-                cargarDatosUsuarioRegistrado(user.uid);
+        window.auth.onAuthStateChanged(function(user) {
+            console.log("[AUTH DEBUG]", user ? ("Usuario logueado: " + user.email) : "Modo Invitado");
+
+            var nameElem = document.getElementById('userProfileName') || document.querySelector('.profile-name');
+            var btnLogin = document.getElementById('btnLoginLogout') || document.querySelector('.btn-profile-action');
+
+            if (user) {
+                // 1. ACTUALIZAR TARJETA LATERAL A MODO LOGUEADO
+                if (nameElem) {
+                    var nombre = user.displayName || (user.email ? user.email.split('@')[0] : 'Estudiante');
+                    nameElem.textContent = nombre;
+                }
+
+                if (btnLogin) {
+                    btnLogin.textContent = 'Cerrar Sesión';
+                    btnLogin.onclick = function() { cerrarSesion(); };
+                }
+
+                // 2. CARGAR BADGES PERSONALES (SIN ROMPER LA GRILLA PÚBLICA)
+                try {
+                    if (typeof cargarMateriasUsuario === 'function') {
+                        cargarMateriasUsuario(user);
+                    }
+                } catch (e) {
+                    console.error("Error al cargar estado personal de materias:", e);
+                }
+
+                // 3. CONSULTAR ROL ADMIN
+                verificarRolAdmin(user);
+
+                var loginModal = document.getElementById('loginModal');
+                if (loginModal) loginModal.classList.add('hidden');
+
+            } else {
+                // 1. RESETEAR TARJETA LATERAL A MODO INVITADO
+                if (nameElem) nameElem.textContent = 'Invitado';
+
+                if (btnLogin) {
+                    btnLogin.textContent = 'Ingresar';
+                    btnLogin.onclick = function() { abrirModalLogin(); };
+                }
+
+                // 2. OCULTAR BOTONES DE ADMIN (forzado con !important)
+                mostrarBotonAdmin(false);
+
+                // 3. OCULTAR BADGES PERSONALES ("Cursando" / "Aprobada")
+                document.querySelectorAll('.badge-cursando, .badge-aprobada').forEach(function(b) {
+                    b.style.display = 'none';
+                });
+
+                // 4. LIMPIAR SESIÓN
+                sessionStorage.removeItem('ungs_is_admin');
+                sessionStorage.removeItem('ungs_user_uid');
             }
-        } catch (e) {
-            console.error("Error cargando datos del usuario:", e);
-        }
-
-        // 4. Verificación Estricta de Admin
-        verificarRolAdmin(user);
-
-        var loginModal = document.getElementById('loginModal');
-        if (loginModal) loginModal.classList.add('hidden');
-
-    } else {
-        // 1. Resetear Perfil a Invitado
-        if (nameElem) nameElem.textContent = 'Invitado';
-        if (btnLogin) {
-            btnLogin.textContent = 'Ingresar';
-            btnLogin.onclick = function() { abrirModalLogin(); };
-        }
-
-        // 2. Ocultar Botones de Admin
-        mostrarBotonAdmin(false);
-
-        // 3. Limpiar memoria local
-        sessionStorage.removeItem('ungs_is_admin');
-        sessionStorage.removeItem('ungs_user_uid');
-        
-        if (typeof resetearInterfazModoInvitado === 'function') {
-            
-        }
-    }
-});;
-        }
+        });
     });
 
     // Registrar Service Worker para soporte offline
@@ -1967,76 +1977,56 @@ function endTour() {
 </script>
 
 <script>
-        function resetearInterfazModoInvitado() {
-            var btnAdminSidebar = document.getElementById('btnAdminSidebar');
-            if (btnAdminSidebar) btnAdminSidebar.style.display = 'none';
-            
-            var userProfileName = document.getElementById('userProfileName');
-            if (userProfileName) userProfileName.textContent = 'Invitado';
-            
-            var btnLoginLogout = document.getElementById('btnLoginLogout');
-            if (btnLoginLogout) {
-                btnLoginLogout.textContent = 'Ingresar';
-                btnLoginLogout.onclick = function() { abrirModalLogin(); };
-            }
-
-            var badgesCursando = document.querySelectorAll('.badge-cursando');
-            badgesCursando.forEach(function(badge) { badge.style.display = 'none'; });
-            
-            var badgesAprobada = document.querySelectorAll('.badge-aprobada');
-            badgesAprobada.forEach(function(badge) { badge.style.display = 'none'; });
-
-            var elemProgreso = document.getElementById('porcentajeProgreso');
-            if (elemProgreso) elemProgreso.textContent = '0%';
+    function verificarRolAdmin(user) {
+        if (!user) {
+            mostrarBotonAdmin(false);
+            return;
         }
 
-        function verificarRolAdmin(user) {
-    if (!user) {
-        mostrarBotonAdmin(false);
-        return;
-    }
+        var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
+        var cachedUid = sessionStorage.getItem('ungs_user_uid');
 
-    var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
-    var cachedUid = sessionStorage.getItem('ungs_user_uid');
-
-    // Si ya existe caché válida en memoria para este UID
-    if (cachedAdmin === 'true' && cachedUid === user.uid) {
-        mostrarBotonAdmin(true);
-        return;
-    }
-
-    // Consulta en Firestore solo si no hay caché
-    window.db.collection('roles_admin').doc(user.uid).get().then(function(doc) {
-        var esAdmin = doc.exists && doc.data().rol === 'admin';
-        sessionStorage.setItem('ungs_is_admin', esAdmin ? 'true' : 'false');
-        sessionStorage.setItem('ungs_user_uid', user.uid);
-        mostrarBotonAdmin(esAdmin);
-    }).catch(function(err) {
-        console.error("[ADMIN CHECK ERROR]", err);
-        mostrarBotonAdmin(false);
-    });
-}
-
-        function mostrarBotonAdmin(esAdmin) {
-    var btnFab = document.getElementById('btnAdminFloating');
-    var btnSidebar = document.getElementById('btnAdminSidebar');
-    var displayVal = esAdmin ? 'flex' : 'none';
-
-    if (btnFab) btnFab.style.display = displayVal;
-    if (btnSidebar) btnSidebar.style.display = displayVal;
-}
-        
-        function cerrarSesion() {
-            window.auth.signOut().then(function() {
-                
-                localStorage.removeItem('ungs_user_data');
-                console.log("Sesión cerrada correctamente.");
-                window.location.reload();
-            }).catch(function(error) {
-                console.error("Error al cerrar sesión:", error);
-            });
+        // Usar caché si pertenece exactamente al usuario activo
+        if (cachedAdmin === 'true' && cachedUid === user.uid) {
+            mostrarBotonAdmin(true);
+            return;
         }
 
+        // Consulta directa a Firestore roles_admin
+        window.db.collection('roles_admin').doc(user.uid).get().then(function(doc) {
+            var esAdmin = doc.exists && doc.data().rol === 'admin';
+            sessionStorage.setItem('ungs_is_admin', esAdmin ? 'true' : 'false');
+            sessionStorage.setItem('ungs_user_uid', user.uid);
+            mostrarBotonAdmin(esAdmin);
+        }).catch(function(err) {
+            console.error("[ADMIN CHECK ERROR]", err);
+            mostrarBotonAdmin(false);
+        });
+    }
+
+    function mostrarBotonAdmin(esAdmin) {
+        var btnFab = document.getElementById('btnAdminFloating');
+        var btnSidebar = document.getElementById('btnAdminSidebar');
+
+        if (esAdmin) {
+            if (btnFab) btnFab.style.setProperty('display', 'flex', 'important');
+            if (btnSidebar) btnSidebar.style.setProperty('display', 'flex', 'important');
+        } else {
+            if (btnFab) btnFab.style.setProperty('display', 'none', 'important');
+            if (btnSidebar) btnSidebar.style.setProperty('display', 'none', 'important');
+        }
+    }
+
+    function cerrarSesion() {
+        window.auth.signOut().then(function() {
+            sessionStorage.clear();
+            localStorage.removeItem('ungs_user_data');
+            console.log("Sesión cerrada correctamente.");
+            window.location.reload();
+        }).catch(function(error) {
+            console.error("Error al cerrar sesión:", error);
+        });
+    }
 </script>
 
 <a id="btnAdminFloating" href="admin.html" class="admin-fab" style="display: none;">
