@@ -1685,64 +1685,63 @@
 
     // ==================== CONTROLADOR DE SESIÓN SEGURO ====================
     document.addEventListener('DOMContentLoaded', function() {
-        if (!window.auth) return;
+    if (!window.auth) return;
 
-        window.auth.onAuthStateChanged(function(user) {
-            console.log("[AUTH DEBUG]", user ? ("Usuario logueado: " + user.email) : "Modo Invitado");
+    window.auth.onAuthStateChanged(function(user) {
+        console.log("[AUTH DEBUG]", user ? ("Usuario logueado: " + user.email) : "Modo Invitado");
 
-            var nameElem = document.getElementById('userProfileName') || document.querySelector('.profile-name');
-            var btnLogin = document.getElementById('btnLoginLogout') || document.querySelector('.btn-profile-action');
+        var userNameElem = document.getElementById('userName');
+        var loginBtn = document.getElementById('sidebarLoginBtn');
+        var logoutBtn = document.getElementById('sidebarLogoutBtn');
 
-            if (user) {
-                // 1. ACTUALIZAR TARJETA LATERAL A MODO LOGUEADO
-                if (nameElem) {
-                    var nombre = user.displayName || (user.email ? user.email.split('@')[0] : 'Estudiante');
-                    nameElem.textContent = nombre;
-                }
-
-                if (btnLogin) {
-                    btnLogin.textContent = 'Cerrar Sesión';
-                    btnLogin.onclick = function() { cerrarSesion(); };
-                }
-
-                // 2. CARGAR BADGES PERSONALES (SIN ROMPER LA GRILLA PÚBLICA)
-                try {
-                    if (typeof cargarMateriasUsuario === 'function') {
-                        cargarMateriasUsuario(user);
-                    }
-                } catch (e) {
-                    console.error("Error al cargar estado personal de materias:", e);
-                }
-
-                // 3. CONSULTAR ROL ADMIN
-                verificarRolAdmin(user);
-
-                var loginModal = document.getElementById('loginModal');
-                if (loginModal) loginModal.classList.add('hidden');
-
-            } else {
-                // 1. RESETEAR TARJETA LATERAL A MODO INVITADO
-                if (nameElem) nameElem.textContent = 'Invitado';
-
-                if (btnLogin) {
-                    btnLogin.textContent = 'Ingresar';
-                    btnLogin.onclick = function() { abrirModalLogin(); };
-                }
-
-                // 2. OCULTAR BOTONES DE ADMIN (forzado con !important)
-                mostrarBotonAdmin(false);
-
-                // 3. OCULTAR BADGES PERSONALES ("Cursando" / "Aprobada")
-                document.querySelectorAll('.badge-cursando, .badge-aprobada').forEach(function(b) {
-                    b.style.display = 'none';
-                });
-
-                // 4. LIMPIAR SESIÓN
-                sessionStorage.removeItem('ungs_is_admin');
-                sessionStorage.removeItem('ungs_user_uid');
+        if (user) {
+            // 1. ACTUALIZAR TARJETA LATERAL A MODO LOGUEADO
+            if (userNameElem) {
+                var nombre = user.displayName || (user.email ? user.email.split('@')[0] : 'Estudiante');
+                userNameElem.textContent = nombre;
             }
-        });
+
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (logoutBtn) logoutBtn.style.display = 'flex';
+
+            // 2. CARGAR MATERIAS Y BADGES DEL USUARIO
+            try {
+                if (typeof cargarMateriasUsuario === 'function') {
+                    cargarMateriasUsuario(user);
+                }
+            } catch (e) {
+                console.error("Error al cargar estado personal de materias:", e);
+            }
+
+            // 3. CONSULTAR Y MOSTRAR ROL ADMIN SI CORRESPONDE
+            verificarRolAdmin(user);
+
+            var loginModal = document.getElementById('loginModal');
+            if (loginModal) loginModal.classList.add('hidden');
+
+        } else {
+            // 1. RESETEAR TARJETA LATERAL A MODO INVITADO
+            if (userNameElem) userNameElem.textContent = 'Invitado';
+            if (loginBtn) loginBtn.style.display = 'flex';
+            if (logoutBtn) logoutBtn.style.display = 'none';
+
+            // 2. OCULTAR BOTONES DE ADMIN
+            mostrarBotonAdmin(false);
+
+            // 3. DESACTIVAR CONFIGURACIÓN DE FILTRADO Y MOSTRAR TODA LA GRILLA
+            userMateriasConfig = null;
+            if (typeof render === 'function') render();
+
+            // 4. OCULTAR BOTÓN DE EDITAR MATERIAS
+            var btnEditar = document.getElementById('btnEditarMaterias');
+            if (btnEditar) btnEditar.style.display = 'none';
+
+            // 5. LIMPIAR SESIÓN
+            sessionStorage.removeItem('ungs_is_admin');
+            sessionStorage.removeItem('ungs_user_uid');
+        }
     });
+});
 
     // Registrar Service Worker para soporte offline
     if ('serviceWorker' in navigator) {
@@ -1978,21 +1977,20 @@ function endTour() {
 
 <script>
     function verificarRolAdmin(user) {
-        if (!user) {
-            mostrarBotonAdmin(false);
-            return;
-        }
+    if (!user) {
+        mostrarBotonAdmin(false);
+        return;
+    }
 
-        var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
-        var cachedUid = sessionStorage.getItem('ungs_user_uid');
+    var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
+    var cachedUid = sessionStorage.getItem('ungs_user_uid');
 
-        // Usar caché si pertenece exactamente al usuario activo
-        if (cachedAdmin === 'true' && cachedUid === user.uid) {
-            mostrarBotonAdmin(true);
-            return;
-        }
+    if (cachedAdmin === 'true' && cachedUid === user.uid) {
+        mostrarBotonAdmin(true);
+        return;
+    }
 
-        // Consulta directa a Firestore roles_admin
+    if (window.db) {
         window.db.collection('roles_admin').doc(user.uid).get().then(function(doc) {
             var esAdmin = doc.exists && doc.data().rol === 'admin';
             sessionStorage.setItem('ungs_is_admin', esAdmin ? 'true' : 'false');
@@ -2003,19 +2001,20 @@ function endTour() {
             mostrarBotonAdmin(false);
         });
     }
+}
 
     function mostrarBotonAdmin(esAdmin) {
-        var btnFab = document.getElementById('btnAdminFloating');
-        var btnSidebar = document.getElementById('btnAdminSidebar');
+    var btnFab = document.getElementById('btnAdminFloating');
+    var btnSidebar = document.getElementById('btnAdminSidebar');
 
-        if (esAdmin) {
-            if (btnFab) btnFab.style.setProperty('display', 'flex', 'important');
-            if (btnSidebar) btnSidebar.style.setProperty('display', 'flex', 'important');
-        } else {
-            if (btnFab) btnFab.style.setProperty('display', 'none', 'important');
-            if (btnSidebar) btnSidebar.style.setProperty('display', 'none', 'important');
-        }
+    if (esAdmin) {
+        if (btnFab) btnFab.style.setProperty('display', 'flex', 'important');
+        if (btnSidebar) btnSidebar.style.setProperty('display', 'flex', 'important');
+    } else {
+        if (btnFab) btnFab.style.setProperty('display', 'none', 'important');
+        if (btnSidebar) btnSidebar.style.setProperty('display', 'none', 'important');
     }
+}
 
     function cerrarSesion() {
         window.auth.signOut().then(function() {
