@@ -1678,37 +1678,59 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (window.auth) {
             window.auth.onAuthStateChanged(function(user) {
-                if (user) {
-                    // --- USUARIO LOGUEADO ---
-                    console.log("Usuario autenticado:", user.email, "UID:", user.uid);
+    console.log("[AUTH STATE CHANGE]", user ? ("Logueado como: " + user.email) : "Modo Invitado");
+    
+    var nameElem = document.getElementById('userProfileName');
+    var btnLogin = document.getElementById('btnLoginLogout');
 
-                    var nameElem = document.getElementById('userProfileName') || document.querySelector('.sidebar .profile-name');
-                    var btnLogin = document.getElementById('btnLoginLogout') || document.querySelector('.btn-login');
+    if (user) {
+        // 1. Actualizar Nombre de Perfil
+        if (nameElem) {
+            var nombreMostrar = user.displayName || (user.email ? user.email.split('@')[0] : 'Estudiante');
+            nameElem.textContent = nombreMostrar;
+        }
 
-                    if (nameElem) {
-                        nameElem.textContent = user.displayName || user.email.split('@')[0];
-                    }
-                    if (btnLogin) {
-                        btnLogin.textContent = 'Cerrar Sesión';
-                        btnLogin.onclick = function() { cerrarSesion(); };
-                        btnLogin.classList.add('btn-logout');
-                    }
+        // 2. Transformar Botón a "Cerrar Sesión"
+        if (btnLogin) {
+            btnLogin.textContent = 'Cerrar Sesión';
+            btnLogin.onclick = function() { cerrarSesion(); };
+        }
 
-                    if (typeof cargarDatosUsuarioRegistrado === 'function') {
-                        cargarDatosUsuarioRegistrado(user.uid);
-                    }
-                    verificarRolAdmin(user);
+        // 3. Cargar datos del usuario logueado
+        try {
+            if (typeof cargarDatosUsuarioRegistrado === 'function') {
+                cargarDatosUsuarioRegistrado(user.uid);
+            }
+        } catch (e) {
+            console.error("Error cargando datos del usuario:", e);
+        }
 
-                    var loginModal = document.getElementById('loginModal');
-                    if (loginModal) loginModal.classList.add('hidden');
-                } else {
-                    // --- USUARIO NO AUTENTICADO (INVITADO) ---
-                    console.log("Modo Invitado: Limpiando estados y caché privada...");
-                    sessionStorage.removeItem('ungs_is_admin');
-                    sessionStorage.removeItem('ungs_user_uid');
-                    resetearInterfazModoInvitado();
-                }
-            });;
+        // 4. Verificación Estricta de Admin
+        verificarRolAdmin(user);
+
+        var loginModal = document.getElementById('loginModal');
+        if (loginModal) loginModal.classList.add('hidden');
+
+    } else {
+        // 1. Resetear Perfil a Invitado
+        if (nameElem) nameElem.textContent = 'Invitado';
+        if (btnLogin) {
+            btnLogin.textContent = 'Ingresar';
+            btnLogin.onclick = function() { abrirModalLogin(); };
+        }
+
+        // 2. Ocultar Botones de Admin
+        mostrarBotonAdmin(false);
+
+        // 3. Limpiar memoria local
+        sessionStorage.removeItem('ungs_is_admin');
+        sessionStorage.removeItem('ungs_user_uid');
+        
+        if (typeof resetearInterfazModoInvitado === 'function') {
+            resetearInterfazModoInvitado();
+        }
+    }
+});;
         }
     });
 
@@ -1969,35 +1991,41 @@ function endTour() {
         }
 
         function verificarRolAdmin(user) {
-            var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
-            var cachedUid = sessionStorage.getItem('ungs_user_uid');
-            
-            if (cachedAdmin === 'true' && cachedUid === user.uid) {
-                mostrarBotonAdmin(true);
-                return;
-            }
-            
-            window.db.collection('roles_admin').doc(user.uid).get().then(function(doc) {
-                var esAdmin = doc.exists && doc.data().rol === 'admin';
-                sessionStorage.setItem('ungs_is_admin', esAdmin ? 'true' : 'false');
-                sessionStorage.setItem('ungs_user_uid', user.uid);
-                mostrarBotonAdmin(esAdmin);
-            }).catch(function(err) {
-                console.error("Error al consultar permisos de administrador:", err);
-                mostrarBotonAdmin(false);
-            });
-        }
+    if (!user) {
+        mostrarBotonAdmin(false);
+        return;
+    }
+
+    var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
+    var cachedUid = sessionStorage.getItem('ungs_user_uid');
+
+    // Usar caché si pertenece exactamente al usuario activo
+    if (cachedAdmin === 'true' && cachedUid === user.uid) {
+        mostrarBotonAdmin(true);
+        return;
+    }
+
+    // Consulta directa a Firestore roles_admin
+    window.db.collection('roles_admin').doc(user.uid).get().then(function(doc) {
+        var esAdmin = doc.exists && doc.data().rol === 'admin';
+        sessionStorage.setItem('ungs_is_admin', esAdmin ? 'true' : 'false');
+        sessionStorage.setItem('ungs_user_uid', user.uid);
+        mostrarBotonAdmin(esAdmin);
+    }).catch(function(err) {
+        console.error("Error consultando rol admin en Firestore:", err);
+        mostrarBotonAdmin(false);
+    });
+}
 
         function mostrarBotonAdmin(esAdmin) {
-            var btnAdminSidebar = document.getElementById('btnAdminSidebar');
-            if (btnAdminSidebar) {
-                btnAdminSidebar.style.display = esAdmin ? 'flex' : 'none';
-            }
-            var btnAdminFloating = document.getElementById('btnAdminFloating');
-            if (btnAdminFloating) {
-                btnAdminFloating.style.display = esAdmin ? 'flex' : 'none';
-            }
-        }
+    var btnFab = document.getElementById('btnAdminFloating');
+    var btnSidebar = document.getElementById('btnAdminSidebar');
+
+    var displayValue = esAdmin ? 'flex' : 'none';
+
+    if (btnFab) btnFab.style.display = displayValue;
+    if (btnSidebar) btnSidebar.style.display = displayValue;
+}
         }
         
         function cerrarSesion() {
