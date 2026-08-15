@@ -145,35 +145,28 @@
         .icon-md { width: 20px; height: 20px; }
         .icon-lg { width: 24px; height: 24px; }
 
-        .sidebar {
-            width: var(--sidebar-width); height: 100vh; background: var(--sidebar-bg);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            padding: 30px 20px 90px 20px; position: fixed; left: 0; top: 0;
-            border-right: 1px solid var(--border); overflow-y: auto;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
+                .sidebar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 280px !important;
+            height: 100vh !important;
+            z-index: 2000 !important;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .sidebar.hidden { transform: translateX(-100%); }
-
-        .toggle-btn {
-            position: fixed; left: 15px; bottom: 20px; z-index: 1100;
-            background: var(--primary); color: white; border: none; padding: 12px 20px;
-            border-radius: 8px; cursor: pointer; font-weight: 600;
-            box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 35%, transparent); transition: all 0.3s ease;
-            display: flex; align-items: center; gap: 8px;
+        .sidebar:not(.hidden) {
+            transform: translateX(0) !important;
         }
-        .toggle-btn:hover { transform: translateY(-2px); }
-
-        .theme-btn {
-            position: fixed; top: 20px; right: 20px; border: 1px solid var(--border); 
-            color: var(--text); background: var(--card-bg); backdrop-filter: blur(10px);
-            padding: 8px 15px; border-radius: 8px; cursor: pointer; z-index: 1001;
-            font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
+        .sidebar.hidden {
+            transform: translateX(-100%) !important;
+            display: none; /* Evita que ocupe espacio o interfiera con toques */
         }
-        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
-
         .main-content {
-            margin-left: var(--sidebar-width); padding: 50px 20px 90px 20px; width: 100%; max-width: 900px;
-            margin-right: auto; transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-left: 0 !important;
+            padding: 20px 15px 80px 15px !important;
+            width: 100% !important;
+            max-width: 100% !important;
         }
         .main-content.expanded { margin-left: auto; margin-right: auto; }
 
@@ -837,9 +830,7 @@
     </a>
 
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-    <a href="admin.html" id="btnAdminSidebar" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary);">
-        <i data-lucide="shield-check" class="icon-sm"></i> Panel Admin
-    </a>
+    
 
     <button id="pwaInstallBtn" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
         <i data-lucide="download" class="icon-sm"></i> Instalar App
@@ -1474,10 +1465,25 @@
         document.getElementById('mainContent').classList.toggle('expanded');
     };
 
+        var themeColors = {
+        'orange': '#080808',
+        'emerald': '#080808',
+        'midnight': '#0B132B',
+        'purple': '#080808',
+        'rose': '#080808',
+        'light': '#f9fafb'
+    };
+
     window.setCustomTheme = function(themeName) {
         document.documentElement.setAttribute('data-theme', themeName);
         localStorage.setItem('ungs_theme', themeName);
         updateThemeSwatches(themeName);
+        
+        // Actualizar meta theme-color para la barra de estado en iPhone/Android
+        var metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor && themeColors[themeName]) {
+            metaThemeColor.setAttribute('content', themeColors[themeName]);
+        }
     };
 
     function updateThemeSwatches(activeTheme) {
@@ -1713,8 +1719,7 @@
                 console.error("Error al cargar estado personal de materias:", e);
             }
 
-            // 3. CONSULTAR Y MOSTRAR ROL ADMIN SI CORRESPONDE
-            verificarRolAdmin(user);
+            
 
             var loginModal = document.getElementById('loginModal');
             if (loginModal) loginModal.classList.add('hidden');
@@ -1725,8 +1730,7 @@
             if (loginBtn) loginBtn.style.display = 'flex';
             if (logoutBtn) logoutBtn.style.display = 'none';
 
-            // 2. OCULTAR BOTONES DE ADMIN
-            mostrarBotonAdmin(false);
+            
 
             // 3. DESACTIVAR CONFIGURACIÓN DE FILTRADO Y MOSTRAR TODA LA GRILLA
             userMateriasConfig = null;
@@ -1976,45 +1980,10 @@ function endTour() {
 </script>
 
 <script>
-    function verificarRolAdmin(user) {
-    if (!user) {
-        mostrarBotonAdmin(false);
-        return;
-    }
-
-    var cachedAdmin = sessionStorage.getItem('ungs_is_admin');
-    var cachedUid = sessionStorage.getItem('ungs_user_uid');
-
-    if (cachedAdmin === 'true' && cachedUid === user.uid) {
-        mostrarBotonAdmin(true);
-        return;
-    }
-
-    if (window.db) {
-        window.db.collection('roles_admin').doc(user.uid).get().then(function(doc) {
-            var esAdmin = doc.exists && doc.data().rol === 'admin';
-            sessionStorage.setItem('ungs_is_admin', esAdmin ? 'true' : 'false');
-            sessionStorage.setItem('ungs_user_uid', user.uid);
-            mostrarBotonAdmin(esAdmin);
-        }).catch(function(err) {
-            console.error("[ADMIN CHECK ERROR]", err);
-            mostrarBotonAdmin(false);
-        });
-    }
+    
 }
 
-    function mostrarBotonAdmin(esAdmin) {
-    var btnFab = document.getElementById('btnAdminFloating');
-    var btnSidebar = document.getElementById('btnAdminSidebar');
-
-    if (esAdmin) {
-        if (btnFab) btnFab.style.setProperty('display', 'flex', 'important');
-        if (btnSidebar) btnSidebar.style.setProperty('display', 'flex', 'important');
-    } else {
-        if (btnFab) btnFab.style.setProperty('display', 'none', 'important');
-        if (btnSidebar) btnSidebar.style.setProperty('display', 'none', 'important');
-    }
-}
+    
 
     function cerrarSesion() {
         window.auth.signOut().then(function() {
@@ -2028,10 +1997,7 @@ function endTour() {
     }
 </script>
 
-<a id="btnAdminFloating" href="admin.html" class="admin-fab" style="display: none;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    <span>Panel Admin</span>
-</a>
+
 
 </body>
 </html>
