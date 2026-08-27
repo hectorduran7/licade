@@ -128,6 +128,34 @@
             z-index: 1;
         }
 
+        /* ==================== 1. BOTONES FLOTANTES CIRCULARES ==================== */
+        .fab-icon-btn {
+            position: fixed !important;
+            z-index: 9990 !important;
+            width: 46px !important;
+            height: 46px !important;
+            border-radius: 50% !important;
+            background: rgba(22, 22, 26, 0.85) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #ffffff !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1) !important;
+            padding: 0 !important;
+        }
+        .fab-icon-btn:hover {
+            border-color: var(--primary) !important;
+            color: var(--primary) !important;
+            transform: scale(1.08) !important;
+        }
+        .fab-left { bottom: 20px !important; left: 20px !important; }
+        .fab-right { top: 20px !important; right: 20px !important; }
+
         /* ==================== DOCK SUPERIOR FLOTANTE ==================== */
         .top-dock-wrapper {
             display: flex;
@@ -181,7 +209,6 @@
             color: var(--primary);
             width: 14px;
             height: 14px;
-            transition: transform 0.2s ease;
         }
 
         .dock-divider {
@@ -213,7 +240,7 @@
             margin-bottom: 24px;
         }
 
-        /* ==================== BANNER PROMO COMPACTO GLASSMORPHISM ==================== */
+        /* ==================== BANNER PROMO COMPACTO ==================== */
         .promo-banner {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -313,7 +340,7 @@
         }
         .tips-close-btn:hover { color: #ffffff; background: rgba(255,255,255,0.06); }
 
-        /* ==================== BUSCADOR ESTILO SPOTLIGHT ==================== */
+        /* ==================== BUSCADOR SPOTLIGHT ==================== */
         .search-container {
             position: relative;
             margin-bottom: 24px;
@@ -430,27 +457,7 @@
             color: var(--primary);
         }
 
-        /* ==================== LISTAS AGRUPADAS CON FILAS EN DOS LÍNEAS ==================== */
-        .section-header-ios {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            color: #86868b;
-            text-transform: uppercase;
-            margin-top: 22px;
-            margin-bottom: 8px;
-            padding-left: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .section-header-ios span.count {
-            font-weight: 500;
-            opacity: 0.7;
-            font-size: 10.5px;
-        }
-
+        /* ==================== FILAS Y LISTAS AGRUPADAS ==================== */
         .year-group-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -486,14 +493,6 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
-        .materia-row.cursando {
-            background: color-mix(in srgb, var(--primary) 3%, transparent);
-        }
-        .materia-row.aprobada {
-            background: rgba(16, 185, 129, 0.02);
-            opacity: 0.88;
-        }
-
         .materia-info {
             display: flex;
             flex-direction: column;
@@ -507,9 +506,6 @@
             font-size: 14px;
             font-weight: 500;
             color: #f5f5f5;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
             letter-spacing: -0.01em;
             transition: color 0.15s ease;
         }
@@ -525,33 +521,6 @@
             color: #86868b;
             line-height: 1.4;
             margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .badge-status {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 1px 6px;
-            border-radius: var(--radius-full);
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            margin-left: 6px;
-            vertical-align: middle;
-        }
-
-        .badge-status.cursando {
-            background: color-mix(in srgb, var(--primary) 12%, transparent);
-            color: var(--primary);
-            border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
-        }
-
-        .badge-status.aprobada {
-            background: rgba(16, 185, 129, 0.12);
-            color: #34D399;
-            border: 1px solid rgba(16, 185, 129, 0.25);
         }
 
         /* Micro-chip de votación */
@@ -568,6 +537,7 @@
             align-items: center;
             gap: 3px;
             transition: all 0.15s ease;
+            white-space: nowrap;
         }
 
         .btn-vote-chip:hover {
@@ -575,17 +545,6 @@
             border-color: rgba(255, 255, 255, 0.18);
             color: #ffffff;
             transform: scale(1.03);
-        }
-
-        /* Estado vacío */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #86868b;
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border);
-            margin-top: 10px;
         }
 
         /* ==================== FOOTER ==================== */
@@ -619,72 +578,17 @@
             color: #ffffff;
         }
 
-        /* ==================== BOTÓN FLOTANTE HERRAMIENTAS & BACKDROP ==================== */
-        .toggle-btn, #toggleSidebarBtn {
-            position: fixed !important;
-            bottom: 20px !important;
-            left: 20px !important;
-            z-index: 1000 !important;
-            background: rgba(18, 18, 22, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            color: var(--text);
-            border: 1px solid var(--border);
-            padding: 10px 16px;
-            border-radius: var(--radius-full);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .toggle-btn:hover, #toggleSidebarBtn:hover {
-            border-color: var(--primary);
-            color: #ffffff;
-            transform: translateY(-2px);
-        }
-        .toggle-btn i, #toggleSidebarBtn i { color: var(--primary); }
-
-        .floating-theme-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: rgba(18, 18, 22, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            color: var(--text);
-            border: 1px solid var(--border);
-            padding: 8px 14px;
-            border-radius: var(--radius-full);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 12.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-        }
-        .floating-theme-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* ==================== 2. SIDEBAR & BACKDROP ==================== */
+        /* ==================== SIDEBAR & BACKDROP ==================== */
         .sidebar-backdrop {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.65);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            z-index: 9999;
+            z-index: 9998;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .sidebar-backdrop.active {
             opacity: 1;
@@ -697,35 +601,50 @@
             left: 0 !important;
             width: 290px !important;
             height: 100vh !important;
-            background: var(--sidebar-bg) !important;
+            background: rgba(12, 12, 14, 0.95) !important;
             backdrop-filter: blur(25px) saturate(180%) !important;
             -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
-            border-right: 1px solid var(--border) !important;
-            padding: 24px 18px 80px 18px !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+            padding: 24px 18px 90px 18px !important;
             overflow-y: auto !important;
-            z-index: 10000 !important;
-            transform: translateX(0) !important;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-            box-shadow: 15px 0 40px rgba(0, 0, 0, 0.7) !important;
+            z-index: 9999 !important;
+            transform: translateX(0);
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+            box-shadow: 12px 0 35px rgba(0, 0, 0, 0.7) !important;
         }
-
         .sidebar.hidden {
             transform: translateX(-100%) !important;
             pointer-events: none !important;
         }
 
+        .sidebar-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .sidebar-brand {
+            font-weight: 800;
+            font-size: 15px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
         .sidebar-close-btn {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(255, 255, 255, 0.05);
             color: #8e8e93;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.2s ease;
         }
         .sidebar-close-btn:hover {
             background: rgba(255, 255, 255, 0.12);
@@ -761,40 +680,17 @@
             height: 15px;
         }
 
-        .sidebar-section-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--text-dim);
-            margin: 16px 0 6px 6px;
-        }
-
-        .sidebar hr {
-            border: 0;
-            border-top: 1px solid var(--border);
-            margin: 14px 0;
-        }
-
         /* Swatches */
-        .theme-panel-section {
-            margin-top: 15px;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-        }
         .theme-swatches {
             display: flex;
-            gap: 6px;
+            gap: 10px;
             justify-content: space-between;
             align-items: center;
-            margin-top: 8px;
         }
         .theme-swatch {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
             border: 2px solid transparent;
             cursor: pointer;
             transition: all 0.18s ease;
@@ -833,20 +729,6 @@
             padding: 28px;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
-        }
-
-        .login-modal-content h2, .login-modal-content h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            color: #ffffff;
-            margin-bottom: 6px;
-        }
-
-        .login-modal-content p {
-            color: var(--text-muted);
-            font-size: 13px;
-            margin-bottom: 18px;
         }
 
         .login-tabs {
@@ -973,95 +855,6 @@
             margin-top: 15px;
         }
 
-        /* Tour */
-        .tour-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 100000;
-        }
-
-        .tour-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 420px;
-            background: #121215;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            z-index: 100001;
-            box-shadow: 0 25px 70px rgba(0,0,0,0.9);
-        }
-
-        .tour-modal h3 {
-            font-size: 1.15rem;
-            color: #ffffff;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .tour-modal h3 i { color: var(--primary); }
-
-        .tour-modal p {
-            color: var(--text-muted);
-            font-size: 13px;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .tour-dots {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            margin-bottom: 18px;
-        }
-
-        .tour-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.2);
-            transition: all 0.2s ease;
-        }
-        .tour-dot.active {
-            width: 16px;
-            background: var(--primary);
-        }
-
-        .tour-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .tour-btn-skip {
-            background: transparent;
-            border: none;
-            color: var(--text-dim);
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .tour-btn-skip:hover { color: #ffffff; }
-
-        .tour-btn-next {
-            padding: 8px 18px;
-            background: var(--primary);
-            color: #111;
-            font-weight: 700;
-            font-size: 13px;
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-        }
-
-        /* ==================== 5. ADAPTABILIDAD MOBILE ESTRICTA ==================== */
         @media (max-width: 768px) {
             .main-content {
                 padding: 20px 14px 80px 14px !important;
@@ -1079,141 +872,63 @@
             .materia-row {
                 padding: 12px 14px;
             }
-            .toggle-btn, #toggleSidebarBtn {
-                bottom: 16px !important;
-                left: 16px !important;
-                padding: 10px 18px !important;
-                font-size: 13px !important;
-            }
-            header h1 { font-size: 1.8rem; }
-            .top-dock {
-                width: 100%;
-                justify-content: space-between;
-                padding: 4px;
-            }
-            .dock-item {
-                padding: 6px 10px;
-                font-size: 11.5px;
-                gap: 5px;
-            }
-            .floating-theme-btn {
-                top: 16px;
-                right: 16px;
-                padding: 6px 12px;
-                font-size: 11.5px;
-            }
+            .fab-left { bottom: 16px !important; left: 16px !important; }
+            .fab-right { top: 16px !important; right: 16px !important; }
         }
     </style>
 </head>
 <body>
 
-<!-- 2. BACKDROP OVERLAY PARA SIDEBAR -->
-<div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
+<!-- 1. BOTONES FLOTANTES CON ÍCONOS SVG NATIVOS (INLINE) -->
+<!-- Telón de fondo para cerrar al hacer clic afuera -->
+<div id="sidebarBackdrop" class="sidebar-backdrop"></div>
 
-<!-- ==================== MODAL DE LOGIN ==================== -->
-<div id="loginModal" class="login-modal hidden">
-    <div class="login-modal-content">
-        <i data-lucide="lock" style="color: var(--primary); margin: 0 auto 12px auto; width: 32px; height: 32px;"></i>
-        <h2>Bienvenido a La Biblioteca</h2>
-        <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones.</p>
+<!-- Botón Menú Flotante (Abajo a la izquierda) -->
+<button id="toggleSidebarBtn" class="fab-icon-btn fab-left" aria-label="Abrir Menú">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+</button>
 
-        <div class="login-tabs">
-            <button class="login-tab active" onclick="switchTab('login')">Ingresar</button>
-            <button class="login-tab" onclick="switchTab('register')">Registrarse</button>
-        </div>
+<!-- Botón Ajustes/Tema (Arriba a la derecha) -->
+<button id="btnSettingsTheme" class="fab-icon-btn fab-right" aria-label="Configuración de Tema">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+</button>
 
-        <div id="panelLogin" class="login-panel active">
-            <button class="btn-google" id="btnGoogleLogin">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                Continuar con Google
-            </button>
-            <div class="login-divider">o con tu correo</div>
-            <input type="email" id="loginEmail" class="login-input" placeholder="tu@gmail.com">
-            <input type="password" id="loginPassword" class="login-input" placeholder="Contraseña">
-            <div id="loginError" class="login-error"></div>
-            <button id="btnEmailLogin" class="btn-primary-solid" style="width: 100%; height: 42px; font-size: 13.5px;">
-                Ingresar
+<!-- MODAL DE APARIENCIA (#settingsModal) -->
+<div id="settingsModal" class="login-modal hidden" style="z-index: 10002;">
+    <div class="login-modal-content" style="max-width: 360px; text-align: left; padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="palette" style="color: var(--primary); width: 18px; height: 18px;"></i> Apariencia y Tema
+            </h3>
+            <button onclick="document.getElementById('settingsModal').classList.add('hidden')" style="background: transparent; border: none; color: #8e8e93; cursor: pointer; padding: 4px;">
+                <i data-lucide="x" style="width: 18px; height: 18px;"></i>
             </button>
         </div>
-
-        <div id="panelRegister" class="login-panel">
-            <button class="btn-google" id="btnGoogleRegister">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                Registrarse con Google
-            </button>
-            <div class="login-divider">o creá una cuenta</div>
-            <input type="email" id="registerEmail" class="login-input" placeholder="tu@gmail.com">
-            <input type="password" id="registerPassword" class="login-input" placeholder="Contraseña (mín. 6 caracteres)">
-            <input type="password" id="registerPassword2" class="login-input" placeholder="Repetí tu contraseña">
-            <div id="registerError" class="login-error"></div>
-            <button id="btnEmailRegister" class="btn-primary-solid" style="width: 100%; height: 42px; font-size: 13.5px;">
-                Crear cuenta
-            </button>
-        </div>
-
-        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; height: 38px; margin-top: 12px; font-size: 12.5px; color: var(--text-muted);">
-            Continuar como invitado
-        </button>
-    </div>
-</div>
-
-<!-- ==================== 4. MODAL DE PERSONALIZACIÓN (MIS MATERIAS) ==================== -->
-<div id="persModal" class="login-modal hidden" style="z-index: 2005;">
-    <div class="login-modal-content" style="max-width: 520px; max-height: 88vh; display: flex; flex-direction: column; text-align: left;">
-        <h2 style="margin-bottom: 4px;">Personalizá tu cursada</h2>
-        <p style="margin-bottom: 16px;">Marcá tus materias cursando y aprobadas para destacarlas en el panel.</p>
-        
-        <div class="login-tabs">
-            <button class="login-tab active" id="tabCursando" onclick="switchPersTab('cursando')">Cursando Actualmente</button>
-            <button class="login-tab" id="tabAprobadas" onclick="switchPersTab('aprobadas')">Ya Aprobadas</button>
-        </div>
-
-        <div id="persListCursando" style="overflow-y: auto; flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.3);">
-        </div>
-        
-        <div id="persListAprobadas" class="hidden" style="overflow-y: auto; flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.3);">
-        </div>
-
-        <div class="vote-modal-buttons">
-            <button onclick="cerrarModalPersonalizacion()" class="btn-dark" style="padding: 8px 16px; font-size: 13px;">Cancelar</button>
-            <button onclick="guardarPersonalizacion()" class="btn-primary-solid" style="padding: 8px 18px; font-size: 13px;">Guardar materias</button>
+        <p style="font-size: 13px; color: #86868b; margin: 0 0 16px 0;">Elegí el color de acento para personalizar tu plataforma:</p>
+        <div class="theme-swatches">
+            <button type="button" class="theme-swatch" data-theme-name="orange" onclick="setCustomTheme('orange')" title="Naranja" style="background: #FF8C00;"></button>
+            <button type="button" class="theme-swatch" data-theme-name="emerald" onclick="setCustomTheme('emerald')" title="Esmeralda" style="background: #059669;"></button>
+            <button type="button" class="theme-swatch" data-theme-name="midnight" onclick="setCustomTheme('midnight')" title="Azul Noche" style="background: #3B82F6;"></button>
+            <button type="button" class="theme-swatch" data-theme-name="purple" onclick="setCustomTheme('purple')" title="Púrpura" style="background: #8B5CF6;"></button>
+            <button type="button" class="theme-swatch" data-theme-name="rose" onclick="setCustomTheme('rose')" title="Rosa" style="background: #F43F5E;"></button>
+            <button type="button" class="theme-swatch" data-theme-name="light" onclick="setCustomTheme('light')" title="Claro" style="background: #f9fafb; border: 1px solid #9ca3af;"></button>
         </div>
     </div>
 </div>
 
-<!-- ==================== BOTONES FLOTANTES ==================== -->
-<button id="toggleSidebarBtn" class="toggle-btn" onclick="toggleSidebar(true)">
-    <i data-lucide="menu" style="width: 16px; height: 16px;"></i>
-    <span>Herramientas</span>
-</button>
-
-<button class="floating-theme-btn" onclick="toggleTheme()">
-    <i data-lucide="moon" style="width: 14px; height: 14px;"></i>
-    <span>Tema</span>
-</button>
-
-<!-- ==================== 2. SIDEBAR CON BOTÓN DE CIERRE PRÉMIUM ==================== -->
+<!-- ==================== SIDEBAR (SIN SECCIÓN DE APARIENCIA) ==================== -->
 <aside class="sidebar hidden" id="sidebar">
-    <div class="sidebar-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <span style="font-weight: 800; font-size: 16px; color: var(--primary); display: flex; align-items: center; gap: 8px;">
-            <i data-lucide="library" style="width: 20px; height: 20px;"></i> ADE UNGS
-        </span>
-        <button id="sidebarCloseBtn" class="sidebar-close-btn" aria-label="Cerrar menú" onclick="toggleSidebar(false)">
-            <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+    <div class="sidebar-header-row">
+        <div class="sidebar-brand">
+            <i data-lucide="library" style="color: var(--primary); width: 20px; height: 20px;"></i>
+            <span>ADE UNGS</span>
+        </div>
+        <button id="sidebarCloseBtn" class="sidebar-close-btn" aria-label="Cerrar barra lateral">
+            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
         </button>
     </div>
 
-    <div id="userProfile" style="margin-bottom: 18px; padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;">
+    <div id="userProfile" style="margin-bottom: 18px; padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
         <i data-lucide="user-circle" style="color: var(--primary); margin: 0 auto 6px auto; width: 28px; height: 28px;"></i>
         <p id="userName" style="font-weight: 600; margin-bottom: 10px; font-size: 13px; color: var(--text);">Invitado</p>
         <button id="sidebarLoginBtn" class="btn-primary-solid" style="width: 100%; height: 34px; font-size: 12.5px; display: flex; justify-content: center; align-items: center; gap: 6px;">
@@ -1224,7 +939,7 @@
         </button>
     </div>
 
-    <p class="sidebar-section-title">Navegación</p>
+    <p style="color: #86868b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 6px 6px;">Navegación</p>
 
     <a href="index.html" class="btn-sidebar" style="background: rgba(255,255,255,0.06); color: #fff;">
         <i data-lucide="search"></i> Buscar Materias
@@ -1247,9 +962,9 @@
         <span style="font-size: 9.5px; background: color-mix(in srgb, var(--primary) 15%, transparent); color: var(--primary); padding: 2px 5px; border-radius: 4px; font-weight: 700;">PRÓXIMO</span>
     </a>
 
-    <hr>
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 14px 0;">
     
-    <p class="sidebar-section-title">Oportunidades</p>
+    <p style="color: #86868b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 6px 6px;">Oportunidades</p>
 
     <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar" rel="noopener noreferrer">
         <i data-lucide="briefcase"></i> Bolsa de Trabajo
@@ -1258,9 +973,9 @@
         <i data-lucide="building"></i> Pasantías UNGS
     </a>
 
-    <hr>
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 14px 0;">
 
-    <p class="sidebar-section-title">Comunidad</p>
+    <p style="color: #86868b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 6px 6px;">Comunidad</p>
 
     <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar" rel="noopener noreferrer">
         <i data-lucide="message-square-plus"></i> Dejar Recomendación
@@ -1275,20 +990,6 @@
     <button id="pwaInstallBtn" class="btn-sidebar" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
         <i data-lucide="download"></i> Instalar App
     </button>
-
-    <div class="theme-panel-section">
-        <p style="color: var(--text); font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="palette" style="color: var(--primary); width: 14px; height: 14px;"></i> Paleta de Acento
-        </p>
-        <div class="theme-swatches">
-            <button type="button" class="theme-swatch" data-theme-name="orange" onclick="setCustomTheme('orange')" title="Naranja" style="background: #FF8C00;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="emerald" onclick="setCustomTheme('emerald')" title="Esmeralda" style="background: #10B981;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="midnight" onclick="setCustomTheme('midnight')" title="Azul Noche" style="background: #3B82F6;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="purple" onclick="setCustomTheme('purple')" title="Púrpura" style="background: #8B5CF6;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="rose" onclick="setCustomTheme('rose')" title="Rosa" style="background: #F43F5E;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="light" onclick="setCustomTheme('light')" title="Claro" style="background: #f9fafb; border: 1px solid #9ca3af;"></button>
-        </div>
-    </div>
 </aside>
 
 <!-- ==================== CONTENEDOR PRINCIPAL ==================== -->
@@ -1350,47 +1051,24 @@
     <!-- BUSCADOR SPOTLIGHT -->
     <div class="search-container">
         <i data-lucide="search" class="search-icon-spotlight"></i>
-        <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="handleSearchInput()">
+        <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="filterMaterias()">
     </div>
 
-    <!-- 3. CONTROL SEGMENTADO iOS CON TOTAL EXACTO (38 MATERIAS) -->
-    <div class="segmented-control" id="yearTabsContainer">
-        <button class="segment-btn active" onclick="setYearFilter('ALL', this)">
-            <span>Todas</span>
-            <span class="segment-count" id="count-ALL">38</span>
-        </button>
-        <button class="segment-btn" onclick="setYearFilter('PRIMER AÑO', this)">
-            <span>1° Año</span>
-            <span class="segment-count" id="count-1">6</span>
-        </button>
-        <button class="segment-btn" onclick="setYearFilter('SEGUNDO AÑO', this)">
-            <span>2° Año</span>
-            <span class="segment-count" id="count-2">6</span>
-        </button>
-        <button class="segment-btn" onclick="setYearFilter('TERCER AÑO', this)">
-            <span>3° Año</span>
-            <span class="segment-count" id="count-3">6</span>
-        </button>
-        <button class="segment-btn" onclick="setYearFilter('CUARTO AÑO', this)">
-            <span>4° Año</span>
-            <span class="segment-count" id="count-4">7</span>
-        </button>
-        <button class="segment-btn" onclick="setYearFilter('QUINTO AÑO', this)">
-            <span>5° Año</span>
-            <span class="segment-count" id="count-5">6</span>
-        </button>
-        <button class="segment-btn" onclick="setYearFilter('SEXTO AÑO', this)">
-            <span>6° Año</span>
-            <span class="segment-count" id="count-6">3</span>
-        </button>
-        <button class="segment-btn" onclick="setYearFilter('EXTRACURRICULARES', this)">
-            <span>Extras</span>
-            <span class="segment-count" id="count-ext">4</span>
-        </button>
-    </div>
+    <!-- 3. CONTROL SEGMENTADO iOS CON DATA-FILTER -->
+    <!-- Control Segmentado de Años -->
+<div class="segmented-control" id="yearTabsContainer" style="display: flex; gap: 6px; overflow-x: auto; margin-bottom: 24px; padding: 4px; background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); scrollbar-width: none;">
+    <button type="button" class="segment-btn active" data-filter="TODAS" onclick="setFilter('TODAS')">Todas <span style="opacity: 0.6; font-size: 11px;">38</span></button>
+    <button type="button" class="segment-btn" data-filter="PRIMER AÑO" onclick="setFilter('PRIMER AÑO')">1° Año <span style="opacity: 0.6; font-size: 11px;">6</span></button>
+    <button type="button" class="segment-btn" data-filter="SEGUNDO AÑO" onclick="setFilter('SEGUNDO AÑO')">2° Año <span style="opacity: 0.6; font-size: 11px;">6</span></button>
+    <button type="button" class="segment-btn" data-filter="TERCER AÑO" onclick="setFilter('TERCER AÑO')">3° Año <span style="opacity: 0.6; font-size: 11px;">6</span></button>
+    <button type="button" class="segment-btn" data-filter="CUARTO AÑO" onclick="setFilter('CUARTO AÑO')">4° Año <span style="opacity: 0.6; font-size: 11px;">7</span></button>
+    <button type="button" class="segment-btn" data-filter="QUINTO AÑO" onclick="setFilter('QUINTO AÑO')">5° Año <span style="opacity: 0.6; font-size: 11px;">6</span></button>
+    <button type="button" class="segment-btn" data-filter="SEXTO AÑO" onclick="setFilter('SEXTO AÑO')">6° Año <span style="opacity: 0.6; font-size: 11px;">3</span></button>
+    <button type="button" class="segment-btn" data-filter="EXTRACURRICULARES" onclick="setFilter('EXTRACURRICULARES')">Extras <span style="opacity: 0.6; font-size: 11px;">4</span></button>
+</div>
 
-    <!-- 3. LISTAS AGRUPADAS CON FILAS EN DOS LÍNEAS -->
-    <div id="subjectsContainer"></div>
+    <!-- 3. CONTENEDOR DE MATERIAS -->
+    <div id="accordionContainer"></div>
 
     <!-- FOOTER -->
     <footer class="footer-ios">
@@ -1405,6 +1083,87 @@
         </button>
     </footer>
 </main>
+
+<!-- ==================== MODAL DE LOGIN ==================== -->
+<div id="loginModal" class="login-modal hidden">
+    <div class="login-modal-content">
+        <i data-lucide="lock" style="color: var(--primary); margin: 0 auto 12px auto; width: 32px; height: 32px;"></i>
+        <h2>Bienvenido a La Biblioteca</h2>
+        <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones.</p>
+
+        <div class="login-tabs">
+            <button class="login-tab active" onclick="switchTab('login')">Ingresar</button>
+            <button class="login-tab" onclick="switchTab('register')">Registrarse</button>
+        </div>
+
+        <div id="panelLogin" class="login-panel active">
+            <button class="btn-google" id="btnGoogleLogin">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Continuar con Google
+            </button>
+            <div class="login-divider">o con tu correo</div>
+            <input type="email" id="loginEmail" class="login-input" placeholder="tu@gmail.com">
+            <input type="password" id="loginPassword" class="login-input" placeholder="Contraseña">
+            <div id="loginError" class="login-error"></div>
+            <button id="btnEmailLogin" class="btn-primary-solid" style="width: 100%; height: 42px; font-size: 13.5px;">
+                Ingresar
+            </button>
+        </div>
+
+        <div id="panelRegister" class="login-panel">
+            <button class="btn-google" id="btnGoogleRegister">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Registrarse con Google
+            </button>
+            <div class="login-divider">o creá una cuenta</div>
+            <input type="email" id="registerEmail" class="login-input" placeholder="tu@gmail.com">
+            <input type="password" id="registerPassword" class="login-input" placeholder="Contraseña (mín. 6 caracteres)">
+            <input type="password" id="registerPassword2" class="login-input" placeholder="Repetí tu contraseña">
+            <div id="registerError" class="login-error"></div>
+            <button id="btnEmailRegister" class="btn-primary-solid" style="width: 100%; height: 42px; font-size: 13.5px;">
+                Crear cuenta
+            </button>
+        </div>
+
+        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; height: 38px; margin-top: 12px; font-size: 12.5px; color: var(--text-muted);">
+            Continuar como invitado
+        </button>
+    </div>
+</div>
+
+<!-- ==================== MODAL DE PERSONALIZACIÓN ==================== -->
+<div id="persModal" class="login-modal hidden" style="z-index: 2005;">
+    <div class="login-modal-content" style="max-width: 520px; max-height: 88vh; display: flex; flex-direction: column; text-align: left;">
+        <h2 style="margin-bottom: 4px;">Personalizá tu cursada</h2>
+        <p style="margin-bottom: 16px;">Marcá tus materias cursando y aprobadas para destacarlas en el panel.</p>
+        
+        <div class="login-tabs">
+            <button class="login-tab active" id="tabCursando" onclick="switchPersTab('cursando')">Cursando Actualmente</button>
+            <button class="login-tab" id="tabAprobadas" onclick="switchPersTab('aprobadas')">Ya Aprobadas</button>
+        </div>
+
+        <div id="persListCursando" style="overflow-y: auto; flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.3);">
+        </div>
+        
+        <div id="persListAprobadas" class="hidden" style="overflow-y: auto; flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.3);">
+        </div>
+
+        <div class="vote-modal-buttons">
+            <button onclick="cerrarModalPersonalizacion()" class="btn-dark" style="padding: 8px 16px; font-size: 13px;">Cancelar</button>
+            <button onclick="guardarPersonalizacion()" class="btn-primary-solid" style="padding: 8px 18px; font-size: 13px;">Guardar materias</button>
+        </div>
+    </div>
+</div>
 
 <!-- ==================== MODAL DE VOTACIÓN ==================== -->
 <div id="voteModal" class="login-modal hidden">
@@ -1423,42 +1182,6 @@
             <button onclick="closeVoteModal()" class="btn-dark" style="padding: 8px 16px; font-size: 13px;">Cancelar</button>
             <button onclick="submitVote()" class="btn-primary-solid" style="padding: 8px 20px; font-size: 13px;">Votar</button>
         </div>
-    </div>
-</div>
-
-<!-- ==================== ONBOARDING TOUR ==================== -->
-<div id="tourOverlay" class="tour-overlay" style="display: none;"></div>
-<div id="tourTooltip" class="tour-modal" style="display: none;">
-    <h3 id="tourTitle"></h3>
-    <p id="tourText"></p>
-    <div class="tour-dots" id="tourDots"></div>
-    <div class="tour-footer">
-        <button id="tourBtnSkip" class="tour-btn-skip">Omitir</button>
-        <button id="tourBtnNext" class="tour-btn-next">Siguiente</button>
-    </div>
-</div>
-
-<!-- PWA Instructions Modal -->
-<div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;">
-    <div class="login-modal-content" style="max-width: 440px; text-align: left;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="margin: 0; font-size: 16px; color: var(--primary); font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="download-cloud" style="width: 18px; height: 18px;"></i> Instalar Aplicación
-            </h3>
-            <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px;">&times;</button>
-        </div>
-        <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px;">Instalá La Biblioteca en tu pantalla de inicio para acceso instantáneo:</p>
-        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px;">
-            <div style="padding: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm);">
-                <strong style="color: var(--text); display: block; margin-bottom: 2px;">En iPhone / Safari:</strong>
-                <span style="color: var(--text-muted);">Tocá el botón <em>Compartir</em> y elegí <em>Agregar a inicio</em>.</span>
-            </div>
-            <div style="padding: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm);">
-                <strong style="color: var(--text); display: block; margin-bottom: 2px;">En Android / Chrome / PC:</strong>
-                <span style="color: var(--text-muted);">Hacé clic en el ícono de instalación en la barra del navegador.</span>
-            </div>
-        </div>
-        <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 16px; padding: 10px; font-size: 13px;">Entendido</button>
     </div>
 </div>
 
@@ -1491,11 +1214,6 @@
         });
     }
     
-    function validateEmail(email) {
-        var re = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
-        return re.test(email);
-    }
-    
     function generarIdValido(texto) {
         return texto.toLowerCase()
             .replace(/[^a-z0-9]/g, '_')
@@ -1504,7 +1222,7 @@
             .substring(0, 100);
     }
 
-    // ==================== 3. DATOS DE MATERIAS (TOTAL EXACTO: 38 MATERIAS) ====================
+    // ==================== 2. DATASET COMPLETO Y CORRELATIVAS (38 MATERIAS EXACTAS) ====================
     var data = {
         "PRIMER AÑO": [
             {n: "Taller Inicial Común: Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1YphnRCiVML6CFc5VHpnvYXHqIshk2oUt?usp=sharing", req: ""},
@@ -1560,115 +1278,16 @@
         ]
     };
 
-    var currentYearFilter = 'ALL';
+    var currentFilter = 'TODAS';
     var userMateriasConfig = null;
     var statsCache = {};
 
-    // ==================== 3. RENDER DE MATERIAS (DOS LÍNEAS + INSET GROUPED) ====================
-    function render() {
-        var container = document.getElementById('subjectsContainer');
-        if (!container) return;
-        
-        var query = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').toLowerCase().trim();
-        var html = '';
-        var totalRendered = 0;
-
-        for (var year in data) {
-            if (currentYearFilter !== 'ALL' && currentYearFilter !== year) {
-                continue;
-            }
-
-            var mats = data[year];
-            var yearRowsHtml = '';
-            var yearVisibleCount = 0;
-
-            mats.forEach(function(m) {
-                var safeName = sanitizeHTML(m.n);
-                var safeReq = m.req ? sanitizeHTML(m.req) : '';
-                var safeLink = encodeURIComponent(m.l);
-                var safeNameForAttr = m.n.replace(/'/g, "\'").replace(/"/g, '&quot;');
-                var materiaId = generarIdValido(m.n);
-
-                if (query) {
-                    var matchName = m.n.toLowerCase().includes(query);
-                    var matchReq = (m.req || '').toLowerCase().includes(query);
-                    var matchYear = year.toLowerCase().includes(query);
-                    if (!matchName && !matchReq && !matchYear) return;
-                }
-
-                var esAprobada = userMateriasConfig && userMateriasConfig.aprobadas && userMateriasConfig.aprobadas.includes(m.n);
-                var esCursando = userMateriasConfig && userMateriasConfig.cursando && userMateriasConfig.cursando.includes(m.n);
-
-                var statusClass = esAprobada ? " aprobada" : (esCursando ? " cursando" : "");
-                var statusBadge = '';
-
-                if (esAprobada) {
-                    statusBadge = '<span class="badge-status aprobada"><i data-lucide="check" style="width:9px;height:9px;"></i> Aprobada</span>';
-                } else if (esCursando) {
-                    statusBadge = '<span class="badge-status cursando"><i data-lucide="book-open" style="width:9px;height:9px;"></i> Cursando</span>';
-                }
-
-                var stat = statsCache[materiaId];
-                var promedioTexto = (stat && stat.promedio) ? stat.promedio.toFixed(1) : '0.0';
-
-                // Línea 1: Nombre + Badges | Línea 2: Correlativas atenuadas
-                yearRowsHtml += `
-                    <div class="materia-row${statusClass}" onclick="openDoc('${safeNameForAttr}', '${safeLink}')">
-                        <div class="materia-info">
-                            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                                <span class="materia-name">${safeName}</span>
-                                ${statusBadge}
-                            </div>
-                            ${safeReq ? `<span class="materia-req">Req: ${safeReq}</span>` : ''}
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                            <button class="btn-vote-chip" data-materia-nombre="${safeNameForAttr}" data-materia-id="${materiaId}" onclick="event.stopPropagation(); abrirModalVotacion('${safeNameForAttr}', '${materiaId}')" title="Calificar dificultad">
-                                <span style="color: #F59E0B; font-size: 10px;">★</span>
-                                <span id="stat-avg-${materiaId}">${promedioTexto}</span>
-                            </button>
-                            <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: #636366;"></i>
-                        </div>
-                    </div>
-                `;
-                totalRendered++;
-                yearVisibleCount++;
-            });
-
-            if (yearRowsHtml) {
-                html += `
-                    <div class="section-header-ios">
-                        <span>${year}</span>
-                        <span class="count">${yearVisibleCount} materias</span>
-                    </div>
-                    <div class="year-group-card">
-                        ${yearRowsHtml}
-                    </div>
-                `;
-            }
-        }
-
-        if (totalRendered === 0) {
-            html = `<div class="empty-state">
-                <i data-lucide="search-x" style="width: 32px; height: 32px; color: var(--text-dim); margin: 0 auto 10px auto; display: block;"></i>
-                <p>No se encontraron materias que coincidan con la búsqueda.</p>
-            </div>`;
-        }
-
-        container.innerHTML = html;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-
-    // ==================== CONTROL SEGMENTADO ====================
-    window.setYearFilter = function(year, btn) {
-        currentYearFilter = year;
-        document.querySelectorAll('.segment-btn').forEach(function(b) {
-            b.classList.remove('active');
+        // ==================== FUNCIÓN DE FILTRADO Y RENDERIZADO ====================
+    window.setFilter = function(filtro) {
+        currentFilter = filtro;
+        document.querySelectorAll('.segment-btn').forEach(function(btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-filter') === filtro);
         });
-        if (btn) btn.classList.add('active');
-        render();
-    };
-
-    window.handleSearchInput = function() {
         render();
     };
 
@@ -1677,21 +1296,100 @@
         window.location.href = 'visor.html?name=' + encodeURIComponent(safeName) + '&link=' + link;
     };
 
-    // ==================== 2. TOGGLE SIDEBAR & BACKDROP ====================
-    window.toggleSidebar = function(forceState) {
-        var sb = document.getElementById('sidebar');
-        var bd = document.getElementById('sidebarBackdrop');
-        if (!sb) return;
-        var isHidden = sb.classList.contains('hidden');
-        var shouldOpen = typeof forceState === 'boolean' ? forceState : isHidden;
-        if (shouldOpen) {
-            sb.classList.remove('hidden');
-            if (bd) bd.classList.add('active');
-        } else {
-            sb.classList.add('hidden');
-            if (bd) bd.classList.remove('active');
+    window.render = function() {
+        var container = document.getElementById('accordionContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        for (var year in data) {
+            if (currentFilter !== 'TODAS' && currentFilter !== year) continue;
+
+            var mats = data[year];
+            var safeYear = sanitizeHTML(year);
+
+            // STRICT FILTERING FOR LOGGED IN USERS: ONLY SHOW "CURSANDO"
+            var esUsuarioLogueado = userMateriasConfig !== null;
+            var tieneMateriasConfig = userMateriasConfig && userMateriasConfig.cursando;
+            
+            if (esUsuarioLogueado && tieneMateriasConfig && currentFilter === 'TODAS') {
+                mats = mats.filter(function(m) {
+                    return userMateriasConfig.cursando.includes(m.n);
+                });
+            }
+
+            if (mats.length === 0) continue;
+
+            var itemsHtml = mats.map(function(m) {
+                var safeName = sanitizeHTML(m.n);
+                var safeReq = m.req ? sanitizeHTML(m.req) : '';
+                var safeLink = encodeURIComponent(m.l);
+                var safeNameForAttr = m.n.replace(/'/g, "\'").replace(/"/g, '&quot;');
+                var materiaId = generarIdValido(m.n);
+
+                var esAprobada = userMateriasConfig && userMateriasConfig.aprobadas && userMateriasConfig.aprobadas.includes(m.n);
+                var esCursando = userMateriasConfig && userMateriasConfig.cursando && userMateriasConfig.cursando.includes(m.n);
+
+                var badge = '';
+                if (esAprobada) {
+                    badge = '<span class="badge-aprobada" style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); margin-left: 6px;">Aprobada</span>';
+                } else if (esCursando) {
+                    badge = '<span class="badge-cursando" style="font-size: 11px; padding: 2px 6px; border-radius: 4px; background: color-mix(in srgb, var(--primary, #FF8C00) 15%, transparent); color: var(--primary, #FF8C00); border: 1px solid color-mix(in srgb, var(--primary, #FF8C00) 35%, transparent); margin-left: 6px;">Cursando</span>';
+                }
+                
+                var stat = typeof statsCache !== 'undefined' ? statsCache[materiaId] : null;
+                var promedioTexto = (stat && stat.promedio) ? stat.promedio.toFixed(1) : '0.0';
+
+                return '<div class="materia-row" onclick="openDoc(\'' + safeNameForAttr + '\', \'' + safeLink + '\')" style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.15s ease;">' +
+                    '<div class="materia-info" style="display: flex; flex-direction: column; gap: 2px;">' +
+                        '<div style="display: flex; align-items: center; flex-wrap: wrap;">' +
+                            '<span class="materia-name" style="font-size: 14px; font-weight: 500; color: #f5f5f5;">' + safeName + '</span>' +
+                            badge +
+                        '</div>' +
+                        (safeReq ? '<span class="materia-req" style="font-size: 12px; color: #86868b; margin-top: 2px;">Req: ' + safeReq + '</span>' : '') +
+                    '</div>' +
+                    '<div style="display: flex; align-items: center; gap: 10px;">' +
+                        '<button class="btn-vote-chip" data-materia-id="' + materiaId + '" onclick="event.stopPropagation(); abrirModalVotacion(\'' + safeNameForAttr + '\', \'' + materiaId + '\')" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); color: #e5e5ea; padding: 3px 8px; border-radius: 6px; font-size: 11px; cursor: pointer;">★ ' + promedioTexto + '</button>' +
+                        '<span style="color: #636366; font-size: 16px;">›</span>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+
+            var section = document.createElement('div');
+            section.className = 'year-group-card';
+            section.style.cssText = 'background: rgba(18, 18, 20, 0.65); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; margin-bottom: 24px; overflow: hidden; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);';
+            section.innerHTML = 
+                '<div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 18px 8px 18px;">' +
+                    '<span style="font-size: 11px; font-weight: 700; color: #86868b; text-transform: uppercase; letter-spacing: 0.06em;">' + safeYear + '</span>' +
+                    '<span style="font-size: 11px; color: #636366; font-weight: 600;">' + mats.length + ' MATERIAS</span>' +
+                '</div>' + itemsHtml;
+            container.appendChild(section);
         }
+
+        try {
+            if (typeof cargarEstadisticasMaterias === 'function') cargarEstadisticasMaterias();
+        } catch(e) {
+            console.warn("Estadísticas pendientes de inicialización:", e);
+        }
+    }
+
+    // ==================== FILTRADO POR BUSCADOR ====================
+    window.filterMaterias = function() {
+        var input = document.getElementById('searchInput').value.toLowerCase().trim();
+        var rows = document.querySelectorAll('.materia-row');
+        var cards = document.querySelectorAll('.year-group-card');
+
+        rows.forEach(function(row) {
+            var name = row.querySelector('.materia-name').textContent.toLowerCase();
+            var req = row.querySelector('.materia-req') ? row.querySelector('.materia-req').textContent.toLowerCase() : '';
+            row.style.display = (name.includes(input) || req.includes(input)) ? 'flex' : 'none';
+        });
+
+        cards.forEach(function(card) {
+            var visibleRows = card.querySelectorAll('.materia-row[style*="display: flex"]');
+            card.style.display = (input === '' || visibleRows.length > 0) ? 'block' : 'none';
+        });
     };
+
 
     // ==================== ESTADÍSTICAS Y VOTACIÓN ====================
     var selectedMateria = null;
@@ -1708,8 +1406,8 @@
                     promedio: d.promedio || 0,
                     totalVotos: d.totalVotos || 0
                 };
-                var avgSpan = document.getElementById('stat-avg-' + doc.id);
-                if (avgSpan) avgSpan.textContent = d.promedio ? d.promedio.toFixed(1) : '0.0';
+                var btn = document.querySelector('.btn-vote-chip[data-materia-id="' + doc.id + '"]');
+                if (btn) btn.innerHTML = '★ ' + (d.promedio ? d.promedio.toFixed(1) : '0.0');
             });
         }).catch(function(err) {
             console.warn("Estadísticas offline:", err);
@@ -1799,7 +1497,7 @@
         });
     };
 
-    // ==================== 4. PERSONALIZACIÓN DE MATERIAS EN LA NUBE ====================
+    // ==================== PERSONALIZACIÓN DE MATERIAS ====================
     function cargarMateriasUsuario(user) {
         if (!window.db || !user) return;
         window.db.collection('usuarios_materias').doc(user.uid).get().then(function(doc) {
@@ -1810,6 +1508,7 @@
                 if (btn) btn.style.display = 'flex';
             } else {
                 userMateriasConfig = { cursando: [], aprobadas: [] };
+                render();
                 var btn = document.getElementById('btnEditarMaterias');
                 if (btn) btn.style.display = 'flex';
             }
@@ -1920,11 +1619,6 @@
         });
     }
 
-    window.toggleTheme = function() {
-        var current = document.documentElement.getAttribute('data-theme') || 'orange';
-        window.setCustomTheme(current === 'light' ? 'orange' : 'light');
-    };
-
     // ==================== AUTH CONTROLLER ====================
     window.switchTab = function(tab) {
         document.querySelectorAll('.login-tab').forEach(function(t) { t.classList.remove('active'); });
@@ -1997,64 +1691,52 @@
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    // ==================== ONBOARDING TOUR ====================
-    var tourSteps = [
-        { title: "¡Bienvenido!", text: "La Biblioteca de ADE te permite acceder a todos los recursos de la carrera organizados en un solo lugar.", icon: "sparkles" },
-        { title: "Dock Rápido", text: "En la parte superior tenés acceso directo al SIU Guaraní, Campus Virtual y contactos de docentes.", icon: "monitor" },
-        { title: "Control Segmentado", text: "Usá el selector de años para explorar rápidamente las materias o filtrá por nombre arriba.", icon: "sliders" },
-        { title: "Personalización", text: "Logueate para marcar tus materias cursando y aprobadas y ver tus estadísticas.", icon: "user-check", last: true }
-    ];
-    var currentTourStep = 0;
-
-    function initTour() {
-        document.getElementById("tourOverlay").style.display = "block";
-        document.getElementById("tourTooltip").style.display = "block";
-        document.getElementById("tourBtnNext").onclick = nextTourStep;
-        document.getElementById("tourBtnSkip").onclick = endTour;
-        showTourStep(0);
-    }
-
-    function showTourStep(idx) {
-        var s = tourSteps[idx];
-        document.getElementById("tourTitle").innerHTML = '<i data-lucide="' + s.icon + '" style="width:16px;height:16px;"></i> ' + s.title;
-        document.getElementById("tourText").textContent = s.text;
-        document.getElementById("tourBtnNext").textContent = s.last ? "¡Empezar!" : "Siguiente";
-        var dots = '';
-        for (var i = 0; i < tourSteps.length; i++) {
-            dots += '<div class="tour-dot ' + (i === idx ? 'active' : '') + '"></div>';
-        }
-        document.getElementById("tourDots").innerHTML = dots;
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-
-    function nextTourStep() {
-        currentTourStep++;
-        if (currentTourStep >= tourSteps.length) endTour();
-        else showTourStep(currentTourStep);
-    }
-
-    function endTour() {
-        localStorage.setItem('tour_completado', 'true');
-        var o = document.getElementById("tourOverlay");
-        var t = document.getElementById("tourTooltip");
-        if (o) o.remove();
-        if (t) t.remove();
-    }
-
     window.showComingSoonAlert = function(e) {
         if (e) e.preventDefault();
         alert("¡Próximamente! Estamos preparando el calendario académico automatizado.");
     };
 
-    // ==================== INICIALIZACIÓN GLOBAL ====================
+    // ==================== 4. CONTROLADOR DE APERTURA DE SIDEBAR Y MODALES ====================
     document.addEventListener('DOMContentLoaded', function() {
-        // 1. Render inicial inmediato de materias (38 materias completas)
+        var btnMenu = document.getElementById('toggleSidebarBtn');
+        var btnClose = document.getElementById('sidebarCloseBtn');
+        var backdrop = document.getElementById('sidebarBackdrop');
+        var sidebar = document.getElementById('sidebar');
+        var btnSettings = document.getElementById('btnSettingsTheme');
+        var settingsModal = document.getElementById('settingsModal');
+
+        function openSidebar() {
+            if (sidebar) sidebar.classList.remove('hidden');
+            if (backdrop) backdrop.classList.add('active');
+        }
+
+        function closeSidebar() {
+            if (sidebar) sidebar.classList.add('hidden');
+            if (backdrop) backdrop.classList.remove('active');
+        }
+
+        if (btnMenu) btnMenu.onclick = function(e) { e.preventDefault(); openSidebar(); };
+        if (btnClose) btnClose.onclick = function(e) { e.preventDefault(); closeSidebar(); };
+        if (backdrop) backdrop.onclick = closeSidebar;
+
+        if (btnSettings && settingsModal) {
+            btnSettings.onclick = function(e) {
+                e.preventDefault();
+                settingsModal.classList.remove('hidden');
+            };
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeSidebar();
+                if (settingsModal) settingsModal.classList.add('hidden');
+            }
+        });
+
+        // 1. Renderizar grilla de 38 materias inmediatamente
         render();
 
-        // 2. Cargar estadísticas de votos
-        cargarEstadisticasMaterias();
-
-        // 3. Vincular clicks de login
+        // 2. Auth & Login
         var gl = document.getElementById('btnGoogleLogin'); if (gl) gl.onclick = doGoogleLogin;
         var gr = document.getElementById('btnGoogleRegister'); if (gr) gr.onclick = doGoogleLogin;
         var el = document.getElementById('btnEmailLogin'); if (el) el.onclick = doEmailLogin;
@@ -2075,7 +1757,7 @@
             };
         }
 
-        // 4. Banner de tips close
+        // 3. Tips close
         var closeTips = document.getElementById('tipsBannerClose');
         if (closeTips) {
             closeTips.onclick = function() {
@@ -2089,7 +1771,7 @@
             }
         }
 
-        // 5. Auth State Changed & Persistencia
+        // 4. Firebase Auth State Changed
         if (window.auth) {
             window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(e){ console.warn(e); });
             window.auth.onAuthStateChanged(function(user) {
@@ -2112,12 +1794,6 @@
             });
         }
 
-        // 6. Tour primera vez
-        if (!localStorage.getItem('tour_completado')) {
-            setTimeout(initTour, 800);
-        }
-
-        // 7. Lucide
         if (typeof lucide !== 'undefined') lucide.createIcons();
     });
 </script>

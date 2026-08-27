@@ -452,6 +452,118 @@
             }
         }
 
+    
+/* ==================== SISTEMA DE BARRA LATERAL CON BACKDROP Y BOTÓN 'X' ==================== */
+.sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 290px !important;
+    height: 100vh !important;
+    background: rgba(12, 12, 14, 0.88) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    padding: 24px 18px 90px 18px !important;
+    overflow-y: auto !important;
+    z-index: 9999 !important;
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    box-shadow: 12px 0 35px rgba(0, 0, 0, 0.7) !important;
+}
+.sidebar.hidden {
+    transform: translateX(-100%) !important;
+    pointer-events: none !important;
+}
+
+.sidebar-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.sidebar-brand {
+    font-weight: 800;
+    font-size: 15px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.sidebar-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #8e8e93;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.sidebar-close-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    transform: scale(1.05);
+}
+
+/* Tarjetas con acabado iOS Glass */
+.card, .timer-box, .stat-card, .tool-panel, .dashboard-panel, .duration-selector, .timer-container, .stats-container, .history-container, .techniques-container, .subject-selector, .viewer-card {
+    background: rgba(18, 18, 20, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+}
+
+    
+        .fab-icon-btn {
+            position: fixed !important;
+            z-index: 9990 !important;
+            width: 46px !important;
+            height: 46px !important;
+            border-radius: 50% !important;
+            background: rgba(22, 22, 26, 0.75) !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            color: #ffffff !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1) !important;
+            padding: 0 !important;
+        }
+        .fab-icon-btn:hover {
+            border-color: var(--primary) !important;
+            color: var(--primary) !important;
+            transform: scale(1.08) !important;
+        }
+        .fab-left { bottom: 20px !important; left: 20px !important; }
+        .fab-right { top: 20px !important; right: 20px !important; }
+    
     </style>
 </head>
 <body>
@@ -461,7 +573,6 @@
         <i data-lucide="lock" class="icon-lg" style="color: var(--primary); margin-bottom: 15px; width: 40px; height: 40px;"></i>
         <h2>Bienvenido a La Biblioteca</h2>
         <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones desde cualquier dispositivo.</p>
-        
         <button id="btnGoogleLogin" class="btn-google">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -471,85 +582,55 @@
             </svg>
             Continuar con Google
         </button>
-
-        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; justify-content: center; padding: 14px; border: 1px solid var(--border);">
+        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; justify-content: center; padding: 14px; border: 1px solid var(--border); margin-top: 10px;">
             Continuar como invitado
         </button>
     </div>
 </div>
 
-<button id="toggleSidebarBtn" class="toggle-btn"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
-<button class="theme-btn" onclick="toggleTheme()"><i data-lucide="moon" class="icon-sm"></i> Tema</button>
 
-<aside class="sidebar hidden" id="sidebar">
-    <div id="userProfile" style="margin-bottom: 25px; padding: 15px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; text-align: center; backdrop-filter: blur(10px);">
-        <i data-lucide="user-circle" class="icon-lg" style="color: var(--primary); margin-bottom: 8px;"></i>
-        <p id="userName" style="font-weight: 700; margin: 0 0 12px 0; font-size: 14px; color: var(--text);">Invitado</p>
-        <button id="sidebarLoginBtn" class="btn-primary-solid" style="width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
-            <i data-lucide="log-in" class="icon-sm"></i> Ingresar
-        </button>
-        <button id="sidebarLogoutBtn" class="btn-dark" style="width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; display: none; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
-            <i data-lucide="log-out" class="icon-sm"></i> Salir
-        </button>
-    </div>
 
-    <h2 style="color: var(--primary); font-weight: 800; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
-        <i data-lucide="library" class="icon-lg"></i> ADE UNGS
-    </h2>
-    <p style="color: #9ca3af; font-size: 14px; margin-top: -5px;">Navegación</p>
-    
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
 
-    <a href="index.html" class="btn-sidebar btn-dark">
-        <i data-lucide="search" class="icon-sm"></i> Buscar Materias
-    </a>
-    <a href="progreso.html" class="btn-sidebar btn-dark">
-        <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
-    </a>
 
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
 
-    <a href="estudio.html" class="btn-sidebar btn-dark">
-        <i data-lucide="timer" class="icon-sm"></i> 🍅 Sesión de Estudio
-    </a>
-    
-    <a href="javascript:void(0)" onclick="showComingSoonAlert(event)" class="btn-sidebar btn-dark" style="opacity: 0.6; cursor: not-allowed; position: relative;">
-        <i data-lucide="lock" class="icon-sm" style="color: #9ca3af;"></i> Calendario
-        <span style="position: absolute; right: 12px; font-size: 10px; background: color-mix(in srgb, var(--primary) 15%, transparent); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Próximamente</span>
-    </a>
+<!-- Telón de fondo para cerrar al tocar afuera -->
 
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+<!-- BOTONES FLOTANTES CIRCULARES MINIMALISTAS -->
 
-    <p style="color: #9ca3af; font-size: 13px; font-weight: 600; margin-bottom: 15px; margin-top: 0;">Oportunidades</p>
 
-    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo
-    </a>
-    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="building" class="icon-sm"></i> Pasantías UNGS
-    </a>
 
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
 
-    <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="message-square-plus" class="icon-sm"></i> Dejar Recomendación
-    </a>
-    <a href="Recomendaciones_docentes.pdf" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="book-open-check" class="icon-sm"></i> Ver Recomendaciones
-    </a>
-    <a href="mailto:bibliotecaadeungs@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="margin-top: 15px; border-style: dashed;">
-        <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos
-    </a>
-    <button id="pwaInstallBtn" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
-        <i data-lucide="download" class="icon-sm"></i> Instalar App
-    </button>
+<!-- MODAL DE APARIENCIA (#settingsModal) -->
 
-    <div class="theme-panel-section">
-        <p style="color: var(--text); font-size: 12px; font-weight: 700; margin: 0 0 8px 0; display: flex; align-items: center; justify-content: space-between;">
-            <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="palette" class="icon-sm" style="color: var(--primary);"></i> Apariencia</span>
-        </p>
-        <div class="theme-swatches">
-            <button type="button" class="theme-swatch" data-theme-name="orange" onclick="setCustomTheme('orange')" title="Naranja (Defecto)" style="background: #FF8C00;"></button>
+</div>
+
+
+
+<!-- BOTONES FLOTANTES CON ÍCONOS SVG NATIVOS (INLINE) -->
+<div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+<button id="toggleSidebarBtn" class="fab-icon-btn fab-left" aria-label="Abrir Menú">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+</button>
+
+<button id="btnSettingsTheme" class="fab-icon-btn fab-right" aria-label="Configuración de Tema">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+</button>
+
+<!-- MODAL DE APARIENCIA (#settingsModal) -->
+<div id="settingsModal" class="login-modal hidden" style="z-index: 10002;">
+    <div class="login-modal-content" style="max-width: 360px; text-align: left; padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="palette" style="color: var(--primary); width: 18px; height: 18px;"></i> Apariencia y Tema
+            </h3>
+            <button onclick="document.getElementById('settingsModal').classList.add('hidden')" style="background: transparent; border: none; color: #8e8e93; cursor: pointer; padding: 4px;">
+                <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+            </button>
+        </div>
+        <p style="font-size: 13px; color: #86868b; margin: 0 0 16px 0;">Elegí el color de acento para personalizar tu plataforma:</p>
+        <div class="theme-swatches" style="display: flex; gap: 10px; justify-content: space-between;">
+            <button type="button" class="theme-swatch" data-theme-name="orange" onclick="setCustomTheme('orange')" title="Naranja" style="background: #FF8C00;"></button>
             <button type="button" class="theme-swatch" data-theme-name="emerald" onclick="setCustomTheme('emerald')" title="Esmeralda" style="background: #059669;"></button>
             <button type="button" class="theme-swatch" data-theme-name="midnight" onclick="setCustomTheme('midnight')" title="Azul Noche" style="background: #3B82F6;"></button>
             <button type="button" class="theme-swatch" data-theme-name="purple" onclick="setCustomTheme('purple')" title="Púrpura" style="background: #8B5CF6;"></button>
@@ -557,6 +638,79 @@
             <button type="button" class="theme-swatch" data-theme-name="light" onclick="setCustomTheme('light')" title="Claro" style="background: #f9fafb; border: 1px solid #9ca3af;"></button>
         </div>
     </div>
+</div>
+
+<aside class="sidebar hidden" id="sidebar">
+    <div class="sidebar-header-row">
+        <div class="sidebar-brand">
+            <i data-lucide="library" class="icon-md" style="color: var(--primary);"></i>
+            <span>ADE UNGS</span>
+        </div>
+        <button id="sidebarCloseBtn" class="sidebar-close-btn" aria-label="Cerrar barra lateral" onclick="toggleSidebar(false)">
+            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+    </div>
+
+    <div id="userProfile" style="margin-bottom: 18px; padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
+        <i data-lucide="user-circle" style="color: var(--primary); margin: 0 auto 6px auto; width: 28px; height: 28px;"></i>
+        <p id="userName" style="font-weight: 600; margin-bottom: 10px; font-size: 13px; color: var(--text);">Invitado</p>
+        <button id="sidebarLoginBtn" class="btn-sidebar btn-primary-solid" style="width: 100%; height: 34px; font-size: 12.5px; display: flex; justify-content: center; align-items: center; gap: 6px;">
+            <i data-lucide="log-in" style="width: 14px; height: 14px;"></i> Ingresar
+        </button>
+        <button id="sidebarLogoutBtn" class="btn-sidebar btn-dark" style="width: 100%; height: 34px; font-size: 12.5px; display: none; justify-content: center; align-items: center; gap: 6px;">
+            <i data-lucide="log-out" style="width: 14px; height: 14px;"></i> Salir
+        </button>
+    </div>
+
+    <p style="color: #86868b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 6px 6px;">Navegación</p>
+
+    <a href="index.html" class="btn-sidebar btn-dark" style="">
+        <i data-lucide="search" style="width: 15px; height: 15px;"></i> Buscar Materias
+    </a>
+    
+    <a href="progreso.html" class="btn-sidebar btn-dark" style="">
+        <i data-lucide="trending-up" style="width: 15px; height: 15px;"></i> Mi Progreso
+    </a>
+
+    <a href="estudio.html" class="btn-sidebar btn-dark" style="">
+        <i data-lucide="timer" style="width: 15px; height: 15px;"></i> Sesión de Estudio
+    </a>
+
+    <a href="javascript:void(0)" onclick="showComingSoonAlert(event)" class="btn-sidebar btn-dark" style="opacity: 0.6; cursor: not-allowed; justify-content: space-between;">
+        <span style="display: flex; align-items: center; gap: 10px;"><i data-lucide="calendar" style="width: 15px; height: 15px;"></i> Calendario</span>
+        <span style="font-size: 9.5px; background: color-mix(in srgb, var(--primary) 15%, transparent); color: var(--primary); padding: 2px 5px; border-radius: 4px; font-weight: 700;">PRÓXIMO</span>
+    </a>
+
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 14px 0;">
+    
+    <p style="color: #86868b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 6px 6px;">Oportunidades</p>
+
+    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
+        <i data-lucide="briefcase" style="width: 15px; height: 15px;"></i> Bolsa de Trabajo
+    </a>
+    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
+        <i data-lucide="building" style="width: 15px; height: 15px;"></i> Pasantías UNGS
+    </a>
+
+    <hr style="border: 0; border-top: 1px solid var(--border); margin: 14px 0;">
+
+    <p style="color: #86868b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 6px 6px;">Comunidad</p>
+
+    <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
+        <i data-lucide="message-square-plus" style="width: 15px; height: 15px;"></i> Dejar Recomendación
+    </a>
+    <a href="Recomendaciones_docentes.pdf" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
+        <i data-lucide="book-open-check" style="width: 15px; height: 15px;"></i> Ver Recomendaciones
+    </a>
+    <a href="mailto:bibliotecaadeungs@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="border: 1px dashed var(--border); margin-top: 6px;">
+        <i data-lucide="file-up" style="width: 15px; height: 15px;"></i> Donar Archivos
+    </a>
+
+    <button id="pwaInstallBtn" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
+        <i data-lucide="download" style="width: 15px; height: 15px;"></i> Instalar App
+    </button>
+
+    
 </aside>
 
 <div class="main-content expanded" id="mainContent">
@@ -1003,5 +1157,78 @@
         }, 3000);
     };
 </script><div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;"><div class="login-modal-content" style="max-width: 450px; text-align: left;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3><button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button></div><p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p><div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: color-mix(in srgb, var(--primary) 12%, transparent); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone/iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> en Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">En Opera, Brave u otros en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div><button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button></div></div>
+<script>
+
+function inicializarControlSidebar() {
+    var btnToggle = document.getElementById('toggleSidebarBtn');
+    var btnClose = document.getElementById('sidebarCloseBtn');
+    var backdrop = document.getElementById('sidebarBackdrop');
+    var sidebar = document.getElementById('sidebar');
+
+    function abrirSidebar() {
+        if (sidebar) sidebar.classList.remove('hidden');
+        if (backdrop) backdrop.classList.add('active');
+    }
+
+    function cerrarSidebar() {
+        if (sidebar) sidebar.classList.add('hidden');
+        if (backdrop) backdrop.classList.remove('active');
+    }
+
+    if (btnToggle) btnToggle.onclick = abrirSidebar;
+    if (btnClose) btnClose.onclick = cerrarSidebar;
+    if (backdrop) backdrop.onclick = cerrarSidebar;
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            cerrarSidebar();
+        }
+    });
+}
+document.addEventListener('DOMContentLoaded', inicializarControlSidebar);
+
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var btnMenu = document.getElementById('toggleSidebarBtn');
+    var btnClose = document.getElementById('sidebarCloseBtn');
+    var backdrop = document.getElementById('sidebarBackdrop');
+    var sidebar = document.getElementById('sidebar');
+    var btnSettings = document.getElementById('btnSettingsTheme');
+    var settingsModal = document.getElementById('settingsModal');
+
+    function openSidebar() {
+        if (sidebar) sidebar.classList.remove('hidden');
+        if (backdrop) backdrop.classList.add('active');
+    }
+
+    function closeSidebar() {
+        if (sidebar) sidebar.classList.add('hidden');
+        if (backdrop) backdrop.classList.remove('active');
+    }
+
+    if (btnMenu) btnMenu.onclick = function(e) { e.stopPropagation(); openSidebar(); };
+    if (btnClose) btnClose.onclick = closeSidebar;
+    if (backdrop) backdrop.onclick = closeSidebar;
+
+    if (btnSettings && settingsModal) {
+        btnSettings.onclick = function() { settingsModal.classList.remove('hidden'); };
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSidebar();
+            if (settingsModal) settingsModal.classList.add('hidden');
+        }
+    });
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+});
+</script>
+
 </body>
 </html>
+
+
+
