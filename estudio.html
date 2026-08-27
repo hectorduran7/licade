@@ -132,12 +132,18 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            display: flex;
+            background-color: #080808 !important;
+            background-image: 
+                radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary, #FF8C00) 12%, transparent) 0%, transparent 55%),
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px) !important;
+            background-size: 100% 100%, 24px 24px !important;
+            background-position: top center, 0 0 !important;
+            background-attachment: fixed !important;
+            color: var(--text, #f5f5f5) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+            margin: 0;
+            min-height: 100vh;
             overflow-x: hidden;
-            transition: background-color .4s ease, color .4s ease;
         }
 
         /* ===== MODO SIN DISTRACCIONES ===== */
@@ -1148,7 +1154,7 @@
     document.getElementById('sidebarLogoutBtn').onclick = function() { window.auth.signOut().then(function(){ sessionStorage.removeItem('guestMode'); location.reload(); }); };
     window.closeLoginModal = function() { document.getElementById('loginModal').classList.add('hidden'); sessionStorage.setItem('guestMode', 'true'); };
 
-    window.auth.onAuthStateChanged(function(user) {
+    window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); window.auth.onAuthStateChanged(function(user) {
         if (user) {
             document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display:inline;"></i> Hola, ' + sanitizeText(user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0]);
             document.getElementById('sidebarLoginBtn').style.display = 'none'; document.getElementById('sidebarLogoutBtn').style.display = 'flex';

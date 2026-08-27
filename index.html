@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="orange">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>La Biblioteca de ADE | UNGS</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#FF8C00">
+    <meta name="theme-color" content="#080808">
     <link rel="apple-touch-icon" href="icon.svg">
     
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Google Analytics (GA4) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -18,801 +20,1108 @@
       gtag('config', 'G-PQGH6R9SZC');
     </script>
 
+    <!-- Pre-init Theme -->
     <script>
-        const theme = localStorage.getItem('ungs_theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? 'orange' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
+        const savedTheme = localStorage.getItem('ungs_theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? 'orange' : 'light');
+        document.documentElement.setAttribute('data-theme', savedTheme);
     </script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-        * { box-sizing: border-box; }
-
-        :root {
-            --primary: #FF8C00; 
-            --bg: #f9fafb;
-            --text: #1a1a1a;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --sidebar-bg: rgba(244, 244, 244, 0.85);
-            --border: #e5e7eb;
-            --sidebar-width: 300px;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        [data-theme="dark"], [data-theme="orange"] {
-            --bg: #080808; 
-            --text: #f5f5f5;
-            --card-bg: rgba(18, 18, 18, 0.6); 
-            --sidebar-bg: rgba(8, 8, 8, 0.85);
-            --border: #222222;
+        :root {
             --primary: #FF8C00;
+            --primary-rgb: 255, 140, 0;
+            --bg: #080808;
+            --bg-secondary: #121214;
+            --card-bg: rgba(18, 18, 20, 0.65);
+            --sidebar-bg: rgba(12, 12, 14, 0.95);
+            --text: #F5F5F7;
+            --text-muted: #86868B;
+            --text-dim: #555A64;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.05);
+            --border-hover: rgba(255, 255, 255, 0.16);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
         }
 
         [data-theme="emerald"] {
-            --bg: #080808; 
-            --text: #f5f5f5;
-            --card-bg: rgba(18, 18, 18, 0.6); 
-            --sidebar-bg: rgba(8, 8, 8, 0.85);
-            --border: #222222;
-            --primary: #059669;
+            --primary: #10B981;
+            --primary-rgb: 16, 185, 129;
+            --bg: #080808;
+            --card-bg: rgba(18, 18, 20, 0.65);
         }
 
         [data-theme="midnight"] {
-            --bg: #0B132B; 
-            --text: #f5f5f5;
-            --card-bg: rgba(28, 37, 65, 0.6); 
-            --sidebar-bg: rgba(11, 19, 43, 0.85);
-            --border: #1C2541;
             --primary: #3B82F6;
+            --primary-rgb: 59, 130, 246;
+            --bg: #060911;
+            --bg-secondary: #0D1322;
+            --card-bg: rgba(17, 24, 39, 0.65);
+            --sidebar-bg: rgba(10, 15, 29, 0.96);
+            --border: rgba(59, 130, 246, 0.14);
         }
 
         [data-theme="purple"] {
-            --bg: #080808; 
-            --text: #f5f5f5;
-            --card-bg: rgba(18, 18, 18, 0.6); 
-            --sidebar-bg: rgba(8, 8, 8, 0.85);
-            --border: #222222;
             --primary: #8B5CF6;
+            --primary-rgb: 139, 92, 246;
+            --bg: #080808;
+            --card-bg: rgba(18, 18, 20, 0.65);
         }
 
         [data-theme="rose"] {
-            --bg: #080808; 
-            --text: #f5f5f5;
-            --card-bg: rgba(18, 18, 18, 0.6); 
-            --sidebar-bg: rgba(8, 8, 8, 0.85);
-            --border: #222222;
             --primary: #F43F5E;
+            --primary-rgb: 244, 63, 94;
+            --bg: #080808;
+            --card-bg: rgba(18, 18, 20, 0.65);
         }
 
         [data-theme="light"] {
-            --bg: #f9fafb;
-            --text: #1a1a1a;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --sidebar-bg: rgba(244, 244, 244, 0.85);
-            --border: #e5e7eb;
             --primary: #FF8C00;
+            --primary-rgb: 255, 140, 0;
+            --bg: #F2F2F7;
+            --bg-secondary: #E5E5EA;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --sidebar-bg: rgba(255, 255, 255, 0.96);
+            --text: #1C1C1E;
+            --text-muted: #8E8E93;
+            --text-dim: #AEAEB2;
+            --border: rgba(0, 0, 0, 0.08);
+            --border-subtle: rgba(0, 0, 0, 0.05);
+            --border-hover: rgba(0, 0, 0, 0.15);
         }
 
-        /* Swatches UI */
+        body {
+            background-color: #080808 !important;
+            background-image: 
+                radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary, #FF8C00) 12%, transparent) 0%, transparent 55%),
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px) !important;
+            background-size: 100% 100%, 24px 24px !important;
+            background-position: top center, 0 0 !important;
+            background-attachment: fixed !important;
+            color: var(--text, #f5f5f5) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+            letter-spacing: -0.015em;
+            -webkit-font-smoothing: antialiased;
+            transition: color 0.3s ease;
+        }
+
+        .main-content {
+            width: 100%;
+            max-width: 860px;
+            padding: 36px 18px 100px 18px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ==================== DOCK SUPERIOR FLOTANTE ==================== */
+        .top-dock-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .top-dock {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 6px;
+            background: rgba(18, 18, 22, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .top-dock:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .dock-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 15px;
+            border-radius: var(--radius-full);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .dock-item:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .dock-item:active {
+            transform: scale(0.96);
+        }
+
+        .dock-item i {
+            color: var(--primary);
+            width: 14px;
+            height: 14px;
+            transition: transform 0.2s ease;
+        }
+
+        .dock-divider {
+            width: 1px;
+            height: 14px;
+            background: var(--border);
+            margin: 0 2px;
+        }
+
+        /* ==================== ENCABEZADO / HEADER ==================== */
+        header {
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+            margin: 10px 0 6px 0;
+        }
+
+        [data-theme="light"] header h1 { color: #111827; }
+
+        header p {
+            color: #86868b;
+            font-size: 14px;
+            font-weight: 400;
+            margin-bottom: 24px;
+        }
+
+        /* ==================== BANNER PROMO COMPACTO GLASSMORPHISM ==================== */
+        .promo-banner {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: border-color 0.2s ease;
+        }
+
+        .promo-banner:hover { border-color: var(--border-hover); }
+
+        .promo-banner-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .promo-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: color-mix(in srgb, var(--primary) 12%, transparent);
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .promo-banner-text h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f5f5f7;
+            margin-bottom: 1px;
+        }
+        [data-theme="light"] .promo-banner-text h4 { color: #111827; }
+
+        .promo-banner-text p {
+            font-size: 12px;
+            color: #86868b;
+        }
+
+        .promo-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .promo-btn:hover {
+            background: var(--primary);
+            color: #111;
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        /* Tips Banner Compact */
+        .tips-banner-compact {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+
+        .tips-banner-compact strong { color: #f4f4f5; }
+        [data-theme="light"] .tips-banner-compact strong { color: #111827; }
+
+        .tips-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            border-radius: 4px;
+        }
+        .tips-close-btn:hover { color: #ffffff; background: rgba(255,255,255,0.06); }
+
+        /* ==================== BUSCADOR ESTILO SPOTLIGHT ==================== */
+        .search-container {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .search-icon-spotlight {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #86868b;
+            pointer-events: none;
+            width: 16px;
+            height: 16px;
+            transition: color 0.2s ease;
+        }
+
+        #searchInput {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 14px 18px 14px 44px;
+            color: #f5f5f5;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            outline: none;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+        }
+
+        #searchInput:focus + .search-icon-spotlight {
+            color: var(--primary);
+        }
+
+        /* ==================== CONTROL SEGMENTADO iOS ==================== */
+        .segmented-control {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 22px;
+        }
+
+        .segmented-control::-webkit-scrollbar {
+            display: none;
+        }
+
+        .segment-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #8e8e93;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            user-select: none;
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .segment-btn:hover {
+            color: #ffffff;
+        }
+
+        .segment-btn.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+        }
+
+        [data-theme="light"] .segmented-control {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
+        [data-theme="light"] .segment-btn { color: #636366; }
+        [data-theme="light"] .segment-btn.active {
+            background: #ffffff;
+            color: #000000;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .segment-count {
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #8e8e93;
+        }
+
+        .segment-btn.active .segment-count {
+            background: color-mix(in srgb, var(--primary) 22%, transparent);
+            color: var(--primary);
+        }
+
+        /* ==================== LISTAS AGRUPADAS CON FILAS EN DOS LÍNEAS ==================== */
+        .section-header-ios {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #86868b;
+            text-transform: uppercase;
+            margin-top: 22px;
+            margin-bottom: 8px;
+            padding-left: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-header-ios span.count {
+            font-weight: 500;
+            opacity: 0.7;
+            font-size: 10.5px;
+        }
+
+        .year-group-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 22px;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .materia-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border-subtle);
+            transition: background 0.15s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .materia-row:last-child {
+            border-bottom: none;
+        }
+
+        .materia-row:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .materia-row:active {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .materia-row.cursando {
+            background: color-mix(in srgb, var(--primary) 3%, transparent);
+        }
+        .materia-row.aprobada {
+            background: rgba(16, 185, 129, 0.02);
+            opacity: 0.88;
+        }
+
+        .materia-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 0;
+            padding-right: 12px;
+        }
+
+        .materia-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #f5f5f5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: -0.01em;
+            transition: color 0.15s ease;
+        }
+
+        [data-theme="light"] .materia-name { color: #1c1c1e; }
+
+        .materia-row:hover .materia-name {
+            color: var(--primary);
+        }
+
+        .materia-req {
+            font-size: 12px;
+            color: #86868b;
+            line-height: 1.4;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .badge-status {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: var(--radius-full);
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        .badge-status.cursando {
+            background: color-mix(in srgb, var(--primary) 12%, transparent);
+            color: var(--primary);
+            border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+        }
+
+        .badge-status.aprobada {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        /* Micro-chip de votación */
+        .btn-vote-chip {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e5e5ea;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-vote-chip:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            transform: scale(1.03);
+        }
+
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #86868b;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .footer-ios {
+            margin-top: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: var(--radius-full);
+            background: rgba(18, 18, 22, 0.4);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.18s ease;
+        }
+
+        .footer-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-hover);
+            color: #ffffff;
+        }
+
+        /* ==================== BOTÓN FLOTANTE HERRAMIENTAS & BACKDROP ==================== */
+        .toggle-btn, #toggleSidebarBtn {
+            position: fixed !important;
+            bottom: 20px !important;
+            left: 20px !important;
+            z-index: 1000 !important;
+            background: rgba(18, 18, 22, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toggle-btn:hover, #toggleSidebarBtn:hover {
+            border-color: var(--primary);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+        .toggle-btn i, #toggleSidebarBtn i { color: var(--primary); }
+
+        .floating-theme-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(18, 18, 22, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .floating-theme-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ==================== 2. SIDEBAR & BACKDROP ==================== */
+        .sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .sidebar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 290px !important;
+            height: 100vh !important;
+            background: var(--sidebar-bg) !important;
+            backdrop-filter: blur(25px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+            border-right: 1px solid var(--border) !important;
+            padding: 24px 18px 80px 18px !important;
+            overflow-y: auto !important;
+            z-index: 10000 !important;
+            transform: translateX(0) !important;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            box-shadow: 15px 0 40px rgba(0, 0, 0, 0.7) !important;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%) !important;
+            pointer-events: none !important;
+        }
+
+        .sidebar-close-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.05);
+            color: #8e8e93;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .sidebar-close-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .btn-sidebar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            margin-bottom: 3px;
+            border: 1px solid transparent;
+        }
+
+        .btn-sidebar:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .btn-sidebar i {
+            color: var(--primary);
+            width: 15px;
+            height: 15px;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-dim);
+            margin: 16px 0 6px 6px;
+        }
+
+        .sidebar hr {
+            border: 0;
+            border-top: 1px solid var(--border);
+            margin: 14px 0;
+        }
+
+        /* Swatches */
         .theme-panel-section {
             margin-top: 15px;
             padding: 12px;
-            background: var(--card-bg);
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
+            border-radius: var(--radius-md);
         }
         .theme-swatches {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             justify-content: space-between;
             align-items: center;
             margin-top: 8px;
         }
         .theme-swatch {
-            width: 26px;
-            height: 26px;
+            width: 24px;
+            height: 24px;
             border-radius: 6px;
             border: 2px solid transparent;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.18s ease;
             outline: none;
             padding: 0;
         }
-        .theme-swatch:hover {
-            transform: scale(1.15);
-        }
+        .theme-swatch:hover { transform: scale(1.15); }
         .theme-swatch.active {
             border-color: #ffffff;
-            box-shadow: 0 0 0 2px var(--primary), 0 0 10px var(--primary);
-            transform: scale(1.1);
-        }
-        [data-theme="light"] .theme-swatch.active {
-            border-color: #1a1a1a;
+            box-shadow: 0 0 0 2px var(--primary);
         }
 
-                body { 
-            background-color: var(--bg, #080808) !important;
-            color: var(--text, #f5f5f5) !important;
-            margin: 0 !important;
-            min-height: 100vh !important;
-            display: block !important;
-            overflow-x: hidden !important;
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.4s ease, color 0.4s ease;
-            scroll-behavior: smooth;
-        }
-
-        .icon-sm { width: 16px; height: 16px; }
-        .icon-md { width: 20px; height: 20px; }
-        .icon-lg { width: 24px; height: 24px; }
-
-                .sidebar {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 280px !important;
-            height: 100vh !important;
-            background: rgba(12, 12, 12, 0.95) !important;
-            backdrop-filter: blur(25px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-            padding: 30px 20px 90px 20px !important;
-            overflow-y: auto !important;
-            z-index: 10000 !important;
-            transform: translateX(0) !important;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            box-shadow: 10px 0 30px rgba(0, 0, 0, 0.8) !important;
-        }
-        .sidebar.hidden {
-            transform: translateX(-100%) !important;
-            pointer-events: none !important;
-        }
-                .main-content {
-            margin: 0 auto !important;
-            padding: 50px 20px 90px 20px !important;
-            width: 100% !important;
-            max-width: 900px !important;
-            transition: opacity 0.3s ease !important;
-        }
-        
-
-        header { text-align: center; margin-bottom: 30px; }
-        header h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; font-size: 2.5rem;}
-        header p { color: #9ca3af; margin-bottom: 25px; }
-
-
-
-        .launchpad-container { display: flex; gap: 15px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
-        .launchpad-btn {
-            display: flex; align-items: center; gap: 8px; background: var(--card-bg);
-            border: 1px solid var(--border); padding: 12px 20px; border-radius: 50px;
-            color: var(--text); text-decoration: none; font-weight: 600; font-size: 14px;
-            backdrop-filter: blur(10px); transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-        }
-        .launchpad-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 20%, transparent); }
-
-        .search-container { position: relative; margin-bottom: 30px;}
-        .search-icon { position: absolute; left: 15px; top: 16px; color: #9ca3af; }
-        #searchInput {
-            width: 100%; padding: 16px 20px 16px 45px; border-radius: 12px;
-            border: 1px solid var(--border); background: var(--card-bg); backdrop-filter: blur(10px);
-            color: var(--text); font-size: 15px; transition: all 0.3s ease; box-sizing: border-box;
-        }
-        #searchInput:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 20px color-mix(in srgb, var(--primary) 20%, transparent); }
-
-        .promo-banner {
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
-            padding: 20px 25px; margin-bottom: 30px; border-radius: 12px;
-            background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, transparent) 0%, color-mix(in srgb, var(--primary) 2%, transparent) 100%);
-            border: 1px dashed var(--primary); transition: all 0.3s ease;
-        }
-        .promo-banner:hover { background: color-mix(in srgb, var(--primary) 15%, transparent); transform: translateY(-2px); }
-
-        .promo-banner-text h4 { margin: 0 0 5px 0; color: var(--primary); font-size: 18px; display: flex; align-items: center; gap: 8px; }
-        .promo-banner-text p { font-size: 13px; color: #9ca3af; margin: 0; }
-        .promo-btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            background: var(--primary); color: white; text-decoration: none; font-size: 13px;
-            font-weight: 700; padding: 12px 20px; border-radius: 8px; transition: all 0.3s ease;
-            box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 30%, transparent); white-space: nowrap;
-        }
-        .promo-btn:hover { box-shadow: 0 6px 15px color-mix(in srgb, var(--primary) 50%, transparent); }
-
-        .year-section { margin-bottom: 20px; }
-        .year-header {
-            background: var(--card-bg); border: 1px solid var(--border); backdrop-filter: blur(10px);
-            color: var(--text); padding: 18px 24px; border-radius: 12px; cursor: pointer;
-            font-weight: 600; display: flex; justify-content: space-between; transition: all 0.3s ease;
-        }
-        .year-header:hover { border-color: var(--primary); }
-        .year-header span { color: var(--primary); font-weight: 800; }
-
-        .materia-container { display: none; padding: 15px 0 5px 0; }
-        .materia-item {
-            background: var(--card-bg); backdrop-filter: blur(10px); padding: 15px 24px;
-            margin-bottom: 8px; border-radius: 10px; border: 1px solid var(--border);
-            border-left: 4px solid transparent; display: flex;
-            justify-content: space-between; align-items: center; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .materia-item:hover { 
-            transform: translateY(-2px); border-color: color-mix(in srgb, var(--primary) 40%, transparent);
-            border-left: 4px solid var(--primary); box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--primary) 20%, transparent);
-        }
-        [data-theme="dark"] .materia-item:hover { background-color: rgba(25, 25, 25, 0.8); }
-        
-        /* Estilos para materias aprobadas */
-        .materia-item.aprobada {
-            opacity: 0.75;
-            border-left: 4px solid #22c55e;
-            background: rgba(34, 197, 94, 0.02);
-        }
-        .materia-item.aprobada:hover {
-            opacity: 1;
-            border-color: rgba(34, 197, 94, 0.4);
-            box-shadow: 0 10px 30px -10px rgba(34, 197, 94, 0.15);
-        }
-        .badge-aprobada { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); margin-left: 8px; }
-        .badge-cursando { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--primary); border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent); margin-left: 8px; }
-
-        .materia-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-        .materia-name { font-weight: 600; font-size: 15px; cursor: pointer; }
-        .materia-name:hover { color: var(--primary); }
-        .correlativas-text { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-        .req-badge { font-size: 11px; padding: 3px 8px; border-radius: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px; background: rgba(255, 74, 74, 0.1); color: #ff4a4a; border: 1px solid rgba(255, 74, 74, 0.2); }
-        
-        .materia-action { color: #9ca3af; transition: color 0.3s; font-weight: 500; display: flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;}
-
-        /* ===== RANKING DE DIFICULTAD ===== */
-        .materia-rating {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 6px;
-            flex-wrap: wrap;
-        }
-
-        .stars-container {
-            display: flex;
-            gap: 2px;
-        }
-
-        .star {
-            font-size: 14px;
-            color: #9ca3af;
-            transition: color 0.2s;
-        }
-
-        .star.filled {
-            color: var(--primary);
-        }
-
-        .rating-average {
-            font-size: 11px;
-            color: #9ca3af;
-        }
-
-        .vote-count {
-            font-size: 10px;
-            color: #9ca3af;
-        }
-
-        .btn-vote {
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 15px;
-            padding: 2px 8px;
-            font-size: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text);
-        }
-
-        .btn-vote:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* Modal de votación */
-        .vote-modal {
+        /* ==================== MODALS ==================== */
+        .login-modal {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(12px);
+            z-index: 99999;
             display: flex;
-            justify-content: center;
             align-items: center;
-            transition: opacity 0.3s ease;
+            justify-content: center;
+            padding: 20px;
         }
+        .login-modal.hidden { display: none !important; }
 
-        .vote-modal.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .vote-modal-content {
-            background: var(--bg);
+        .login-modal-content {
+            width: 100%;
+            max-width: 440px;
+            background: #121215;
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 400px;
-            width: 90%;
+            border-radius: var(--radius-lg);
+            padding: 28px;
             text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
         }
 
+        .login-modal-content h2, .login-modal-content h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .login-modal-content p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .login-tabs {
+            display: flex;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .login-tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .login-panel { display: none; }
+        .login-panel.active { display: block; }
+
+        .login-input {
+            width: 100%;
+            height: 42px;
+            padding: 0 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: #ffffff;
+            font-size: 13.5px;
+            outline: none;
+            margin-bottom: 10px;
+            transition: border-color 0.2s ease;
+        }
+        .login-input:focus { border-color: var(--primary); }
+
+        .btn-google {
+            width: 100%;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #ffffff;
+            color: #111111;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 13.5px;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .btn-google:hover { opacity: 0.92; }
+        .btn-google svg { width: 16px; height: 16px; }
+
+        .login-divider {
+            margin: 14px 0;
+            color: var(--text-dim);
+            font-size: 11.5px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary-solid {
+            background: var(--primary);
+            color: #111;
+            font-weight: 700;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .btn-primary-solid:hover { opacity: 0.9; }
+
+        .btn-dark {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: #ffffff;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+        .btn-dark:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .login-error {
+            color: #EF4444;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+
+        /* Voting */
         .vote-stars {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin: 20px 0;
+            margin: 15px 0;
         }
-
         .vote-star {
-            font-size: 32px;
+            font-size: 28px;
+            color: rgba(255, 255, 255, 0.2);
             cursor: pointer;
-            color: #9ca3af;
-            transition: all 0.2s;
+            transition: all 0.15s ease;
         }
-
-        .vote-star:hover,
-        .vote-star.selected {
-            color: var(--primary);
-            transform: scale(1.1);
+        .vote-star:hover, .vote-star.selected {
+            color: #F59E0B;
+            transform: scale(1.15);
         }
 
         .vote-modal-buttons {
             display: flex;
+            justify-content: flex-end;
             gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
-        .btn-sidebar {
-            width: 100%; border: none; padding: 14px; border-radius: 8px; cursor: pointer;
-            font-size: 14px; font-weight: 600; transition: all 0.3s ease; margin-bottom: 12px;
-            display: flex; align-items: center; justify-content: flex-start; gap: 12px;
-            text-decoration: none; box-sizing: border-box;
-        }
-        .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
-        .btn-dark:hover { background: var(--card-bg); border-color: var(--primary); color: var(--primary); }
-        .btn-primary-solid { background: var(--primary); color: white; box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 30%, transparent); }
-        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px color-mix(in srgb, var(--primary) 45%, transparent); }
-
-        .footer-donate { 
-            display: flex; flex-direction: column; align-items: center; gap: 20px;
-            padding: 40px 20px; font-size: 14px; color: #9ca3af; margin-top: 60px; border-top: 1px solid var(--border); 
-        }
-        .footer-donate a { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
-        .footer-donate a:hover { text-decoration: underline; }
-        
-        .btn-sugerencias { color: #9ca3af !important; border: 1px dashed #9ca3af; padding: 12px 24px; border-radius: 8px; transition: 0.3s; }
-        .btn-sugerencias:hover { color: var(--primary) !important; border-color: var(--primary); background: color-mix(in srgb, var(--primary) 8%, transparent); text-decoration: none !important; }
-
-        /* ===== MODAL DE LOGIN ===== */
-        .login-modal { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; 
-            display: flex; justify-content: center; align-items: center; 
-            transition: opacity 0.3s ease; 
-        }
-        .login-modal.hidden { opacity: 0; pointer-events: none; }
-        .login-modal-content { 
-            background: var(--bg); padding: 40px; border-radius: 16px; 
-            border: 1px solid var(--border); max-width: 420px; width: 90%; 
-            text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
-        }
-        .login-modal-content h2 { margin-top: 0; font-weight: 800; color: var(--text); }
-        .login-modal-content p { color: #9ca3af; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
-
-        .login-tabs { display: flex; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
-        .login-tab { flex: 1; padding: 10px; background: transparent; border: none; cursor: pointer; font-size: 13px; font-weight: 600; color: #9ca3af; transition: all 0.2s; }
-        .login-tab.active { background: var(--primary); color: white; }
-        .login-panel { display: none; }
-        .login-panel.active { display: block; }
-        .login-input {
-            width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid var(--border);
-            background: var(--card-bg); color: var(--text); font-size: 14px;
-            margin-bottom: 10px; box-sizing: border-box; font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s;
-        }
-        .login-input:focus { outline: none; border-color: var(--primary); }
-        .login-input::placeholder { color: #9ca3af; }
-        .login-divider { display: flex; align-items: center; gap: 10px; margin: 15px 0; color: #9ca3af; font-size: 12px; }
-        .login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-        .btn-google {
-            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
-            background: var(--card-bg); color: var(--text); font-size: 14px; font-weight: 600;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: all 0.2s; font-family: 'Inter', sans-serif; margin-bottom: 10px;
-        }
-        .btn-google:hover { border-color: var(--primary); color: var(--primary); }
-        .btn-google svg { width: 18px; height: 18px; }
-        .login-error { color: #ff4a4a; font-size: 12px; margin-bottom: 10px; min-height: 16px; }
-
-        /* Estilos del Modal de Personalización de Materias */
-        .pers-list-container {
-            display: flex; flex-direction: column; gap: 5px;
-        }
-        .pers-list-container.hidden { display: none; }
-        .pers-year-header {
-            font-weight: 700; color: var(--primary); margin: 10px 0 5px 0;
-            font-size: 13px; border-bottom: 1px solid var(--border); padding-bottom: 3px;
-        }
-        .pers-item {
-            display: flex; align-items: center; gap: 10px; padding: 6px 8px;
-            font-size: 14px; color: var(--text); border-radius: 6px; cursor: pointer;
-            transition: background 0.2s;
-        }
-        .pers-item:hover { background: color-mix(in srgb, var(--primary) 8%, transparent); }
-        .pers-item input[type="checkbox"] {
-            accent-color: var(--primary);
-            width: 16px; height: 16px; cursor: pointer;
+        /* Tour */
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 100000;
         }
 
-                /* Botón Flotante Herramientas (Abajo a la izquierda) */
-        .toggle-btn {
-            position: fixed !important;
-            left: 20px !important;
-            bottom: 20px !important;
-            z-index: 9999 !important;
-            background: var(--primary, #FF8C00) !important;
-            color: #ffffff !important;
-            border: none !important;
-            padding: 12px 20px !important;
-            border-radius: 9999px !important;
-            cursor: pointer !important;
-            font-weight: 700 !important;
-            font-size: 14px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 12px color-mix(in srgb, var(--primary) 30%, transparent) !important;
-            transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-        }
-        .toggle-btn:hover {
-            transform: translateY(-2px) !important;
+        .tour-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 420px;
+            background: #121215;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            z-index: 100001;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.9);
         }
 
-        /* Botón Flotante Tema (Arriba a la derecha) */
-        .theme-btn {
-            position: fixed !important;
-            top: 20px !important;
-            right: 20px !important;
-            z-index: 9999 !important;
-            background: rgba(28, 28, 30, 0.75) !important;
-            color: var(--text, #f5f5f5) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(15px) !important;
-            -webkit-backdrop-filter: blur(15px) !important;
-            padding: 10px 18px !important;
-            border-radius: 9999px !important;
-            cursor: pointer !important;
-            font-weight: 600 !important;
-            font-size: 13px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-            transition: all 0.2s ease !important;
-        }
-        .theme-btn:hover {
-            border-color: var(--primary) !important;
-            color: var(--primary) !important;
-        }
-
-@media (max-width: 768px) {
-            .materia-rating { flex-wrap: wrap; }
-            .stars-container { order: 1; }
-            .rating-average { order: 2; }
-            .vote-count { order: 3; }
-            .btn-vote { order: 4; }
-            .tips-banner { flex-direction: column; }
-            .tips-banner-close { top: 8px; right: 8px; }
-        }
-
-        /* ===== BANNER DE RECOMENDACIONES ===== */
-        .tips-banner {
+        .tour-modal h3 {
+            font-size: 1.15rem;
+            color: #ffffff;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 16px 45px 16px 20px;
-            margin-bottom: 24px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, color-mix(in srgb, var(--primary) 10%, transparent) 100%);
-            border: 1px solid rgba(139, 92, 246, 0.25);
-            position: relative;
-            animation: tipsBannerSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            transition: all 0.3s ease;
-        }
-        .tips-banner:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.12); }
-        @keyframes tipsBannerSlideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .tips-banner-icon {
-            flex-shrink: 0;
-            width: 38px; height: 38px;
-            background: linear-gradient(135deg, #8b5cf6, var(--primary));
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            color: white;
-        }
-        .tips-banner-text { flex: 1; }
-        .tips-banner-text strong { color: var(--primary); font-size: 14px; }
-        .tips-banner-text p { color: #9ca3af; font-size: 13px; margin: 3px 0 0 0; line-height: 1.4; }
-        .tips-banner-close {
-            position: absolute; top: 12px; right: 12px;
-            background: transparent; border: none; color: #9ca3af;
-            cursor: pointer; padding: 4px; border-radius: 6px;
-            transition: all 0.2s; display: flex; align-items: center; justify-content: center;
-        }
-        .tips-banner-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
-
-        /* ===== TIPS Y CONSEJOS POR MATERIA ===== */
-        .tips-section {
-            margin-top: 10px;
-            padding: 14px 0 4px 0;
-            border-top: 1px dashed var(--border);
-        }
-        .tips-section-header {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 13px; font-weight: 600; color: var(--primary);
-            margin-bottom: 10px; cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .tips-section-header:hover { opacity: 0.8; }
-        .tips-input-row {
-            display: flex; gap: 8px; margin-bottom: 12px; align-items: center;
-        }
-        .tips-input-row input {
-            flex: 1; padding: 10px 14px; border-radius: 8px;
-            border: 1px solid var(--border); background: var(--card-bg);
-            color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s;
-        }
-        .tips-input-row input:focus { outline: none; border-color: var(--primary); }
-        .tips-input-row input::placeholder { color: #9ca3af; }
-        .tips-input-row button {
-            padding: 10px 16px; border-radius: 8px; border: none;
-            background: var(--primary); color: white; font-weight: 600;
-            font-size: 12px; cursor: pointer; white-space: nowrap;
-            transition: all 0.2s; font-family: 'Inter', sans-serif;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .tips-input-row button:hover { box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 40%, transparent); transform: translateY(-1px); }
-        .tips-input-row button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-        .tips-list { display: flex; flex-direction: column; gap: 8px; }
-        .tip-bubble {
-            background: rgba(139, 92, 246, 0.06);
-            border: 1px solid rgba(139, 92, 246, 0.12);
-            border-radius: 10px; padding: 10px 14px;
-            animation: tipFadeIn 0.3s ease;
-        }
-        @keyframes tipFadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .tip-bubble-text { font-size: 13px; color: var(--text); line-height: 1.45; margin: 0; }
-        .tip-bubble-meta {
-            display: flex; align-items: center; gap: 8px;
-            margin-top: 5px; font-size: 11px; color: #9ca3af;
-        }
-        .tips-empty {
-            font-size: 12px; color: #9ca3af; font-style: italic;
-            padding: 6px 0;
-        }
-        .tips-toggle-body { display: none; }
-        .tips-toggle-body.open { display: block; }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-    /* --- ONBOARDING TOUR CSS --- */
-.tour-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85);
-    z-index: 10000;
-    transition: opacity 0.3s ease;
-}
-.tour-modal {
-    position: fixed;
-    top: 50%; left: 50%; transform: translate(-50%, -50%);
-    z-index: 10001;
-    background: #121212;
-    border: 1px solid var(--primary);
-    border-radius: 12px;
-    padding: 30px;
-    width: 90%;
-    max-width: 450px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-    color: #F5F5F5;
-    text-align: center;
-}
-.tour-modal h3 {
-    margin: 0 0 15px 0;
-    color: var(--primary);
-    font-size: 22px;
-    display: flex; justify-content: center; align-items: center; gap: 10px;
-}
-.tour-modal p {
-    font-size: 15px;
-    color: #9CA3AF;
-    line-height: 1.6;
-    margin: 0 0 25px 0;
-}
-.tour-dots {
-    display: flex; justify-content: center; gap: 8px; margin-bottom: 25px;
-}
-.tour-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: #4B5563;
-}
-.tour-dot.active { background: var(--primary); }
-.tour-footer {
-    display: flex; justify-content: space-between; align-items: center;
-}
-.tour-btn-skip {
-    background: transparent; border: none; color: #9CA3AF; cursor: pointer; font-size: 14px;
-}
-.tour-btn-skip:hover { color: #fff; }
-.tour-btn-next {
-    background: var(--primary); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer;
-}
-.tour-btn-next:hover { background: #e67e00; }
-
-        /* --- MOBILE RESPONSIVENESS --- */
-        html, body {
-            max-width: 100vw;
-            overflow-x: hidden;
-        }
-        .admin-fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 99999;
-            background: var(--primary, #FF8C00);
-            color: #ffffff;
-            padding: 12px 20px;
-            border-radius: 9999px;
-            display: none !important;
-            align-items: center;
             gap: 8px;
+        }
+        .tour-modal h3 i { color: var(--primary); }
+
+        .tour-modal p {
+            color: var(--text-muted);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .tour-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 18px;
+        }
+
+        .tour-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+        .tour-dot.active {
+            width: 16px;
+            background: var(--primary);
+        }
+
+        .tour-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tour-btn-skip {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .tour-btn-skip:hover { color: #ffffff; }
+
+        .tour-btn-next {
+            padding: 8px 18px;
+            background: var(--primary);
+            color: #111;
             font-weight: 700;
-            font-size: 14px;
-            text-decoration: none;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 140, 0, 0.4);
-            backdrop-filter: blur(10px);
-            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s;
-        }
-        .admin-fab:hover { transform: scale(1.05); }
-        .admin-fab:active { transform: scale(0.95); }
-        #btnAdminSidebar { display: none !important; }
-
-                /* Botón Flotante Herramientas (Abajo a la izquierda) */
-        .toggle-btn {
-            position: fixed !important;
-            left: 20px !important;
-            bottom: 20px !important;
-            z-index: 9999 !important;
-            background: var(--primary, #FF8C00) !important;
-            color: #ffffff !important;
-            border: none !important;
-            padding: 12px 20px !important;
-            border-radius: 9999px !important;
-            cursor: pointer !important;
-            font-weight: 700 !important;
-            font-size: 14px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 12px color-mix(in srgb, var(--primary) 30%, transparent) !important;
-            transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-        }
-        .toggle-btn:hover {
-            transform: translateY(-2px) !important;
+            font-size: 13px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
         }
 
-        /* Botón Flotante Tema (Arriba a la derecha) */
-        .theme-btn {
-            position: fixed !important;
-            top: 20px !important;
-            right: 20px !important;
-            z-index: 9999 !important;
-            background: rgba(28, 28, 30, 0.75) !important;
-            color: var(--text, #f5f5f5) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            backdrop-filter: blur(15px) !important;
-            -webkit-backdrop-filter: blur(15px) !important;
-            padding: 10px 18px !important;
-            border-radius: 9999px !important;
-            cursor: pointer !important;
-            font-weight: 600 !important;
-            font-size: 13px !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-            transition: all 0.2s ease !important;
-        }
-        .theme-btn:hover {
-            border-color: var(--primary) !important;
-            color: var(--primary) !important;
-        }
-
-@media (max-width: 768px) {
-            body {
-                flex-direction: column !important;
-                padding: 12px !important;
-            }
-            .sidebar {
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 280px !important;
-                height: 100vh !important;
-                z-index: 2000 !important;
-                transform: translateX(-100%);
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            .sidebar:not(.hidden) {
-                transform: translateX(0) !important;
-            }
-            .sidebar.hidden {
-                transform: translateX(-100%) !important;
-                display: none;
-            }
+        /* ==================== 5. ADAPTABILIDAD MOBILE ESTRICTA ==================== */
+        @media (max-width: 768px) {
             .main-content {
-                margin-left: 0 !important;
-                padding: 20px 15px 80px 15px !important;
+                padding: 20px 14px 80px 14px !important;
                 width: 100% !important;
-                max-width: 100% !important;
+                max-width: 100vw !important;
             }
-            .launchpad-container, .nav-buttons {
-                flex-wrap: wrap !important;
-                justify-content: center !important;
-                gap: 8px !important;
+            .segmented-control {
+                padding: 4px;
+                gap: 4px;
             }
-            .launchpad-btn {
-                width: 100% !important;
-                max-width: 100% !important;
-                text-align: center !important;
-                justify-content: center !important;
+            .segment-btn {
+                padding: 6px 12px;
+                font-size: 12px;
             }
-            .materia-item {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                gap: 12px !important;
-                padding: 16px !important;
+            .materia-row {
+                padding: 12px 14px;
             }
-            .materia-actions {
-                width: 100% !important;
-                justify-content: space-between !important;
-            }
-            .admin-fab {
+            .toggle-btn, #toggleSidebarBtn {
                 bottom: 16px !important;
-                right: 16px !important;
-                padding: 10px 16px !important;
+                left: 16px !important;
+                padding: 10px 18px !important;
                 font-size: 13px !important;
             }
+            header h1 { font-size: 1.8rem; }
+            .top-dock {
+                width: 100%;
+                justify-content: space-between;
+                padding: 4px;
+            }
+            .dock-item {
+                padding: 6px 10px;
+                font-size: 11.5px;
+                gap: 5px;
+            }
+            .floating-theme-btn {
+                top: 16px;
+                right: 16px;
+                padding: 6px 12px;
+                font-size: 11.5px;
+            }
         }
-
     </style>
 </head>
 <body>
 
+<!-- 2. BACKDROP OVERLAY PARA SIDEBAR -->
+<div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
+
+<!-- ==================== MODAL DE LOGIN ==================== -->
 <div id="loginModal" class="login-modal hidden">
     <div class="login-modal-content">
-        <i data-lucide="lock" class="icon-lg" style="color: var(--primary); margin-bottom: 15px; width: 40px; height: 40px;"></i>
+        <i data-lucide="lock" style="color: var(--primary); margin: 0 auto 12px auto; width: 32px; height: 32px;"></i>
         <h2>Bienvenido a La Biblioteca</h2>
-        <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones desde cualquier dispositivo.</p>
+        <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones.</p>
 
         <div class="login-tabs">
             <button class="login-tab active" onclick="switchTab('login')">Ingresar</button>
             <button class="login-tab" onclick="switchTab('register')">Registrarse</button>
         </div>
 
-    
         <div id="panelLogin" class="login-panel active">
             <button class="btn-google" id="btnGoogleLogin">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -827,7 +1136,7 @@
             <input type="email" id="loginEmail" class="login-input" placeholder="tu@gmail.com">
             <input type="password" id="loginPassword" class="login-input" placeholder="Contraseña">
             <div id="loginError" class="login-error"></div>
-            <button id="btnEmailLogin" class="btn-primary-solid" style="width: 100%; padding: 13px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; font-family: 'Inter', sans-serif;">
+            <button id="btnEmailLogin" class="btn-primary-solid" style="width: 100%; height: 42px; font-size: 13.5px;">
                 Ingresar
             </button>
         </div>
@@ -847,122 +1156,133 @@
             <input type="password" id="registerPassword" class="login-input" placeholder="Contraseña (mín. 6 caracteres)">
             <input type="password" id="registerPassword2" class="login-input" placeholder="Repetí tu contraseña">
             <div id="registerError" class="login-error"></div>
-            <button id="btnEmailRegister" class="btn-primary-solid" style="width: 100%; padding: 13px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; font-family: 'Inter', sans-serif;">
+            <button id="btnEmailRegister" class="btn-primary-solid" style="width: 100%; height: 42px; font-size: 13.5px;">
                 Crear cuenta
             </button>
         </div>
 
-        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; justify-content: center; padding: 12px; border-radius: 8px; margin-top: 12px; cursor: pointer; font-size: 13px; color: #9ca3af;">
+        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; height: 38px; margin-top: 12px; font-size: 12.5px; color: var(--text-muted);">
             Continuar como invitado
         </button>
     </div>
 </div>
 
+<!-- ==================== 4. MODAL DE PERSONALIZACIÓN (MIS MATERIAS) ==================== -->
 <div id="persModal" class="login-modal hidden" style="z-index: 2005;">
-    <div class="login-modal-content" style="max-width: 550px; max-height: 90vh; display: flex; flex-direction: column;">
-        <h2 style="margin-bottom: 5px;">Personalizá tu experiencia</h2>
-        <p style="margin-bottom: 20px;">Seleccioná qué materias querés ver en tu inicio para no distraerte.</p>
+    <div class="login-modal-content" style="max-width: 520px; max-height: 88vh; display: flex; flex-direction: column; text-align: left;">
+        <h2 style="margin-bottom: 4px;">Personalizá tu cursada</h2>
+        <p style="margin-bottom: 16px;">Marcá tus materias cursando y aprobadas para destacarlas en el panel.</p>
         
         <div class="login-tabs">
             <button class="login-tab active" id="tabCursando" onclick="switchPersTab('cursando')">Cursando Actualmente</button>
             <button class="login-tab" id="tabAprobadas" onclick="switchPersTab('aprobadas')">Ya Aprobadas</button>
         </div>
 
-        <div id="persListCursando" class="pers-list-container" style="overflow-y: auto; flex: 1; text-align: left; border: 1px solid var(--border); border-radius: 8px; padding: 10px 15px; margin-bottom: 15px; background: var(--bg);">
-            </div>
+        <div id="persListCursando" style="overflow-y: auto; flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.3);">
+        </div>
         
-        <div id="persListAprobadas" class="pers-list-container hidden" style="overflow-y: auto; flex: 1; text-align: left; border: 1px solid var(--border); border-radius: 8px; padding: 10px 15px; margin-bottom: 15px; background: var(--bg);">
-            </div>
+        <div id="persListAprobadas" class="hidden" style="overflow-y: auto; flex: 1; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.3);">
+        </div>
 
         <div class="vote-modal-buttons">
-            <button onclick="cerrarModalPersonalizacion()" class="btn-dark" style="padding: 10px 20px;">Cancelar</button>
-            <button onclick="guardarPersonalizacion()" class="btn-primary-solid" style="padding: 10px 20px;">Guardar materias</button>
+            <button onclick="cerrarModalPersonalizacion()" class="btn-dark" style="padding: 8px 16px; font-size: 13px;">Cancelar</button>
+            <button onclick="guardarPersonalizacion()" class="btn-primary-solid" style="padding: 8px 18px; font-size: 13px;">Guardar materias</button>
         </div>
     </div>
 </div>
 
-<button id="toggleSidebarBtn" class="toggle-btn"><i data-lucide="menu" class="icon-md"></i> Herramientas</button>
-<button class="theme-btn" onclick="toggleTheme()"><i data-lucide="moon" class="icon-sm"></i> Tema</button>
+<!-- ==================== BOTONES FLOTANTES ==================== -->
+<button id="toggleSidebarBtn" class="toggle-btn" onclick="toggleSidebar(true)">
+    <i data-lucide="menu" style="width: 16px; height: 16px;"></i>
+    <span>Herramientas</span>
+</button>
 
+<button class="floating-theme-btn" onclick="toggleTheme()">
+    <i data-lucide="moon" style="width: 14px; height: 14px;"></i>
+    <span>Tema</span>
+</button>
+
+<!-- ==================== 2. SIDEBAR CON BOTÓN DE CIERRE PRÉMIUM ==================== -->
 <aside class="sidebar hidden" id="sidebar">
-    <div id="userProfile" style="margin-bottom: 25px; padding: 15px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; text-align: center; backdrop-filter: blur(10px);">
-        <i data-lucide="user-circle" class="icon-lg" style="color: var(--primary); margin-bottom: 8px;"></i>
-        <p id="userName" style="font-weight: 700; margin: 0 0 12px 0; font-size: 14px; color: var(--text);">Invitado</p>
-        <button id="sidebarLoginBtn" class="btn-primary-solid" style="width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
-            <i data-lucide="log-in" class="icon-sm"></i> Ingresar
-        </button>
-        <button id="sidebarLogoutBtn" class="btn-dark" style="width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; display: none; justify-content: center; align-items: center; gap: 8px; font-weight: bold;">
-            <i data-lucide="log-out" class="icon-sm"></i> Salir
+    <div class="sidebar-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <span style="font-weight: 800; font-size: 16px; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="library" style="width: 20px; height: 20px;"></i> ADE UNGS
+        </span>
+        <button id="sidebarCloseBtn" class="sidebar-close-btn" aria-label="Cerrar menú" onclick="toggleSidebar(false)">
+            <i data-lucide="x" style="width: 20px; height: 20px;"></i>
         </button>
     </div>
 
-    <h2 style="color: var(--primary); font-weight: 800; margin-top: 10px; display: flex; align-items: center; gap: 8px;">
-        <i data-lucide="library" class="icon-lg"></i> ADE UNGS
-    </h2>
-    <p style="color: #9ca3af; font-size: 14px; margin-top: -5px;">Navegación</p>
-    
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+    <div id="userProfile" style="margin-bottom: 18px; padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-md); text-align: center;">
+        <i data-lucide="user-circle" style="color: var(--primary); margin: 0 auto 6px auto; width: 28px; height: 28px;"></i>
+        <p id="userName" style="font-weight: 600; margin-bottom: 10px; font-size: 13px; color: var(--text);">Invitado</p>
+        <button id="sidebarLoginBtn" class="btn-primary-solid" style="width: 100%; height: 34px; font-size: 12.5px; display: flex; justify-content: center; align-items: center; gap: 6px;">
+            <i data-lucide="log-in" style="width: 14px; height: 14px;"></i> Ingresar
+        </button>
+        <button id="sidebarLogoutBtn" class="btn-dark" style="width: 100%; height: 34px; font-size: 12.5px; display: none; justify-content: center; align-items: center; gap: 6px;">
+            <i data-lucide="log-out" style="width: 14px; height: 14px;"></i> Salir
+        </button>
+    </div>
 
-    <a href="index.html" class="btn-sidebar btn-primary-solid" style="margin-bottom: 5px;">
-        <i data-lucide="search" class="icon-sm"></i> Buscar Materias
+    <p class="sidebar-section-title">Navegación</p>
+
+    <a href="index.html" class="btn-sidebar" style="background: rgba(255,255,255,0.06); color: #fff;">
+        <i data-lucide="search"></i> Buscar Materias
     </a>
     
-    <a href="#" onclick="abrirModalPersonalizacion(); return false;" class="btn-sidebar btn-dark" id="btnEditarMaterias" style="display:none; margin-bottom: 12px; border-style: dashed;">
-        <i data-lucide="sliders" class="icon-sm"></i> Mis Materias
+    <a href="#" onclick="abrirModalPersonalizacion(); return false;" class="btn-sidebar" id="btnEditarMaterias" style="display:none; border: 1px dashed var(--border);">
+        <i data-lucide="sliders"></i> Mis Materias
     </a>
 
-    <a href="progreso.html" class="btn-sidebar btn-dark">
-        <i data-lucide="trending-up" class="icon-sm"></i> Mi Progreso
+    <a href="progreso.html" class="btn-sidebar">
+        <i data-lucide="trending-up"></i> Mi Progreso
     </a>
 
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-
-    <a href="estudio.html" class="btn-sidebar btn-dark">
-        <i data-lucide="timer" class="icon-sm"></i> Sesión de Estudio
+    <a href="estudio.html" class="btn-sidebar">
+        <i data-lucide="timer"></i> Sesión de Estudio
     </a>
 
-    <a href="javascript:void(0)" onclick="showComingSoonAlert(event)" class="btn-sidebar btn-dark" style="opacity: 0.6; cursor: not-allowed; position: relative;">
-        <i data-lucide="lock" class="icon-sm" style="color: #9ca3af;"></i> Calendario
-        <span style="position: absolute; right: 12px; font-size: 10px; background: color-mix(in srgb, var(--primary) 15%, transparent); color: var(--primary); padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Próximamente</span>
+    <a href="javascript:void(0)" onclick="showComingSoonAlert(event)" class="btn-sidebar" style="opacity: 0.6; cursor: not-allowed; justify-content: space-between;">
+        <span style="display: flex; align-items: center; gap: 10px;"><i data-lucide="calendar"></i> Calendario</span>
+        <span style="font-size: 9.5px; background: color-mix(in srgb, var(--primary) 15%, transparent); color: var(--primary); padding: 2px 5px; border-radius: 4px; font-weight: 700;">PRÓXIMO</span>
     </a>
 
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+    <hr>
     
-    <p style="color: #9ca3af; font-size: 13px; font-weight: 600; margin-bottom: 15px; margin-top: 0;">Oportunidades</p>
+    <p class="sidebar-section-title">Oportunidades</p>
 
-    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="briefcase" class="icon-sm"></i> Bolsa de Trabajo
+    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar" rel="noopener noreferrer">
+        <i data-lucide="briefcase"></i> Bolsa de Trabajo
     </a>
-    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="building" class="icon-sm"></i> Pasantías UNGS
-    </a>
-
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-
-    <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="message-square-plus" class="icon-sm"></i> Dejar Recomendación
-    </a>
-    <a href="Recomendaciones_docentes.pdf" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="book-open-check" class="icon-sm"></i> Ver Recomendaciones
-    </a>
-    <a href="mailto:bibliotecaadeungs@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="margin-top: 15px; border-style: dashed;">
-        <i data-lucide="file-up" class="icon-sm"></i> Donar Archivos
+    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar" rel="noopener noreferrer">
+        <i data-lucide="building"></i> Pasantías UNGS
     </a>
 
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-    
+    <hr>
 
-    <button id="pwaInstallBtn" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
-        <i data-lucide="download" class="icon-sm"></i> Instalar App
+    <p class="sidebar-section-title">Comunidad</p>
+
+    <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar" rel="noopener noreferrer">
+        <i data-lucide="message-square-plus"></i> Dejar Recomendación
+    </a>
+    <a href="Recomendaciones_docentes.pdf" target="_blank" class="btn-sidebar" rel="noopener noreferrer">
+        <i data-lucide="book-open-check"></i> Ver Recomendaciones
+    </a>
+    <a href="mailto:bibliotecaadeungs@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar" style="border: 1px dashed var(--border); margin-top: 6px;">
+        <i data-lucide="file-up"></i> Donar Archivos
+    </a>
+
+    <button id="pwaInstallBtn" class="btn-sidebar" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
+        <i data-lucide="download"></i> Instalar App
     </button>
 
     <div class="theme-panel-section">
-        <p style="color: var(--text); font-size: 12px; font-weight: 700; margin: 0 0 8px 0; display: flex; align-items: center; justify-content: space-between;">
-            <span style="display: flex; align-items: center; gap: 6px;"><i data-lucide="palette" class="icon-sm" style="color: var(--primary);"></i> Apariencia</span>
+        <p style="color: var(--text); font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="palette" style="color: var(--primary); width: 14px; height: 14px;"></i> Paleta de Acento
         </p>
         <div class="theme-swatches">
-            <button type="button" class="theme-swatch" data-theme-name="orange" onclick="setCustomTheme('orange')" title="Naranja (Defecto)" style="background: #FF8C00;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="emerald" onclick="setCustomTheme('emerald')" title="Esmeralda" style="background: #059669;"></button>
+            <button type="button" class="theme-swatch" data-theme-name="orange" onclick="setCustomTheme('orange')" title="Naranja" style="background: #FF8C00;"></button>
+            <button type="button" class="theme-swatch" data-theme-name="emerald" onclick="setCustomTheme('emerald')" title="Esmeralda" style="background: #10B981;"></button>
             <button type="button" class="theme-swatch" data-theme-name="midnight" onclick="setCustomTheme('midnight')" title="Azul Noche" style="background: #3B82F6;"></button>
             <button type="button" class="theme-swatch" data-theme-name="purple" onclick="setCustomTheme('purple')" title="Púrpura" style="background: #8B5CF6;"></button>
             <button type="button" class="theme-swatch" data-theme-name="rose" onclick="setCustomTheme('rose')" title="Rosa" style="background: #F43F5E;"></button>
@@ -971,73 +1291,126 @@
     </div>
 </aside>
 
-<div class="main-content expanded" id="mainContent">
+<!-- ==================== CONTENEDOR PRINCIPAL ==================== -->
+<main class="main-content" id="mainContent">
+
+    <!-- DOCK SUPERIOR FLOTANTE CENTRADO -->
+    <div class="top-dock-wrapper">
+        <nav class="top-dock">
+            <a href="https://inscripciones.ungs.edu.ar/" target="_blank" class="dock-item" rel="noopener noreferrer">
+                <i data-lucide="monitor"></i>
+                <span>SIU Guaraní</span>
+            </a>
+            <div class="dock-divider"></div>
+            <a href="https://sso.ungs.edu.ar/moodle" target="_blank" class="dock-item" rel="noopener noreferrer">
+                <i data-lucide="graduation-cap"></i>
+                <span>Campus Virtual</span>
+            </a>
+            <div class="dock-divider"></div>
+            <a href="Contactos_Docentes.pdf" target="_blank" class="dock-item" rel="noopener noreferrer">
+                <i data-lucide="mail"></i>
+                <span>Mails Docentes</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- ENCABEZADO -->
     <header>
         <h1>La Biblioteca de ADE</h1>
-        <p>Lic. Administración de Empresas - UNGS</p>
-                
-        <div class="launchpad-container">
-            <a href="https://inscripciones.ungs.edu.ar/" target="_blank" class="launchpad-btn" rel="noopener noreferrer">
-                <i data-lucide="monitor" class="icon-sm text-primary"></i> SIU Guaraní
-            </a>
-            <a href="https://sso.ungs.edu.ar/moodle" target="_blank" class="launchpad-btn" rel="noopener noreferrer">
-                <i data-lucide="graduation-cap" class="icon-sm text-primary"></i> Campus Virtual
-            </a>
-            
-            <a href="Contactos_Docentes.pdf" target="_blank" class="launchpad-btn" rel="noopener noreferrer">
-                <i data-lucide="mail" class="icon-sm text-primary"></i> Mails de Profesores
-            </a>
-            
-        </div>
+        <p>Licenciatura en Administración de Empresas • Material y Recursos</p>
     </header>
 
+    <!-- BANNER PROMO COMPACTO -->
     <div class="promo-banner">
         <div class="promo-banner-text">
-            <h4><i data-lucide="graduation-cap" class="icon-md"></i> ¿Das clases particulares?</h4>
-            <p>Llegá a más alumnos.</p>
+            <div class="promo-icon">
+                <i data-lucide="graduation-cap" style="width: 16px; height: 16px;"></i>
+            </div>
+            <div>
+                <h4>¿Das clases particulares?</h4>
+                <p>Llegá a más estudiantes de la carrera.</p>
+            </div>
         </div>
         <a href="mailto:bibliotecaadeungs@gmail.com?subject=Consulta%20Clases%20Particulares" class="promo-btn">
-            <i data-lucide="megaphone" class="icon-sm"></i> Más información
+            <i data-lucide="megaphone" style="width: 12px; height: 12px;"></i> Más información
         </a>
     </div>
 
-    <!-- Banner de Recomendaciones -->
-    <div class="tips-banner" id="tipsBanner">
-        <div class="tips-banner-icon">
-            <i data-lucide="sparkles" style="width:20px;height:20px;"></i>
+    <!-- TIPS BANNER -->
+    <div class="tips-banner-compact" id="tipsBanner">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="lightbulb" style="color: var(--primary); width: 15px; height: 15px; flex-shrink: 0;"></i>
+            <span><strong>¿Tenés consejos de cursada?</strong> Sumá tu recomendación docente desde el menú de la izquierda.</span>
         </div>
-        <div class="tips-banner-text">
-            <strong>💡 ¿Tenés un consejo para la cursada?</strong>
-            <p>Ayudá a la comunidad dejando tu recomendación general desde el botón <em>"Dejar Recomendación"</em> en la barra lateral.</p>
-        </div>
-        <button class="tips-banner-close" id="tipsBannerClose" title="Cerrar">
-            <i data-lucide="x" style="width:16px;height:16px;"></i>
+        <button class="tips-close-btn" id="tipsBannerClose" title="Cerrar">
+            <i data-lucide="x" style="width: 14px; height: 14px;"></i>
         </button>
     </div>
 
+    <!-- BUSCADOR SPOTLIGHT -->
     <div class="search-container">
-        <i data-lucide="search" class="search-icon icon-md"></i>
-        <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="filterMaterias()">
+        <i data-lucide="search" class="search-icon-spotlight"></i>
+        <input type="text" id="searchInput" placeholder="Buscá tu materia..." onkeyup="handleSearchInput()">
     </div>
 
-    <div id="accordionContainer"></div>
-
-    <div class="footer-donate">
-        <a href="Horarios.pdf" class="btn-sugerencias" target="_blank" rel="noopener noreferrer">
-            <i data-lucide="calendar" class="icon-sm"></i> Plan de estudios y horarios
-        </a>
-        <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="btn-sugerencias" target="_blank" rel="noopener noreferrer">
-            <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para mejorar la web
-        </a>
-        <button id="pwaInstallBtnFooter" class="btn-sugerencias" style="display: none; background: transparent; cursor: pointer; width: 100%; max-width: 280px; justify-content: center;">
-            <i data-lucide="download" class="icon-sm"></i> Descargar aplicación
+    <!-- 3. CONTROL SEGMENTADO iOS CON TOTAL EXACTO (38 MATERIAS) -->
+    <div class="segmented-control" id="yearTabsContainer">
+        <button class="segment-btn active" onclick="setYearFilter('ALL', this)">
+            <span>Todas</span>
+            <span class="segment-count" id="count-ALL">38</span>
+        </button>
+        <button class="segment-btn" onclick="setYearFilter('PRIMER AÑO', this)">
+            <span>1° Año</span>
+            <span class="segment-count" id="count-1">6</span>
+        </button>
+        <button class="segment-btn" onclick="setYearFilter('SEGUNDO AÑO', this)">
+            <span>2° Año</span>
+            <span class="segment-count" id="count-2">6</span>
+        </button>
+        <button class="segment-btn" onclick="setYearFilter('TERCER AÑO', this)">
+            <span>3° Año</span>
+            <span class="segment-count" id="count-3">6</span>
+        </button>
+        <button class="segment-btn" onclick="setYearFilter('CUARTO AÑO', this)">
+            <span>4° Año</span>
+            <span class="segment-count" id="count-4">7</span>
+        </button>
+        <button class="segment-btn" onclick="setYearFilter('QUINTO AÑO', this)">
+            <span>5° Año</span>
+            <span class="segment-count" id="count-5">6</span>
+        </button>
+        <button class="segment-btn" onclick="setYearFilter('SEXTO AÑO', this)">
+            <span>6° Año</span>
+            <span class="segment-count" id="count-6">3</span>
+        </button>
+        <button class="segment-btn" onclick="setYearFilter('EXTRACURRICULARES', this)">
+            <span>Extras</span>
+            <span class="segment-count" id="count-ext">4</span>
         </button>
     </div>
-</div>
 
-<div id="voteModal" class="vote-modal hidden">
-    <div class="vote-modal-content">
+    <!-- 3. LISTAS AGRUPADAS CON FILAS EN DOS LÍNEAS -->
+    <div id="subjectsContainer"></div>
+
+    <!-- FOOTER -->
+    <footer class="footer-ios">
+        <a href="Horarios.pdf" class="footer-btn" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="calendar" style="width: 13px; height: 13px;"></i> Plan de estudios y horarios
+        </a>
+        <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="footer-btn" target="_blank" rel="noopener noreferrer">
+            <i data-lucide="message-square" style="width: 13px; height: 13px;"></i> Sugerencias
+        </a>
+        <button id="pwaInstallBtnFooter" class="footer-btn" style="display: none; cursor: pointer;">
+            <i data-lucide="download" style="width: 13px; height: 13px;"></i> Instalar App
+        </button>
+    </footer>
+</main>
+
+<!-- ==================== MODAL DE VOTACIÓN ==================== -->
+<div id="voteModal" class="login-modal hidden">
+    <div class="login-modal-content">
         <h3 id="voteMateriaTitle">¿Qué tan difícil es esta materia?</h3>
+        <p>Tu opinión anónima ayuda a otros estudiantes a organizar su cuatrimestre.</p>
         <div class="vote-stars" id="voteStars">
             <span class="vote-star" data-value="1">★</span>
             <span class="vote-star" data-value="2">★</span>
@@ -1045,15 +1418,51 @@
             <span class="vote-star" data-value="4">★</span>
             <span class="vote-star" data-value="5">★</span>
         </div>
-        <p style="font-size: 13px; color: #9ca3af;">1 = Muy fácil | 5 = Muy difícil</p>
+        <p style="font-size: 11.5px; color: var(--text-dim);">1 = Muy accesible • 5 = Muy exigente</p>
         <div class="vote-modal-buttons">
-            <button onclick="closeVoteModal()" class="btn-dark">Cancelar</button>
-            <button onclick="submitVote()" class="btn-primary-solid">Votar</button>
+            <button onclick="closeVoteModal()" class="btn-dark" style="padding: 8px 16px; font-size: 13px;">Cancelar</button>
+            <button onclick="submitVote()" class="btn-primary-solid" style="padding: 8px 20px; font-size: 13px;">Votar</button>
         </div>
     </div>
 </div>
 
-<!-- Firebase SDK + Config (cargados al final del body para acceso seguro al DOM) -->
+<!-- ==================== ONBOARDING TOUR ==================== -->
+<div id="tourOverlay" class="tour-overlay" style="display: none;"></div>
+<div id="tourTooltip" class="tour-modal" style="display: none;">
+    <h3 id="tourTitle"></h3>
+    <p id="tourText"></p>
+    <div class="tour-dots" id="tourDots"></div>
+    <div class="tour-footer">
+        <button id="tourBtnSkip" class="tour-btn-skip">Omitir</button>
+        <button id="tourBtnNext" class="tour-btn-next">Siguiente</button>
+    </div>
+</div>
+
+<!-- PWA Instructions Modal -->
+<div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;">
+    <div class="login-modal-content" style="max-width: 440px; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="margin: 0; font-size: 16px; color: var(--primary); font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="download-cloud" style="width: 18px; height: 18px;"></i> Instalar Aplicación
+            </h3>
+            <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px;">&times;</button>
+        </div>
+        <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 16px;">Instalá La Biblioteca en tu pantalla de inicio para acceso instantáneo:</p>
+        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12.5px;">
+            <div style="padding: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                <strong style="color: var(--text); display: block; margin-bottom: 2px;">En iPhone / Safari:</strong>
+                <span style="color: var(--text-muted);">Tocá el botón <em>Compartir</em> y elegí <em>Agregar a inicio</em>.</span>
+            </div>
+            <div style="padding: 10px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                <strong style="color: var(--text); display: block; margin-bottom: 2px;">En Android / Chrome / PC:</strong>
+                <span style="color: var(--text-muted);">Hacé clic en el ícono de instalación en la barra del navegador.</span>
+            </div>
+        </div>
+        <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 16px; padding: 10px; font-size: 13px;">Entendido</button>
+    </div>
+</div>
+
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
@@ -1062,7 +1471,7 @@
 <script src="firebase-config.js"></script>
 
 <script>
-    // ==================== FUNCIONES DE SEGURIDAD ====================
+    // ==================== SEGURIDAD & HELPERS ====================
     function sanitizeHTML(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -1087,13 +1496,6 @@
         return re.test(email);
     }
     
-    function sanitizeSubjectName(name) {
-        if (!name) return '';
-        var cleaned = name.replace(/[^\w\s\u00C0-\u00FF\-\.\,\(\)\:\/]/gi, '');
-        if (cleaned.length > 200) cleaned = cleaned.substring(0, 200);
-        return cleaned.trim();
-    }
-    
     function generarIdValido(texto) {
         return texto.toLowerCase()
             .replace(/[^a-z0-9]/g, '_')
@@ -1101,286 +1503,8 @@
             .replace(/^_|_$/, '')
             .substring(0, 100);
     }
-    
-    // Las instancias de auth, db y googleProvider son provistas de forma global por firebase-config.js
 
-    // ==================== CONFIGURACIÓN DE MATERIAS DEL USUARIO ====================
-    // userMateriasConfig contendrá { cursando: [], aprobadas: [] }. Si es null, muestra todo.
-    var userMateriasConfig = null; 
-
-    function cargarMateriasUsuario(user) {
-        db.collection('usuarios_materias').doc(user.uid).get()
-            .then(function(doc) {
-                if (doc.exists) {
-                    userMateriasConfig = doc.data();
-                    render();
-                    document.getElementById('btnEditarMaterias').style.display = 'flex';
-                } else {
-                    userMateriasConfig = { cursando: [], aprobadas: [] };
-                    abrirModalPersonalizacion();
-                    document.getElementById('btnEditarMaterias').style.display = 'flex';
-                }
-            })
-            .catch(function(error) {
-                console.error("Error al cargar configuración de materias:", error);
-            });
-    }
-
-    // Modal de Personalización (Lógica)
-    window.switchPersTab = function(tab) {
-        document.getElementById('tabCursando').classList.toggle('active', tab === 'cursando');
-        document.getElementById('tabAprobadas').classList.toggle('active', tab === 'aprobadas');
-        document.getElementById('persListCursando').classList.toggle('hidden', tab !== 'cursando');
-        document.getElementById('persListAprobadas').classList.toggle('hidden', tab !== 'aprobadas');
-    };
-
-    window.abrirModalPersonalizacion = function() {
-        var htmlCursando = '';
-        var htmlAprobadas = '';
-        
-        for (var year in data) {
-            htmlCursando += '<div class="pers-year-header">' + sanitizeHTML(year) + '</div>';
-            htmlAprobadas += '<div class="pers-year-header">' + sanitizeHTML(year) + '</div>';
-            
-            data[year].forEach(function(m) {
-                var checkedCursando = (userMateriasConfig && userMateriasConfig.cursando && userMateriasConfig.cursando.includes(m.n)) ? 'checked' : '';
-                var checkedAprobadas = (userMateriasConfig && userMateriasConfig.aprobadas && userMateriasConfig.aprobadas.includes(m.n)) ? 'checked' : '';
-                
-                var safeName = sanitizeHTML(m.n);
-                
-                htmlCursando += 
-                    '<label class="pers-item">' +
-                        '<input type="checkbox" value="' + safeName + '" class="chk-cursando" ' + checkedCursando + '>' +
-                        safeName +
-                    '</label>';
-                
-                htmlAprobadas += 
-                    '<label class="pers-item">' +
-                        '<input type="checkbox" value="' + safeName + '" class="chk-aprobadas" ' + checkedAprobadas + '>' +
-                        safeName +
-                    '</label>';
-            });
-        }
-        
-        document.getElementById('persListCursando').innerHTML = htmlCursando;
-        document.getElementById('persListAprobadas').innerHTML = htmlAprobadas;
-        document.getElementById('persModal').classList.remove('hidden');
-    };
-
-    window.cerrarModalPersonalizacion = function() {
-        document.getElementById('persModal').classList.add('hidden');
-    };
-
-    window.guardarPersonalizacion = function() {
-        var cursandoEls = document.querySelectorAll('.chk-cursando:checked');
-        var aprobadasEls = document.querySelectorAll('.chk-aprobadas:checked');
-        
-        var cursandoArr = [];
-        var aprobadasArr = [];
-        
-        for(var i=0; i<cursandoEls.length; i++) cursandoArr.push(cursandoEls[i].value);
-        for(var j=0; j<aprobadasEls.length; j++) aprobadasArr.push(aprobadasEls[j].value);
-        
-        var user = auth.currentUser;
-        if (!user) return;
-        
-        var newData = {
-            cursando: cursandoArr,
-            aprobadas: aprobadasArr,
-            ultimaActualizacion: new Date().toISOString()
-        };
-        
-        db.collection('usuarios_materias').doc(user.uid).set(newData)
-            .then(function() {
-                userMateriasConfig = newData;
-                cerrarModalPersonalizacion();
-                render();
-            })
-            .catch(function(error) {
-                console.error("Error guardando personalización:", error);
-                alert("Ocurrió un error al guardar tus materias.");
-            });
-    };
-
-
-    
-    // ==================== RANKING DE DIFICULTAD ====================
-    var selectedMateria = null;
-    var selectedVote = null;
-    var currentMateriaId = null;
-    var currentMateriaNombre = null;
-    
-    function cargarEstadisticasMaterias() {
-        db.collection('materias_stats').get()
-            .then(function(querySnapshot) {
-                querySnapshot.forEach(function(doc) {
-                    var data = doc.data();
-                    var materiaNombre = data.nombre;
-                    var promedio = data.promedio || 0;
-                    var totalVotos = data.totalVotos || 0;
-                    actualizarRatingEnPagina(materiaNombre, promedio, totalVotos);
-                });
-            })
-            .catch(function(error) {
-                console.error("Error cargando estadísticas:", error);
-            });
-    }
-    
-    function actualizarRatingEnPagina(materiaNombre, promedio, totalVotos) {
-        var elementosMateria = document.querySelectorAll('.materia-name');
-        for (var i = 0; i < elementosMateria.length; i++) {
-            // El innerText puede tener contenido de tags extras si hay badges, así que comparamos la data-attribute o el string limpio.
-            // Para ser seguros, validaremos el texto base
-            var rawName = elementosMateria[i].childNodes[0].textContent.trim();
-            if (rawName === materiaNombre) {
-                var materiaItem = elementosMateria[i].closest('.materia-item');
-                var ratingContainer = materiaItem.querySelector('.materia-rating');
-                if (ratingContainer) {
-                    var stars = ratingContainer.querySelectorAll('.star');
-                    for (var s = 0; s < stars.length; s++) {
-                        var starValue = parseInt(stars[s].getAttribute('data-value'));
-                        if (starValue <= Math.round(promedio)) {
-                            stars[s].classList.add('filled');
-                        } else {
-                            stars[s].classList.remove('filled');
-                        }
-                    }
-                    var avgSpan = ratingContainer.querySelector('.rating-average');
-                    var countSpan = ratingContainer.querySelector('.vote-count');
-                    if (avgSpan) avgSpan.textContent = promedio.toFixed(1);
-                    if (countSpan) countSpan.textContent = '(' + totalVotos + ')';
-                }
-                break; // Removemos break si la materia puede estar duplicada, aunque en data no lo está.
-            }
-        }
-    }
-    
-    function verificarVotoUsuario(materiaId) {
-        var user = auth.currentUser;
-        if (!user) return Promise.resolve(false);
-        
-        var docId = user.uid + '_' + materiaId;
-        return db.collection('users_votes').doc(docId).get()
-            .then(function(doc) {
-                return doc.exists;
-            });
-    }
-    
-    function abrirModalVotacion(materiaNombre, materiaId) {
-        var user = auth.currentUser;
-        if (!user) {
-            alert('Iniciá sesión para votar la dificultad de las materias');
-            document.getElementById('loginModal').classList.remove('hidden');
-            return;
-        }
-        
-        verificarVotoUsuario(materiaId).then(function(yaVoto) {
-            if (yaVoto) {
-                alert('Ya votaste esta materia anteriormente');
-                return;
-            }
-            
-            selectedMateria = materiaNombre;
-            currentMateriaId = materiaId;
-            currentMateriaNombre = materiaNombre;
-            selectedVote = null;
-            
-            document.getElementById('voteMateriaTitle').textContent = '¿Qué tan difícil es ' + materiaNombre + '?';
-            
-            var stars = document.querySelectorAll('#voteStars .vote-star');
-            stars.forEach(function(star) {
-                star.classList.remove('selected');
-            });
-            
-            document.getElementById('voteModal').classList.remove('hidden');
-        });
-    }
-    
-    window.submitVote = function() {
-        if (!selectedVote) {
-            alert('Seleccioná una calificación (1 a 5 estrellas)');
-            return;
-        }
-        
-        var user = auth.currentUser;
-        if (!user) return;
-        
-        var docId = user.uid + '_' + currentMateriaId;
-        
-        db.collection('users_votes').doc(docId).set({
-            uid: user.uid,
-            materiaId: currentMateriaId,
-            materiaNombre: currentMateriaNombre,
-            voto: selectedVote,
-            fecha: new Date().toISOString()
-        })
-        .then(function() {
-            return actualizarEstadisticasMateria(currentMateriaId, selectedVote);
-        })
-        .then(function() {
-            closeVoteModal();
-            alert('¡Gracias por tu voto!');
-            cargarEstadisticasMaterias();
-        })
-        .catch(function(error) {
-            console.error("Error al votar:", error);
-            alert('Error al guardar el voto');
-        });
-    };
-    
-    function actualizarEstadisticasMateria(materiaId, nuevoVoto) {
-        var materiaRef = db.collection('materias_stats').doc(materiaId);
-        
-        return materiaRef.get().then(function(doc) {
-            if (doc.exists) {
-                var data = doc.data();
-                var totalVotos = data.totalVotos || 0;
-                var promedioActual = data.promedio || 0;
-                var sumaTotal = promedioActual * totalVotos;
-                var nuevaSuma = sumaTotal + nuevoVoto;
-                var nuevoTotalVotos = totalVotos + 1;
-                var nuevoPromedio = nuevaSuma / nuevoTotalVotos;
-                
-                return materiaRef.update({
-                    promedio: nuevoPromedio,
-                    totalVotos: nuevoTotalVotos,
-                    ultimaActualizacion: new Date().toISOString()
-                });
-            } else {
-                return materiaRef.set({
-                    nombre: currentMateriaNombre,
-                    promedio: nuevoVoto,
-                    totalVotos: 1,
-                    ultimaActualizacion: new Date().toISOString()
-                });
-            }
-        });
-    }
-    
-    window.closeVoteModal = function() {
-        document.getElementById('voteModal').classList.add('hidden');
-        selectedMateria = null;
-        selectedVote = null;
-        currentMateriaId = null;
-        currentMateriaNombre = null;
-    };
-    
-    document.querySelectorAll('#voteStars .vote-star').forEach(function(star) {
-        star.addEventListener('click', function() {
-            var value = parseInt(this.getAttribute('data-value'));
-            selectedVote = value;
-            
-            document.querySelectorAll('#voteStars .vote-star').forEach(function(s, index) {
-                if (index < value) {
-                    s.classList.add('selected');
-                } else {
-                    s.classList.remove('selected');
-                }
-            });
-        });
-    });
-    
-    // ==================== RENDER DE MATERIAS ====================
+    // ==================== 3. DATOS DE MATERIAS (TOTAL EXACTO: 38 MATERIAS) ====================
     var data = {
         "PRIMER AÑO": [
             {n: "Taller Inicial Común: Taller de Lectura y Escritura", l: "https://drive.google.com/drive/folders/1YphnRCiVML6CFc5VHpnvYXHqIshk2oUt?usp=sharing", req: ""},
@@ -1436,112 +1560,116 @@
         ]
     };
 
+    var currentYearFilter = 'ALL';
+    var userMateriasConfig = null;
+    var statsCache = {};
+
+    // ==================== 3. RENDER DE MATERIAS (DOS LÍNEAS + INSET GROUPED) ====================
     function render() {
-        var container = document.getElementById('accordionContainer');
-        container.innerHTML = '';
+        var container = document.getElementById('subjectsContainer');
+        if (!container) return;
         
-        var materiasMostradas = 0;
+        var query = (document.getElementById('searchInput') ? document.getElementById('searchInput').value : '').toLowerCase().trim();
+        var html = '';
+        var totalRendered = 0;
 
         for (var year in data) {
+            if (currentYearFilter !== 'ALL' && currentYearFilter !== year) {
+                continue;
+            }
+
             var mats = data[year];
-            var safeYear = sanitizeHTML(year);
-            
-            // Filtrar las materias según la configuración del usuario
-            var itemsHtml = mats.filter(function(m) {
-                if (!userMateriasConfig) return true; // Si no hay conf, muestra todas
-                var estaCursando = userMateriasConfig.cursando && userMateriasConfig.cursando.includes(m.n);
-                var estaAprobada = userMateriasConfig.aprobadas && userMateriasConfig.aprobadas.includes(m.n);
-                return estaCursando || estaAprobada;
-            }).map(function(m) {
+            var yearRowsHtml = '';
+            var yearVisibleCount = 0;
+
+            mats.forEach(function(m) {
                 var safeName = sanitizeHTML(m.n);
                 var safeReq = m.req ? sanitizeHTML(m.req) : '';
                 var safeLink = encodeURIComponent(m.l);
-                var safeNameForAttr = m.n.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                var safeNameForAttr = m.n.replace(/'/g, "\'").replace(/"/g, '&quot;');
                 var materiaId = generarIdValido(m.n);
-                
+
+                if (query) {
+                    var matchName = m.n.toLowerCase().includes(query);
+                    var matchReq = (m.req || '').toLowerCase().includes(query);
+                    var matchYear = year.toLowerCase().includes(query);
+                    if (!matchName && !matchReq && !matchYear) return;
+                }
+
                 var esAprobada = userMateriasConfig && userMateriasConfig.aprobadas && userMateriasConfig.aprobadas.includes(m.n);
                 var esCursando = userMateriasConfig && userMateriasConfig.cursando && userMateriasConfig.cursando.includes(m.n);
-                
-                var claseExtra = esAprobada ? " aprobada" : "";
-                var badgesHtml = "";
-                
-                if (esAprobada) {
-                    badgesHtml += '<span class="badge-aprobada"><i data-lucide="check-circle" style="width:12px;height:12px;"></i> Aprobada</span>';
-                } else if (esCursando) {
-                    badgesHtml += '<span class="badge-cursando"><i data-lucide="book-open" style="width:12px;height:12px;"></i> Cursando</span>';
-                }
-                
-                materiasMostradas++;
 
-                return '<div class="materia-item' + claseExtra + '">' +
-                    '<div class="materia-info">' +
-                        '<div style="display:flex; align-items:center; flex-wrap:wrap; gap:5px;">' +
-                            '<span class="materia-name" onclick="openDoc(\'' + safeNameForAttr + '\', \'' + safeLink + '\')">' + safeName + '</span>' +
-                            badgesHtml +
-                        '</div>' +
-                        '<div class="correlativas-text">' +
-                            (safeReq ? '<span class="req-badge"><i data-lucide="lock" style="width:10px;height:10px;"></i> Req: ' + safeReq + '</span>' : '') +
-                        '</div>' +
-                        '<div class="materia-rating" data-materia-id="' + materiaId + '" data-materia-nombre="' + safeNameForAttr + '">' +
-                            '<div class="stars-container">' +
-                                '<span class="star" data-value="1">★</span>' +
-                                '<span class="star" data-value="2">★</span>' +
-                                '<span class="star" data-value="3">★</span>' +
-                                '<span class="star" data-value="4">★</span>' +
-                                '<span class="star" data-value="5">★</span>' +
-                            '</div>' +
-                            '<span class="rating-average">0.0</span>' +
-                            '<span class="vote-count">(0)</span>' +
-                            '<button class="btn-vote" data-materia-nombre="' + safeNameForAttr + '" data-materia-id="' + materiaId + '">Votar</button>' +
-                        '</div>' +
-                    '</div>' +
-                    '<span class="materia-action" onclick="openDoc(\'' + safeNameForAttr + '\', \'' + safeLink + '\')">Ver recursos <i data-lucide="arrow-right" class="icon-sm"></i></span>' +
-                '</div>';
-            }).join('');
-            
-            // Solo dibujamos la sección (AÑO) si tiene materias para mostrar
-            if (itemsHtml !== '') {
-                var section = document.createElement('div');
-                section.className = 'year-section';
-                section.innerHTML =
-                    '<div class="year-header" onclick="toggleYear(this)">' + safeYear + ' <span>+</span></div>' +
-                    '<div class="materia-container" style="display:block;">' + itemsHtml + '</div>'; // Por defecto abierto si hay filtro
-                container.appendChild(section);
+                var statusClass = esAprobada ? " aprobada" : (esCursando ? " cursando" : "");
+                var statusBadge = '';
+
+                if (esAprobada) {
+                    statusBadge = '<span class="badge-status aprobada"><i data-lucide="check" style="width:9px;height:9px;"></i> Aprobada</span>';
+                } else if (esCursando) {
+                    statusBadge = '<span class="badge-status cursando"><i data-lucide="book-open" style="width:9px;height:9px;"></i> Cursando</span>';
+                }
+
+                var stat = statsCache[materiaId];
+                var promedioTexto = (stat && stat.promedio) ? stat.promedio.toFixed(1) : '0.0';
+
+                // Línea 1: Nombre + Badges | Línea 2: Correlativas atenuadas
+                yearRowsHtml += `
+                    <div class="materia-row${statusClass}" onclick="openDoc('${safeNameForAttr}', '${safeLink}')">
+                        <div class="materia-info">
+                            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                <span class="materia-name">${safeName}</span>
+                                ${statusBadge}
+                            </div>
+                            ${safeReq ? `<span class="materia-req">Req: ${safeReq}</span>` : ''}
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                            <button class="btn-vote-chip" data-materia-nombre="${safeNameForAttr}" data-materia-id="${materiaId}" onclick="event.stopPropagation(); abrirModalVotacion('${safeNameForAttr}', '${materiaId}')" title="Calificar dificultad">
+                                <span style="color: #F59E0B; font-size: 10px;">★</span>
+                                <span id="stat-avg-${materiaId}">${promedioTexto}</span>
+                            </button>
+                            <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: #636366;"></i>
+                        </div>
+                    </div>
+                `;
+                totalRendered++;
+                yearVisibleCount++;
+            });
+
+            if (yearRowsHtml) {
+                html += `
+                    <div class="section-header-ios">
+                        <span>${year}</span>
+                        <span class="count">${yearVisibleCount} materias</span>
+                    </div>
+                    <div class="year-group-card">
+                        ${yearRowsHtml}
+                    </div>
+                `;
             }
         }
-        
-        // Si el usuario configuró y no tiene NADA marcado, le mostramos un mensaje bonito
-        if (materiasMostradas === 0 && userMateriasConfig) {
-            container.innerHTML = '<div style="text-align:center; padding: 50px 20px; color:#9ca3af; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);">' +
-                '<i data-lucide="book-x" class="icon-lg" style="width: 40px; height: 40px; margin-bottom: 15px; display:inline-block;"></i>' +
-                '<p>No seleccionaste ninguna materia para mostrar.</p>' +
-                '<button onclick="abrirModalPersonalizacion()" class="btn-primary-solid" style="padding: 10px 20px; border:none; border-radius:8px; margin-top:15px; cursor:pointer; display:inline-flex; align-items:center; gap:8px;">' +
-                    '<i data-lucide="sliders" class="icon-sm"></i> Configurar mis materias' +
-                '</button>' +
-            '</div>';
+
+        if (totalRendered === 0) {
+            html = `<div class="empty-state">
+                <i data-lucide="search-x" style="width: 32px; height: 32px; color: var(--text-dim); margin: 0 auto 10px auto; display: block;"></i>
+                <p>No se encontraron materias que coincidan con la búsqueda.</p>
+            </div>`;
         }
 
+        container.innerHTML = html;
         if (typeof lucide !== 'undefined') lucide.createIcons();
-        
-        // Agregar event listeners a los botones de votar después de renderizar
-        document.querySelectorAll('.btn-vote').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var materiaNombre = this.getAttribute('data-materia-nombre');
-                var materiaId = this.getAttribute('data-materia-id');
-                abrirModalVotacion(materiaNombre, materiaId);
-            });
-        });
-        
-        cargarEstadisticasMaterias();
     }
 
-    window.toggleYear = function(el) {
-        var panel = el.nextElementSibling;
-        var icon = el.querySelector('span');
-        var isOpen = panel.style.display === "block";
-        panel.style.display = isOpen ? "none" : "block";
-        icon.innerText = isOpen ? "+" : "-";
+    // ==================== CONTROL SEGMENTADO ====================
+    window.setYearFilter = function(year, btn) {
+        currentYearFilter = year;
+        document.querySelectorAll('.segment-btn').forEach(function(b) {
+            b.classList.remove('active');
+        });
+        if (btn) btn.classList.add('active');
+        render();
+    };
+
+    window.handleSearchInput = function() {
+        render();
     };
 
     window.openDoc = function(name, link) {
@@ -1549,57 +1677,231 @@
         window.location.href = 'visor.html?name=' + encodeURIComponent(safeName) + '&link=' + link;
     };
 
-    window.filterMaterias = function() {
-        var input = document.getElementById('searchInput').value.toLowerCase();
-        var items = document.getElementsByClassName('materia-item');
-        var sections = document.getElementsByClassName('year-section');
-        for (var i = 0; i < items.length; i++) {
-            var titleElem = items[i].querySelector('.materia-name');
-            if (titleElem) {
-                // Al tener los badges adentro, nos aseguramos de leer solo el texto base del span de nombre
-                var title = titleElem.childNodes[0].textContent.trim().toLowerCase();
-                items[i].style.display = title.includes(input) ? "" : "none";
-            }
-        }
-        for (var j = 0; j < sections.length; j++) {
-            var panel = sections[j].querySelector('.materia-container');
-            if (panel) {
-                // Si hay búsqueda, forzar apertura. Si no, dejar abierto/cerrado como esté
-                if (input) panel.style.display = "block";
-                var span = sections[j].querySelector('span');
-                if (span) span.innerText = (panel.style.display === "block") ? "-" : "+";
-                
-                // Ocultar sección completa si todos sus items están display:none
-                var sectionItems = panel.querySelectorAll('.materia-item');
-                var hasVisible = false;
-                sectionItems.forEach(function(si) {
-                    if (si.style.display !== "none") hasVisible = true;
-                });
-                sections[j].style.display = hasVisible ? "block" : "none";
-            }
+    // ==================== 2. TOGGLE SIDEBAR & BACKDROP ====================
+    window.toggleSidebar = function(forceState) {
+        var sb = document.getElementById('sidebar');
+        var bd = document.getElementById('sidebarBackdrop');
+        if (!sb) return;
+        var isHidden = sb.classList.contains('hidden');
+        var shouldOpen = typeof forceState === 'boolean' ? forceState : isHidden;
+        if (shouldOpen) {
+            sb.classList.remove('hidden');
+            if (bd) bd.classList.add('active');
+        } else {
+            sb.classList.add('hidden');
+            if (bd) bd.classList.remove('active');
         }
     };
 
-    window.toggleSidebar = function() {
-        document.getElementById('sidebar').classList.toggle('hidden');
-        document.getElementById('mainContent').classList.toggle('expanded');
+    // ==================== ESTADÍSTICAS Y VOTACIÓN ====================
+    var selectedMateria = null;
+    var selectedVote = null;
+    var currentMateriaId = null;
+    var currentMateriaNombre = null;
+
+    function cargarEstadisticasMaterias() {
+        if (!window.db) return;
+        db.collection('materias_stats').get().then(function(snapshot) {
+            snapshot.forEach(function(doc) {
+                var d = doc.data();
+                statsCache[doc.id] = {
+                    promedio: d.promedio || 0,
+                    totalVotos: d.totalVotos || 0
+                };
+                var avgSpan = document.getElementById('stat-avg-' + doc.id);
+                if (avgSpan) avgSpan.textContent = d.promedio ? d.promedio.toFixed(1) : '0.0';
+            });
+        }).catch(function(err) {
+            console.warn("Estadísticas offline:", err);
+        });
+    }
+
+    window.abrirModalVotacion = function(materiaNombre, materiaId) {
+        var user = window.auth ? window.auth.currentUser : null;
+        if (!user) {
+            alert('Iniciá sesión para votar la dificultad de las materias');
+            document.getElementById('loginModal').classList.remove('hidden');
+            return;
+        }
+
+        var docId = user.uid + '_' + materiaId;
+        window.db.collection('users_votes').doc(docId).get().then(function(doc) {
+            if (doc.exists) {
+                alert('Ya votaste esta materia anteriormente (' + doc.data().voto + '★)');
+                return;
+            }
+
+            selectedMateria = materiaNombre;
+            currentMateriaId = materiaId;
+            currentMateriaNombre = materiaNombre;
+            selectedVote = null;
+
+            document.getElementById('voteMateriaTitle').textContent = '¿Qué tan difícil es ' + materiaNombre + '?';
+            document.querySelectorAll('#voteStars .vote-star').forEach(function(s) { s.classList.remove('selected'); });
+            document.getElementById('voteModal').classList.remove('hidden');
+        }).catch(function() {
+            selectedMateria = materiaNombre;
+            currentMateriaId = materiaId;
+            currentMateriaNombre = materiaNombre;
+            document.getElementById('voteModal').classList.remove('hidden');
+        });
     };
 
-        var themeColors = {
+    window.closeVoteModal = function() {
+        document.getElementById('voteModal').classList.add('hidden');
+    };
+
+    document.querySelectorAll('#voteStars .vote-star').forEach(function(star) {
+        star.addEventListener('click', function() {
+            var value = parseInt(this.getAttribute('data-value'));
+            selectedVote = value;
+            document.querySelectorAll('#voteStars .vote-star').forEach(function(s, index) {
+                if (index < value) s.classList.add('selected');
+                else s.classList.remove('selected');
+            });
+        });
+    });
+
+    window.submitVote = function() {
+        if (!selectedVote) {
+            alert('Seleccioná una calificación (1 a 5 estrellas)');
+            return;
+        }
+        var user = window.auth ? window.auth.currentUser : null;
+        if (!user) return;
+
+        var docId = user.uid + '_' + currentMateriaId;
+        window.db.collection('users_votes').doc(docId).set({
+            uid: user.uid,
+            materiaId: currentMateriaId,
+            materiaNombre: currentMateriaNombre,
+            voto: selectedVote,
+            fecha: new Date().toISOString()
+        }).then(function() {
+            var materiaRef = window.db.collection('materias_stats').doc(currentMateriaId);
+            return materiaRef.get().then(function(doc) {
+                if (doc.exists) {
+                    var d = doc.data();
+                    var tot = (d.totalVotos || 0) + 1;
+                    var prom = (((d.promedio || 0) * (d.totalVotos || 0)) + selectedVote) / tot;
+                    return materiaRef.update({ promedio: prom, totalVotos: tot });
+                } else {
+                    return materiaRef.set({ nombre: currentMateriaNombre, promedio: selectedVote, totalVotos: 1 });
+                }
+            });
+        }).then(function() {
+            closeVoteModal();
+            alert('¡Gracias por tu voto!');
+            cargarEstadisticasMaterias();
+        }).catch(function(err) {
+            console.error("Error al votar:", err);
+            alert('Error al guardar el voto');
+        });
+    };
+
+    // ==================== 4. PERSONALIZACIÓN DE MATERIAS EN LA NUBE ====================
+    function cargarMateriasUsuario(user) {
+        if (!window.db || !user) return;
+        window.db.collection('usuarios_materias').doc(user.uid).get().then(function(doc) {
+            if (doc.exists) {
+                userMateriasConfig = doc.data();
+                render();
+                var btn = document.getElementById('btnEditarMaterias');
+                if (btn) btn.style.display = 'flex';
+            } else {
+                userMateriasConfig = { cursando: [], aprobadas: [] };
+                var btn = document.getElementById('btnEditarMaterias');
+                if (btn) btn.style.display = 'flex';
+            }
+        }).catch(function(err) {
+            console.error("Error cargando materias:", err);
+        });
+    }
+
+    window.switchPersTab = function(tab) {
+        document.getElementById('tabCursando').classList.toggle('active', tab === 'cursando');
+        document.getElementById('tabAprobadas').classList.toggle('active', tab === 'aprobadas');
+        document.getElementById('persListCursando').classList.toggle('hidden', tab !== 'cursando');
+        document.getElementById('persListAprobadas').classList.toggle('hidden', tab !== 'aprobadas');
+    };
+
+    window.abrirModalPersonalizacion = function() {
+        var htmlCursando = '';
+        var htmlAprobadas = '';
+
+        for (var year in data) {
+            htmlCursando += `<div style="font-size:11px;font-weight:700;color:var(--primary);margin:10px 0 4px 0;text-transform:uppercase;">${year}</div>`;
+            htmlAprobadas += `<div style="font-size:11px;font-weight:700;color:var(--primary);margin:10px 0 4px 0;text-transform:uppercase;">${year}</div>`;
+
+            data[year].forEach(function(m) {
+                var chkCur = (userMateriasConfig && userMateriasConfig.cursando && userMateriasConfig.cursando.includes(m.n)) ? 'checked' : '';
+                var chkApr = (userMateriasConfig && userMateriasConfig.aprobadas && userMateriasConfig.aprobadas.includes(m.n)) ? 'checked' : '';
+                var safeN = sanitizeHTML(m.n);
+
+                htmlCursando += `
+                    <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12.5px;cursor:pointer;color:var(--text);">
+                        <input type="checkbox" name="cursando" value="${safeN}" ${chkCur}>
+                        <span>${safeN}</span>
+                    </label>
+                `;
+                htmlAprobadas += `
+                    <label style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12.5px;cursor:pointer;color:var(--text);">
+                        <input type="checkbox" name="aprobadas" value="${safeN}" ${chkApr}>
+                        <span>${safeN}</span>
+                    </label>
+                `;
+            });
+        }
+
+        document.getElementById('persListCursando').innerHTML = htmlCursando;
+        document.getElementById('persListAprobadas').innerHTML = htmlAprobadas;
+        document.getElementById('persModal').classList.remove('hidden');
+    };
+
+    window.cerrarModalPersonalizacion = function() {
+        document.getElementById('persModal').classList.add('hidden');
+    };
+
+    window.guardarPersonalizacion = function() {
+        var curArr = [];
+        var aprArr = [];
+        document.querySelectorAll('input[name="cursando"]:checked').forEach(function(el) { curArr.push(el.value); });
+        document.querySelectorAll('input[name="aprobadas"]:checked').forEach(function(el) { aprArr.push(el.value); });
+
+        var user = window.auth ? window.auth.currentUser : null;
+        if (!user) return;
+
+        var newData = {
+            cursando: curArr,
+            aprobadas: aprArr,
+            ultimaActualizacion: new Date().toISOString()
+        };
+
+        window.db.collection('usuarios_materias').doc(user.uid).set(newData).then(function() {
+            userMateriasConfig = newData;
+            cerrarModalPersonalizacion();
+            render();
+        }).catch(function(err) {
+            console.error("Error guardando personalización:", err);
+            alert("Error al guardar tus materias.");
+        });
+    };
+
+    // ==================== TEMAS & PALETAS ====================
+    var themeColors = {
         'orange': '#080808',
         'emerald': '#080808',
-        'midnight': '#0B132B',
+        'midnight': '#060911',
         'purple': '#080808',
         'rose': '#080808',
-        'light': '#f9fafb'
+        'light': '#F2F2F7'
     };
 
     window.setCustomTheme = function(themeName) {
         document.documentElement.setAttribute('data-theme', themeName);
         localStorage.setItem('ungs_theme', themeName);
         updateThemeSwatches(themeName);
-        
-        // Actualizar meta theme-color para la barra de estado en iPhone/Android
+
         var metaThemeColor = document.querySelector('meta[name="theme-color"]');
         if (metaThemeColor && themeColors[themeName]) {
             metaThemeColor.setAttribute('content', themeColors[themeName]);
@@ -1618,506 +1920,206 @@
         });
     }
 
-    function applyTheme(theme) {
-        window.setCustomTheme(theme);
-    }
-
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(e) {
-        if (!localStorage.getItem('ungs_theme')) window.setCustomTheme(e.matches ? 'orange' : 'light');
-    });
-
     window.toggleTheme = function() {
         var current = document.documentElement.getAttribute('data-theme') || 'orange';
-        if (current === 'light') {
-            window.setCustomTheme('orange');
-        } else {
-            window.setCustomTheme('light');
-        }
+        window.setCustomTheme(current === 'light' ? 'orange' : 'light');
     };
 
-    document.addEventListener('DOMContentLoaded', function() {
-        var savedTheme = localStorage.getItem('ungs_theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? 'orange' : 'light');
-        window.setCustomTheme(savedTheme);
-    });
-
-    // ==================== TABS DEL MODAL ====================
+    // ==================== AUTH CONTROLLER ====================
     window.switchTab = function(tab) {
-        document.querySelectorAll('.login-tab:not(#tabCursando):not(#tabAprobadas)').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.login-tab').forEach(function(t) { t.classList.remove('active'); });
         document.querySelectorAll('.login-panel').forEach(function(p) { p.classList.remove('active'); });
         document.getElementById('loginError').textContent = '';
         document.getElementById('registerError').textContent = '';
         if (tab === 'login') {
-            document.querySelectorAll('.login-tab:not(#tabCursando):not(#tabAprobadas)')[0].classList.add('active');
+            document.querySelectorAll('.login-tab')[0].classList.add('active');
             document.getElementById('panelLogin').classList.add('active');
-        } else if (tab === 'register') {
-            document.querySelectorAll('.login-tab:not(#tabCursando):not(#tabAprobadas)')[1].classList.add('active');
+        } else {
+            document.querySelectorAll('.login-tab')[1].classList.add('active');
             document.getElementById('panelRegister').classList.add('active');
         }
     };
 
     function authErrorMsg(code) {
         var msgs = {
-            'auth/user-not-found': 'No existe una cuenta con ese correo.',
+            'auth/user-not-found': 'No existe cuenta con ese correo.',
             'auth/wrong-password': 'Contraseña incorrecta.',
-            'auth/email-already-in-use': 'Ese correo ya tiene una cuenta. Ingresá en la pestaña "Ingresar".',
-            'auth/invalid-email': 'El correo no tiene un formato válido.',
-            'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
-            'auth/popup-closed-by-user': 'Cerraste la ventana de Google antes de terminar.',
-            'auth/network-request-failed': 'Error de red. Revisá tu conexión.',
-            'auth/invalid-credential': 'Correo o contraseña incorrectos.',
-            'auth/unauthorized-domain': 'Dominio no autorizado. Agregá tu dominio en Firebase Console.'
+            'auth/email-already-in-use': 'Ese correo ya está registrado.',
+            'auth/invalid-email': 'Formato de correo no válido.',
+            'auth/weak-password': 'La contraseña debe tener mín. 6 caracteres.',
+            'auth/popup-closed-by-user': 'Ventana cerrada antes de terminar.',
+            'auth/network-request-failed': 'Error de red.'
         };
-        return msgs[code] || 'Ocurrió un error. Intentá de nuevo.';
+        return msgs[code] || 'Ocurrió un error. Reintentá.';
     }
 
     function doGoogleLogin() {
-        if (!window.auth || !window.googleProvider) {
-            console.error("❌ window.auth o window.googleProvider no están listos.");
-            alert("Los servicios de autenticación aún se están inicializando. Aguarda un instante por favor.");
-            return;
-        }
-
-        console.log("🚀 Iniciando sesión con Google Popup...");
-        window.auth.signInWithPopup(window.googleProvider)
-            .then(function(result) {
-                console.log("✅ Login con Google exitoso:", result.user.email);
-                document.getElementById('loginModal').classList.add('hidden');
-                sessionStorage.removeItem('guestMode');
-                if (typeof cargarMateriasUsuario === 'function') {
-                    cargarMateriasUsuario(result.user);
-                } else if (typeof render === 'function') {
-                    render();
-                }
-            })
-            .catch(function(error) {
-                console.error("❌ Error en Google Login:", error);
-                var msg = error && error.code ? authErrorMsg(error.code) : 'Error al conectar con Google.';
-                document.getElementById('loginError').textContent = msg;
-            });
+        if (!window.auth || !window.googleProvider) return;
+        window.auth.signInWithPopup(window.googleProvider).then(function(res) {
+            document.getElementById('loginModal').classList.add('hidden');
+            sessionStorage.removeItem('guestMode');
+            cargarMateriasUsuario(res.user);
+        }).catch(function(err) {
+            document.getElementById('loginError').textContent = authErrorMsg(err.code);
+        });
     }
 
     function doEmailLogin() {
         var email = document.getElementById('loginEmail').value.trim();
         var pass = document.getElementById('loginPassword').value;
-        document.getElementById('loginError').textContent = '';
-        
-        if (!email || !pass) {
-            document.getElementById('loginError').textContent = 'Completá el correo y la contraseña.';
-            return;
-        }
-        
-        if (!validateEmail(email)) {
-            document.getElementById('loginError').textContent = 'Ingresá un email válido (ej: usuario@dominio.com).';
-            return;
-        }
-        
-        if (pass.length < 6) {
-            document.getElementById('loginError').textContent = 'La contraseña debe tener al menos 6 caracteres.';
-            return;
-        }
-        
-        window.auth.signInWithEmailAndPassword(email, pass)
-            .then(function(result) {
-                document.getElementById('loginModal').classList.add('hidden');
-                sessionStorage.removeItem('guestMode');
-                cargarMateriasUsuario(result.user);
-            })
-            .catch(function(error) {
-                document.getElementById('loginError').textContent = authErrorMsg(error.code);
-            });
+        if (!email || !pass) return document.getElementById('loginError').textContent = 'Completá todos los campos.';
+        window.auth.signInWithEmailAndPassword(email, pass).then(function(res) {
+            document.getElementById('loginModal').classList.add('hidden');
+            sessionStorage.removeItem('guestMode');
+            cargarMateriasUsuario(res.user);
+        }).catch(function(err) {
+            document.getElementById('loginError').textContent = authErrorMsg(err.code);
+        });
     }
 
     function doEmailRegister() {
         var email = document.getElementById('registerEmail').value.trim();
         var pass = document.getElementById('registerPassword').value;
         var pass2 = document.getElementById('registerPassword2').value;
-        document.getElementById('registerError').textContent = '';
-        
-        if (!email || !pass) {
-            document.getElementById('registerError').textContent = 'Completá todos los campos.';
-            return;
-        }
-        
-        if (!validateEmail(email)) {
-            document.getElementById('registerError').textContent = 'Ingresá un email válido (ej: usuario@dominio.com).';
-            return;
-        }
-        
-        if (pass !== pass2) {
-            document.getElementById('registerError').textContent = 'Las contraseñas no coinciden.';
-            return;
-        }
-        
-        if (pass.length < 6) {
-            document.getElementById('registerError').textContent = 'La contraseña debe tener al menos 6 caracteres.';
-            return;
-        }
-        
-        window.auth.createUserWithEmailAndPassword(email, pass)
-            .then(function(result) {
-                document.getElementById('loginModal').classList.add('hidden');
-                sessionStorage.removeItem('guestMode');
-                cargarMateriasUsuario(result.user);
-            })
-            .catch(function(error) {
-                document.getElementById('registerError').textContent = authErrorMsg(error.code);
-            });
+        if (!email || !pass) return document.getElementById('registerError').textContent = 'Completá todos los campos.';
+        if (pass !== pass2) return document.getElementById('registerError').textContent = 'Las contraseñas no coinciden.';
+        window.auth.createUserWithEmailAndPassword(email, pass).then(function(res) {
+            document.getElementById('loginModal').classList.add('hidden');
+            sessionStorage.removeItem('guestMode');
+            cargarMateriasUsuario(res.user);
+        }).catch(function(err) {
+            document.getElementById('registerError').textContent = authErrorMsg(err.code);
+        });
     }
-
-    // Vincular todos los clics de forma segura una vez cargado el DOM
-    document.addEventListener('DOMContentLoaded', function() {
-        var googleLoginBtn = document.getElementById('btnGoogleLogin');
-        if (googleLoginBtn) googleLoginBtn.onclick = doGoogleLogin;
-
-        var googleRegisterBtn = document.getElementById('btnGoogleRegister');
-        if (googleRegisterBtn) googleRegisterBtn.onclick = doGoogleLogin;
-
-        var emailLoginBtn = document.getElementById('btnEmailLogin');
-        if (emailLoginBtn) emailLoginBtn.onclick = doEmailLogin;
-
-        var emailRegisterBtn = document.getElementById('btnEmailRegister');
-        if (emailRegisterBtn) emailRegisterBtn.onclick = doEmailRegister;
-
-        var sidebarLoginBtn = document.getElementById('sidebarLoginBtn');
-        if (sidebarLoginBtn) {
-            sidebarLoginBtn.onclick = function() {
-                document.getElementById('loginModal').classList.remove('hidden');
-            };
-        }
-
-        var sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
-        if (sidebarLogoutBtn) {
-            sidebarLogoutBtn.onclick = function() {
-                window.auth.signOut().then(function() {
-                    sessionStorage.removeItem('guestMode');
-                    location.reload();
-                });
-            };
-        }
-    });
 
     window.closeLoginModal = function() {
         document.getElementById('loginModal').classList.add('hidden');
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    // ==================== RENDERIZADO PÚBLICO OBLIGATORIO ====================
-    // La grilla de materias se dibuja SIEMPRE al cargar, sin depender de auth.
-    document.addEventListener('DOMContentLoaded', function() {
-        if (typeof render === 'function') {
-            render();
-        }
-    });
+    // ==================== ONBOARDING TOUR ====================
+    var tourSteps = [
+        { title: "¡Bienvenido!", text: "La Biblioteca de ADE te permite acceder a todos los recursos de la carrera organizados en un solo lugar.", icon: "sparkles" },
+        { title: "Dock Rápido", text: "En la parte superior tenés acceso directo al SIU Guaraní, Campus Virtual y contactos de docentes.", icon: "monitor" },
+        { title: "Control Segmentado", text: "Usá el selector de años para explorar rápidamente las materias o filtrá por nombre arriba.", icon: "sliders" },
+        { title: "Personalización", text: "Logueate para marcar tus materias cursando y aprobadas y ver tus estadísticas.", icon: "user-check", last: true }
+    ];
+    var currentTourStep = 0;
 
-    // ==================== CONTROLADOR DE SESIÓN SEGURO ====================
-    document.addEventListener('DOMContentLoaded', function() {
-    if (!window.auth) return;
-
-    window.auth.onAuthStateChanged(function(user) {
-        console.log("[AUTH DEBUG]", user ? ("Usuario logueado: " + user.email) : "Modo Invitado");
-
-        var userNameElem = document.getElementById('userName');
-        var loginBtn = document.getElementById('sidebarLoginBtn');
-        var logoutBtn = document.getElementById('sidebarLogoutBtn');
-
-        if (user) {
-            // 1. ACTUALIZAR TARJETA LATERAL A MODO LOGUEADO
-            if (userNameElem) {
-                var nombre = user.displayName || (user.email ? user.email.split('@')[0] : 'Estudiante');
-                userNameElem.textContent = nombre;
-            }
-
-            if (loginBtn) loginBtn.style.display = 'none';
-            if (logoutBtn) logoutBtn.style.display = 'flex';
-
-            // 2. CARGAR MATERIAS Y BADGES DEL USUARIO
-            try {
-                if (typeof cargarMateriasUsuario === 'function') {
-                    cargarMateriasUsuario(user);
-                }
-            } catch (e) {
-                console.error("Error al cargar estado personal de materias:", e);
-            }
-
-            
-
-            var loginModal = document.getElementById('loginModal');
-            if (loginModal) loginModal.classList.add('hidden');
-
-        } else {
-            // 1. RESETEAR TARJETA LATERAL A MODO INVITADO
-            if (userNameElem) userNameElem.textContent = 'Invitado';
-            if (loginBtn) loginBtn.style.display = 'flex';
-            if (logoutBtn) logoutBtn.style.display = 'none';
-
-            
-
-            // 3. DESACTIVAR CONFIGURACIÓN DE FILTRADO Y MOSTRAR TODA LA GRILLA
-            userMateriasConfig = null;
-            if (typeof render === 'function') render();
-
-            // 4. OCULTAR BOTÓN DE EDITAR MATERIAS
-            var btnEditar = document.getElementById('btnEditarMaterias');
-            if (btnEditar) btnEditar.style.display = 'none';
-
-            // 5. LIMPIAR SESIÓN
-            sessionStorage.removeItem('ungs_is_admin');
-            sessionStorage.removeItem('ungs_user_uid');
-        }
-    });
-});
-
-    // Registrar Service Worker para soporte offline
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('./service-worker.js')
-                .then(function(reg) {
-                    console.log('Service Worker registrado correctamente. Scope:', reg.scope);
-                })
-                .catch(function(err) {
-                    console.error('Fallo al registrar el Service Worker:', err);
-                });
-        });
+    function initTour() {
+        document.getElementById("tourOverlay").style.display = "block";
+        document.getElementById("tourTooltip").style.display = "block";
+        document.getElementById("tourBtnNext").onclick = nextTourStep;
+        document.getElementById("tourBtnSkip").onclick = endTour;
+        showTourStep(0);
     }
 
-    // Asegurar la inicialización de iconos al cargar el DOM y al final del script
-    document.addEventListener('DOMContentLoaded', function() {
+    function showTourStep(idx) {
+        var s = tourSteps[idx];
+        document.getElementById("tourTitle").innerHTML = '<i data-lucide="' + s.icon + '" style="width:16px;height:16px;"></i> ' + s.title;
+        document.getElementById("tourText").textContent = s.text;
+        document.getElementById("tourBtnNext").textContent = s.last ? "¡Empezar!" : "Siguiente";
+        var dots = '';
+        for (var i = 0; i < tourSteps.length; i++) {
+            dots += '<div class="tour-dot ' + (i === idx ? 'active' : '') + '"></div>';
+        }
+        document.getElementById("tourDots").innerHTML = dots;
         if (typeof lucide !== 'undefined') lucide.createIcons();
-    });
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-
-    // Lógica de Instalación de PWA (sidebar + footer)
-    let deferredPrompt;
-    const pwaBtnFooter = document.getElementById('pwaInstallBtnFooter');
-
-    // Forzamos que se renderice el botón en el DOM para asegurar que exista visualmente
-    if (pwaBtnFooter) {
-        pwaBtnFooter.style.display = 'inline-flex'; 
     }
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        console.log(' PWA: Evento beforeinstallprompt capturado');
-    });
-
-    if (pwaBtnFooter) {
-        pwaBtnFooter.addEventListener('click', () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Usuario aceptó la instalación');
-                    }
-                    deferredPrompt = null;
-                });
-            } else {
-                var modalInst = document.getElementById('pwaInstructionsModal'); if (modalInst) { modalInst.classList.remove('hidden'); if (typeof lucide !== 'undefined') lucide.createIcons(); }
-            }
-        });
+    function nextTourStep() {
+        currentTourStep++;
+        if (currentTourStep >= tourSteps.length) endTour();
+        else showTourStep(currentTourStep);
     }
 
-    // ==================== BANNER DE RECOMENDACIONES ====================
-    (function initTipsBanner() {
-        var banner = document.getElementById('tipsBanner');
-        var closeBtn = document.getElementById('tipsBannerClose');
-        if (!banner || !closeBtn) return;
-        if (sessionStorage.getItem('tipsBannerClosed')) {
-            banner.style.display = 'none';
-            return;
-        }
-        closeBtn.addEventListener('click', function() {
-            banner.style.opacity = '0';
-            banner.style.transform = 'translateY(-10px)';
-            setTimeout(function() { banner.style.display = 'none'; }, 300);
-            sessionStorage.setItem('tipsBannerClosed', '1');
-        });
-    })();
-
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.getElementById('toggleSidebarBtn');
-        const sidebar = document.getElementById('sidebar');
-        const content = document.getElementById('mainContent');
-        if (btn) {
-            btn.addEventListener('click', () => {
-                sidebar.classList.toggle('hidden');
-                content.classList.toggle('expanded');
-            });
-        }
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    });
+    function endTour() {
+        localStorage.setItem('tour_completado', 'true');
+        var o = document.getElementById("tourOverlay");
+        var t = document.getElementById("tourTooltip");
+        if (o) o.remove();
+        if (t) t.remove();
+    }
 
     window.showComingSoonAlert = function(e) {
         if (e) e.preventDefault();
-    
-        // Verificar si ya existe un aviso en pantalla para no duplicar
-        if (document.getElementById('comingSoonToast')) return;
-    
-        // Crear el elemento del aviso flotante
-        var toast = document.createElement('div');
-        toast.id = 'comingSoonToast';
-        toast.style.position = 'fixed';
-        toast.style.top = '20px';
-        toast.style.right = '20px';
-        toast.style.zIndex = '9999';
-        toast.style.background = 'rgba(18, 18, 18, 0.95)';
-        toast.style.color = '#f5f5f5';
-        toast.style.border = '1px solid var(--primary)';
-        toast.style.padding = '14px 20px';
-        toast.style.borderRadius = '10px';
-        toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
-        toast.style.fontFamily = "'Inter', sans-serif";
-        toast.style.fontSize = '13px';
-        toast.style.fontWeight = '600';
-        toast.style.display = 'flex';
-        toast.style.alignItems = 'center';
-        toast.style.gap = '10px';
-        toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        toast.style.transform = 'translateY(-10px)';
-        toast.style.opacity = '0';
-    
-        // Contenido con icono integrado
-        toast.innerHTML = '<i data-lucide="bell-ring" style="color: var(--primary); width: 16px; height: 16px;"></i> ¡Próximamente! Estamos automatizando las notificaciones de exámenes.';
-    
-        document.body.appendChild(toast);
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    
-        // Efecto de entrada animación
-        setTimeout(function() {
-            toast.style.transform = 'translateY(0)';
-            toast.style.opacity = '1';
-        }, 50);
-    
-        // Efecto de salida automático tras 3 segundos
-        setTimeout(function() {
-            toast.style.transform = 'translateY(-10px)';
-            toast.style.opacity = '0';
-            setTimeout(function() {
-                toast.remove();
-            }, 300);
-        }, 3000);
+        alert("¡Próximamente! Estamos preparando el calendario académico automatizado.");
     };
+
+    // ==================== INICIALIZACIÓN GLOBAL ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Render inicial inmediato de materias (38 materias completas)
+        render();
+
+        // 2. Cargar estadísticas de votos
+        cargarEstadisticasMaterias();
+
+        // 3. Vincular clicks de login
+        var gl = document.getElementById('btnGoogleLogin'); if (gl) gl.onclick = doGoogleLogin;
+        var gr = document.getElementById('btnGoogleRegister'); if (gr) gr.onclick = doGoogleLogin;
+        var el = document.getElementById('btnEmailLogin'); if (el) el.onclick = doEmailLogin;
+        var er = document.getElementById('btnEmailRegister'); if (er) er.onclick = doEmailRegister;
+
+        var sbLogin = document.getElementById('sidebarLoginBtn');
+        if (sbLogin) sbLogin.onclick = function() { document.getElementById('loginModal').classList.remove('hidden'); };
+
+        var sbLogout = document.getElementById('sidebarLogoutBtn');
+        if (sbLogout) {
+            sbLogout.onclick = function() {
+                if (window.auth) {
+                    window.auth.signOut().then(function() {
+                        sessionStorage.removeItem('guestMode');
+                        location.reload();
+                    });
+                }
+            };
+        }
+
+        // 4. Banner de tips close
+        var closeTips = document.getElementById('tipsBannerClose');
+        if (closeTips) {
+            closeTips.onclick = function() {
+                var b = document.getElementById('tipsBanner');
+                if (b) b.style.display = 'none';
+                sessionStorage.setItem('tipsBannerClosed', '1');
+            };
+            if (sessionStorage.getItem('tipsBannerClosed')) {
+                var b = document.getElementById('tipsBanner');
+                if (b) b.style.display = 'none';
+            }
+        }
+
+        // 5. Auth State Changed & Persistencia
+        if (window.auth) {
+            window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(e){ console.warn(e); });
+            window.auth.onAuthStateChanged(function(user) {
+                var nameElem = document.getElementById('userName');
+                var loginBtn = document.getElementById('sidebarLoginBtn');
+                var logoutBtn = document.getElementById('sidebarLogoutBtn');
+
+                if (user) {
+                    if (nameElem) nameElem.textContent = user.displayName || (user.email ? user.email.split('@')[0] : 'Estudiante');
+                    if (loginBtn) loginBtn.style.display = 'none';
+                    if (logoutBtn) logoutBtn.style.display = 'flex';
+                    cargarMateriasUsuario(user);
+                } else {
+                    if (nameElem) nameElem.textContent = 'Invitado';
+                    if (loginBtn) loginBtn.style.display = 'flex';
+                    if (logoutBtn) logoutBtn.style.display = 'none';
+                    userMateriasConfig = null;
+                    render();
+                }
+            });
+        }
+
+        // 6. Tour primera vez
+        if (!localStorage.getItem('tour_completado')) {
+            setTimeout(initTour, 800);
+        }
+
+        // 7. Lucide
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    });
 </script>
-
-<div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;">    <div class="login-modal-content" style="max-width: 450px; text-align: left;">        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">            <h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3>            <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button>        </div>        <p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p>        <div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: color-mix(in srgb, var(--primary) 12%, transparent); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone / iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> abajo en tu navegador Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en Opera, Brave u otros navegadores en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div>        <button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button>    </div></div>
-<!-- ONBOARDING TOUR TEMPLATE -->
-<div id="tourOverlay" class="tour-overlay" style="display: none;"></div>
-<div id="tourTooltip" class="tour-modal" style="display: none;">
-    <h3 id="tourTitle"></h3>
-    <p id="tourText"></p>
-    <div class="tour-dots" id="tourDots"></div>
-    <div class="tour-footer">
-        <button id="tourBtnSkip" class="tour-btn-skip">Omitir</button>
-        <button id="tourBtnNext" class="tour-btn-next">Siguiente</button>
-    </div>
-</div>
-
-<script>
-var tourSteps = [
-    {
-        title: "¡Bienvenido!",
-        text: "Diseñamos este espacio colaborativo para facilitarte la cursada. Vamos a dar un paseo rápido por sus funciones principales.",
-        icon: "sparkles"
-    },
-    {
-        title: "Tus Materias",
-        text: "Utiliza el botón 'Mis Materias' para elegir y marcar exactamente qué materias estás cursando este cuatrimestre y personalizar tu panel.",
-        icon: "sliders"
-    },
-    {
-        title: "Material de Apoyo",
-        text: "Aquí tenés acceso directo a las carpetas organizadas por año con apuntes, resúmenes, parciales y recursos clave.",
-        icon: "folder"
-    },
-    {
-        title: "Recomendaciones",
-        text: "Desde la barra lateral podés abrir la guía en PDF sobre docentes y dejar tus propios consejos o donar material.",
-        icon: "users"
-    },
-    {
-        title: "Progreso y Promedio",
-        text: "Registrá tus materias aprobadas y el sistema calculará automáticamente tu promedio y porcentaje de avance.",
-        icon: "trending-up"
-    },
-    {
-        title: "Zona de Enfoque",
-        text: "Accedé a tu sesión de estudio con temporizador Pomodoro, calendario y accesos directos al SIU y Moodle.",
-        icon: "timer",
-        last: true
-    }
-];
-
-var currentTourStep = 0;
-
-function initTour() {
-    document.getElementById("tourOverlay").style.display = "block";
-    document.getElementById("tourTooltip").style.display = "block";
-    
-    document.getElementById("tourBtnNext").addEventListener("click", nextTourStep);
-    document.getElementById("tourBtnSkip").addEventListener("click", endTour);
-    
-    showTourStep(0);
-}
-
-function showTourStep(index) {
-    var step = tourSteps[index];
-    document.getElementById("tourTitle").innerHTML = '<i data-lucide="' + step.icon + '" class="icon-sm"></i> ' + step.title;
-    document.getElementById("tourText").textContent = step.text;
-    
-    if(step.last) {
-        document.getElementById("tourBtnNext").textContent = "¡Listo, empezar!";
-    } else {
-        document.getElementById("tourBtnNext").textContent = "Siguiente";
-    }
-    
-    var dotsHtml = "";
-    for(var i=0; i<tourSteps.length; i++) {
-        dotsHtml += '<div class="tour-dot ' + (i === index ? 'active' : '') + '"></div>';
-    }
-    document.getElementById("tourDots").innerHTML = dotsHtml;
-    
-    lucide.createIcons();
-}
-
-function nextTourStep() {
-    currentTourStep++;
-    if(currentTourStep >= tourSteps.length) {
-        endTour();
-    } else {
-        showTourStep(currentTourStep);
-    }
-}
-
-function endTour() {
-    localStorage.setItem('tour_completado', 'true');
-    var overlay = document.getElementById("tourOverlay");
-    var tooltip = document.getElementById("tourTooltip");
-    if(overlay) overlay.remove();
-    if(tooltip) tooltip.remove();
-}
-</script>
-
-<script>
-    
-}
-
-    
-
-    function cerrarSesion() {
-        window.auth.signOut().then(function() {
-            sessionStorage.clear();
-            localStorage.removeItem('ungs_user_data');
-            console.log("Sesión cerrada correctamente.");
-            window.location.reload();
-        }).catch(function(error) {
-            console.error("Error al cerrar sesión:", error);
-        });
-    }
-</script>
-
-
-
 </body>
 </html>

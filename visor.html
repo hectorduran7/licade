@@ -131,15 +131,19 @@
             border-color: #1a1a1a;
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text); 
-            margin: 0; 
-            display: flex;
-            transition: background-color 0.4s ease, color 0.4s ease;
+        body {
+            background-color: #080808 !important;
+            background-image: 
+                radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary, #FF8C00) 12%, transparent) 0%, transparent 55%),
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px) !important;
+            background-size: 100% 100%, 24px 24px !important;
+            background-position: top center, 0 0 !important;
+            background-attachment: fixed !important;
+            color: var(--text, #f5f5f5) !important;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+            margin: 0;
+            min-height: 100vh;
             overflow-x: hidden;
-            scroll-behavior: smooth;
         }
 
         .icon-sm { width: 16px; height: 16px; }
@@ -699,7 +703,7 @@
         sessionStorage.setItem('guestMode', 'true');
     };
 
-    window.auth.onAuthStateChanged(function(user) {
+    window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); window.auth.onAuthStateChanged(function(user) {
         if (user) {
             var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
             var safeName = sanitizeText(nombre);
