@@ -1,0 +1,133 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // materias_dificultad - votos de dificultad por materia
+    match /materias_dificultad/{materiaId}/votos/{userId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+
+
+    // ==================== FUNCIONES AUXILIARES ====================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    // ==================== ADMINISTRADORES ====================
+
+    // roles_admin — solo se gestiona desde Firebase Console
+    match /roles_admin/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ==================== CONFIGURACIÓN GLOBAL ====================
+
+    // config — barra de donaciones, meta mensual, ajustes generales
+    match /config/{document} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // banners — anuncios y publicidad
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ==================== PERFIL DE USUARIO ====================
+
+    // usuarios — perfil, gamificación, logros
+    match /usuarios/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll(['email', 'createdAt']);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // ==================== PLAN DE MATERIAS ====================
+
+    // usuarios_materias — qué materias cursa el usuario actualmente
+    match /usuarios_materias/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId);
+    }
+
+    // ==================== PROGRESO / NOTAS ====================
+
+    // usuarios_progreso — notas, materias aprobadas, promedio
+    match /usuarios_progreso/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId);
+    }
+
+    // ==================== ESTUDIO / POMODORO ====================
+
+    // usuarios_estudio — sesiones pomodoro, rachas, estadísticas
+    match /usuarios_estudio/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId);
+    }
+
+    // ==================== PLANIFICADOR DE CURSADA ====================
+
+    // usuarios_cursada — horarios, exámenes, planificación
+    match /usuarios_cursada/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId);
+    }
+
+    // ==================== CALENDARIO ====================
+
+    // users_calendar — eventos personales con subcolección events
+    match /users_calendar/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /events/{eventId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ==================== TIPS COMUNITARIOS ====================
+
+    // tips_materias — consejos por materia, moderados por admin
+    match /tips_materias/{tipId} {
+      allow read: if true;
+      allow create: if isAuthenticated()
+        && request.resource.data.texto is string
+        && request.resource.data.texto.size() > 0
+        && request.resource.data.texto.size() <= 300
+        && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // users_votes — votos de usuarios en tips (un voto por UID+tip)
+    match /users_votes/{voteId} {
+      allow read: if isAuthenticated()
+        && voteId.split('_')[0] == request.auth.uid;
+      allow create: if isAuthenticated()
+        && voteId.split('_')[0] == request.auth.uid
+        && request.resource.data.uid == request.auth.uid;
+      allow delete: if isAuthenticated()
+        && (voteId.split('_')[0] == request.auth.uid || isAdmin());
+    }
+
+    // ==================== BLOQUEO TOTAL POR DEFECTO ====================
+    // Cualquier colección no listada arriba queda completamente bloqueada.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

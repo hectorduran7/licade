@@ -13,4 +13,4 @@ window.FIREBASE_CONFIG = {
     measurementId: "G-PQGH6R9SZC"
 };
 
-console.log("✅ config.js cargado exitosamente — projectId:", window.FIREBASE_CONFIG.projectId);
+console.log("[Config] config.js cargado exitosamente — projectId:", window.FIREBASE_CONFIG.projectId);

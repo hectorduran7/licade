@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="orange">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Métricas e Historial de Estudio | La Biblioteca de ADE</title>
+
+    <!-- CSS Module -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Anti-Inspection & DevTools Protection -->
+    <script src="protection.js"></script>
+
+    <!-- Firebase SDK Compat v10.13.0 -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PQGH6R9SZC');
+    </script>
+
+    <!-- Theme pre-init -->
+    <script>
+        const savedTheme = localStorage.getItem('ungs_theme') || 'orange';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-mesh"></div>
+    <div class="bg-spotlight"></div>
+
+    <!-- Sidebar Mount Point -->
+    <div id="sidebar-mount"></div>
+
+    <!-- MAIN APP CONTENT -->
+    <main class="app-container" style="max-width: 960px; margin: 0 auto; padding-bottom: 60px;">
+        <!-- Navigation Breadcrumb & Back Action -->
+        <div style="margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <a href="estudio.html" class="btn-dark" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; font-size: 13px; font-weight: 700; border-radius: 12px; text-decoration: none; color: var(--text-main);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                <span>Volver al Temporizador</span>
+            </a>
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">
+                Sincronización en tiempo real activa
+            </div>
+        </div>
+
+        <!-- Academic Header -->
+        <header class="page-header" style="margin-bottom: 24px;">
+            <div class="page-kicker">Herramientas de Concentración • UNGS</div>
+            <h1 class="page-title" style="margin-bottom: 6px;">Métricas e Historial de Estudio</h1>
+            <p class="page-subtitle" style="margin: 0; max-width: 700px;">Panel analítico de concentración, pausas activas y registro de rendimiento por materia.</p>
+        </header>
+
+        <!-- Main Content Card -->
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+
+            <!-- SECTION 1: KPIS & STATS -->
+            <section class="glass-card" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        </div>
+                        <h2 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0;">Métricas de Rendimiento</h2>
+                    </div>
+
+                    <!-- Period Switcher -->
+                    <div class="section-tabs" style="margin: 0;">
+                        <button type="button" class="section-tab active" id="tabStatsHoy" onclick="window.toggleStats('hoy')">Hoy</button>
+                        <button type="button" class="section-tab" id="tabStatsGlobal" onclick="window.toggleStats('global')">Total Histórico</button>
+                        <button type="button" class="section-tab" id="tabStatsMateria" onclick="window.toggleStats('materia')">Por Materia</button>
+                    </div>
+                </div>
+
+                <!-- Grid Hoy -->
+                <div class="stats-grid" id="statsGridHoy">
+                    <div class="stat-card">
+                        <div class="stat-label">Racha</div>
+                        <div class="stat-value" id="statStreak">0</div>
+                        <div style="font-size:11px; color:var(--text-muted);">días seguidos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Sesiones</div>
+                        <div class="stat-value" id="statSessions">0</div>
+                        <div style="font-size:11px; color:var(--text-muted);">completadas hoy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Tiempo Enfoque</div>
+                        <div class="stat-value" id="statTime">0m</div>
+                        <div style="font-size:11px; color:var(--text-muted);">estudio productivo</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Tiempo Descanso</div>
+                        <div class="stat-value" id="statBreakTime" style="color: #32D74B;">0m</div>
+                        <div style="font-size:11px; color:var(--text-muted);">pausa activa</div>
+                    </div>
+                </div>
+
+                <!-- Grid Total Histórico -->
+                <div class="stats-grid hidden" id="statsGridGlobal">
+                    <div class="stat-card">
+                        <div class="stat-label">Racha Máxima</div>
+                        <div class="stat-value" id="statGlobalStreak">0</div>
+                        <div style="font-size:11px; color:var(--text-muted);">días seguidos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Sesiones Totales</div>
+                        <div class="stat-value" id="statGlobalSessions">0</div>
+                        <div style="font-size:11px; color:var(--text-muted);">acumuladas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Tiempo Enfoque Total</div>
+                        <div class="stat-value" id="statGlobalTime">0m</div>
+                        <div style="font-size:11px; color:var(--text-muted);">acumulado</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Tiempo Descanso Total</div>
+                        <div class="stat-value" id="statGlobalBreakTime" style="color: #32D74B;">0m</div>
+                        <div style="font-size:11px; color:var(--text-muted);">acumulado</div>
+                    </div>
+                </div>
+
+                <!-- Grid Por Materia -->
+                <div class="hidden" id="statsGridMateria" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <label for="statsSubjectFilter" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Filtrar por materia:</label>
+                        <select id="statsSubjectFilter" class="calc-input" style="flex: 1; min-width: 220px;" onchange="window.renderSubjectStats()">
+                            <option value="ALL">Todas las materias (Desglose global)</option>
+                        </select>
+                    </div>
+
+                    <div class="stats-grid" id="statsSubjectCards">
+                        <div class="stat-card">
+                            <div class="stat-label">Materias</div>
+                            <div class="stat-value" id="statSubjCount">0</div>
+                            <div style="font-size:11px; color:var(--text-muted);">con dedicación</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Sesiones</div>
+                            <div class="stat-value" id="statSubjSessions">0</div>
+                            <div style="font-size:11px; color:var(--text-muted);">en la materia</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Tiempo Enfoque</div>
+                            <div class="stat-value" id="statSubjTime">0m</div>
+                            <div style="font-size:11px; color:var(--text-muted);">dedicación total</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Tiempo Descanso</div>
+                            <div class="stat-value" id="statSubjBreakTime" style="color: #32D74B;">0m</div>
+                            <div style="font-size:11px; color:var(--text-muted);">en la materia</div>
+                        </div>
+                    </div>
+
+                    <!-- Subject Breakdown Cards -->
+                    <div id="statsSubjectBreakdownList" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;"></div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: SESSION HISTORY -->
+            <section class="glass-card" style="padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(50, 215, 75, 0.12); border: 1px solid rgba(50, 215, 75, 0.25); display: flex; align-items: center; justify-content: center; color: #32D74B;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <h2 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0;">Historial de Sesiones</h2>
+                    </div>
+
+                    <!-- History View Switcher -->
+                    <div class="section-tabs" style="margin: 0;">
+                        <button type="button" class="section-tab active" id="tabHistoryHoy" onclick="window.toggleHistory('hoy')">Hoy</button>
+                        <button type="button" class="section-tab" id="tabHistoryGlobal" onclick="window.toggleHistory('global')">Global</button>
+                        <button type="button" class="section-tab" id="tabHistoryMateria" onclick="window.toggleHistory('materia')">Por Materia</button>
+                    </div>
+                </div>
+
+                <!-- History Lists -->
+                <div class="history-list" id="historyListHoy">
+                    <div style="text-align:center; padding:36px; color:var(--text-muted); font-size:13px;">Sin sesiones completadas hoy.</div>
+                </div>
+
+                <div class="history-list hidden" id="historyListGlobal">
+                    <div style="text-align:center; padding:36px; color:var(--text-muted); font-size:13px;">Sin historial acumulado aún.</div>
+                </div>
+
+                <div class="history-list hidden" id="historyListMateria">
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
+                        <label for="historySubjectFilterSelect" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Filtrar por:</label>
+                        <select id="historySubjectFilterSelect" class="calc-input" style="flex: 1; min-width: 220px;" onchange="window.filterHistoryBySelectedSubject()">
+                            <option value="ALL">Todas las materias</option>
+                        </select>
+                    </div>
+                    <div id="historyMateriaFilteredList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+            </section>
+
+            <!-- Bottom CTA: Start Study Session -->
+            <div style="text-align: center; margin-top: 10px;">
+                <a href="estudio.html" class="btn-primary-solid" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 28px; font-size: 14px; font-weight: 700; border-radius: 14px; text-decoration: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <span>Iniciar Nueva Sesión de Concentración</span>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- App Scripts -->
+    <script src="js/materias-data.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/account.js"></script>
+
+    <!-- METRICS SCRIPT -->
+    <script>
+        let timerState = {
+            todayDate: getTodayDateString(),
+            todaySessions: 0,
+            todaySeconds: 0,
+            todayBreakSeconds: 0,
+            streak: 0,
+            lastStudyDate: null,
+            globalSessions: 0,
+            globalTime: 0,
+            globalBreakTime: 0,
+            globalStreak: 0,
+            lastGlobalStudyDate: null,
+            sessionHistory: [],
+            globalHistory: [],
+            subjectStats: {}
+        };
+
+        function getTodayDateString() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function loadTimerLocalState() {
+            try {
+                const savedStats = localStorage.getItem('ungs_study_stats') || localStorage.getItem('ungs_pomodoro_stats');
+                if (savedStats) {
+                    const parsed = JSON.parse(savedStats);
+                    if (parsed && typeof parsed === 'object') {
+                        timerState = Object.assign(timerState, parsed);
+                    }
+                }
+                if (!Array.isArray(timerState.sessionHistory)) timerState.sessionHistory = [];
+                if (!Array.isArray(timerState.globalHistory)) timerState.globalHistory = [];
+                if (!timerState.subjectStats || typeof timerState.subjectStats !== 'object') timerState.subjectStats = {};
+            } catch(e) {
+                console.warn('Error cargando métricas locales:', e);
+            }
+        }
+
+        function parseDurationToSeconds(dur) {
+            if (typeof dur === 'number') return dur;
+            if (!dur || typeof dur !== 'string') return 0;
+            dur = dur.trim().toLowerCase();
+            
+            let totalSecs = 0;
+            const hourMatch = dur.match(/(\d+)\s*h/);
+            if (hourMatch) {
+                totalSecs += parseInt(hourMatch[1], 10) * 3600;
+            }
+            const minMatch = dur.match(/(\d+)\s*m/);
+            if (minMatch) {
+                totalSecs += parseInt(minMatch[1], 10) * 60;
+            }
+            const secMatch = dur.match(/(\d+)\s*s/);
+            if (secMatch) {
+                totalSecs += parseInt(secMatch[1], 10);
+            }
+            
+            if (totalSecs === 0) {
+                if (dur.includes(':')) {
+                    const parts = dur.split(':').map(p => parseInt(p, 10) || 0);
+                    if (parts.length === 2) totalSecs = parts[0] * 60 + parts[1];
+                    else if (parts.length === 3) totalSecs = parts[0] * 3600 + parts[1] * 60 + parts[2];
+                } else {
+                    const num = parseInt(dur, 10);
+                    if (!isNaN(num)) totalSecs = num * 60;
+                }
+            }
+            return totalSecs;
+        }
+
+        function formatDurationSummary(s) {
+            const totalSecs = Math.max(0, Math.floor(s || 0));
+            const hours = Math.floor(totalSecs / 3600);
+            const mins = Math.floor((totalSecs % 3600) / 60);
+            const secs = totalSecs % 60;
+            if (hours > 0) {
+                return mins > 0 ? `${hours}h ${String(mins).padStart(2, '0')}m` : `${hours}h 00m`;
+            } else if (mins > 0) {
+                return `${mins}m`;
+            } else if (secs > 0) {
+                return `${secs}s`;
+            } else {
+                return '0m';
+            }
+        }
+
+        function formatSessionDuration(s) {
+            const totalSecs = Math.max(0, Math.floor(s || 0));
+            const hours = Math.floor(totalSecs / 3600);
+            const mins = Math.floor((totalSecs % 3600) / 60);
+            if (hours > 0) {
+                return mins > 0 ? `${hours}h ${String(mins).padStart(2, '0')}m` : `${hours}h 00m`;
+            } else {
+                return `${Math.max(1, mins)} min`;
+            }
+        }
+
+        function getSubjectMetrics() {
+            const metrics = {};
+
+            // A. Base map from timerState.subjectStats if available
+            if (timerState.subjectStats && typeof timerState.subjectStats === 'object') {
+                Object.keys(timerState.subjectStats).forEach(subj => {
+                    const st = timerState.subjectStats[subj];
+                    if (st && typeof st === 'object') {
+                        metrics[subj] = {
+                            subject: subj,
+                            sessions: Number(st.sessions) || 0,
+                            seconds: Number(st.seconds) || 0,
+                            breakSeconds: Number(st.breakSeconds) || 0,
+                            lastDate: null
+                        };
+                    }
+                });
+            }
+
+            // B. Aggregate from history records (globalHistory + sessionHistory)
+            const allRecords = [];
+            if (Array.isArray(timerState.globalHistory)) {
+                allRecords.push(...timerState.globalHistory);
+            }
+            if (Array.isArray(timerState.sessionHistory)) {
+                timerState.sessionHistory.forEach(s => {
+                    if (!allRecords.includes(s)) allRecords.push(s);
+                });
+            }
+
+            const historyMetrics = {};
+            allRecords.forEach(sess => {
+                if (!sess) return;
+                const subj = sess.subject || 'Estudio Libre';
+                if (!historyMetrics[subj]) {
+                    historyMetrics[subj] = {
+                        subject: subj,
+                        sessions: 0,
+                        seconds: 0,
+                        breakSeconds: 0,
+                        lastDate: sess.date || null
+                    };
+                }
+                const secs = typeof sess.seconds === 'number' ? sess.seconds : parseDurationToSeconds(sess.duration);
+                if (sess.mode === 'Descanso') {
+                    historyMetrics[subj].breakSeconds += secs;
+                } else {
+                    historyMetrics[subj].sessions++;
+                    historyMetrics[subj].seconds += secs;
+                }
+            });
+
+            // C. Merge historyMetrics into metrics keeping the max to guarantee zero data loss
+            Object.keys(historyMetrics).forEach(subj => {
+                const hm = historyMetrics[subj];
+                if (!metrics[subj]) {
+                    metrics[subj] = hm;
+                } else {
+                    metrics[subj].sessions = Math.max(metrics[subj].sessions, hm.sessions);
+                    metrics[subj].seconds = Math.max(metrics[subj].seconds, hm.seconds);
+                    metrics[subj].breakSeconds = Math.max(metrics[subj].breakSeconds, hm.breakSeconds);
+                    if (!metrics[subj].lastDate) metrics[subj].lastDate = hm.lastDate;
+                }
+            });
+
+            return metrics;
+        }
+
+        function populateSubjectSelects() {
+            const statsFilter = document.getElementById('statsSubjectFilter');
+            const histFilter = document.getElementById('historySubjectFilterSelect');
+
+            const metrics = getSubjectMetrics();
+            const recordedSubjects = Object.keys(metrics);
+            const subjects = window.MATERIAS_ADE ? window.MATERIAS_ADE.map(m => m.nombre) : [];
+            const allSubjects = Array.from(new Set([...recordedSubjects, ...subjects])).sort();
+
+            if (statsFilter) {
+                const cur = statsFilter.value;
+                let opts = '<option value="ALL">Todas las materias (Desglose global)</option>';
+                allSubjects.forEach(s => {
+                    opts += `<option value="${s}">${s}</option>`;
+                });
+                statsFilter.innerHTML = opts;
+                if (allSubjects.includes(cur)) statsFilter.value = cur;
+            }
+            if (histFilter) {
+                const cur = histFilter.value;
+                let opts = '<option value="ALL">Todas las materias</option>';
+                allSubjects.forEach(s => {
+                    opts += `<option value="${s}">${s}</option>`;
+                });
+                histFilter.innerHTML = opts;
+                if (allSubjects.includes(cur)) histFilter.value = cur;
+            }
+        }
+
+        function updateStats() {
+            const metrics = getSubjectMetrics();
+            const subjects = Object.keys(metrics);
+
+            // Compute cumulative totals across all subjects using reduce
+            const accumulatedStudySecs = subjects.reduce((sum, s) => sum + (Number(metrics[s].seconds) || 0), 0);
+            const accumulatedBreakSecs = subjects.reduce((sum, s) => sum + (Number(metrics[s].breakSeconds) || 0), 0);
+            const accumulatedSessions = subjects.reduce((sum, s) => sum + (Number(metrics[s].sessions) || 0), 0);
+
+            const effectiveGlobalStudy = Math.max(Number(timerState.globalTime) || 0, accumulatedStudySecs);
+            const effectiveGlobalBreak = Math.max(Number(timerState.globalBreakTime) || 0, accumulatedBreakSecs);
+            const effectiveGlobalSessions = Math.max(Number(timerState.globalSessions) || 0, accumulatedSessions);
+
+            timerState.globalTime = effectiveGlobalStudy;
+            timerState.globalBreakTime = effectiveGlobalBreak;
+            timerState.globalSessions = effectiveGlobalSessions;
+
+            // Compute Today's Metrics
+            const todayDate = new Date().toLocaleDateString('es-ES');
+            const todayList = (timerState.sessionHistory || []).filter(s => s && (s.date === todayDate || !s.date));
+
+            const todayStudySecs = todayList
+                .filter(s => s.mode !== 'Descanso')
+                .reduce((sum, s) => sum + (typeof s.seconds === 'number' ? s.seconds : parseDurationToSeconds(s.duration)), 0);
+
+            const todayBreakSecs = todayList
+                .filter(s => s.mode === 'Descanso')
+                .reduce((sum, s) => sum + (typeof s.seconds === 'number' ? s.seconds : parseDurationToSeconds(s.duration)), 0);
+
+            const todaySessionsCount = todayList.filter(s => s.mode !== 'Descanso').length;
+
+            const effectiveTodayStudy = Math.max(Number(timerState.todaySeconds) || Number(timerState.totalWorkSeconds) || 0, todayStudySecs);
+            const effectiveTodayBreak = Math.max(Number(timerState.todayBreakSeconds) || Number(timerState.totalBreakSeconds) || 0, todayBreakSecs);
+            const effectiveTodaySessions = Math.max(Number(timerState.todaySessions) || Number(timerState.sessionsCompleted) || 0, todaySessionsCount);
+
+            const streakEl = document.getElementById('statStreak');
+            const sessionsEl = document.getElementById('statSessions');
+            const timeEl = document.getElementById('statTime');
+            const breakEl = document.getElementById('statBreakTime');
+
+            if (streakEl) streakEl.textContent = timerState.streak || 0;
+            if (sessionsEl) sessionsEl.textContent = effectiveTodaySessions;
+            if (timeEl) timeEl.textContent = formatDurationSummary(effectiveTodayStudy);
+            if (breakEl) breakEl.textContent = formatDurationSummary(effectiveTodayBreak);
+
+            const gStreakEl = document.getElementById('statGlobalStreak');
+            const gSessionsEl = document.getElementById('statGlobalSessions');
+            const gTimeEl = document.getElementById('statGlobalTime');
+            const gBreakEl = document.getElementById('statGlobalBreakTime');
+
+            if (gStreakEl) gStreakEl.textContent = timerState.globalStreak || timerState.streak || 0;
+            if (gSessionsEl) gSessionsEl.textContent = effectiveGlobalSessions;
+            if (gTimeEl) gTimeEl.textContent = formatDurationSummary(effectiveGlobalStudy);
+            if (gBreakEl) gBreakEl.textContent = formatDurationSummary(effectiveGlobalBreak);
+
+            populateSubjectSelects();
+            renderSubjectStats();
+        }
+
+        window.renderSubjectStats = function() {
+            const filterEl = document.getElementById('statsSubjectFilter');
+            const target = filterEl ? filterEl.value : 'ALL';
+
+            const countEl = document.getElementById('statSubjCount');
+            const sessEl = document.getElementById('statSubjSessions');
+            const timeEl = document.getElementById('statSubjTime');
+            const breakEl = document.getElementById('statSubjBreakTime');
+            const listEl = document.getElementById('statsSubjectBreakdownList');
+
+            const metrics = getSubjectMetrics();
+            const subjects = Object.keys(metrics);
+
+            const totalStudySecs = subjects.reduce((sum, s) => sum + (metrics[s].seconds || 0), 0);
+            const totalBreakSecs = subjects.reduce((sum, s) => sum + (metrics[s].breakSeconds || 0), 0);
+            const totalSessions = subjects.reduce((sum, s) => sum + (metrics[s].sessions || 0), 0);
+
+            const effectiveGlobalStudy = Math.max(timerState.globalTime || 0, totalStudySecs);
+            const effectiveGlobalBreak = Math.max(timerState.globalBreakTime || 0, totalBreakSecs);
+            const effectiveGlobalSessions = Math.max(timerState.globalSessions || 0, totalSessions);
+
+            if (target === 'ALL') {
+                const activeCount = subjects.filter(s => (metrics[s].sessions > 0 || metrics[s].seconds > 0 || metrics[s].breakSeconds > 0)).length;
+                if (countEl) countEl.textContent = activeCount;
+                if (sessEl) sessEl.textContent = effectiveGlobalSessions;
+                if (timeEl) timeEl.textContent = formatDurationSummary(effectiveGlobalStudy);
+                if (breakEl) breakEl.textContent = formatDurationSummary(effectiveGlobalBreak);
+
+                if (listEl) {
+                    if (activeCount === 0) {
+                        listEl.innerHTML = '<div style="text-align:center; padding:24px; color:var(--text-muted); font-size:13px;">Aún no registrás tiempo en ninguna materia.</div>';
+                    } else {
+                        const denom = effectiveGlobalStudy > 0 ? effectiveGlobalStudy : 1;
+                        const sortedSubjects = subjects
+                            .filter(s => (metrics[s].sessions > 0 || metrics[s].seconds > 0 || metrics[s].breakSeconds > 0))
+                            .sort((a, b) => (metrics[b].seconds || 0) - (metrics[a].seconds || 0));
+
+                        listEl.innerHTML = sortedSubjects
+                            .map(name => {
+                                const data = metrics[name];
+                                const sec = data.seconds || 0;
+                                const brkSec = data.breakSeconds || 0;
+                                const pct = Math.min(100, Math.round((sec / denom) * 100));
+                                const safeName = window.sanitizeHTML ? window.sanitizeHTML(name) : name;
+                                return `
+                                    <div class="stat-card" style="padding:16px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02); border-radius:14px; margin-bottom:12px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                            <strong style="color:var(--text-main); font-size:14px;">${safeName}</strong>
+                                            <span style="color:var(--primary); font-weight:800; font-size:14px;">${formatDurationSummary(sec)}</span>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-muted); margin-bottom:8px;">
+                                            <span>${data.sessions || 0} sesión(es) completadas</span>
+                                            <span>${pct}% del tiempo total de estudio</span>
+                                        </div>
+                                        <div style="height:6px; background:rgba(255,255,255,0.06); border-radius:999px; overflow:hidden; margin-bottom:10px;">
+                                            <div style="height:100%; width:${pct}%; background:var(--primary); border-radius:999px;"></div>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted);">
+                                            <span>Tiempo de descanso acumulado:</span>
+                                            <strong style="color:#32D74B;">${formatDurationSummary(brkSec)}</strong>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('');
+                    }
+                }
+            } else {
+                const data = metrics[target] || { sessions: 0, seconds: 0, breakSeconds: 0 };
+                if (countEl) countEl.textContent = '1';
+                if (sessEl) sessEl.textContent = data.sessions || 0;
+                if (timeEl) timeEl.textContent = formatDurationSummary(data.seconds || 0);
+                if (breakEl) breakEl.textContent = formatDurationSummary(data.breakSeconds || 0);
+
+                if (listEl) {
+                    const denom = effectiveGlobalStudy > 0 ? effectiveGlobalStudy : 1;
+                    const pct = Math.min(100, Math.round(((data.seconds || 0) / denom) * 100));
+                    const safeName = window.sanitizeHTML ? window.sanitizeHTML(target) : target;
+                    listEl.innerHTML = `
+                        <div class="stat-card" style="padding:16px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02); border-radius:14px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <strong style="color:var(--text-main); font-size:14px;">${safeName}</strong>
+                                <span style="color:var(--primary); font-weight:800; font-size:14px;">${formatDurationSummary(data.seconds || 0)}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-muted); margin-bottom:8px;">
+                                <span>${data.sessions || 0} sesión(es) completadas</span>
+                                <span>Representa el ${pct}% de tu tiempo de estudio</span>
+                            </div>
+                            <div style="height:6px; background:rgba(255,255,255,0.06); border-radius:999px; overflow:hidden; margin-bottom:10px;">
+                                <div style="height:100%; width:${pct}%; background:var(--primary); border-radius:999px;"></div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted);">
+                                <span>Tiempo de descanso acumulado:</span>
+                                <strong style="color:#32D74B;">${formatDurationSummary(data.breakSeconds || 0)}</strong>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        function renderHistoryList(arr, id, emptyText) {
+            const container = document.getElementById(id);
+            if (!container) return;
+            if (!arr || !arr.length) {
+                container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:13px;"><p>${emptyText}</p></div>`;
+                return;
+            }
+            container.innerHTML = arr.map(s => {
+                const safeSubj = window.sanitizeHTML ? window.sanitizeHTML(s.subject) : s.subject;
+                const safeDate = window.sanitizeHTML ? window.sanitizeHTML(s.date) : s.date;
+                const safeTime = window.sanitizeHTML ? window.sanitizeHTML(s.time) : s.time;
+                const safeDur = s.seconds ? formatSessionDuration(s.seconds) : (window.sanitizeHTML ? window.sanitizeHTML(s.duration) : s.duration);
+                const isBreak = s.mode === 'Descanso';
+                const badge = isBreak
+                    ? '<span style="background:rgba(50,215,75,0.12); color:#32D74B; border:1px solid rgba(50,215,75,0.25); font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:6px;">Descanso</span>'
+                    : '<span style="background:rgba(10,132,255,0.12); color:var(--primary); border:1px solid rgba(10,132,255,0.25); font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:6px;">Enfoque</span>';
+                return '<div class="history-item"><div><div class="history-materia">' + safeSubj + badge + '</div><div class="history-date">' + safeDate + ' a las ' + safeTime + '</div></div><div class="history-time" style="' + (isBreak ? 'color:#32D74B;' : '') + '">' + safeDur + '</div></div>';
+            }).join('');
+        }
+
+        window.filterHistoryBySelectedSubject = function() {
+            const sel = document.getElementById('historySubjectFilterSelect');
+            const target = sel ? sel.value : 'ALL';
+            const history = timerState.globalHistory || [];
+            const filtered = target === 'ALL' ? history : history.filter(s => (s.subject || 'Estudio Libre') === target);
+            renderHistoryList(filtered, 'historyMateriaFilteredList', 'No hay sesiones registradas para esta materia.');
+        };
+
+        function updateHistory() {
+            renderHistoryList((timerState.sessionHistory || []).slice().reverse(), 'historyListHoy', 'Sin sesiones completadas hoy.');
+            renderHistoryList(timerState.globalHistory || [], 'historyListGlobal', 'Sin historial global acumulado.');
+            window.filterHistoryBySelectedSubject();
+        }
+
+        window.toggleStats = function(view) {
+            const tabHoy = document.getElementById('tabStatsHoy');
+            const tabGlobal = document.getElementById('tabStatsGlobal');
+            const tabMateria = document.getElementById('tabStatsMateria');
+            const gridHoy = document.getElementById('statsGridHoy');
+            const gridGlobal = document.getElementById('statsGridGlobal');
+            const gridMateria = document.getElementById('statsGridMateria');
+
+            if (tabHoy) tabHoy.classList.toggle('active', view === 'hoy');
+            if (tabGlobal) tabGlobal.classList.toggle('active', view === 'global');
+            if (tabMateria) tabMateria.classList.toggle('active', view === 'materia');
+
+            if (gridHoy) gridHoy.classList.toggle('hidden', view !== 'hoy');
+            if (gridGlobal) gridGlobal.classList.toggle('hidden', view !== 'global');
+            if (gridMateria) gridMateria.classList.toggle('hidden', view !== 'materia');
+
+            if (view === 'materia') {
+                window.renderSubjectStats();
+            }
+        };
+
+        window.toggleHistory = function(view) {
+            const tabHoy = document.getElementById('tabHistoryHoy');
+            const tabGlobal = document.getElementById('tabHistoryGlobal');
+            const tabMateria = document.getElementById('tabHistoryMateria');
+            const listHoy = document.getElementById('historyListHoy');
+            const listGlobal = document.getElementById('historyListGlobal');
+            const listMateria = document.getElementById('historyListMateria');
+
+            if (tabHoy) tabHoy.classList.toggle('active', view === 'hoy');
+            if (tabGlobal) tabGlobal.classList.toggle('active', view === 'global');
+            if (tabMateria) tabMateria.classList.toggle('active', view === 'materia');
+
+            if (listHoy) listHoy.classList.toggle('hidden', view !== 'hoy');
+            if (listGlobal) listGlobal.classList.toggle('hidden', view !== 'global');
+            if (listMateria) listMateria.classList.toggle('hidden', view !== 'materia');
+
+            if (view === 'materia') {
+                window.filterHistoryBySelectedSubject();
+            }
+        };
+
+        // Initialize Everything on Load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTimerLocalState();
+            populateSubjectSelects();
+            updateStats();
+            updateHistory();
+
+            if (window.auth) {
+                window.auth.onAuthStateChanged(user => {
+                    if (user && window.db) {
+                        window.db.collection('usuarios_estudio').doc(user.uid).get().then(doc => {
+                            if (doc.exists && doc.data().timerState) {
+                                timerState = Object.assign(timerState, doc.data().timerState);
+                                populateSubjectSelects();
+                                updateStats();
+                                updateHistory();
+                            }
+                        }).catch(console.error);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

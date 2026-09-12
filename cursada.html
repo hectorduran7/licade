@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="orange">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Planificador de Cursada | La Biblioteca de ADE</title>
+
+    <!-- CSS Module -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Anti-Inspection & DevTools Protection -->
+    <script src="protection.js"></script>
+
+    <!-- Firebase SDK Compat v10.13.0 -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-PQGH6R9SZC');
+    </script>
+
+    <!-- Theme pre-init -->
+    <script>
+        const savedTheme = localStorage.getItem('ungs_theme') || 'orange';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-mesh"></div>
+    <div class="bg-spotlight"></div>
+
+    <!-- Sidebar Mount Point -->
+    <div id="sidebar-mount"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p id="loadingText">Sincronizando planificador de cursada...</p>
+    </div>
+
+    <!-- MAIN APP CONTENT -->
+    <main class="app-container">
+        <!-- Academic Header -->
+        <header class="page-header" style="text-align: center; margin-bottom: 24px;">
+            <div class="page-kicker">Planificación Cuatrimestral • UNGS</div>
+            <h1 class="page-title" style="margin-bottom: 6px;">Planificador de Cursada</h1>
+            <p class="page-subtitle" style="margin: 0 auto; max-width: 620px;">Validador de correlativas en tiempo real, matriz semanal con detector de choques y gestor de parciales.</p>
+        </header>
+
+        <!-- SPA Hash Navigation Tabs -->
+        <nav class="cursada-nav-tabs" aria-label="Secciones del Planificador">
+            <a href="#resumen" class="cursada-tab-btn active" id="tabNavResumen">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>Resumen y Ritmo</span>
+            </a>
+            <a href="#grilla" class="cursada-tab-btn" id="tabNavGrilla">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Grilla Semanal</span>
+            </a>
+            <a href="#materias" class="cursada-tab-btn" id="tabNavMaterias">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <span>Árbol de Elegibilidad</span>
+            </a>
+            <a href="#agenda" class="cursada-tab-btn" id="tabNavAgenda">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Agenda de Parciales</span>
+            </a>
+        </nav>
+
+        <!-- ============================================================ -->
+        <!-- VISTA 1: RESUMEN Y RITMO (#resumen)                          -->
+        <!-- ============================================================ -->
+        <div id="viewResumen" class="cursada-view">
+            <!-- Cross-Sync Fallback Banner -->
+            <div id="noSubjectsBanner" class="sync-info-banner" style="display:none; margin-bottom: 20px;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                    <div style="width:40px; height:40px; border-radius:12px; background:var(--primary-glow); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-weight:700; font-size:14px; color:var(--text-main);">Aún no configuraste tus materias de este cuatrimestre</div>
+                        <div style="font-size:12px; color:var(--text-muted); line-height:1.4;">Podés elegirlas desde el Buscador de Materias o configurar tu estado acá en el Árbol de Elegibilidad.</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <a href="index.html" class="btn-primary-solid" style="height:36px; padding:0 16px; font-size:12px; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <span>Ir al Buscador</span>
+                    </a>
+                    <a href="#materias" class="btn-dark" style="height:36px; padding:0 16px; font-size:12px; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                        <span>Elegir Materias</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Tool 3: Calculadora de Carga Horaria y Sugerencia de Ritmo -->
+            <section class="dashboard-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div class="panel-title" style="margin-bottom:0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Carga Cuatrimestral y Ritmo de Estudio
+                    </div>
+                    <button type="button" onclick="window.openGeneralFeedbackModal()" id="btnGeneralFeedback" class="viewer-btn" style="border-color:rgba(50,215,75,0.3); color:var(--success); display:none; align-items:center; gap:6px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>Finalizar Cuatrimestre / Encuesta</span>
+                    </button>
+                </div>
+
+                <div class="stats-summary-grid" style="margin-top:16px;">
+                    <div class="stat-summary-card">
+                        <span class="stat-summary-label">Materias Cursando</span>
+                        <span class="stat-summary-value" id="statEnrolledCount">0</span>
+                    </div>
+                    <div class="stat-summary-card">
+                        <span class="stat-summary-label">Horas Semanales de Clase</span>
+                        <span class="stat-summary-value" id="statClassHours" style="color:var(--primary);">0h</span>
+                    </div>
+                    <div class="stat-summary-card">
+                        <span class="stat-summary-label">Estudio Autónomo Sugerido</span>
+                        <span class="stat-summary-value" id="statStudyHours">0h</span>
+                    </div>
+                    <div class="stat-summary-card">
+                        <span class="stat-summary-label">Estado de Horarios</span>
+                        <span class="stat-summary-value" id="statCollisionStatus" style="font-size:20px; color:var(--success);">Sin choques</span>
+                    </div>
+                </div>
+
+                <div id="studySyncBox" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:14px; padding:14px 18px; flex-wrap:wrap; gap:10px; margin-top:16px;">
+                    <span style="font-size:13px; color:var(--text-muted);">
+                        <strong>Consejo de Rendimiento:</strong> Dedicar 1.5 horas de estudio fuera de clase por cada hora presencial asegura regularizar con solidez.
+                    </span>
+                    <a href="estudio.html" class="btn-primary-solid" style="height:38px; padding:0 16px; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>Iniciar Sesión Pomodoro</span>
+                    </a>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- VISTA 2: GRILLA SEMANAL (#grilla)                            -->
+        <!-- ============================================================ -->
+        <div id="viewGrilla" class="cursada-view" style="display:none;">
+            <!-- Tool 2: Matriz de Horarios Semanal y Detector de Colisiones -->
+            <section class="dashboard-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div class="panel-title" style="margin-bottom:0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        Grilla Semanal de Clases
+                    </div>
+                    <button type="button" onclick="window.openScheduleModal()" class="viewer-btn" style="display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Asignar / Editar Horario</span>
+                    </button>
+                </div>
+
+                <!-- Collision Alert Banner -->
+                <div id="collisionAlert" class="collision-alert" style="display:none; margin-top:16px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <span id="collisionAlertText">¡Atención! Hay materias superpuestas en el mismo día y franja horaria.</span>
+                </div>
+
+                <!-- Schedule Matrix Table -->
+                <div class="schedule-grid-wrapper" style="margin-top:16px;">
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th class="schedule-time-col">Turno / Franja</th>
+                                <th>Lunes</th>
+                                <th>Martes</th>
+                                <th>Miércoles</th>
+                                <th>Jueves</th>
+                                <th>Viernes</th>
+                                <th>Sábado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody">
+                            <!-- Rendered by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- VISTA 3: ÁRBOL DE ELEGIBILIDAD (#materias)                   -->
+        <!-- ============================================================ -->
+        <div id="viewMaterias" class="cursada-view" style="display:none;">
+            <!-- Tool 1: Validador de Correlativas y Selección de Materias -->
+            <section class="dashboard-panel">
+                <div class="panel-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    Árbol de Elegibilidad & Inscripción Cuatrimestral
+                </div>
+
+                <p style="font-size:13px; color:var(--text-muted); margin:0;">
+                    El sistema valida automáticamente tus materias aprobadas registradas en <a href="progreso.html" style="color:var(--primary); text-decoration:underline;">Mi Progreso</a> y calcula cuáles materias estás habilitado para cursar sin riesgo de trabas académicas.
+                </p>
+
+                <!-- Filter Tabs -->
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
+                    <button type="button" class="preset-btn active" id="filterAll" onclick="window.setEligibilityFilter('all')">Todas (38)</button>
+                    <button type="button" class="preset-btn" id="filterAvailable" onclick="window.setEligibilityFilter('available')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg> Habilitadas</button>
+                    <button type="button" class="preset-btn" id="filterEnrolled" onclick="window.setEligibilityFilter('enrolled')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:4px;"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Inscriptas</button>
+                    <button type="button" class="preset-btn" id="filterBlocked" onclick="window.setEligibilityFilter('blocked')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Bloqueadas</button>
+                    <button type="button" class="preset-btn" id="filterApproved" onclick="window.setEligibilityFilter('approved')"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px; margin-right:4px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Aprobadas</button>
+                </div>
+
+                <!-- Subject Cards List -->
+                <div id="cursadaSubjectsList" style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+                    <!-- Rendered dynamically -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- VISTA 4: AGENDA DE PARCIALES (#agenda)                       -->
+        <!-- ============================================================ -->
+        <div id="viewAgenda" class="cursada-view" style="display:none;">
+            <!-- Tool 4: Gestor de Exámenes Parciales y Entregas -->
+            <section class="dashboard-panel">
+                <div class="panel-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Agenda de Exámenes y Entregas del Cuatrimestre
+                </div>
+
+                <!-- Form to Add Exam -->
+                <form id="examForm" onsubmit="event.preventDefault(); window.addExamDate();" class="calc-row">
+                    <select id="examSubjectSelect" class="calc-input" style="flex:2; min-width:200px;" required>
+                        <option value="">Seleccioná materia inscripta...</option>
+                    </select>
+                    <select id="examTypeSelect" class="calc-input" style="flex:1; min-width:140px;" required>
+                        <option value="1° Parcial">1° Parcial</option>
+                        <option value="2° Parcial">2° Parcial</option>
+                        <option value="Recuperatorio">Recuperatorio</option>
+                        <option value="Entrega de TP">Entrega de TP</option>
+                        <option value="Examen Final">Examen Final</option>
+                    </select>
+                    <input type="date" id="examDateInput" class="calc-input" style="flex:1; min-width:140px;" required>
+                    <button type="submit" class="btn-primary-solid" style="padding:0 20px; display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Añadir</span>
+                    </button>
+                </form>
+
+                <div id="examsList" style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
+                    <!-- Rendered dynamically -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Schedule Assignment Modal -->
+    <div id="scheduleModal" class="modal-overlay" onclick="window.closeOnOutsideClick && closeOnOutsideClick(event, 'scheduleModal')">
+        <div class="modal-content" style="max-width: 480px; padding: 22px 20px 20px 20px;">
+            <div class="apple-modal-header" style="margin-bottom: 18px;">
+                <div class="apple-modal-icon-badge" style="width: 42px; height: 42px; border-radius: 14px; margin-bottom: 8px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                <h3 class="apple-modal-title" style="font-size: 18px; margin: 0 0 4px 0;">Asignar Horario</h3>
+                <p class="apple-modal-subtitle" style="font-size: 12px; margin: 0; line-height: 1.3;">Agregá la materia a tu grilla semanal de cursada.</p>
+                <button class="modal-close" style="position: absolute; top: 0; right: 0;" onclick="window.closeModal && closeModal('scheduleModal')" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+
+            <form onsubmit="event.preventDefault(); window.saveScheduleSlot();" style="display:flex; flex-direction:column; gap:14px;">
+                <div>
+                    <label style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Materia</label>
+                    <select id="modalSubjectSelect" class="calc-input" style="margin-top:6px;" required>
+                        <option value="">Seleccioná una materia inscripta...</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Día de Cursada</label>
+                    <select id="modalDaySelect" class="calc-input" style="margin-top:6px;" required>
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miércoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                        <option value="Sábado">Sábado</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Franja Horaria / Turno</label>
+                    <select id="modalSlotSelect" class="calc-input" style="margin-top:6px;" required>
+                        <option value="08:00 - 12:00">Mañana (08:00 - 12:00)</option>
+                        <option value="09:00 - 13:00">Mañana (09:00 - 13:00)</option>
+                        <option value="11:00 - 13:00">Mañana (11:00 - 13:00)</option>
+                        <option value="12:00 - 16:00">Mediodía (12:00 - 16:00)</option>
+                        <option value="14:00 - 17:00">Tarde (14:00 - 17:00)</option>
+                        <option value="16:00 - 18:00">Tarde (16:00 - 18:00)</option>
+                        <option value="18:00 - 20:00">Noche 1 (18:00 - 20:00)</option>
+                        <option value="20:00 - 22:00">Noche 2 (20:00 - 22:00)</option>
+                        <option value="18:00 - 22:00">Noche Completa (18:00 - 22:00)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Aula / Comisión (Opcional)</label>
+                    <input type="text" id="modalRoomInput" class="calc-input" placeholder="Ej. Aula 102 - Módulo 1" style="margin-top:6px;">
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button type="submit" class="btn-primary-solid" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Guardar en la Grilla</span>
+                    </button>
+                    <button type="button" class="btn-dark" onclick="window.closeModal && closeModal('scheduleModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feedback Post-Cursada Modal -->
+    <div id="feedbackModal" class="modal-overlay" onclick="window.closeOnOutsideClick && closeOnOutsideClick(event, 'feedbackModal')">
+        <div class="modal-content" style="max-width: 520px; padding: 22px 20px 20px 20px;">
+            <div class="apple-modal-header" style="margin-bottom: 18px;">
+                <div class="apple-modal-icon-badge" style="width: 42px; height: 42px; border-radius: 14px; margin-bottom: 8px; background:rgba(50,215,75,0.15); color:var(--success);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <h3 class="apple-modal-title" id="feedbackModalTitle" style="font-size: 18px; margin: 0 0 4px 0;">¿Cómo te fue con la materia?</h3>
+                <p class="apple-modal-subtitle" style="font-size: 12px; margin: 0; line-height: 1.3;">Registrá el resultado para actualizar tu progreso.</p>
+                <button class="modal-close" style="position: absolute; top: 0; right: 0;" onclick="window.closeModal && closeModal('feedbackModal')" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;">
+                Seleccioná el resultado obtenido. Si aprobaste, se registrará automáticamente en tu progreso y habilitará tus siguientes correlativas.
+            </p>
+
+            <div class="feedback-options-grid">
+                <div class="feedback-option-card selected" id="optPromoted" onclick="window.selectFeedbackOption('promoted')">
+                    <div class="feedback-option-title" style="font-weight:700; font-size:13px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--success);"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Promocioné / Final</span>
+                    </div>
+                    <div class="feedback-option-desc" style="font-size:11px; color:var(--text-muted); margin-top:4px;">Aprobada con nota numérica.</div>
+                </div>
+                <div class="feedback-option-card" id="optPassed" onclick="window.selectFeedbackOption('passed')">
+                    <div class="feedback-option-title" style="font-weight:700; font-size:13px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--primary);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>Aprobé (Sin Nota)</span>
+                    </div>
+                    <div class="feedback-option-desc" style="font-size:11px; color:var(--text-muted); margin-top:4px;">Aprobada sin nota numérica.</div>
+                </div>
+                <div class="feedback-option-card" id="optRegular" onclick="window.selectFeedbackOption('regular')">
+                    <div class="feedback-option-title" style="font-weight:700; font-size:13px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--warning);"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>Regularicé</span>
+                    </div>
+                    <div class="feedback-option-desc" style="font-size:11px; color:var(--text-muted); margin-top:4px;">Pendiente examen final.</div>
+                </div>
+                <div class="feedback-option-card" id="optRetake" onclick="window.selectFeedbackOption('retake')">
+                    <div class="feedback-option-title" style="font-weight:700; font-size:13px; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--danger);"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                        <span>Debo Recursar</span>
+                    </div>
+                    <div class="feedback-option-desc" style="font-size:11px; color:var(--text-muted); margin-top:4px;">Retirar de la cursada actual.</div>
+                </div>
+            </div>
+
+            <!-- Grade Numeric Input Area -->
+            <div id="feedbackGradeArea" style="margin-top: 10px;">
+                <label style="font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Nota Obtenida</label>
+                <input type="number" id="feedbackGradeInput" class="calc-input" min="4" max="10" step="0.5" placeholder="Ej. 8" style="margin-top:6px;">
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button type="button" class="btn-primary-solid" onclick="window.saveFeedbackOutcome()" style="flex:1; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <span>Guardar en Mi Progreso</span>
+                </button>
+                <button type="button" class="btn-dark" onclick="window.closeModal && closeModal('feedbackModal')">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="js/materias-data.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/sidebar.js"></script>
+
+    <!-- Cursada Planner Engine & Hash Router -->
+    <script>
+        const TIME_SLOTS = [
+            "08:00 - 12:00",
+            "09:00 - 13:00",
+            "11:00 - 13:00",
+            "12:00 - 16:00",
+            "14:00 - 17:00",
+            "16:00 - 18:00",
+            "18:00 - 20:00",
+            "20:00 - 22:00"
+        ];
+        const DAYS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+        let approvedSubjects = new Set();
+        let enrolledSubjects = new Set();
+        let schedules = [];
+        let examDates = [];
+        let currentFilter = 'all';
+
+        let activeFeedbackSubject = null;
+        let activeFeedbackOutcome = 'promoted';
+
+        // ==================== HASH ROUTING CONTROLLER ====================
+        function handleCursadaHashRouting() {
+            const rawHash = (window.location.hash || '').toLowerCase();
+            const validHashes = ['#resumen', '#grilla', '#materias', '#agenda'];
+            const hash = validHashes.includes(rawHash) ? rawHash : '#resumen';
+
+            const views = {
+                '#resumen': document.getElementById('viewResumen'),
+                '#grilla': document.getElementById('viewGrilla'),
+                '#materias': document.getElementById('viewMaterias'),
+                '#agenda': document.getElementById('viewAgenda')
+            };
+
+            const tabs = {
+                '#resumen': document.getElementById('tabNavResumen'),
+                '#grilla': document.getElementById('tabNavGrilla'),
+                '#materias': document.getElementById('tabNavMaterias'),
+                '#agenda': document.getElementById('tabNavAgenda')
+            };
+
+            Object.keys(views).forEach(k => {
+                if (views[k]) {
+                    views[k].style.display = (k === hash) ? 'block' : 'none';
+                }
+                if (tabs[k]) {
+                    tabs[k].classList.toggle('active', k === hash);
+                }
+            });
+
+            const titles = {
+                '#resumen': 'Resumen de Cursada | La Biblioteca de ADE',
+                '#grilla': 'Grilla Semanal de Clases | La Biblioteca de ADE',
+                '#materias': 'Árbol de Materias & Correlativas | La Biblioteca de ADE',
+                '#agenda': 'Agenda de Parciales | La Biblioteca de ADE'
+            };
+            if (titles[hash]) {
+                document.title = titles[hash];
+            }
+        }
+
+        window.addEventListener('hashchange', handleCursadaHashRouting);
+
+        function showLoading(show, text) {
+            const overlay = document.getElementById('loadingOverlay');
+            const txt = document.getElementById('loadingText');
+            if (txt && text) txt.textContent = text;
+            if (overlay) overlay.classList.toggle('hidden', !show);
+        }
+
+        function loadApprovedSubjects() {
+            try {
+                const cachedGrades = localStorage.getItem('ungs_grades_backup_guest');
+                if (cachedGrades) {
+                    const entries = JSON.parse(cachedGrades) || [];
+                    approvedSubjects = new Set(entries.map(e => e.subj.trim()));
+                }
+            } catch(e) {
+                approvedSubjects = new Set();
+            }
+        }
+
+        function saveCursadaData() {
+            const data = {
+                enrolled: Array.from(enrolledSubjects),
+                schedules: schedules,
+                exams: examDates,
+                updatedAt: new Date().toISOString()
+            };
+            
+            // LocalStorage Sync
+            localStorage.setItem('ungs_cursada_planner', JSON.stringify(data));
+            localStorage.setItem('ungs_my_subjects', JSON.stringify(Array.from(enrolledSubjects)));
+            window.userMySubjects = Array.from(enrolledSubjects);
+
+            // Cloud Sync
+            if (window.currentUser && window.db) {
+                window.db.collection('usuarios_cursada').doc(window.currentUser.uid).set(data).catch(console.error);
+                window.db.collection('usuarios_materias').doc(window.currentUser.uid).set({
+                    cursando: Array.from(enrolledSubjects)
+                }, { merge: true }).catch(console.error);
+            }
+        }
+
+        function loadCursadaData() {
+            try {
+                const saved = localStorage.getItem('ungs_cursada_planner');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    enrolledSubjects = new Set(parsed.enrolled || []);
+                    schedules = parsed.schedules || [];
+                    examDates = parsed.exams || [];
+                }
+
+                // Cross-sync check: if enrolled is empty, check ungs_my_subjects
+                if (enrolledSubjects.size === 0) {
+                    const mySubjs = localStorage.getItem('ungs_my_subjects');
+                    if (mySubjs) {
+                        const parsed = JSON.parse(mySubjs);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            enrolledSubjects = new Set(parsed);
+                        }
+                    }
+                }
+            } catch(e) {
+                console.warn(e);
+            }
+        }
+
+        function checkSubjectEligibility(subject) {
+            if (approvedSubjects.has(subject.name.trim())) {
+                return { status: 'APPROVED', label: 'Aprobada', badgeClass: 'badge-approved', missing: null };
+            }
+            if (enrolledSubjects.has(subject.name.trim())) {
+                return { status: 'ENROLLED', label: 'Inscripta', badgeClass: 'badge-enrolled', missing: null };
+            }
+
+            const reqStr = (subject.req || 'Ninguna').trim();
+            if (reqStr === 'Ninguna' || reqStr === '-' || !reqStr) {
+                return { status: 'AVAILABLE', label: 'Habilitada', badgeClass: 'badge-available', missing: null };
+            }
+
+            let isPassed = false;
+            approvedSubjects.forEach(app => {
+                if (app.toLowerCase().includes(reqStr.toLowerCase()) || reqStr.toLowerCase().includes(app.toLowerCase())) {
+                    isPassed = true;
+                }
+            });
+
+            if (isPassed) {
+                return { status: 'AVAILABLE', label: 'Habilitada', badgeClass: 'badge-available', missing: null };
+            } else {
+                return { status: 'BLOCKED', label: 'Bloqueada', badgeClass: 'badge-blocked', missing: reqStr };
+            }
+        }
+
+        window.setEligibilityFilter = function(filter) {
+            currentFilter = filter;
+            ['filterAll', 'filterAvailable', 'filterEnrolled', 'filterBlocked', 'filterApproved'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById('filter' + filter.charAt(0).toUpperCase() + filter.slice(1));
+            if (activeBtn) activeBtn.classList.add('active');
+            renderSubjectsList();
+        };
+
+        function renderSubjectsList() {
+            const container = document.getElementById('cursadaSubjectsList');
+            if (!container || !window.MATERIAS_ADE) return;
+
+            let list = window.MATERIAS_ADE;
+            let html = '';
+
+            list.forEach(m => {
+                const elig = checkSubjectEligibility(m);
+
+                if (currentFilter === 'available' && elig.status !== 'AVAILABLE') return;
+                if (currentFilter === 'enrolled' && elig.status !== 'ENROLLED') return;
+                if (currentFilter === 'blocked' && elig.status !== 'BLOCKED') return;
+                if (currentFilter === 'approved' && elig.status !== 'APPROVED') return;
+
+                const isEnrolled = enrolledSubjects.has(m.name);
+                const isBlocked = elig.status === 'BLOCKED';
+                const isApproved = elig.status === 'APPROVED';
+
+                let actionBtn = '';
+                if (isApproved) {
+                    actionBtn = `<span style="font-size:12px; color:var(--text-muted); font-weight:600; display:inline-flex; align-items:center; gap:4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Completada</span>`;
+                } else if (isEnrolled) {
+                    actionBtn = `
+                        <button type="button" onclick="window.openFeedbackModal('${m.name}')" class="btn-primary-solid" style="height:36px; padding:0 12px; font-size:12px; background:rgba(50,215,75,0.15); color:var(--success); border-color:rgba(50,215,75,0.3); display:inline-flex; align-items:center; gap:6px;" title="Calificar o Finalizar Cursada">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <span>Calificar</span>
+                        </button>
+                        <button type="button" onclick="window.toggleEnrollment('${m.name}')" class="btn-dark" style="height:36px; padding:0 10px; font-size:12px; border-color:var(--danger); color:var(--danger); display:inline-flex; align-items:center; justify-content:center;" title="Desinscribir">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                    `;
+                } else if (isBlocked) {
+                    actionBtn = `
+                        <button type="button" onclick="alert('No podés inscribirte aún. Debés aprobar previamente: ${elig.missing}')" class="btn-dark" style="height:36px; padding:0 14px; font-size:12px; opacity:0.6; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <span>Bloqueada</span>
+                        </button>
+                    `;
+                } else {
+                    actionBtn = `
+                        <button type="button" onclick="window.toggleEnrollment('${m.name}')" class="btn-primary-solid" style="height:36px; padding:0 14px; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            <span>Inscribir</span>
+                        </button>
+                    `;
+                }
+
+                html += `
+                    <div class="cursada-subject-card ${isEnrolled ? 'enrolled' : ''} ${isBlocked ? 'blocked' : ''}">
+                        <div style="display:flex; flex-direction:column; gap:4px; flex:1;">
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <span style="font-weight:700; font-size:14px; color:var(--text-main);">${m.name}</span>
+                                <span class="${elig.badgeClass}">${elig.label}</span>
+                                <span style="font-size:11px; color:var(--text-muted); background:rgba(255,255,255,0.04); padding:2px 6px; border-radius:4px;">${m.year}</span>
+                            </div>
+                            <div style="font-size:12px; color:var(--text-muted);">
+                                Correlativa: <span style="color:${isBlocked ? 'var(--danger)' : 'var(--text-main)'}; font-weight:500;">${m.req || 'Ninguna'}</span>
+                                ${isBlocked ? ` (Adeuda: <strong>${elig.missing}</strong>)` : ''}
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <a href="visor.html?name=${encodeURIComponent(m.name)}&link=${encodeURIComponent(m.link || '')}" class="viewer-btn" style="height:36px; padding:0 10px; display:inline-flex; align-items:center; justify-content:center;" title="Ver apuntes y carpeta">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                            </a>
+                            ${actionBtn}
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (!html) {
+                html = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:14px;">No hay materias que coincidan con este filtro.</div>`;
+            }
+
+            container.innerHTML = html;
+            updateSelectOptions();
+        }
+
+        window.toggleEnrollment = function(subjectName) {
+            if (enrolledSubjects.has(subjectName)) {
+                enrolledSubjects.delete(subjectName);
+                schedules = schedules.filter(s => s.subject !== subjectName);
+                examDates = examDates.filter(e => e.subject !== subjectName);
+            } else {
+                enrolledSubjects.add(subjectName);
+            }
+            saveCursadaData();
+            renderAll();
+        };
+
+        function checkScheduleCollisions() {
+            const collisionMap = {};
+            schedules.forEach(s => {
+                const slotsToTag = s.slot === "18:00 - 22:00" ? ["18:00 - 20:00", "20:00 - 22:00"] : [s.slot];
+                slotsToTag.forEach(slot => {
+                    const key = `${s.day}_${slot}`;
+                    collisionMap[key] = (collisionMap[key] || 0) + 1;
+                });
+            });
+
+            let hasCollision = false;
+            let collisionDetails = [];
+
+            for (const key in collisionMap) {
+                if (collisionMap[key] > 1) {
+                    hasCollision = true;
+                    const parts = key.split('_');
+                    collisionDetails.push(`${parts[0]} (${parts[1]})`);
+                }
+            }
+
+            const alertEl = document.getElementById('collisionAlert');
+            const alertText = document.getElementById('collisionAlertText');
+            const statusStat = document.getElementById('statCollisionStatus');
+
+            if (hasCollision) {
+                if (alertEl) alertEl.style.display = 'flex';
+                if (alertText) alertText.textContent = `¡Choque detectado! Tenés materias superpuestas el día ${collisionDetails.join(', ')}.`;
+                if (statusStat) {
+                    statusStat.textContent = `${collisionDetails.length} Choque(s)`;
+                    statusStat.style.color = 'var(--danger)';
+                }
+            } else {
+                if (alertEl) alertEl.style.display = 'none';
+                if (statusStat) {
+                    statusStat.textContent = 'Sin choques';
+                    statusStat.style.color = 'var(--success)';
+                }
+            }
+
+            return collisionMap;
+        }
+
+        function renderScheduleGrid() {
+            const tbody = document.getElementById('scheduleTableBody');
+            if (!tbody) return;
+
+            const collisionMap = checkScheduleCollisions();
+            let html = '';
+
+            TIME_SLOTS.forEach(slot => {
+                html += `<tr>`;
+                html += `<td class="schedule-time-col">${slot}</td>`;
+
+                DAYS.forEach(day => {
+                    const key = `${day}_${slot}`;
+                    const isColliding = (collisionMap[key] || 0) > 1;
+
+                    const matching = schedules.filter(s => {
+                        if (s.day !== day) return false;
+                        if (s.slot === slot) return true;
+                        if (s.slot === "18:00 - 22:00" && (slot === "18:00 - 20:00" || slot === "20:00 - 22:00")) return true;
+                        return false;
+                    });
+
+                    let cellContent = '';
+                    matching.forEach((item) => {
+                        cellContent += `
+                            <div class="schedule-slot-item ${isColliding ? 'collision' : ''}">
+                                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:4px;">
+                                    <span style="font-weight:600; font-size:12px;">${item.subject}</span>
+                                    <button type="button" onclick="window.removeScheduleSlot('${item.id}')" style="background:none; border:none; color:inherit; cursor:pointer; opacity:0.7; padding:2px; display:flex; align-items:center;" title="Eliminar horario">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                </div>
+                                ${item.room ? `<span style="font-size:10px; opacity:0.8; display:block; margin-top:2px;">${item.room}</span>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    html += `<td>${cellContent}</td>`;
+                });
+
+                html += `</tr>`;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        window.openScheduleModal = function() {
+            if (enrolledSubjects.size === 0) {
+                alert('Primero inscribí al menos una materia en el Árbol de Elegibilidad.');
+                window.location.hash = '#materias';
+                return;
+            }
+            if (window.openModal) window.openModal('scheduleModal');
+        };
+
+        window.saveScheduleSlot = function() {
+            const subj = document.getElementById('modalSubjectSelect')?.value;
+            const day = document.getElementById('modalDaySelect')?.value;
+            const slot = document.getElementById('modalSlotSelect')?.value;
+            const room = document.getElementById('modalRoomInput')?.value.trim();
+
+            if (!subj || !day || !slot) return;
+
+            schedules.push({
+                id: 'sched_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                subject: subj,
+                day: day,
+                slot: slot,
+                room: room
+            });
+
+            saveCursadaData();
+            if (window.closeModal) window.closeModal('scheduleModal');
+            renderScheduleGrid();
+            updateCalculations();
+        };
+
+        window.removeScheduleSlot = function(id) {
+            schedules = schedules.filter(s => s.id !== id);
+            saveCursadaData();
+            renderScheduleGrid();
+            updateCalculations();
+        };
+
+        function updateCalculations() {
+            const count = enrolledSubjects.size;
+            const classHours = count * 4;
+            const studyHours = Math.round(classHours * 1.5);
+
+            const elCount = document.getElementById('statEnrolledCount');
+            const elClass = document.getElementById('statClassHours');
+            const elStudy = document.getElementById('statStudyHours');
+            const noSubjBanner = document.getElementById('noSubjectsBanner');
+            const btnFeedback = document.getElementById('btnGeneralFeedback');
+
+            if (elCount) elCount.textContent = `${count} materias`;
+            if (elClass) elClass.textContent = `${classHours} hs/sem`;
+            if (elStudy) elStudy.textContent = `${studyHours} hs/sem`;
+
+            if (noSubjBanner) {
+                noSubjBanner.style.display = count === 0 ? 'flex' : 'none';
+            }
+            if (btnFeedback) {
+                btnFeedback.style.display = count > 0 ? 'inline-flex' : 'none';
+            }
+        }
+
+        window.addExamDate = function() {
+            const subj = document.getElementById('examSubjectSelect')?.value;
+            const type = document.getElementById('examTypeSelect')?.value;
+            const date = document.getElementById('examDateInput')?.value;
+
+            if (!subj || !type || !date) {
+                alert('Por favor completá todos los campos del examen.');
+                return;
+            }
+
+            examDates.push({
+                id: 'exam_' + Date.now(),
+                subject: subj,
+                type: type,
+                date: date
+            });
+
+            examDates.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            saveCursadaData();
+            renderExamsList();
+
+            const dateInp = document.getElementById('examDateInput');
+            if (dateInp) dateInp.value = '';
+        };
+
+        window.removeExamDate = function(id) {
+            examDates = examDates.filter(e => e.id !== id);
+            saveCursadaData();
+            renderExamsList();
+        };
+
+        function renderExamsList() {
+            const container = document.getElementById('examsList');
+            if (!container) return;
+
+            if (examDates.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted); font-size:13px;">No hay parciales o entregas registradas aún.</div>`;
+                return;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            container.innerHTML = examDates.map(item => {
+                const examD = new Date(item.date + 'T00:00:00');
+                const diffDays = Math.ceil((examD - today) / (1000 * 60 * 60 * 24));
+
+                let countdownText = '';
+                if (diffDays < 0) countdownText = 'Finalizado';
+                else if (diffDays === 0) countdownText = '¡HOY!';
+                else if (diffDays === 1) countdownText = 'Mañana';
+                else countdownText = `Faltan ${diffDays} días`;
+
+                return `
+                    <div class="exam-card">
+                        <div style="display:flex; flex-direction:column; gap:2px;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-weight:700; font-size:14px; color:var(--text-main);">${item.subject}</span>
+                                <span class="badge-enrolled">${item.type}</span>
+                            </div>
+                            <span style="font-size:12px; color:var(--text-muted);">Fecha: ${examD.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span class="exam-countdown">${countdownText}</span>
+                            <a href="estudio.html" class="btn-dark" style="height:32px; padding:0 10px; font-size:12px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center;" title="Estudiar para este parcial">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </a>
+                            <button type="button" onclick="window.removeExamDate('${item.id}')" class="btn-del" style="width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center;" title="Eliminar"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateSelectOptions() {
+            const modalSelect = document.getElementById('modalSubjectSelect');
+            const examSelect = document.getElementById('examSubjectSelect');
+
+            const optionsHtml = Array.from(enrolledSubjects).map(s => `<option value="${s}">${s}</option>`).join('');
+
+            if (modalSelect) {
+                modalSelect.innerHTML = `<option value="">Seleccioná una materia inscripta...</option>` + optionsHtml;
+            }
+            if (examSelect) {
+                examSelect.innerHTML = `<option value="">Seleccioná materia inscripta...</option>` + optionsHtml;
+            }
+        }
+
+        // ==================== FEEDBACK POST-CURSADA ====================
+        window.openFeedbackModal = function(subjectName) {
+            activeFeedbackSubject = subjectName;
+            const titleEl = document.getElementById('feedbackModalTitle');
+            if (titleEl) {
+                titleEl.textContent = `¿Cómo te fue con ${subjectName}?`;
+            }
+            window.selectFeedbackOption('promoted');
+            if (window.openModal) window.openModal('feedbackModal');
+        };
+
+        window.openGeneralFeedbackModal = function() {
+            const firstSubj = Array.from(enrolledSubjects)[0];
+            if (firstSubj) {
+                window.openFeedbackModal(firstSubj);
+            }
+        };
+
+        window.selectFeedbackOption = function(option) {
+            activeFeedbackOutcome = option;
+            ['optPromoted', 'optPassed', 'optRegular', 'optRetake'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('selected');
+            });
+
+            const targetId = option === 'promoted' ? 'optPromoted' : option === 'passed' ? 'optPassed' : option === 'regular' ? 'optRegular' : 'optRetake';
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) targetEl.classList.add('selected');
+
+            const gradeArea = document.getElementById('feedbackGradeArea');
+            if (gradeArea) {
+                gradeArea.style.display = option === 'promoted' ? 'block' : 'none';
+            }
+        };
+
+        window.saveFeedbackOutcome = function() {
+            if (!activeFeedbackSubject) return;
+
+            let finalGrade = 'Aprobado';
+            let isNumeric = false;
+
+            if (activeFeedbackOutcome === 'promoted') {
+                const gradeInp = document.getElementById('feedbackGradeInput');
+                const val = parseFloat(gradeInp?.value || '0');
+                if (isNaN(val) || val < 4 || val > 10) {
+                    alert('Por favor ingresá una nota válida del 4 al 10.');
+                    return;
+                }
+                finalGrade = Number(val.toFixed(2));
+                isNumeric = true;
+            }
+
+            if (activeFeedbackOutcome === 'promoted' || activeFeedbackOutcome === 'passed') {
+                // Inyectar en progreso
+                let progEntries = [];
+                try {
+                    const savedProg = localStorage.getItem('ungs_grades_backup_guest');
+                    if (savedProg) progEntries = JSON.parse(savedProg) || [];
+                } catch(e) {
+                    progEntries = [];
+                }
+
+                const existingIdx = progEntries.findIndex(e => e.subj.trim().toLowerCase() === activeFeedbackSubject.trim().toLowerCase());
+                const newEntry = {
+                    subj: activeFeedbackSubject,
+                    grade: finalGrade,
+                    isNumeric: isNumeric,
+                    date: new Date().toISOString()
+                };
+
+                if (existingIdx !== -1) {
+                    progEntries[existingIdx] = newEntry;
+                } else {
+                    progEntries.push(newEntry);
+                }
+
+                localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(progEntries));
+
+                if (window.currentUser && window.db) {
+                    window.db.collection('usuarios_progreso').doc(window.currentUser.uid).set({
+                        entries: progEntries,
+                        updatedAt: new Date().toISOString()
+                    }).catch(console.error);
+
+                    window.db.collection('usuarios_materias').doc(window.currentUser.uid).set({
+                        aprobadas: progEntries.map(e => e.subj)
+                    }, { merge: true }).catch(console.error);
+                }
+
+                // Remover de cursando
+                enrolledSubjects.delete(activeFeedbackSubject);
+                schedules = schedules.filter(s => s.subject !== activeFeedbackSubject);
+                examDates = examDates.filter(e => e.subject !== activeFeedbackSubject);
+                saveCursadaData();
+
+                loadApprovedSubjects();
+                renderAll();
+
+                if (window.closeModal) window.closeModal('feedbackModal');
+
+                const toast = document.createElement('div');
+                toast.className = 'toast-notice';
+                toast.innerHTML = `¡Felicitaciones! Se registró <strong>${activeFeedbackSubject}</strong> en Mi Progreso.`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+
+            } else if (activeFeedbackOutcome === 'retake') {
+                enrolledSubjects.delete(activeFeedbackSubject);
+                schedules = schedules.filter(s => s.subject !== activeFeedbackSubject);
+                examDates = examDates.filter(e => e.subject !== activeFeedbackSubject);
+                saveCursadaData();
+                renderAll();
+
+                if (window.closeModal) window.closeModal('feedbackModal');
+
+                const toast = document.createElement('div');
+                toast.className = 'toast-notice';
+                toast.innerHTML = `Se retiró <strong>${activeFeedbackSubject}</strong> de la cursada activa.`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+
+            } else if (activeFeedbackOutcome === 'regular') {
+                if (window.closeModal) window.closeModal('feedbackModal');
+
+                const toast = document.createElement('div');
+                toast.className = 'toast-notice';
+                toast.innerHTML = `<strong>${activeFeedbackSubject}</strong> regularizada. ¡Muchos éxitos en el examen final!`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+            }
+        };
+
+        function renderAll() {
+            renderSubjectsList();
+            renderScheduleGrid();
+            renderExamsList();
+            updateCalculations();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply Hash Routing on page load immediately
+            handleCursadaHashRouting();
+
+            loadApprovedSubjects();
+            loadCursadaData();
+            renderAll();
+
+            if (window.auth) {
+                window.auth.onAuthStateChanged(user => {
+                    if (user && window.db) {
+                        showLoading(true, 'Sincronizando con tu usuario...');
+                        Promise.all([
+                            window.db.collection('usuarios_progreso').doc(user.uid).get(),
+                            window.db.collection('usuarios_cursada').doc(user.uid).get(),
+                            window.db.collection('usuarios_materias').doc(user.uid).get()
+                        ]).then(([progDoc, cursadaDoc, matDoc]) => {
+                            if (progDoc.exists && progDoc.data().entries) {
+                                approvedSubjects = new Set(progDoc.data().entries.map(e => e.subj.trim()));
+                            }
+                            if (cursadaDoc.exists && cursadaDoc.data()) {
+                                const data = cursadaDoc.data();
+                                enrolledSubjects = new Set(data.enrolled || []);
+                                schedules = data.schedules || [];
+                                examDates = data.exams || [];
+                            } else if (matDoc.exists && matDoc.data().cursando && enrolledSubjects.size === 0) {
+                                enrolledSubjects = new Set(matDoc.data().cursando || []);
+                            } else if (enrolledSubjects.size > 0) {
+                                saveCursadaData();
+                            }
+                            renderAll();
+                        }).catch(console.error).finally(() => {
+                            showLoading(false);
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,12 +1,22 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="orange">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor de Material | Biblioteca ADE</title>
-    
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Visor de Material | La Biblioteca de ADE</title>
 
+    <!-- CSS Module -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Anti-Inspection & DevTools Protection -->
+    <script src="protection.js"></script>
+
+    <!-- Firebase SDK Compat v10.13.0 -->
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+    <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -15,1220 +25,308 @@
       gtag('config', 'G-PQGH6R9SZC');
     </script>
 
+    <!-- Theme pre-init -->
     <script>
-        const theme = localStorage.getItem('ungs_theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? 'orange' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
+        const savedTheme = localStorage.getItem('ungs_theme') || 'orange';
+        document.documentElement.setAttribute('data-theme', savedTheme);
     </script>
-
-
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
-        * {
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #FF8C00; 
-            --bg: #f9fafb;
-            --text: #1a1a1a;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --sidebar-bg: rgba(244, 244, 244, 0.85);
-            --border: #e5e7eb;
-            --sidebar-width: 300px;
-        }
-
-        [data-theme="dark"], [data-theme="orange"] {
-            --bg: #080808; 
-            --text: #f5f5f5;
-            --card-bg: rgba(18, 18, 18, 0.6); 
-            --sidebar-bg: rgba(8, 8, 8, 0.85);
-            --border: #222222;
-            --primary: #FF8C00;
-        }
-
-        [data-theme="emerald"] {
-            --bg: #080808;
-            --text: #f5f5f5;
-            --card-bg: rgba(18, 18, 18, 0.6);
-            --sidebar-bg: rgba(8, 8, 8, 0.85);
-            --border: #222222;
-            --primary: #059669;
-        }
-
-        [data-theme="midnight"] {
-            --bg: #0B132B;
-            --text: #f5f5f5;
-            --card-bg: rgba(28, 37, 65, 0.6);
-            --sidebar-bg: rgba(11, 19, 43, 0.85);
-            --border: #1C2541;
-            --primary: #3B82F6;
-        }
-
-        [data-theme="purple"] {
-            --bg: #080808;
-            --text: #f5f5f5;
-            --card-bg: rgba(18, 18, 18, 0.6);
-            --sidebar-bg: rgba(8, 8, 8, 0.85);
-            --border: #222222;
-            --primary: #8B5CF6;
-        }
-
-        [data-theme="rose"] {
-            --bg: #080808;
-            --text: #f5f5f5;
-            --card-bg: rgba(18, 18, 18, 0.6);
-            --sidebar-bg: rgba(8, 8, 8, 0.85);
-            --border: #222222;
-            --primary: #F43F5E;
-        }
-
-        [data-theme="light"] {
-            --bg: #f9fafb;
-            --text: #1a1a1a;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --sidebar-bg: rgba(244, 244, 244, 0.85);
-            --border: #e5e7eb;
-            --primary: #FF8C00;
-        }
-
-        /* Swatches UI */
-        .theme-panel-section {
-            margin-top: 15px;
-            padding: 12px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-        }
-        .theme-swatches {
-            display: flex;
-            gap: 8px;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 8px;
-        }
-        .theme-swatch {
-            width: 26px;
-            height: 26px;
-            border-radius: 6px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            outline: none;
-            padding: 0;
-        }
-        .theme-swatch:hover {
-            transform: scale(1.15);
-        }
-        .theme-swatch.active {
-            border-color: #ffffff;
-            box-shadow: 0 0 0 2px var(--primary), 0 0 10px var(--primary);
-            transform: scale(1.1);
-        }
-        [data-theme="light"] .theme-swatch.active {
-            border-color: #1a1a1a;
-        }
-
-        body {
-            background-color: #080808 !important;
-            background-image: 
-                radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--primary, #FF8C00) 12%, transparent) 0%, transparent 55%),
-                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px) !important;
-            background-size: 100% 100%, 24px 24px !important;
-            background-position: top center, 0 0 !important;
-            background-attachment: fixed !important;
-            color: var(--text, #f5f5f5) !important;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
-            margin: 0;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .icon-sm { width: 16px; height: 16px; }
-        .icon-md { width: 20px; height: 20px; }
-        .icon-lg { width: 24px; height: 24px; }
-
-        .sidebar {
-            width: var(--sidebar-width); height: 100vh; background: var(--sidebar-bg);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            padding: 30px 20px 90px 20px; position: fixed; left: 0; top: 0;
-            border-right: 1px solid var(--border); overflow-y: auto;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000;
-        }
-        .sidebar.hidden { transform: translateX(-100%); }
-
-        .toggle-btn {
-            position: fixed; left: 15px; bottom: 20px; z-index: 1100;
-            background: var(--primary); color: white; border: none; padding: 12px 20px;
-            border-radius: 8px; cursor: pointer; font-weight: 600;
-            box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 35%, transparent); transition: all 0.3s ease;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .toggle-btn:hover { transform: translateY(-2px); }
-
-        .theme-btn {
-            position: fixed; top: 20px; right: 20px; border: 1px solid var(--border); 
-            color: var(--text); background: var(--card-bg); backdrop-filter: blur(10px);
-            padding: 8px 15px; border-radius: 8px; cursor: pointer; z-index: 1001;
-            font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px;
-        }
-        .theme-btn:hover { border-color: var(--primary); color: var(--primary); }
-
-        .main-content {
-            margin-left: var(--sidebar-width); padding: 50px 20px 90px 20px; width: 100%; max-width: 900px;
-            margin-right: auto; transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .main-content.expanded { margin-left: auto; margin-right: auto; }
-
-        header { text-align: center; margin-bottom: 30px; }
-        header h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 5px; font-size: 2.2rem; color: var(--text); }
-        header p { color: #9ca3af; font-size: 14px; margin: 0; }
-
-        .viewer-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 20px 40px -20px rgba(0,0,0,0.3);
-            margin-bottom: 30px;
-        }
-
-        [data-theme="dark"] .viewer-card {
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        .viewer-header {
-            border-bottom: 1px solid var(--border);
-            padding: 15px 20px; 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .viewer-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .viewer-btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid var(--border);
-            background: var(--card-bg);
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .viewer-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-sidebar {
-            width: 100%; border: none; padding: 14px; border-radius: 8px; cursor: pointer;
-            font-size: 14px; font-weight: 600; transition: all 0.3s ease; margin-bottom: 12px;
-            display: flex; align-items: center; justify-content: flex-start; gap: 12px;
-            text-decoration: none; box-sizing: border-box;
-        }
-        .btn-dark { background: transparent; color: var(--text); border: 1px solid var(--border); }
-        .btn-dark:hover { background: var(--card-bg); border-color: var(--primary); color: var(--primary); }
-        .btn-primary-solid { background: var(--primary); color: white; box-shadow: 0 4px 15px color-mix(in srgb, var(--primary) 30%, transparent); }
-        .btn-primary-solid:hover { transform: translateY(-2px); box-shadow: 0 6px 20px color-mix(in srgb, var(--primary) 45%, transparent); }
-
-        .footer-donate { 
-            display: flex; flex-direction: column; align-items: center; gap: 20px;
-            padding: 40px 20px; font-size: 14px; color: #9ca3af; margin-top: 40px; border-top: 1px solid var(--border); 
-        }
-        .footer-donate a { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
-        .footer-donate a:hover { text-decoration: underline; }
-        
-        .btn-sugerencias {
-            color: #9ca3af !important; border: 1px dashed #9ca3af; padding: 12px 24px;
-            border-radius: 8px; transition: 0.3s;
-        }
-        .btn-sugerencias:hover {
-            color: var(--primary) !important; border-color: var(--primary);
-            background: color-mix(in srgb, var(--primary) 8%, transparent); text-decoration: none !important;
-        }
-
-        .login-modal { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; 
-            display: flex; justify-content: center; align-items: center; 
-            transition: opacity 0.3s ease; 
-        }
-        .login-modal.hidden { opacity: 0; pointer-events: none; }
-        .login-modal-content { 
-            background: var(--bg); padding: 40px; border-radius: 16px; 
-            border: 1px solid var(--border); max-width: 400px; width: 90%; 
-            text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
-        }
-        .login-modal-content h2 { margin-top: 0; font-weight: 800; color: var(--text); }
-        .login-modal-content p { color: #9ca3af; font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
-
-        .btn-google {
-            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border);
-            background: var(--card-bg); color: var(--text); font-size: 14px; font-weight: 600;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: all 0.2s; font-family: 'Inter', sans-serif;
-            margin-bottom: 10px;
-        }
-        .btn-google:hover { border-color: var(--primary); color: var(--primary); }
-        .btn-google svg { width: 18px; height: 18px; }
-
-        .drive-frame {
-            width: 100%;
-            height: 550px;
-            border: none;
-            background-color: var(--bg);
-        }
-
-        [data-theme="dark"] .drive-frame {
-            background-color: #1a1a1a;
-        }
-
-        .loading-overlay {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
-            text-align: center;
-            background: var(--bg);
-            min-height: 550px;
-        }
-
-        .loading-overlay.show {
-            display: flex;
-        }
-
-        .error-overlay {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
-            text-align: center;
-            background: var(--bg);
-            min-height: 550px;
-        }
-
-        .error-overlay.show {
-            display: flex;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .error-icon {
-            width: 60px;
-            height: 60px;
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
-
-        .error-overlay h3 {
-            margin-bottom: 10px;
-            color: var(--text);
-        }
-
-        .error-overlay p {
-            color: #9ca3af;
-            margin-bottom: 25px;
-            max-width: 400px;
-        }
-
-        .error-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .access-requested {
-            margin-top: 20px;
-            padding: 12px;
-            background: color-mix(in srgb, var(--primary) 12%, transparent);
-            border-radius: 8px;
-            font-size: 13px;
-            color: var(--primary);
-        }
-
-        .drive-frame.hide {
-            display: none;
-        }
-
-    
-        /* --- MOBILE RESPONSIVENESS --- */
-        html, body {
-            max-width: 100vw;
-            overflow-x: hidden;
-        }
-        .admin-fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 99999;
-            background: var(--primary, #FF8C00);
-            color: #ffffff;
-            padding: 12px 20px;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 700;
-            font-size: 14px;
-            text-decoration: none;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 140, 0, 0.4);
-            backdrop-filter: blur(10px);
-            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s;
-        }
-        .admin-fab:hover { transform: scale(1.05); }
-        .admin-fab:active { transform: scale(0.95); }
-
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column !important;
-                padding: 12px !important;
-            }
-            .sidebar {
-                width: 100% !important;
-                position: relative !important;
-                margin-bottom: 20px !important;
-            }
-            .main-content {
-                width: 100% !important;
-                padding: 0 !important;
-            }
-            .launchpad-container, .nav-buttons {
-                flex-wrap: wrap !important;
-                justify-content: center !important;
-                gap: 8px !important;
-            }
-            .launchpad-btn {
-                width: 100% !important;
-                max-width: 100% !important;
-                text-align: center !important;
-                justify-content: center !important;
-            }
-            .materia-item {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                gap: 12px !important;
-                padding: 16px !important;
-            }
-            .materia-actions {
-                width: 100% !important;
-                justify-content: space-between !important;
-            }
-            .admin-fab {
-                bottom: 16px !important;
-                right: 16px !important;
-                padding: 10px 16px !important;
-                font-size: 13px !important;
-            }
-        }
-
-    
-/* ==================== SISTEMA DE BARRA LATERAL CON BACKDROP Y BOTÓN 'X' ==================== */
-.sidebar-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 9998;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.sidebar-backdrop.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.sidebar {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 290px !important;
-    height: 100vh !important;
-    background: rgba(12, 12, 14, 0.88) !important;
-    backdrop-filter: blur(25px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-    padding: 24px 18px 90px 18px !important;
-    overflow-y: auto !important;
-    z-index: 9999 !important;
-    transform: translateX(0);
-    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1) !important;
-    box-shadow: 12px 0 35px rgba(0, 0, 0, 0.7) !important;
-}
-.sidebar.hidden {
-    transform: translateX(-100%) !important;
-    pointer-events: none !important;
-}
-
-.sidebar-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-.sidebar-brand {
-    font-weight: 800;
-    font-size: 15px;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.sidebar-close-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    color: #8e8e93;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.sidebar-close-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
-    transform: scale(1.05);
-}
-
-/* Tarjetas con acabado iOS Glass */
-.card, .timer-box, .stat-card, .tool-panel, .dashboard-panel, .duration-selector, .timer-container, .stats-container, .history-container, .techniques-container, .subject-selector, .viewer-card {
-    background: rgba(18, 18, 20, 0.65) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 16px !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-}
-
-    
-        .fab-icon-btn {
-            position: fixed !important;
-            z-index: 9990 !important;
-            width: 46px !important;
-            height: 46px !important;
-            border-radius: 50% !important;
-            background: rgba(22, 22, 26, 0.75) !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
-            color: #ffffff !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            cursor: pointer !important;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
-            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1) !important;
-            padding: 0 !important;
-        }
-        .fab-icon-btn:hover {
-            border-color: var(--primary) !important;
-            color: var(--primary) !important;
-            transform: scale(1.08) !important;
-        }
-        .fab-left { bottom: 20px !important; left: 20px !important; }
-        .fab-right { top: 20px !important; right: 20px !important; }
-    
-    </style>
 </head>
 <body>
+    <!-- Background Effects -->
+    <div class="bg-mesh"></div>
+    <div class="bg-spotlight"></div>
 
-<div id="loginModal" class="login-modal hidden">
-    <div class="login-modal-content">
-        <i data-lucide="lock" class="icon-lg" style="color: var(--primary); margin-bottom: 15px; width: 40px; height: 40px;"></i>
-        <h2>Bienvenido a La Biblioteca</h2>
-        <p>Iniciá sesión para guardar tu progreso en la nube y acceder a todas las funciones desde cualquier dispositivo.</p>
-        <button id="btnGoogleLogin" class="btn-google">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-            </svg>
-            Continuar con Google
-        </button>
-        <button onclick="closeLoginModal()" class="btn-dark" style="width: 100%; justify-content: center; padding: 14px; border: 1px solid var(--border); margin-top: 10px;">
-            Continuar como invitado
-        </button>
-    </div>
-</div>
+    <!-- Sidebar Mount Point -->
+    <div id="sidebar-mount"></div>
 
-
-
-
-
-
-<!-- Telón de fondo para cerrar al tocar afuera -->
-
-<!-- BOTONES FLOTANTES CIRCULARES MINIMALISTAS -->
-
-
-
-
-<!-- MODAL DE APARIENCIA (#settingsModal) -->
-
-</div>
-
-
-
-<!-- BOTONES FLOTANTES CON ÍCONOS SVG NATIVOS (INLINE) -->
-<div id="sidebarBackdrop" class="sidebar-backdrop"></div>
-
-<button id="toggleSidebarBtn" class="fab-icon-btn fab-left" aria-label="Abrir Menú">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-</button>
-
-<button id="btnSettingsTheme" class="fab-icon-btn fab-right" aria-label="Configuración de Tema">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-</button>
-
-<!-- MODAL DE APARIENCIA (#settingsModal) -->
-<div id="settingsModal" class="login-modal hidden" style="z-index: 10002;">
-    <div class="login-modal-content" style="max-width: 360px; text-align: left; padding: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="palette" style="color: var(--primary); width: 18px; height: 18px;"></i> Apariencia y Tema
-            </h3>
-            <button onclick="document.getElementById('settingsModal').classList.add('hidden')" style="background: transparent; border: none; color: #8e8e93; cursor: pointer; padding: 4px;">
-                <i data-lucide="x" style="width: 18px; height: 18px;"></i>
-            </button>
+    <!-- MAIN APP CONTENT -->
+    <main class="app-container">
+        <!-- Back Navigation -->
+        <div>
+            <a href="index.html" class="back-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Volver a las materias
+            </a>
         </div>
-        <p style="font-size: 13px; color: #86868b; margin: 0 0 16px 0;">Elegí el color de acento para personalizar tu plataforma:</p>
-        <div class="theme-swatches" style="display: flex; gap: 10px; justify-content: space-between;">
-            <button type="button" class="theme-swatch" data-theme-name="orange" onclick="setCustomTheme('orange')" title="Naranja" style="background: #FF8C00;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="emerald" onclick="setCustomTheme('emerald')" title="Esmeralda" style="background: #059669;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="midnight" onclick="setCustomTheme('midnight')" title="Azul Noche" style="background: #3B82F6;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="purple" onclick="setCustomTheme('purple')" title="Púrpura" style="background: #8B5CF6;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="rose" onclick="setCustomTheme('rose')" title="Rosa" style="background: #F43F5E;"></button>
-            <button type="button" class="theme-swatch" data-theme-name="light" onclick="setCustomTheme('light')" title="Claro" style="background: #f9fafb; border: 1px solid #9ca3af;"></button>
-        </div>
-    </div>
-</div>
 
-<aside class="sidebar hidden" id="sidebar">
-    <div class="sidebar-header-row">
-        <div class="sidebar-brand">
-            <i data-lucide="library" class="icon-md" style="color: var(--primary);"></i>
-            <span>ADE UNGS</span>
-        </div>
-        <button id="sidebarCloseBtn" class="sidebar-close-btn" aria-label="Cerrar barra lateral" onclick="toggleSidebar(false)">
-            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
-        </button>
-    </div>
+        <!-- Academic Header -->
+        <header class="page-header" style="text-align: left; margin-bottom: 24px;">
+            <div class="page-kicker">Material de Estudio • UNGS</div>
+            <h1 class="page-title" id="materiaTitle" style="font-size: 28px;">Cargando materia...</h1>
+            <p class="page-subtitle" id="materiaSubtitle" style="margin: 0;">Repositorio oficial de apuntes, programas y bibliografía de la materia.</p>
+        </header>
 
-    <div id="userProfile" style="margin-bottom: 18px; padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; text-align: center;">
-        <i data-lucide="user-circle" style="color: var(--primary); margin: 0 auto 6px auto; width: 28px; height: 28px;"></i>
-        <p id="userName" style="font-weight: 600; margin-bottom: 10px; font-size: 13px; color: var(--text);">Invitado</p>
-        <button id="sidebarLoginBtn" class="btn-sidebar btn-primary-solid" style="width: 100%; height: 34px; font-size: 12.5px; display: flex; justify-content: center; align-items: center; gap: 6px;">
-            <i data-lucide="log-in" style="width: 14px; height: 14px;"></i> Ingresar
-        </button>
-        <button id="sidebarLogoutBtn" class="btn-sidebar btn-dark" style="width: 100%; height: 34px; font-size: 12.5px; display: none; justify-content: center; align-items: center; gap: 6px;">
-            <i data-lucide="log-out" style="width: 14px; height: 14px;"></i> Salir
-        </button>
-    </div>
-
-    <p style="color: #86868b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 6px 6px;">Navegación</p>
-
-    <a href="index.html" class="btn-sidebar btn-dark" style="">
-        <i data-lucide="search" style="width: 15px; height: 15px;"></i> Buscar Materias
-    </a>
-    
-    <a href="progreso.html" class="btn-sidebar btn-dark" style="">
-        <i data-lucide="trending-up" style="width: 15px; height: 15px;"></i> Mi Progreso
-    </a>
-
-    <a href="estudio.html" class="btn-sidebar btn-dark" style="">
-        <i data-lucide="timer" style="width: 15px; height: 15px;"></i> Sesión de Estudio
-    </a>
-
-    <a href="javascript:void(0)" onclick="showComingSoonAlert(event)" class="btn-sidebar btn-dark" style="opacity: 0.6; cursor: not-allowed; justify-content: space-between;">
-        <span style="display: flex; align-items: center; gap: 10px;"><i data-lucide="calendar" style="width: 15px; height: 15px;"></i> Calendario</span>
-        <span style="font-size: 9.5px; background: color-mix(in srgb, var(--primary) 15%, transparent); color: var(--primary); padding: 2px 5px; border-radius: 4px; font-weight: 700;">PRÓXIMO</span>
-    </a>
-
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 14px 0;">
-    
-    <p style="color: #86868b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 6px 6px;">Oportunidades</p>
-
-    <a href="https://www.ungs.edu.ar/category/bienestar/intermediacion-laboral/busquedas-externas" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="briefcase" style="width: 15px; height: 15px;"></i> Bolsa de Trabajo
-    </a>
-    <a href="https://www.ungs.edu.ar/category/estudiar-en-la-ungs/becas-y-pasantias/convocatorias-de-pasantias-vigentes" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="building" style="width: 15px; height: 15px;"></i> Pasantías UNGS
-    </a>
-
-    <hr style="border: 0; border-top: 1px solid var(--border); margin: 14px 0;">
-
-    <p style="color: #86868b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 6px 6px;">Comunidad</p>
-
-    <a href="https://forms.gle/rjBa6mMxTo9zxcmy7" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="message-square-plus" style="width: 15px; height: 15px;"></i> Dejar Recomendación
-    </a>
-    <a href="Recomendaciones_docentes.pdf" target="_blank" class="btn-sidebar btn-dark" rel="noopener noreferrer">
-        <i data-lucide="book-open-check" style="width: 15px; height: 15px;"></i> Ver Recomendaciones
-    </a>
-    <a href="mailto:bibliotecaadeungs@gmail.com?subject=Donación%20de%20Archivos%20-%20Biblioteca%20ADE" class="btn-sidebar btn-dark" style="border: 1px dashed var(--border); margin-top: 6px;">
-        <i data-lucide="file-up" style="width: 15px; height: 15px;"></i> Donar Archivos
-    </a>
-
-    <button id="pwaInstallBtn" class="btn-sidebar btn-dark" style="display: none; border: 1px dashed var(--primary); color: var(--primary); margin-top: 10px;">
-        <i data-lucide="download" style="width: 15px; height: 15px;"></i> Instalar App
-    </button>
-
-    
-</aside>
-
-<div class="main-content expanded" id="mainContent">
-    <header>
-        <p>Biblioteca Digital de Administración de Empresas</p>
-        <h1 id="materiaTitle">Cargando materia...</h1>
-    </header>
-
-    <a href="index.html" class="btn-sidebar btn-dark" style="width: auto; display: inline-flex; margin-bottom: 20px; padding: 10px 20px;">
-        <i data-lucide="arrow-left" class="icon-sm"></i> Volver a las materias
-    </a>
-
-    <div class="viewer-card" id="viewerCard">
-        <div class="viewer-header">
-            <span id="activeTitle" style="font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px;">
-                <i data-lucide="folder-open" class="icon-md"></i> Repositorio de Recursos
-            </span>
-            <div class="viewer-buttons">
-                <button onclick="abrirEnDrive()" class="viewer-btn" id="btnAbrirDrive">
-                    <i data-lucide="external-link" class="icon-sm"></i> Abrir en Drive
-                </button>
-                <button onclick="solicitarAccesoEnDrive()" class="viewer-btn" id="btnSolicitarAcceso">
-                    <i data-lucide="mail" class="icon-sm"></i> Solicitar acceso
-                </button>
+        <!-- Visor Card -->
+        <section class="viewer-card" id="viewerCard">
+            <div class="viewer-header">
+                <span id="activeTitle" style="font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    Carpeta de Google Drive
+                </span>
+                <div class="viewer-buttons">
+                    <button type="button" onclick="window.abrirEnDrive()" class="viewer-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Abrir en Drive
+                    </button>
+                    <button type="button" onclick="window.solicitarAccesoEnDrive()" class="viewer-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Solicitar acceso
+                    </button>
+                </div>
             </div>
-        </div>
-        
-        <div id="loadingOverlay" class="loading-overlay">
-            <div class="spinner"></div>
-            <p>Cargando contenido desde Google Drive...</p>
-            <p style="font-size: 12px; margin-top: 10px;">Esto puede tomar unos segundos</p>
-        </div>
-        
-        <div id="errorOverlay" class="error-overlay">
-            <i data-lucide="lock" class="error-icon"></i>
-            <h3>🔒 Acceso restringido</h3>
-            <p>Esta carpeta de Google Drive es privada. Necesitás solicitar acceso al propietario para ver su contenido.</p>
-            <div class="error-buttons">
-                <button onclick="solicitarAccesoEnDrive()" class="btn-primary-solid" style="padding: 10px 20px;">
-                    <i data-lucide="mail" class="icon-sm"></i> Solicitar acceso
-                </button>
-                <button onclick="abrirEnDrive()" class="btn-dark" style="padding: 10px 20px; border: 1px solid var(--border);">
-                    <i data-lucide="external-link" class="icon-sm"></i> Abrir en Drive
-                </button>
+
+            <!-- Loading Overlay -->
+            <div id="loadingOverlay" class="loading-overlay" style="position:relative; min-height:420px; background:rgba(0,0,0,0.3); border-radius:16px;">
+                <div class="spinner"></div>
+                <p style="font-size:14px; font-weight:600; color:var(--text-main); margin:0;">Conectando con Google Drive...</p>
+                <p style="font-size:12px; color:var(--text-muted); margin:0;">El contenido embebido se cargará en instantes</p>
             </div>
-            <div id="accessRequestedMsg" class="access-requested" style="display: none;">
-                <i data-lucide="clock" class="icon-sm"></i> Ya solicitaste acceso a esta carpeta. Verificá tu correo electrónico.
+
+            <!-- Custom 403 Error Overlay -->
+            <div id="errorOverlay" class="error-overlay" style="padding: 20px 10px;">
+                <div class="error-403-container">
+                    <div class="error-403-badge">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        HTTP 403 • ACCESO RESTRINGIDO
+                    </div>
+
+                    <div class="error-403-icon-wrapper">
+                        <div class="error-403-glow"></div>
+                        <svg class="error-403-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </div>
+
+                    <h2 class="error-403-title">Carpeta Protegida o Requiere Permisos UNGS</h2>
+                    <p class="error-403-desc">
+                        El material de <strong id="errorSubjectName" style="color:var(--text-main);">esta materia</strong> está alojado en una unidad segura de Google Drive o el navegador bloqueó la vista previa incrustada.
+                    </p>
+
+                    <!-- Pasos de Solución -->
+                    <div class="error-403-steps">
+                        <div class="error-403-step-card">
+                            <span class="error-403-step-num">Paso 01</span>
+                            <span class="error-403-step-title">Cuenta Institucional</span>
+                            <span class="error-403-step-text">Asegurate de estar conectado en Google con tu correo universitario <code>@campus.ungs.edu.ar</code>.</span>
+                        </div>
+                        <div class="error-403-step-card">
+                            <span class="error-403-step-num">Paso 02</span>
+                            <span class="error-403-step-title">Solicitar Acceso</span>
+                            <span class="error-403-step-text">Hacé clic en el botón inferior para pedir autorización directa al titular de la carpeta.</span>
+                        </div>
+                        <div class="error-403-step-card">
+                            <span class="error-403-step-num">Paso 03</span>
+                            <span class="error-403-step-title">Abrir en Pestaña</span>
+                            <span class="error-403-step-text">Si tu navegador restringe iframes de terceros, visualizalo directamente en Drive.</span>
+                        </div>
+                    </div>
+
+                    <div id="accessRequestedMsg" class="error-403-confirmed" style="display:none;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Solicitud registrada. Si ya pediste acceso, revisá tu casilla de correo o Gmail institucional.</span>
+                    </div>
+
+                    <div class="error-403-actions">
+                        <button type="button" onclick="window.solicitarAccesoEnDrive()" class="btn-primary-solid" style="padding:0 24px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            Solicitar Acceso en Google Drive
+                        </button>
+                        <button type="button" onclick="window.abrirEnDrive()" class="btn-dark">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            Abrir Carpeta en Drive
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 8px;">
+                        <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" target="_blank" rel="noopener noreferrer" style="color:var(--text-muted); font-size:12px; text-decoration:none;">
+                            ¿El enlace está caído o querés aportar apuntes? <span style="text-decoration:underline; color:var(--primary);">Hacé clic acá</span>
+                        </a>
+                    </div>
+                </div>
             </div>
+
+            <!-- Embedded Frame -->
+            <iframe id="driveViewer" class="drive-frame hide" src="" frameborder="0" allowfullscreen></iframe>
+
+            <div style="padding:12px 16px; border-top:1px solid var(--border); font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <span style="display:inline-flex; align-items:center; gap:6px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    Tip: Podés descargar archivos individuales directamente desde el menú de cada documento en Drive.
+                </span>
+                <span id="syncStatusTag" style="font-weight:600; color:var(--primary);">Verificado</span>
+            </div>
+        </section>
+
+        <!-- Empty State if no params -->
+        <section id="noSubjectState" class="dashboard-panel" style="display:none; text-align:center; padding:60px 20px;">
+            <div style="width:64px; height:64px; border-radius:32px; background:rgba(255,255,255,0.04); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; margin:0 auto 16px auto; color:var(--text-muted);">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <h2 style="font-size:20px; font-weight:700; color:var(--text-main); margin-bottom:8px;">No se seleccionó ninguna materia</h2>
+            <p style="color:var(--text-muted); font-size:14px; max-width:440px; margin:0 auto 24px auto;">
+                Elegí una materia desde la pantalla principal para acceder a todos los resúmenes y carpetas oficiales.
+            </p>
+            <a href="index.html" class="btn-primary-solid" style="display:inline-flex; width:fit-content; margin:0 auto; text-decoration:none;">
+                Explorar el Catálogo de Materias
+            </a>
+        </section>
+
+        <!-- Footer Suggestions -->
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="btn-dark" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; margin:0 auto;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Sugerir material o reportar enlace caído
+            </a>
         </div>
-        
-        <iframe id="driveViewer" class="drive-frame" src="" frameborder="0"></iframe>
-        
-        <div style="padding: 15px 25px; background: var(--card-bg); text-align: center; border-top: 1px solid var(--border); font-size: 13px; color: #9ca3af;">
-            <i data-lucide="info" class="icon-sm" style="display: inline; margin-right: 5px;"></i>
-            💡 Si ves un error 403, la carpeta es privada. Hacé clic en "Solicitar acceso" y esperá que el dueño te autorice.
-        </div>
-    </div>
-    
-    
+    </main>
 
-    <div class="footer-donate">
-        <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="btn-sugerencias" target="_blank" rel="noopener noreferrer">
-            <i data-lucide="lightbulb" class="icon-sm"></i> Sugerencias para mejorar la web
-        </a>
-    </div>
-</div>
+    <!-- Core Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="js/materias-data.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/sidebar.js"></script>
 
-<!-- Firebase SDK + Config (cargados al final del body para acceso seguro al DOM) -->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-check-compat.js"></script>
-<script src="config.js"></script>
-<script src="firebase-config.js"></script>
-
-<script>
-    // ==================== FUNCIONES DE SEGURIDAD ====================
-    
-    function sanitizeHTML(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-    
-    function sanitizeText(str) {
-        if (!str) return '';
-        return str.replace(/[<>]/g, function(m) {
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-    
-    // Validación de URLs de Google Drive
-    function isValidDriveLink(link) {
-        if (!link || typeof link !== 'string') return false;
-        var allowedDomains = ['drive.google.com', 'docs.google.com'];
-        try {
-            var urlStr = link;
-            if (!urlStr.startsWith('http://') && !urlStr.startsWith('https://')) {
-                urlStr = 'https://' + urlStr;
+    <!-- Visor Logic -->
+    <script>
+        function isValidDriveLink(link) {
+            if (!link || typeof link !== 'string') return false;
+            const allowed = ['drive.google.com', 'docs.google.com'];
+            try {
+                const u = link.startsWith('http') ? link : 'https://' + link;
+                return allowed.includes(new URL(u).hostname);
+            } catch(e) {
+                return false;
             }
-            var url = new URL(urlStr);
-            return allowedDomains.includes(url.hostname);
-        } catch(e) {
-            return false;
         }
-    }
-    
-    // ==================== FIN FUNCIONES DE SEGURIDAD ====================
 
-    // Las instancias de auth, db y googleProvider son provistas de forma global por firebase-config.js
-
-    function doGoogleLogin() {
-        window.auth.signInWithPopup(window.googleProvider)
-            .then(function(result) {
-                console.log("Login con Google exitoso:", result.user.email);
-                document.getElementById('loginModal').classList.add('hidden');
-                sessionStorage.removeItem('guestMode');
-            })
-            .catch(function(error) {
-                console.error("Error en Google Login:", error.code, error.message);
-                alert('Error: ' + (error.message || 'No se pudo iniciar sesión.'));
-            });
-    }
-
-    document.getElementById('btnGoogleLogin').onclick = doGoogleLogin;
-    document.getElementById('sidebarLoginBtn').onclick = function() {
-        document.getElementById('loginModal').classList.remove('hidden');
-    };
-    document.getElementById('sidebarLogoutBtn').onclick = function() {
-        window.auth.signOut().then(function() {
-            sessionStorage.removeItem('guestMode');
-            location.reload();
-        });
-    };
-
-    window.closeLoginModal = function() {
-        document.getElementById('loginModal').classList.add('hidden');
-        sessionStorage.setItem('guestMode', 'true');
-    };
-
-    window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); window.auth.onAuthStateChanged(function(user) {
-        if (user) {
-            var nombre = user.displayName ? user.displayName.split(' ')[0] : user.email.split('@')[0];
-            var safeName = sanitizeText(nombre);
-            document.getElementById('userName').innerHTML = '<i data-lucide="user-check" class="icon-sm" style="display: inline;"></i> Hola, ' + safeName;
-            document.getElementById('sidebarLoginBtn').style.display = 'none';
-            document.getElementById('sidebarLogoutBtn').style.display = 'flex';
-            document.getElementById('loginModal').classList.add('hidden');
-            if (typeof renderTipsInput === 'function') renderTipsInput();
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        } else {
-            document.getElementById('userName').innerHTML = '<i data-lucide="user" class="icon-sm" style="display: inline;"></i> Invitado';
-            document.getElementById('sidebarLoginBtn').style.display = 'flex';
-            document.getElementById('sidebarLogoutBtn').style.display = 'none';
-            if (!sessionStorage.getItem('guestMode')) {
-                document.getElementById('loginModal').classList.remove('hidden');
-            }
-            if (typeof renderTipsInput === 'function') renderTipsInput();
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
-    });
-
-    // ── OBTENER PARÁMETROS DE LA URL ──
-    var urlParams = new URLSearchParams(window.location.search);
-    var nombreMateria = urlParams.get('name');
-    var enlaceMateria = urlParams.get('link');
-    var accessRequestedKey = 'access_requested_' + (enlaceMateria || '');
-
-    var iframe = document.getElementById('driveViewer');
-    var loadingDiv = document.getElementById('loadingOverlay');
-    var errorDiv = document.getElementById('errorOverlay');
-    var accessRequestedMsg = document.getElementById('accessRequestedMsg');
-
-    function checkAccessRequested() {
-        var requested = localStorage.getItem(accessRequestedKey);
-        if (requested && accessRequestedMsg) {
-            accessRequestedMsg.style.display = 'block';
-        }
-    }
-
-    function markAccessRequested() {
-        localStorage.setItem(accessRequestedKey, new Date().toISOString());
-        if (accessRequestedMsg) {
-            accessRequestedMsg.style.display = 'block';
-        }
-    }
-
-    function showError() {
-        loadingDiv.classList.remove('show');
-        iframe.classList.add('hide');
-        errorDiv.classList.add('show');
-        checkAccessRequested();
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    }
-
-    function showLoading() {
-        loadingDiv.classList.add('show');
-        iframe.classList.add('hide');
-        errorDiv.classList.remove('show');
-    }
-
-    function showIframe() {
-        loadingDiv.classList.remove('show');
-        iframe.classList.remove('hide');
-        errorDiv.classList.remove('show');
-    }
-
-    if (nombreMateria && enlaceMateria) {
-        var safeNombre = sanitizeText(nombreMateria);
-        document.getElementById('materiaTitle').innerText = safeNombre;
-        
-        // VALIDAR ENLACE ANTES DE PROCESAR
-        if (!isValidDriveLink(enlaceMateria)) {
-            document.getElementById('materiaTitle').innerText = safeNombre + ' (Enlace no válido)';
-            showError();
-        } else {
-            showLoading();
-            
-            var iframeUrl = '';
-            
-            if (enlaceMateria.includes('drive.google.com')) {
-                var previewUrl = enlaceMateria
-                    .replace('/view', '/preview')
-                    .replace('?usp=drive_link', '')
-                    .replace('edit', 'preview');
-                
-                if (enlaceMateria.includes('folders')) {
-                    iframeUrl = enlaceMateria + '/preview';
-                } else {
-                    iframeUrl = previewUrl;
-                }
-            } else {
-                iframeUrl = enlaceMateria;
-            }
-            
-            iframe.src = iframeUrl;
-            
-            iframe.onload = function() {
-                setTimeout(function() {
-                    try {
-                        var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        if (iframeDoc && iframeDoc.body && iframeDoc.body.innerHTML.includes('403')) {
-                            showError();
-                        } else {
-                            showIframe();
-                        }
-                    } catch(e) {
-                        showIframe();
+        function formatDriveEmbedUrl(rawLink) {
+            if (!rawLink) return '';
+            let u = rawLink.trim();
+            if (u.includes('drive.google.com')) {
+                if (u.includes('/folders/')) {
+                    const match = u.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+                    if (match && match[1]) {
+                        return `https://drive.google.com/embeddedfolderview?id=${match[1]}#grid`;
                     }
-                }, 2000);
-            };
-            
-            iframe.onerror = function() {
-                showError();
-            };
-            
-            setTimeout(function() {
-                if (loadingDiv.classList.contains('show')) {
-                    showError();
-                }
-            }, 8000);
-        }
-    } else {
-        document.getElementById('materiaTitle').innerText = "Ninguna materia seleccionada";
-        document.getElementById('viewerCard').style.display = "none";
-    }
-
-    window.abrirEnDrive = function() {
-        if (enlaceMateria && isValidDriveLink(enlaceMateria)) {
-            window.open(enlaceMateria, '_blank');
-        } else {
-            alert("El enlace no es válido.");
-        }
-    };
-
-    window.solicitarAccesoEnDrive = function() {
-        if (enlaceMateria && isValidDriveLink(enlaceMateria)) {
-            markAccessRequested();
-            window.open(enlaceMateria, '_blank');
-        } else {
-            alert("No se pudo abrir el enlace para solicitar acceso.");
-        }
-    };
-
-    window.solicitarMaterial = function() {
-        var materia = nombreMateria || "material solicitado";
-        var asunto = encodeURIComponent("Solicitud de material: " + materia);
-        var cuerpo = encodeURIComponent("Hola, quisiera solicitar acceso al material de: " + materia + "\n\nMi correo es: \n\nGracias!");
-        window.location.href = "mailto:bibliotecaadeungs@gmail.com?subject=" + asunto + "&body=" + cuerpo;
-    };
-
-    window.toggleSidebar = function() {
-        document.getElementById('sidebar').classList.toggle('hidden');
-        document.getElementById('mainContent').classList.toggle('expanded');
-    };
-
-    window.setCustomTheme = function(themeName) {
-        document.documentElement.setAttribute('data-theme', themeName);
-        localStorage.setItem('ungs_theme', themeName);
-        updateThemeSwatches(themeName);
-    };
-
-    function updateThemeSwatches(activeTheme) {
-        var current = activeTheme || document.documentElement.getAttribute('data-theme') || 'orange';
-        document.querySelectorAll('.theme-swatch').forEach(function(el) {
-            var t = el.getAttribute('data-theme-name');
-            if (t === current || (t === 'orange' && current === 'dark')) {
-                el.classList.add('active');
-            } else {
-                el.classList.remove('active');
-            }
-        });
-    }
-
-    function applyTheme(theme) {
-        window.setCustomTheme(theme);
-    }
-
-    window.toggleTheme = function() {
-        var current = document.documentElement.getAttribute('data-theme') || 'orange';
-        if (current === 'light') {
-            window.setCustomTheme('orange');
-        } else {
-            window.setCustomTheme('light');
-        }
-    };
-
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-        if (!localStorage.getItem('ungs_theme')) window.setCustomTheme(e.matches ? 'orange' : 'light');
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        var savedTheme = localStorage.getItem('ungs_theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? 'orange' : 'light');
-        window.setCustomTheme(savedTheme);
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    });
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-
-    // Logica de Instalacion de PWA
-    var deferredPrompt;
-    var pwaInstallBtn = document.getElementById('pwaInstallBtn');
-
-    window.addEventListener('beforeinstallprompt', function(e) {
-        e.preventDefault();
-        deferredPrompt = e;
-        if (pwaInstallBtn) {
-            pwaInstallBtn.style.display = 'flex';
-        }
-    });
-
-    if (pwaInstallBtn) {
-        pwaInstallBtn.addEventListener('click', function() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(function(choiceResult) {
-                    deferredPrompt = null;
-                    pwaInstallBtn.style.display = 'none';
-                });
-            } else {
-                var modalInst = document.getElementById('pwaInstructionsModal');
-                if (modalInst) {
-                    modalInst.classList.remove('hidden');
-                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                    return u.split('?')[0] + '/preview';
+                } else if (u.includes('/file/d/')) {
+                    const match = u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                    if (match && match[1]) {
+                        return `https://drive.google.com/file/d/${match[1]}/preview`;
+                    }
+                    return u.replace('/view', '/preview');
+                } else {
+                    return u.replace('/view', '/preview').replace('?usp=drive_link', '').replace('/edit', '/preview');
                 }
             }
+            return u;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let nombreMateria = urlParams.get('name') || urlParams.get('materia');
+        let enlaceMateria = decodeURIComponent(urlParams.get('link') || '');
+
+        if (nombreMateria && !enlaceMateria && window.MATERIAS_ADE) {
+            const found = window.MATERIAS_ADE.find(m => m.name.toLowerCase() === nombreMateria.toLowerCase());
+            if (found && found.link) enlaceMateria = found.link;
+        }
+
+        const accessKey = 'access_requested_' + (enlaceMateria || '');
+        const iframe = document.getElementById('driveViewer');
+        const loadingDiv = document.getElementById('loadingOverlay');
+        const errorDiv = document.getElementById('errorOverlay');
+        const accessRequestedMsg = document.getElementById('accessRequestedMsg');
+        const viewerCard = document.getElementById('viewerCard');
+        const noSubjectState = document.getElementById('noSubjectState');
+        const titleEl = document.getElementById('materiaTitle');
+        const errorSubjectName = document.getElementById('errorSubjectName');
+
+        function checkAccessRequested() {
+            if (localStorage.getItem(accessKey) && accessRequestedMsg) {
+                accessRequestedMsg.style.display = 'flex';
+            }
+        }
+
+        function showViewerError() {
+            if (loadingDiv) loadingDiv.style.display = 'none';
+            if (iframe) iframe.classList.add('hide');
+            if (errorDiv) errorDiv.classList.add('show');
+            if (errorSubjectName && nombreMateria) {
+                errorSubjectName.textContent = window.sanitizeText ? window.sanitizeText(nombreMateria) : nombreMateria;
+            }
+            checkAccessRequested();
+        }
+
+        function showViewerLoading() {
+            if (loadingDiv) loadingDiv.style.display = 'flex';
+            if (iframe) iframe.classList.add('hide');
+            if (errorDiv) errorDiv.classList.remove('show');
+        }
+
+        function showViewerIframe() {
+            if (loadingDiv) loadingDiv.style.display = 'none';
+            if (iframe) iframe.classList.remove('hide');
+            if (errorDiv) errorDiv.classList.remove('show');
+        }
+
+        window.abrirEnDrive = function() {
+            if (enlaceMateria && isValidDriveLink(enlaceMateria)) {
+                window.open(enlaceMateria, '_blank', 'noopener,noreferrer');
+            } else {
+                alert('El enlace de Drive no está disponible.');
+            }
+        };
+
+        window.solicitarAccesoEnDrive = function() {
+            if (enlaceMateria && isValidDriveLink(enlaceMateria)) {
+                localStorage.setItem(accessKey, new Date().toISOString());
+                if (accessRequestedMsg) accessRequestedMsg.style.display = 'flex';
+                window.open(enlaceMateria, '_blank', 'noopener,noreferrer');
+            } else {
+                alert('No se pudo abrir el enlace.');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (nombreMateria && enlaceMateria) {
+                if (titleEl) {
+                    titleEl.textContent = window.sanitizeText ? window.sanitizeText(nombreMateria) : nombreMateria;
+                }
+
+                if (!isValidDriveLink(enlaceMateria)) {
+                    if (titleEl) titleEl.textContent += ' (Enlace no válido)';
+                    showViewerError();
+                } else {
+                    showViewerLoading();
+                    const embedUrl = formatDriveEmbedUrl(enlaceMateria);
+                    if (iframe) {
+                        iframe.src = embedUrl;
+
+                        iframe.onload = () => {
+                            setTimeout(() => {
+                                showViewerIframe();
+                            }, 1200);
+                        };
+
+                        iframe.onerror = () => {
+                            showViewerError();
+                        };
+
+                        setTimeout(() => {
+                            if (loadingDiv && loadingDiv.style.display !== 'none') {
+                                showViewerError();
+                            }
+                        }, 7000);
+                    }
+                }
+            } else {
+                if (titleEl) titleEl.textContent = 'Materia no especificada';
+                if (viewerCard) viewerCard.style.display = 'none';
+                if (noSubjectState) noSubjectState.style.display = 'block';
+            }
         });
-    }
-
-    window.addEventListener('appinstalled', function(evt) {
-        console.log('Biblioteca-ADE fue instalada correctamente');
-        if (pwaInstallBtn) {
-            pwaInstallBtn.style.display = 'none';
-        }
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.getElementById('toggleSidebarBtn');
-        const sidebar = document.getElementById('sidebar');
-        const content = document.getElementById('mainContent');
-        if (btn) {
-            btn.addEventListener('click', () => {
-                sidebar.classList.toggle('hidden');
-                content.classList.toggle('expanded');
-            });
-        }
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    });
-
-    window.showComingSoonAlert = function(e) {
-        if (e) e.preventDefault();
-    
-        // Verificar si ya existe un aviso en pantalla para no duplicar
-        if (document.getElementById('comingSoonToast')) return;
-    
-        // Crear el elemento del aviso flotante
-        var toast = document.createElement('div');
-        toast.id = 'comingSoonToast';
-        toast.style.position = 'fixed';
-        toast.style.top = '20px';
-        toast.style.right = '20px';
-        toast.style.zIndex = '9999';
-        toast.style.background = 'rgba(18, 18, 18, 0.95)';
-        toast.style.color = '#f5f5f5';
-        toast.style.border = '1px solid var(--primary)';
-        toast.style.padding = '14px 20px';
-        toast.style.borderRadius = '10px';
-        toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
-        toast.style.fontFamily = "'Inter', sans-serif";
-        toast.style.fontSize = '13px';
-        toast.style.fontWeight = '600';
-        toast.style.display = 'flex';
-        toast.style.alignItems = 'center';
-        toast.style.gap = '10px';
-        toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        toast.style.transform = 'translateY(-10px)';
-        toast.style.opacity = '0';
-    
-        // Contenido con icono integrado
-        toast.innerHTML = '<i data-lucide="bell-ring" style="color: var(--primary); width: 16px; height: 16px;"></i> ¡Próximamente! Estamos automatizando las notificaciones de exámenes.';
-    
-        document.body.appendChild(toast);
-        if (typeof lucide !== 'undefined') lucide.createIcons();
-    
-        // Efecto de entrada animación
-        setTimeout(function() {
-            toast.style.transform = 'translateY(0)';
-            toast.style.opacity = '1';
-        }, 50);
-    
-        // Efecto de salida automático tras 3 segundos
-        setTimeout(function() {
-            toast.style.transform = 'translateY(-10px)';
-            toast.style.opacity = '0';
-            setTimeout(function() {
-                toast.remove();
-            }, 300);
-        }, 3000);
-    };
-</script><div id="pwaInstructionsModal" class="login-modal hidden" style="z-index: 3000;"><div class="login-modal-content" style="max-width: 450px; text-align: left;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3 style="margin: 0; font-size: 18px; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px;"><i data-lucide="download-cloud"></i> Instalar Aplicacion</h3><button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" style="background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 18px; font-weight: bold;">&times;</button></div><p style="font-size: 13px; color: #9ca3af; margin-top: -10px; margin-bottom: 20px;">Segui estos simples pasos para tener la app en tu pantalla de inicio segun tu dispositivo:</p><div style="display: flex; flex-direction: column; gap: 15px;"><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: color-mix(in srgb, var(--primary) 12%, transparent); padding: 8px; border-radius: 8px; color: var(--primary); display: flex;"><i data-lucide="smartphone"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">Si estas en iPhone/iPad (iOS):</strong><span style="font-size: 13px; color: #9ca3af;">Pulsa el boton de <strong style="color: var(--text);">Compartir</strong> <i data-lucide="share" class="icon-sm" style="display:inline;"></i> en Safari y selecciona <strong style="color: var(--text);">Agregar a inicio</strong>.</span></div></div><div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; display: flex; gap: 12px; align-items: flex-start;"><span style="background: rgba(139, 92, 246, 0.1); padding: 8px; border-radius: 8px; color: #8b5cf6; display: flex;"><i data-lucide="monitor"></i></span><div><strong style="font-size: 14px; display: block; margin-bottom: 3px; color: var(--text);">En Opera, Brave u otros en PC:</strong><span style="font-size: 13px; color: #9ca3af;">Busca el icono de instalacion en la barra de direcciones (URL) y dale a instalar.</span></div></div></div><button onclick="document.getElementById('pwaInstructionsModal').classList.add('hidden')" class="btn-primary-solid" style="width: 100%; margin-top: 20px; padding: 12px; justify-content: center; border-radius: 8px; border: none; font-weight: bold; cursor: pointer;">Entendido</button></div></div>
-<script>
-
-function inicializarControlSidebar() {
-    var btnToggle = document.getElementById('toggleSidebarBtn');
-    var btnClose = document.getElementById('sidebarCloseBtn');
-    var backdrop = document.getElementById('sidebarBackdrop');
-    var sidebar = document.getElementById('sidebar');
-
-    function abrirSidebar() {
-        if (sidebar) sidebar.classList.remove('hidden');
-        if (backdrop) backdrop.classList.add('active');
-    }
-
-    function cerrarSidebar() {
-        if (sidebar) sidebar.classList.add('hidden');
-        if (backdrop) backdrop.classList.remove('active');
-    }
-
-    if (btnToggle) btnToggle.onclick = abrirSidebar;
-    if (btnClose) btnClose.onclick = cerrarSidebar;
-    if (backdrop) backdrop.onclick = cerrarSidebar;
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            cerrarSidebar();
-        }
-    });
-}
-document.addEventListener('DOMContentLoaded', inicializarControlSidebar);
-
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var btnMenu = document.getElementById('toggleSidebarBtn');
-    var btnClose = document.getElementById('sidebarCloseBtn');
-    var backdrop = document.getElementById('sidebarBackdrop');
-    var sidebar = document.getElementById('sidebar');
-    var btnSettings = document.getElementById('btnSettingsTheme');
-    var settingsModal = document.getElementById('settingsModal');
-
-    function openSidebar() {
-        if (sidebar) sidebar.classList.remove('hidden');
-        if (backdrop) backdrop.classList.add('active');
-    }
-
-    function closeSidebar() {
-        if (sidebar) sidebar.classList.add('hidden');
-        if (backdrop) backdrop.classList.remove('active');
-    }
-
-    if (btnMenu) btnMenu.onclick = function(e) { e.stopPropagation(); openSidebar(); };
-    if (btnClose) btnClose.onclick = closeSidebar;
-    if (backdrop) backdrop.onclick = closeSidebar;
-
-    if (btnSettings && settingsModal) {
-        btnSettings.onclick = function() { settingsModal.classList.remove('hidden'); };
-    }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeSidebar();
-            if (settingsModal) settingsModal.classList.add('hidden');
-        }
-    });
-
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-});
-</script>
-
+    </script>
 </body>
 </html>
-
-
-
