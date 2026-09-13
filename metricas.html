@@ -176,10 +176,16 @@
                     </div>
 
                     <!-- History View Switcher -->
-                    <div class="section-tabs" style="margin: 0;">
-                        <button type="button" class="section-tab active" id="tabHistoryHoy" onclick="window.toggleHistory('hoy')">Hoy</button>
-                        <button type="button" class="section-tab" id="tabHistoryGlobal" onclick="window.toggleHistory('global')">Global</button>
-                        <button type="button" class="section-tab" id="tabHistoryMateria" onclick="window.toggleHistory('materia')">Por Materia</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:10px;">
+                        <div class="section-tabs" style="margin: 0;">
+                            <button type="button" class="section-tab active" id="tabHistoryHoy" onclick="window.toggleHistory('hoy')">Hoy</button>
+                            <button type="button" class="section-tab" id="tabHistoryGlobal" onclick="window.toggleHistory('global')">Global</button>
+                            <button type="button" class="section-tab" id="tabHistoryMateria" onclick="window.toggleHistory('materia')">Por Materia</button>
+                        </div>
+                        <button type="button" onclick="window.clearAllStudyData && window.clearAllStudyData()" style="background:transparent; border:1px solid rgba(255,69,58,0.25); color:#FF453A; padding:5px 10px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,69,58,0.1)'" onmouseout="this.style.background='transparent'">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <span>Limpiar Historial</span>
+                        </button>
                     </div>
                 </div>
 
@@ -604,16 +610,192 @@
                 return;
             }
             container.innerHTML = arr.map(s => {
-                const safeSubj = window.sanitizeHTML ? window.sanitizeHTML(s.subject) : s.subject;
-                const safeDate = window.sanitizeHTML ? window.sanitizeHTML(s.date) : s.date;
-                const safeTime = window.sanitizeHTML ? window.sanitizeHTML(s.time) : s.time;
-                const safeDur = s.seconds ? formatSessionDuration(s.seconds) : (window.sanitizeHTML ? window.sanitizeHTML(s.duration) : s.duration);
+                const safeSubj = window.sanitizeHTML ? window.sanitizeHTML(s.subject) : (s.subject || 'Estudio Libre');
+                const safeDate = window.sanitizeHTML ? window.sanitizeHTML(s.date) : (s.date || '');
+                const safeTime = window.sanitizeHTML ? window.sanitizeHTML(s.time) : (s.time || '');
+                const safeDur = s.seconds ? formatSessionDuration(s.seconds) : (window.sanitizeHTML ? window.sanitizeHTML(s.duration) : (s.duration || '0m'));
                 const isBreak = s.mode === 'Descanso';
                 const badge = isBreak
                     ? '<span style="background:rgba(50,215,75,0.12); color:#32D74B; border:1px solid rgba(50,215,75,0.25); font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:6px;">Descanso</span>'
                     : '<span style="background:rgba(10,132,255,0.12); color:var(--primary); border:1px solid rgba(10,132,255,0.25); font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:6px;">Enfoque</span>';
-                return '<div class="history-item"><div><div class="history-materia">' + safeSubj + badge + '</div><div class="history-date">' + safeDate + ' a las ' + safeTime + '</div></div><div class="history-time" style="' + (isBreak ? 'color:#32D74B;' : '') + '">' + safeDur + '</div></div>';
+                const sessKey = encodeURIComponent(`${s.date || ''}_${s.time || ''}_${s.subject || ''}_${s.seconds || ''}_${s.mode || ''}`);
+                return `
+                    <div class="history-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; margin-bottom:8px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px;">
+                        <div>
+                            <div class="history-materia" style="font-weight:600; font-size:13px; color:var(--text-main); display:flex; align-items:center;">
+                                ${safeSubj}${badge}
+                            </div>
+                            <div class="history-date" style="font-size:11px; color:var(--text-muted); margin-top:2px;">
+                                ${safeDate}${safeTime ? ' a las ' + safeTime : ''}
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span class="history-time" style="font-weight:700; font-size:13px; ${isBreak ? 'color:#32D74B;' : 'color:var(--text-main);'}">
+                                ${safeDur}
+                            </span>
+                            <button type="button" class="btn-icon" title="Eliminar sesión" onclick="window.deleteStudySession && window.deleteStudySession('${sessKey}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:4px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; transition:color 0.2s;" onmouseover="this.style.color='#FF453A'" onmouseout="this.style.color='var(--text-muted)'">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
             }).join('');
+        }
+
+        function recalculateStatsFromHistory() {
+            const allRecords = [];
+            if (Array.isArray(timerState.globalHistory)) {
+                allRecords.push(...timerState.globalHistory);
+            }
+            if (Array.isArray(timerState.sessionHistory)) {
+                timerState.sessionHistory.forEach(s => {
+                    if (!s) return;
+                    const k = `${s.date || ''}_${s.time || ''}_${s.subject || ''}_${s.seconds || ''}_${s.mode || ''}`;
+                    if (!allRecords.some(r => `${r.date || ''}_${r.time || ''}_${r.subject || ''}_${r.seconds || ''}_${r.mode || ''}` === k)) {
+                        allRecords.push(s);
+                    }
+                });
+            }
+
+            const newSubjectStats = {};
+            let totalStudy = 0;
+            let totalBreak = 0;
+            let totalSess = 0;
+
+            allRecords.forEach(sess => {
+                if (!sess) return;
+                const subj = sess.subject || 'Estudio Libre';
+                if (!newSubjectStats[subj]) {
+                    newSubjectStats[subj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
+                }
+                const secs = typeof sess.seconds === 'number' ? sess.seconds : parseDurationToSeconds(sess.duration);
+                if (sess.mode === 'Descanso') {
+                    newSubjectStats[subj].breakSeconds += secs;
+                    totalBreak += secs;
+                } else {
+                    newSubjectStats[subj].sessions++;
+                    newSubjectStats[subj].seconds += secs;
+                    totalStudy += secs;
+                    totalSess++;
+                }
+            });
+
+            timerState.subjectStats = newSubjectStats;
+            timerState.globalTime = totalStudy;
+            timerState.globalBreakTime = totalBreak;
+            timerState.globalSessions = totalSess;
+            timerState.totalWorkSeconds = totalStudy;
+            timerState.totalBreakSeconds = totalBreak;
+            timerState.sessionsCompleted = totalSess;
+        }
+
+        function syncCleanPomodoroToFirestore() {
+            if (window.currentUser && window.currentUser.uid && window.db) {
+                const uid = window.currentUser.uid;
+                const payload = {
+                    timerState: {
+                        sessionHistory: timerState.sessionHistory || [],
+                        globalHistory: timerState.globalHistory || [],
+                        subjectStats: timerState.subjectStats || {},
+                        globalSessions: timerState.globalSessions || 0,
+                        globalTime: timerState.globalTime || 0,
+                        globalBreakTime: timerState.globalBreakTime || 0,
+                        streak: timerState.streak || 0,
+                        globalStreak: timerState.globalStreak || 0,
+                        totalWorkSeconds: timerState.totalWorkSeconds || 0,
+                        totalBreakSeconds: timerState.totalBreakSeconds || 0,
+                        sessionsCompleted: timerState.sessionsCompleted || 0,
+                        lastStudyDate: timerState.lastStudyDate || null
+                    },
+                    sessionHistory: timerState.sessionHistory || [],
+                    globalHistory: timerState.globalHistory || [],
+                    subjectStats: timerState.subjectStats || {},
+                    globalSessions: timerState.globalSessions || 0,
+                    globalTime: timerState.globalTime || 0,
+                    globalBreakTime: timerState.globalBreakTime || 0,
+                    streak: timerState.streak || 0,
+                    globalStreak: timerState.globalStreak || 0,
+                    totalWorkSeconds: timerState.totalWorkSeconds || 0,
+                    totalBreakSeconds: timerState.totalBreakSeconds || 0,
+                    sessionsCompleted: timerState.sessionsCompleted || 0,
+                    lastStudyDate: timerState.lastStudyDate || null,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                // Clean overwrite to prevent ghost data resurrection
+                window.db.collection('users_pomodoro').doc(uid).set(payload).catch(console.warn);
+                window.db.collection('usuarios_estudio').doc(uid).set(payload).catch(console.warn);
+            }
+        }
+
+        window.deleteStudySession = function(encodedKey) {
+            if (!confirm('¿Deseas eliminar este registro de sesión de tu historial?')) return;
+            const targetKey = decodeURIComponent(encodedKey);
+
+            if (Array.isArray(timerState.sessionHistory)) {
+                timerState.sessionHistory = timerState.sessionHistory.filter(s => {
+                    const k = `${s.date || ''}_${s.time || ''}_${s.subject || ''}_${s.seconds || ''}_${s.mode || ''}`;
+                    return k !== targetKey;
+                });
+            }
+
+            if (Array.isArray(timerState.globalHistory)) {
+                timerState.globalHistory = timerState.globalHistory.filter(s => {
+                    const k = `${s.date || ''}_${s.time || ''}_${s.subject || ''}_${s.seconds || ''}_${s.mode || ''}`;
+                    return k !== targetKey;
+                });
+            }
+
+            recalculateStatsFromHistory();
+            syncCleanPomodoroToFirestore();
+
+            try {
+                localStorage.setItem('ungs_study_stats', JSON.stringify(timerState));
+            } catch(e){}
+
+            updateStats();
+            updateHistory();
+            showNotification('Sesión eliminada del historial.');
+        };
+
+        window.clearAllStudyData = function() {
+            if (!confirm('¿Estás seguro de que deseas vaciar todo el historial y reiniciar las estadísticas a cero? Esta acción no se puede deshacer.')) return;
+
+            timerState = {
+                todayDate: getTodayDateString ? getTodayDateString() : new Date().toLocaleDateString('es-ES'),
+                todaySessions: 0,
+                sessionsCompleted: 0,
+                totalWorkSeconds: 0,
+                totalBreakSeconds: 0,
+                streak: 0,
+                globalStreak: 0,
+                globalSessions: 0,
+                globalTime: 0,
+                globalBreakTime: 0,
+                lastStudyDate: null,
+                sessionHistory: [],
+                globalHistory: [],
+                subjectStats: {}
+            };
+
+            try {
+                localStorage.removeItem('ungs_study_stats');
+                localStorage.removeItem('ungs_pomodoro_stats');
+            } catch(e){}
+
+            syncCleanPomodoroToFirestore();
+
+            updateStats();
+            updateHistory();
+            showNotification('Historial y estadísticas reiniciados a cero.');
+        };
+
+        function showNotification(msg) {
+            const n = document.createElement('div');
+            n.className = 'notification';
+            n.textContent = msg;
+            document.body.appendChild(n);
+            setTimeout(() => n.remove(), 3200);
         }
 
         window.filterHistoryBySelectedSubject = function() {
@@ -671,87 +853,117 @@
                 window.filterHistoryBySelectedSubject();
             }
         };
-        function ingestPomodoroDoc(d) {
-            if (!d || typeof d !== 'object') return;
-            const rState = d.timerState || d;
+        function deepExtractPomodoro(docData, subDocList) {
+            const extracted = {
+                sessions: [],
+                subjectStats: {},
+                globalSessions: 0,
+                globalTime: 0,
+                globalBreakTime: 0,
+                totalWorkSeconds: 0,
+                totalBreakSeconds: 0,
+                sessionsCompleted: 0,
+                streak: 0,
+                globalStreak: 0,
+                lastStudyDate: null
+            };
 
-            // 1. Session lists
-            const listCandidates = [
-                rState.sessionHistory, rState.historial, d.sessionHistory, d.historial,
-                rState.sessions, d.sessions, rState.records, d.records, rState.logs, d.logs
-            ];
-            listCandidates.forEach(sessList => {
-                if (Array.isArray(sessList)) {
-                    sessList.forEach(s => {
-                        if (!s) return;
-                        const sName = s.subject || s.materia || s.name || 'Estudio Libre';
-                        const sMode = s.mode || s.tipo || (s.isBreak ? 'Descanso' : 'Estudio');
-                        const sTime = s.time || s.hora || '';
-                        const sDate = s.date || s.fecha || new Date().toLocaleDateString('es-ES');
-                        const sSecs = typeof s.seconds === 'number' ? s.seconds : (typeof s.segundos === 'number' ? s.segundos : parseDurationToSeconds(s.duration || s.duracion));
-                        const sDur = s.duration || s.duracion || formatDurationSummary(sSecs);
-                        const norm = { subject: sName, mode: sMode, time: sTime, date: sDate, seconds: sSecs, duration: sDur };
-                        if (!Array.isArray(timerState.sessionHistory)) timerState.sessionHistory = [];
-                        const key = `${sDate}_${sTime}_${sName}_${sSecs}`;
-                        if (!timerState.sessionHistory.some(x => `${x.date}_${x.time}_${x.subject}_${x.seconds}` === key)) {
-                            timerState.sessionHistory.push(norm);
+            const seenSessions = new Set();
+
+            function addSession(s) {
+                if (!s || typeof s !== 'object') return;
+                const subj = (s.subject || s.materia || s.name || s.subj || 'Estudio Libre').trim();
+                const mode = (s.mode || s.tipo || (s.isBreak ? 'Descanso' : 'Estudio')).trim();
+                const date = (s.date || s.fecha || (s.timestamp && typeof s.timestamp.toDate === 'function' ? s.timestamp.toDate().toLocaleDateString('es-ES') : '') || new Date().toLocaleDateString('es-ES')).trim();
+                const time = (s.time || s.hora || (s.timestamp && typeof s.timestamp.toDate === 'function' ? s.timestamp.toDate().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '') || '').trim();
+                
+                let secs = 0;
+                if (typeof s.seconds === 'number') secs = s.seconds;
+                else if (typeof s.segundos === 'number') secs = s.segundos;
+                else if (typeof s.durationSeconds === 'number') secs = s.durationSeconds;
+                else if (s.duration || s.duracion) secs = parseDurationToSeconds(s.duration || s.duracion);
+
+                if (secs <= 0 && !s.duration && !s.duracion) return;
+
+                const dur = s.duration || s.duracion || formatDurationSummary(secs);
+                const norm = {
+                    subject: subj,
+                    mode: mode,
+                    date: date,
+                    time: time,
+                    seconds: secs,
+                    duration: dur
+                };
+
+                const key = `${date}_${time}_${subj}_${secs}_${mode}`;
+                if (!seenSessions.has(key)) {
+                    seenSessions.add(key);
+                    extracted.sessions.push(norm);
+                }
+            }
+
+            function traverse(node, depth) {
+                if (!node || typeof node !== 'object' || depth > 7) return;
+
+                if (Array.isArray(node)) {
+                    node.forEach(item => {
+                        if (item && typeof item === 'object') {
+                            if (item.subject || item.materia || item.mode || item.seconds || item.segundos || item.duration || item.duracion) {
+                                addSession(item);
+                            } else {
+                                traverse(item, depth + 1);
+                            }
+                        }
+                    });
+                    return;
+                }
+
+                if (typeof node.globalSessions === 'number') extracted.globalSessions = Math.max(extracted.globalSessions, node.globalSessions);
+                if (typeof node.totalSessions === 'number') extracted.globalSessions = Math.max(extracted.globalSessions, node.totalSessions);
+                if (typeof node.sessionsCompleted === 'number') extracted.sessionsCompleted = Math.max(extracted.sessionsCompleted, node.sessionsCompleted);
+
+                if (typeof node.globalTime === 'number') extracted.globalTime = Math.max(extracted.globalTime, node.globalTime);
+                if (typeof node.totalWorkSeconds === 'number') extracted.totalWorkSeconds = Math.max(extracted.totalWorkSeconds, node.totalWorkSeconds);
+                if (typeof node.totalTime === 'number') extracted.globalTime = Math.max(extracted.globalTime, node.totalTime);
+
+                if (typeof node.globalBreakTime === 'number') extracted.globalBreakTime = Math.max(extracted.globalBreakTime, node.globalBreakTime);
+                if (typeof node.totalBreakSeconds === 'number') extracted.totalBreakSeconds = Math.max(extracted.totalBreakSeconds, node.totalBreakSeconds);
+
+                if (typeof node.streak === 'number') extracted.streak = Math.max(extracted.streak, node.streak);
+                if (typeof node.racha === 'number') extracted.streak = Math.max(extracted.streak, node.racha);
+                if (typeof node.globalStreak === 'number') extracted.globalStreak = Math.max(extracted.globalStreak, node.globalStreak);
+                if (typeof node.mejorRacha === 'number') extracted.globalStreak = Math.max(extracted.globalStreak, node.mejorRacha);
+
+                if (typeof node.lastStudyDate === 'string') extracted.lastStudyDate = node.lastStudyDate;
+
+                if (node.subjectStats && typeof node.subjectStats === 'object' && !Array.isArray(node.subjectStats)) {
+                    Object.keys(node.subjectStats).forEach(sKey => {
+                        const val = node.subjectStats[sKey];
+                        if (val && typeof val === 'object') {
+                            if (!extracted.subjectStats[sKey]) extracted.subjectStats[sKey] = { sessions: 0, seconds: 0, breakSeconds: 0 };
+                            extracted.subjectStats[sKey].sessions = Math.max(extracted.subjectStats[sKey].sessions, Number(val.sessions || val.sesiones) || 0);
+                            extracted.subjectStats[sKey].seconds = Math.max(extracted.subjectStats[sKey].seconds, Number(val.seconds || val.segundos) || 0);
+                            extracted.subjectStats[sKey].breakSeconds = Math.max(extracted.subjectStats[sKey].breakSeconds, Number(val.breakSeconds || val.segundosDescanso) || 0);
                         }
                     });
                 }
-            });
 
-            const globalCandidates = [
-                rState.globalHistory, rState.historialGlobal, d.globalHistory, d.historialGlobal
-            ];
-            globalCandidates.forEach(gList => {
-                if (Array.isArray(gList)) {
-                    gList.forEach(s => {
-                        if (!s) return;
-                        const sName = s.subject || s.materia || s.name || 'Estudio Libre';
-                        const sMode = s.mode || s.tipo || (s.isBreak ? 'Descanso' : 'Estudio');
-                        const sTime = s.time || s.hora || '';
-                        const sDate = s.date || s.fecha || new Date().toLocaleDateString('es-ES');
-                        const sSecs = typeof s.seconds === 'number' ? s.seconds : (typeof s.segundos === 'number' ? s.segundos : parseDurationToSeconds(s.duration || s.duracion));
-                        const sDur = s.duration || s.duracion || formatDurationSummary(sSecs);
-                        const norm = { subject: sName, mode: sMode, time: sTime, date: sDate, seconds: sSecs, duration: sDur };
-                        if (!Array.isArray(timerState.globalHistory)) timerState.globalHistory = [];
-                        const key = `${sDate}_${sTime}_${sName}_${sSecs}`;
-                        if (!timerState.globalHistory.some(x => `${x.date}_${x.time}_${x.subject}_${x.seconds}` === key)) {
-                            timerState.globalHistory.push(norm);
-                        }
-                    });
-                }
-            });
-
-            // 2. Subject stats
-            const sStats = rState.subjectStats || rState.materias || rState.estadisticas || d.subjectStats || d.materias || {};
-            if (sStats && typeof sStats === 'object') {
-                if (!timerState.subjectStats) timerState.subjectStats = {};
-                Object.keys(sStats).forEach(subj => {
-                    const rs = sStats[subj];
-                    if (rs && typeof rs === 'object') {
-                        if (!timerState.subjectStats[subj]) timerState.subjectStats[subj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
-                        timerState.subjectStats[subj].sessions = Math.max(timerState.subjectStats[subj].sessions || 0, Number(rs.sessions || rs.sesiones) || 0);
-                        timerState.subjectStats[subj].seconds = Math.max(timerState.subjectStats[subj].seconds || 0, Number(rs.seconds || rs.segundos || (rs.focusMinutes * 60)) || 0);
-                        timerState.subjectStats[subj].breakSeconds = Math.max(timerState.subjectStats[subj].breakSeconds || 0, Number(rs.breakSeconds || rs.segundosDescanso || (rs.breakMinutes * 60)) || 0);
-                    }
+                Object.keys(node).forEach(key => {
+                    const lowKey = key.toLowerCase();
+                    if (['updatedat', 'createdat', 'lastupdated', 'timestamp', 'email', 'uid', 'userid'].includes(lowKey)) return;
+                    traverse(node[key], depth + 1);
                 });
             }
 
-            // 3. Totals and Streaks
-            const gSess = Number(rState.globalSessions || rState.totalSessions || rState.sesiones || d.globalSessions || d.total_sessions) || 0;
-            const gTime = Number(rState.globalTime || rState.totalTime || rState.totalWorkSeconds || d.globalTime || d.totalWorkSeconds) || ((Number(rState.globalFocusMinutes || d.globalFocusMinutes || d.focusMinutes) || 0) * 60) || 0;
-            const gBreak = Number(rState.globalBreakTime || rState.totalBreakTime || rState.totalBreakSeconds || d.globalBreakTime || d.totalBreakSeconds) || ((Number(rState.globalBreakMinutes || d.globalBreakMinutes || d.breakMinutes) || 0) * 60) || 0;
-            const strk = Number(rState.streak || rState.racha || d.streak || rState.currentStreak || d.current_streak) || 0;
-            const gStrk = Number(rState.globalStreak || rState.mejorRacha || d.globalStreak || rState.bestStreak || d.best_streak) || 0;
+            if (docData) {
+                traverse(docData, 0);
+            }
 
-            timerState.globalSessions = Math.max(Number(timerState.globalSessions) || 0, gSess);
-            timerState.globalTime = Math.max(Number(timerState.globalTime) || 0, gTime);
-            timerState.globalBreakTime = Math.max(Number(timerState.globalBreakTime) || 0, gBreak);
-            timerState.totalWorkSeconds = Math.max(Number(timerState.totalWorkSeconds) || 0, gTime);
-            timerState.totalBreakSeconds = Math.max(Number(timerState.totalBreakSeconds) || 0, gBreak);
-            timerState.streak = Math.max(Number(timerState.streak) || 0, strk);
-            timerState.globalStreak = Math.max(Number(timerState.globalStreak) || 0, gStrk);
+            if (Array.isArray(subDocList)) {
+                subDocList.forEach(s => addSession(s));
+            }
+
+            return extracted;
         }
 
         // Initialize Everything on Load
@@ -772,34 +984,123 @@
                             window.db.collection('users_pomodoro').doc(user.uid).collection('sessions').get(),
                             window.db.collection('usuarios_estudio').doc(user.uid).collection('sessions').get()
                         ]).then(results => {
+                            let combinedDocs = [];
+                            let subDocs = [];
+
                             results.forEach(res => {
                                 if (res.status === 'fulfilled' && res.value) {
                                     const val = res.value;
                                     if (val.exists && typeof val.data === 'function') {
-                                        ingestPomodoroDoc(val.data());
+                                        combinedDocs.push(val.data());
                                     } else if (typeof val.forEach === 'function') {
                                         val.forEach(docSnap => {
-                                            if (docSnap.exists) {
-                                                const s = docSnap.data();
-                                                const sName = s.subject || s.materia || s.name || 'Estudio Libre';
-                                                const sMode = s.mode || s.tipo || (s.isBreak ? 'Descanso' : 'Estudio');
-                                                const sTime = s.time || s.hora || '';
-                                                const sDate = s.date || s.fecha || new Date().toLocaleDateString('es-ES');
-                                                const sSecs = typeof s.seconds === 'number' ? s.seconds : (typeof s.segundos === 'number' ? s.segundos : parseDurationToSeconds(s.duration || s.duracion));
-                                                const sDur = s.duration || s.duracion || formatDurationSummary(sSecs);
-                                                const norm = { subject: sName, mode: sMode, time: sTime, date: sDate, seconds: sSecs, duration: sDur };
-                                                if (!Array.isArray(timerState.sessionHistory)) timerState.sessionHistory = [];
-                                                const key = `${sDate}_${sTime}_${sName}_${sSecs}`;
-                                                if (!timerState.sessionHistory.some(x => `${x.date}_${x.time}_${x.subject}_${x.seconds}` === key)) {
-                                                    timerState.sessionHistory.push(norm);
-                                                }
-                                            }
+                                            if (docSnap.exists) subDocs.push(docSnap.data());
                                         });
                                     }
                                 }
                             });
 
-                            try { localStorage.setItem('ungs_study_stats', JSON.stringify(timerState)); } catch(e){}
+                            if (combinedDocs.length > 0 || subDocs.length > 0) {
+                                let mergedSessions = [];
+                                let mergedSubjectStats = {};
+                                let maxGlobalSessions = 0;
+                                let maxGlobalTime = 0;
+                                let maxGlobalBreakTime = 0;
+                                let maxTotalWork = 0;
+                                let maxTotalBreak = 0;
+                                let maxStreak = 0;
+                                let maxGlobalStreak = 0;
+                                let lastDate = null;
+
+                                const seenKeys = new Set();
+
+                                combinedDocs.forEach(d => {
+                                    const ext = deepExtractPomodoro(d, []);
+                                    ext.sessions.forEach(s => {
+                                        const k = `${s.date}_${s.time}_${s.subject}_${s.seconds}_${s.mode}`;
+                                        if (!seenKeys.has(k)) {
+                                            seenKeys.add(k);
+                                            mergedSessions.push(s);
+                                        }
+                                    });
+                                    Object.keys(ext.subjectStats).forEach(subj => {
+                                        const st = ext.subjectStats[subj];
+                                        if (!mergedSubjectStats[subj]) mergedSubjectStats[subj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
+                                        mergedSubjectStats[subj].sessions = Math.max(mergedSubjectStats[subj].sessions, st.sessions);
+                                        mergedSubjectStats[subj].seconds = Math.max(mergedSubjectStats[subj].seconds, st.seconds);
+                                        mergedSubjectStats[subj].breakSeconds = Math.max(mergedSubjectStats[subj].breakSeconds, st.breakSeconds);
+                                    });
+                                    maxGlobalSessions = Math.max(maxGlobalSessions, ext.globalSessions);
+                                    maxGlobalTime = Math.max(maxGlobalTime, ext.globalTime);
+                                    maxGlobalBreakTime = Math.max(maxGlobalBreakTime, ext.globalBreakTime);
+                                    maxTotalWork = Math.max(maxTotalWork, ext.totalWorkSeconds);
+                                    maxTotalBreak = Math.max(maxTotalBreak, ext.totalBreakSeconds);
+                                    maxStreak = Math.max(maxStreak, ext.streak);
+                                    maxGlobalStreak = Math.max(maxGlobalStreak, ext.globalStreak);
+                                    if (ext.lastStudyDate) lastDate = ext.lastStudyDate;
+                                });
+
+                                if (subDocs.length > 0) {
+                                    const subExt = deepExtractPomodoro(null, subDocs);
+                                    subExt.sessions.forEach(s => {
+                                        const k = `${s.date}_${s.time}_${s.subject}_${s.seconds}_${s.mode}`;
+                                        if (!seenKeys.has(k)) {
+                                            seenKeys.add(k);
+                                            mergedSessions.push(s);
+                                        }
+                                    });
+                                }
+
+                                const todayDateStr = new Date().toLocaleDateString('es-ES');
+                                const todaySessions = mergedSessions.filter(s => s.date === todayDateStr);
+
+                                // Strict pure Firestore source of truth
+                                timerState = {
+                                    todayDate: todayDateStr,
+                                    todaySessions: todaySessions.filter(s => s.mode !== 'Descanso').length,
+                                    sessionsCompleted: todaySessions.filter(s => s.mode !== 'Descanso').length,
+                                    totalWorkSeconds: maxTotalWork || todaySessions.filter(s => s.mode !== 'Descanso').reduce((sum, s) => sum + s.seconds, 0),
+                                    totalBreakSeconds: maxTotalBreak || todaySessions.filter(s => s.mode === 'Descanso').reduce((sum, s) => sum + s.seconds, 0),
+                                    streak: maxStreak || (todaySessions.length > 0 ? 1 : 0),
+                                    globalStreak: maxGlobalStreak || maxStreak || (todaySessions.length > 0 ? 1 : 0),
+                                    globalSessions: maxGlobalSessions || mergedSessions.filter(s => s.mode !== 'Descanso').length,
+                                    globalTime: maxGlobalTime || mergedSessions.filter(s => s.mode !== 'Descanso').reduce((sum, s) => sum + s.seconds, 0),
+                                    globalBreakTime: maxGlobalBreakTime || mergedSessions.filter(s => s.mode === 'Descanso').reduce((sum, s) => sum + s.seconds, 0),
+                                    lastStudyDate: lastDate,
+                                    sessionHistory: todaySessions,
+                                    globalHistory: mergedSessions.slice().reverse(),
+                                    subjectStats: mergedSubjectStats
+                                };
+
+                                if (Object.keys(timerState.subjectStats).length === 0) {
+                                    recalculateStatsFromHistory();
+                                }
+
+                                try { localStorage.setItem('ungs_study_stats', JSON.stringify(timerState)); } catch(e){}
+                            } else {
+                                // Explicit zeroing when database is empty
+                                timerState = {
+                                    todayDate: new Date().toLocaleDateString('es-ES'),
+                                    todaySessions: 0,
+                                    sessionsCompleted: 0,
+                                    totalWorkSeconds: 0,
+                                    totalBreakSeconds: 0,
+                                    streak: 0,
+                                    globalStreak: 0,
+                                    globalSessions: 0,
+                                    globalTime: 0,
+                                    globalBreakTime: 0,
+                                    lastStudyDate: null,
+                                    sessionHistory: [],
+                                    globalHistory: [],
+                                    subjectStats: {}
+                                };
+                                try {
+                                    localStorage.removeItem('ungs_study_stats');
+                                    localStorage.removeItem('ungs_pomodoro_stats');
+                                } catch(e){}
+                            }
+
                             populateSubjectSelects();
                             updateStats();
                             updateHistory();

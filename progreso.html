@@ -42,9 +42,9 @@
     <div id="sidebar-mount"></div>
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay hidden">
+    <div id="loadingOverlay" class="loading-overlay">
         <div class="spinner"></div>
-        <p id="loadingText">Sincronizando progreso...</p>
+        <p id="loadingText">Conectando con la base de datos...</p>
     </div>
 
     <!-- MAIN APP CONTENT -->
@@ -240,7 +240,7 @@
             'userid', 'uid', 'email', 'cursando', 'enrolled', 'timerstate', 
             'timer_state', 'stats', 'subjectstats', 'sessionhistory', 'globalhistory', 
             'aprobadas', 'entries', 'grades', 'scores', 'records', 'notas', 
-            'materias', 'materiasaprobadas', 'fecha', 'date', 'version', 'id', 'total'
+            'materias', 'materiasaprobadas', 'fecha', 'date', 'version', 'id', 'total', 'tipo'
         ]);
 
         function normalizeString(str) {
@@ -260,7 +260,6 @@
             if (METADATA_KEYS.has(clean)) return false;
             if (clean.includes('actualizacion') || clean.includes('updatedat') || clean.includes('createdat')) return false;
 
-            // Validate against official MATERIAS_ADE catalog if available
             if (window.MATERIAS_ADE && Array.isArray(window.MATERIAS_ADE) && window.MATERIAS_ADE.length > 0) {
                 return window.MATERIAS_ADE.some(m => {
                     const mNorm = normalizeString(m.name);
@@ -328,89 +327,71 @@
             if (overlay) overlay.classList.toggle('hidden', !show);
         }
 
-        function extractGradesFromDoc(d) {
-            if (!d || typeof d !== 'object') return [];
-            const extracted = [];
+        // Deep Recursive Parsing for all forms of nested grade objects/arrays
+        function deepExtractGrades(node, depth = 0, results = []) {
+            if (!node || depth > 5) return results;
 
-            function pushEntry(sName, gVal, dt) {
-                if (!isValidSubjectName(sName)) return;
-                const officialName = getOfficialSubjectName(sName);
-                if (extracted.some(e => normalizeString(e.subj) === normalizeString(officialName))) return;
+            function addEntry(name, gradeVal, dateVal) {
+                if (!isValidSubjectName(name)) return;
+                const official = getOfficialSubjectName(name);
+                if (results.some(e => normalizeString(e.subj) === normalizeString(official))) return;
 
                 let isNum = false;
-                let finalGrade = 'Aprobado';
+                let gVal = 'Aprobado';
 
-                if (typeof gVal === 'number' && !isNaN(gVal) && gVal >= 1 && gVal <= 10) {
+                if (typeof gradeVal === 'number' && !isNaN(gradeVal) && gradeVal >= 1 && gradeVal <= 10) {
                     isNum = true;
-                    finalGrade = Number(gVal.toFixed(2));
-                } else if (typeof gVal === 'string') {
-                    const trimmedG = gVal.trim().toUpperCase();
-                    const parsed = parseFloat(gVal.replace(',', '.'));
-                    if (!isNaN(parsed) && parsed >= 1 && parsed <= 10 && !['A', 'AP', 'APROBADO', 'APROBADA', 'EQUIV', 'EQUIVALENCIA'].includes(trimmedG)) {
+                    gVal = Number(gradeVal.toFixed(2));
+                } else if (typeof gradeVal === 'string') {
+                    const trimmed = gradeVal.trim().toUpperCase();
+                    const p = parseFloat(gradeVal.replace(',', '.'));
+                    if (!isNaN(p) && p >= 1 && p <= 10 && !['A', 'AP', 'APROBADO', 'APROBADA', 'EQUIV', 'EQUIVALENCIA'].includes(trimmed)) {
                         isNum = true;
-                        finalGrade = Number(parsed.toFixed(2));
+                        gVal = Number(p.toFixed(2));
                     } else {
-                        finalGrade = 'Aprobado';
+                        gVal = 'Aprobado';
                     }
-                } else if (gVal && typeof gVal === 'object') {
-                    const rawG = gVal.grade !== undefined ? gVal.grade : (gVal.nota !== undefined ? gVal.nota : (gVal.calificacion !== undefined ? gVal.calificacion : 'Aprobado'));
-                    return pushEntry(officialName, rawG, gVal.date || gVal.fecha || dt);
                 }
 
-                extracted.push({
-                    subj: officialName,
-                    grade: finalGrade,
+                results.push({
+                    subj: official,
+                    grade: gVal,
                     isNumeric: isNum,
-                    date: dt || new Date().toISOString()
+                    date: dateVal || new Date().toISOString()
                 });
             }
 
-            // 1. Array containers
-            const containerKeys = ['entries', 'grades', 'aprobadas', 'materiasAprobadas', 'materias', 'subjects', 'scores', 'records', 'notas'];
-            for (const k of containerKeys) {
-                if (!d[k]) continue;
-                if (Array.isArray(d[k])) {
-                    d[k].forEach(item => {
-                        if (typeof item === 'string') {
-                            pushEntry(item, 'Aprobado');
-                        } else if (item && typeof item === 'object') {
-                            const sName = item.subj || item.materia || item.name || item.subject || item.nombre || '';
-                            const gVal = item.grade !== undefined ? item.grade : (item.nota !== undefined ? item.nota : (item.calificacion !== undefined ? item.calificacion : 'Aprobado'));
-                            const dt = item.date || item.fecha;
-                            pushEntry(sName, gVal, dt);
+            if (Array.isArray(node)) {
+                node.forEach(item => {
+                    if (typeof item === 'string') {
+                        addEntry(item, 'Aprobado');
+                    } else if (item && typeof item === 'object') {
+                        const sName = item.subj || item.materia || item.name || item.subject || item.nombre || item.title || '';
+                        const gVal = item.grade !== undefined ? item.grade : (item.nota !== undefined ? item.nota : (item.calificacion !== undefined ? item.calificacion : 'Aprobado'));
+                        if (sName) {
+                            addEntry(sName, gVal, item.date || item.fecha);
+                        } else {
+                            deepExtractGrades(item, depth + 1, results);
                         }
-                    });
-                } else if (typeof d[k] === 'object') {
-                    Object.keys(d[k]).forEach(subKey => {
-                        if (!isValidSubjectName(subKey)) return;
-                        const val = d[k][subKey];
+                    }
+                });
+            } else if (typeof node === 'object') {
+                Object.keys(node).forEach(k => {
+                    if (METADATA_KEYS.has(normalizeString(k)) || k.toLowerCase().includes('actualizacion') || k.toLowerCase().includes('updated')) return;
+                    const val = node[k];
+                    if (isValidSubjectName(k)) {
                         if (typeof val === 'number' || typeof val === 'string') {
-                            pushEntry(subKey, val);
+                            addEntry(k, val);
                         } else if (val && typeof val === 'object') {
-                            const sName = val.subj || val.materia || val.name || val.subject || val.nombre || subKey;
                             const gVal = val.grade !== undefined ? val.grade : (val.nota !== undefined ? val.nota : (val.calificacion !== undefined ? val.calificacion : 'Aprobado'));
-                            pushEntry(sName, gVal, val.date || val.fecha);
+                            addEntry(k, gVal, val.date || val.fecha);
                         }
-                    });
-                }
+                    } else if (val && typeof val === 'object') {
+                        deepExtractGrades(val, depth + 1, results);
+                    }
+                });
             }
-
-            // 2. Direct root keys (strictly guarded against metadata)
-            Object.keys(d).forEach(rootKey => {
-                if (containerKeys.includes(rootKey) || !isValidSubjectName(rootKey)) return;
-                const val = d[rootKey];
-                if (typeof val === 'number' && val >= 1 && val <= 10) {
-                    pushEntry(rootKey, val);
-                } else if (typeof val === 'string' && val.length < 20) {
-                    pushEntry(rootKey, val);
-                } else if (val && typeof val === 'object' && (val.grade !== undefined || val.nota !== undefined || val.name !== undefined)) {
-                    const sName = val.subj || val.materia || val.name || val.subject || rootKey;
-                    const gVal = val.grade !== undefined ? val.grade : (val.nota !== undefined ? val.nota : 'Aprobado');
-                    pushEntry(sName, gVal, val.date || val.fecha);
-                }
-            });
-
-            return extracted;
+            return results;
         }
 
         function populateSubjectSelect() {
@@ -440,7 +421,6 @@
         }
 
         function syncToStorage() {
-            // Guarantee pure academic entries without metadata pollution
             entries = cleanEntriesList(entries);
             localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
 
@@ -462,10 +442,10 @@
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
-                // STRICT PRIMARY: users_grades
-                window.db.collection('users_grades').doc(uid).set(progPayload, { merge: true }).catch(console.warn);
-                window.db.collection('usuarios_progreso').doc(uid).set(progPayload, { merge: true }).catch(console.warn);
-                window.db.collection('users_progreso').doc(uid).set(progPayload, { merge: true }).catch(console.warn);
+                // Overwrite users_grades directly so deleted entries never resurrect
+                window.db.collection('users_grades').doc(uid).set(progPayload).catch(console.warn);
+                window.db.collection('usuarios_progreso').doc(uid).set(progPayload).catch(console.warn);
+                window.db.collection('users_progreso').doc(uid).set(progPayload).catch(console.warn);
                 window.db.collection('usuarios_materias').doc(uid).set(matPayload, { merge: true }).catch(console.warn);
                 window.db.collection('users_materias').doc(uid).set(matPayload, { merge: true }).catch(console.warn);
             }
@@ -596,6 +576,7 @@
             if (entries.length === 0) return;
             if (confirm('¿Estás seguro de que deseas borrar todas las materias cargadas?')) {
                 entries = [];
+                localStorage.removeItem('ungs_grades_backup_guest');
                 saveAndRender();
                 syncToStorage();
             }
@@ -938,17 +919,9 @@
         // Initialize Data & Auth Hook
         document.addEventListener('DOMContentLoaded', () => {
             populateSubjectSelect();
-
-            try {
-                const cached = localStorage.getItem('ungs_grades_backup_guest');
-                if (cached) {
-                    const parsed = JSON.parse(cached);
-                    entries = cleanEntriesList(parsed);
-                }
-            } catch(e) {
-                entries = [];
-            }
+            entries = [];
             saveAndRender();
+            showLoading(true, 'Conectando con la base de datos...');
 
             if (window.auth) {
                 window.auth.onAuthStateChanged(async user => {
@@ -963,9 +936,7 @@
                                 window.db.collection('users_progreso').doc(user.uid).get(),
                                 window.db.collection('users_progress').doc(user.uid).get(),
                                 window.db.collection('usuarios_materias').doc(user.uid).get(),
-                                window.db.collection('users_materias').doc(user.uid).get(),
-                                window.db.collection('usuarios_cursada').doc(user.uid).get(),
-                                window.db.collection('users_cursada').doc(user.uid).get()
+                                window.db.collection('users_materias').doc(user.uid).get()
                             ]);
 
                             let loadedEntries = [];
@@ -973,7 +944,7 @@
                                 if (res.status === 'fulfilled' && res.value && res.value.exists) {
                                     const d = res.value.data();
                                     if (d) {
-                                        const parsed = extractGradesFromDoc(d);
+                                        const parsed = deepExtractGrades(d);
                                         parsed.forEach(p => {
                                             if (isValidSubjectName(p.subj) && !loadedEntries.some(e => normalizeString(e.subj) === normalizeString(p.subj))) {
                                                 loadedEntries.push(p);
@@ -983,14 +954,9 @@
                                 }
                             });
 
-                            if (loadedEntries.length > 0) {
-                                entries = cleanEntriesList(loadedEntries);
-                                syncToStorage();
-                            } else if (entries.length > 0) {
-                                entries = cleanEntriesList(entries);
-                                syncToStorage();
-                            }
-
+                            // Cloud is single source of truth
+                            entries = cleanEntriesList(loadedEntries);
+                            localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
                             saveAndRender();
                         } catch (err) {
                             console.error('Error al sincronizar datos de progreso:', err);
@@ -999,10 +965,18 @@
                             showLoading(false);
                         }
                     } else if (!user) {
+                        try {
+                            const cached = localStorage.getItem('ungs_grades_backup_guest');
+                            if (cached) entries = cleanEntriesList(JSON.parse(cached));
+                        } catch(e) {
+                            entries = [];
+                        }
                         showLoading(false);
                         saveAndRender();
                     }
                 });
+            } else {
+                showLoading(false);
             }
         });
     </script>

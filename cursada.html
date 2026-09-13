@@ -1002,14 +1002,20 @@
                 localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(progEntries));
 
                 if (window.currentUser && window.db) {
-                    window.db.collection('users_grades').doc(window.currentUser.uid).set({ aprobadas: firebase.firestore.FieldValue.arrayUnion(materiaName), updatedAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(console.warn);
+                    const approvedList = progEntries.map(e => (typeof e === 'string' ? e : e.subj).trim());
+                    window.db.collection('users_grades').doc(window.currentUser.uid).set({
+                        entries: progEntries,
+                        aprobadas: approvedList,
+                        materiasAprobadas: approvedList,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true }).catch(console.warn);
                     window.db.collection('usuarios_progreso').doc(window.currentUser.uid).set({
                         entries: progEntries,
                         updatedAt: new Date().toISOString()
                     }).catch(console.error);
 
                     window.db.collection('usuarios_materias').doc(window.currentUser.uid).set({
-                        aprobadas: progEntries.map(e => e.subj)
+                        aprobadas: approvedList
                     }, { merge: true }).catch(console.error);
                 }
 
@@ -1112,9 +1118,7 @@
                                 }
                             });
 
-                            if (progList.length > 0) {
-                                approvedSubjects = new Set(progList);
-                            }
+                            approvedSubjects = new Set(progList);
                             renderAll();
                         }).catch(console.error).finally(() => {
                             showLoading(false);

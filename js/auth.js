@@ -210,14 +210,18 @@ if(window.auth) {
 
                 if (entries.length > 0) {
                     try { localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries)); } catch(e){}
+                } else {
+                    try { localStorage.removeItem('ungs_grades_backup_guest'); } catch(e){}
                 }
 
                 if (studyState) {
                     try {
-                        const curLocal = localStorage.getItem('ungs_study_stats');
-                        let localObj = curLocal ? JSON.parse(curLocal) : {};
-                        const merged = Object.assign({}, localObj, studyState);
-                        localStorage.setItem('ungs_study_stats', JSON.stringify(merged));
+                        localStorage.setItem('ungs_study_stats', JSON.stringify(studyState));
+                    } catch(e){}
+                } else {
+                    try {
+                        localStorage.removeItem('ungs_study_stats');
+                        localStorage.removeItem('ungs_pomodoro_stats');
                     } catch(e){}
                 }
 
