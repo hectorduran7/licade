@@ -145,27 +145,9 @@
     <script src="js/app.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/sidebar.js"></script>
-
     <!-- Progreso Page Logic -->
     <script>
         const TOTAL_MATERIAS = 38;
-        function normalizeGradeEntry(e) {
-            if (!e) return null;
-            if (typeof e === 'string') {
-                return { subj: e.trim(), grade: 'Aprobado', isNumeric: false, date: new Date().toISOString() };
-            }
-            const subj = (e.subj || e.materia || e.name || e.subject || '').trim();
-            if (!subj) return null;
-            const gradeRaw = e.grade !== undefined ? e.grade : (e.nota !== undefined ? e.nota : 'Aprobado');
-            const isNum = typeof gradeRaw === 'number' || (!isNaN(parseFloat(gradeRaw)) && isFinite(gradeRaw) && !['A','AP','APROBADO','APROBADA','EQUIV'].includes(String(gradeRaw).toUpperCase()));
-            const finalGrade = isNum ? Number(parseFloat(gradeRaw).toFixed(2)) : String(gradeRaw);
-            return {
-                subj: subj,
-                grade: finalGrade,
-                isNumeric: isNum,
-                date: e.date || e.fecha || new Date().toISOString()
-            };
-        }
         let entries = [];
 
         function showLoading(show, text) {
@@ -173,6 +155,90 @@
             const txt = document.getElementById('loadingText');
             if (txt && text) txt.textContent = text;
             if (overlay) overlay.classList.toggle('hidden', !show);
+        }
+
+        function extractGradesFromDoc(d) {
+            if (!d || typeof d !== 'object') return [];
+            const extracted = [];
+
+            function pushEntry(sName, gVal, dt) {
+                if (!sName || typeof sName !== 'string') return;
+                const cleanName = sName.trim();
+                if (!cleanName) return;
+                if (extracted.some(e => e.subj.toLowerCase() === cleanName.toLowerCase())) return;
+
+                let isNum = false;
+                let finalGrade = 'Aprobado';
+
+                if (typeof gVal === 'number' && !isNaN(gVal)) {
+                    isNum = true;
+                    finalGrade = Number(gVal.toFixed(2));
+                } else if (typeof gVal === 'string') {
+                    const trimmedG = gVal.trim().toUpperCase();
+                    const parsed = parseFloat(gVal.replace(',', '.'));
+                    if (!isNaN(parsed) && isFinite(parsed) && !['A', 'AP', 'APROBADO', 'APROBADA', 'EQUIV', 'EQUIVALENCIA'].includes(trimmedG)) {
+                        isNum = true;
+                        finalGrade = Number(parsed.toFixed(2));
+                    } else {
+                        finalGrade = (['A', 'AP', 'APROBADO', 'APROBADA', 'EQUIV', 'EQUIVALENCIA'].includes(trimmedG)) ? 'Aprobado' : (gVal || 'Aprobado');
+                    }
+                } else if (gVal && typeof gVal === 'object') {
+                    const rawG = gVal.grade !== undefined ? gVal.grade : (gVal.nota !== undefined ? gVal.nota : (gVal.calificacion !== undefined ? gVal.calificacion : 'Aprobado'));
+                    return pushEntry(cleanName, rawG, gVal.date || gVal.fecha || dt);
+                }
+
+                extracted.push({
+                    subj: cleanName,
+                    grade: finalGrade,
+                    isNumeric: isNum,
+                    date: dt || new Date().toISOString()
+                });
+            }
+
+            // 1. Array and Object containers
+            const containerKeys = ['entries', 'grades', 'aprobadas', 'materiasAprobadas', 'materias', 'subjects', 'scores', 'records', 'notas'];
+            for (const k of containerKeys) {
+                if (!d[k]) continue;
+                if (Array.isArray(d[k])) {
+                    d[k].forEach(item => {
+                        if (typeof item === 'string') {
+                            pushEntry(item, 'Aprobado');
+                        } else if (item && typeof item === 'object') {
+                            const sName = item.subj || item.materia || item.name || item.subject || item.nombre || '';
+                            const gVal = item.grade !== undefined ? item.grade : (item.nota !== undefined ? item.nota : (item.calificacion !== undefined ? item.calificacion : 'Aprobado'));
+                            const dt = item.date || item.fecha;
+                            pushEntry(sName, gVal, dt);
+                        }
+                    });
+                } else if (typeof d[k] === 'object') {
+                    Object.keys(d[k]).forEach(subKey => {
+                        const val = d[k][subKey];
+                        if (typeof val === 'number' || typeof val === 'string') {
+                            pushEntry(subKey, val);
+                        } else if (val && typeof val === 'object') {
+                            const sName = val.subj || val.materia || val.name || val.subject || val.nombre || subKey;
+                            const gVal = val.grade !== undefined ? val.grade : (val.nota !== undefined ? val.nota : (val.calificacion !== undefined ? val.calificacion : 'Aprobado'));
+                            pushEntry(sName, gVal, val.date || val.fecha);
+                        }
+                    });
+                }
+            }
+
+            // 2. Direct keys on root object
+            const reserved = new Set(['updatedAt', 'createdAt', 'timerState', 'userId', 'uid', 'email', 'cursando', 'enrolled']);
+            Object.keys(d).forEach(rootKey => {
+                if (reserved.has(rootKey) || containerKeys.includes(rootKey)) return;
+                const val = d[rootKey];
+                if (typeof val === 'number' || typeof val === 'string') {
+                    pushEntry(rootKey, val);
+                } else if (val && typeof val === 'object' && (val.grade !== undefined || val.nota !== undefined || val.name !== undefined || val.subj !== undefined || val.calificacion !== undefined)) {
+                    const sName = val.subj || val.materia || val.name || val.subject || val.nombre || rootKey;
+                    const gVal = val.grade !== undefined ? val.grade : (val.nota !== undefined ? val.nota : (val.calificacion !== undefined ? val.calificacion : 'Aprobado'));
+                    pushEntry(sName, gVal, val.date || val.fecha);
+                }
+            });
+
+            return extracted;
         }
 
         function populateSubjectSelect() {
@@ -206,9 +272,15 @@
 
             if (window.currentUser && window.currentUser.uid && window.db) {
                 const uid = window.currentUser.uid;
+                const gradesMap = {};
+                entries.forEach(e => {
+                    gradesMap[e.subj] = e.grade;
+                });
+
                 const progPayload = {
                     entries: entries,
                     aprobadas: entries.map(e => e.subj),
+                    grades: gradesMap,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
                 const matPayload = {
@@ -216,6 +288,8 @@
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
+                // STRICT PRIMARY: users_grades
+                window.db.collection('users_grades').doc(uid).set(progPayload, { merge: true }).catch(console.warn);
                 window.db.collection('usuarios_progreso').doc(uid).set(progPayload, { merge: true }).catch(console.warn);
                 window.db.collection('users_progreso').doc(uid).set(progPayload, { merge: true }).catch(console.warn);
                 window.db.collection('usuarios_materias').doc(uid).set(matPayload, { merge: true }).catch(console.warn);
@@ -448,7 +522,9 @@
                     if (user && window.db) {
                         showLoading(true, 'Sincronizando progreso académico...');
                         try {
+                            // STRICT PRIMARY: users_grades
                             const results = await Promise.allSettled([
+                                window.db.collection('users_grades').doc(user.uid).get(),
                                 window.db.collection('usuarios_progreso').doc(user.uid).get(),
                                 window.db.collection('users_progreso').doc(user.uid).get(),
                                 window.db.collection('users_progress').doc(user.uid).get(),
@@ -463,22 +539,12 @@
                                 if (res.status === 'fulfilled' && res.value && res.value.exists) {
                                     const d = res.value.data();
                                     if (d) {
-                                        const raw = d.entries || d.aprobadas || d.materiasAprobadas || d.materias || [];
-                                        if (Array.isArray(raw)) {
-                                            raw.forEach(item => {
-                                                const sName = typeof item === 'string' ? item : (item.subj || item.materia || item.name || '');
-                                                if (sName && !loadedEntries.some(e => e.subj.toLowerCase() === sName.toLowerCase())) {
-                                                    const isNum = typeof item.grade === 'number' || typeof item.nota === 'number';
-                                                    const gVal = (item && item.grade !== undefined) ? item.grade : ((item && item.nota !== undefined) ? item.nota : 'Aprobado');
-                                                    loadedEntries.push({
-                                                        subj: sName,
-                                                        grade: isNum ? Number(gVal) : gVal,
-                                                        isNumeric: isNum,
-                                                        date: (item && (item.date || item.fecha)) || new Date().toISOString()
-                                                    });
-                                                }
-                                            });
-                                        }
+                                        const parsed = extractGradesFromDoc(d);
+                                        parsed.forEach(p => {
+                                            if (!loadedEntries.some(e => e.subj.toLowerCase() === p.subj.toLowerCase())) {
+                                                loadedEntries.push(p);
+                                            }
+                                        });
                                     }
                                 }
                             });

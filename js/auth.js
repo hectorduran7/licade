@@ -150,10 +150,11 @@ if(window.auth) {
             if(logEmail) logEmail.textContent = user.email;
             if(logAvatar) logAvatar.textContent = name.charAt(0).toUpperCase();
 
-            // Parallel multi-collection fetch with full schema mapping - ONE-SHOT GET
+                        // Parallel multi-collection fetch with full schema mapping - STRICT PRIMARY: users_grades & users_pomodoro
             Promise.allSettled([
                 window.db.collection('users_pomodoro').doc(user.uid).get(),
                 window.db.collection('usuarios_estudio').doc(user.uid).get(),
+                window.db.collection('users_grades').doc(user.uid).get(),
                 window.db.collection('usuarios_materias').doc(user.uid).get(),
                 window.db.collection('users_materias').doc(user.uid).get(),
                 window.db.collection('usuarios_cursada').doc(user.uid).get(),
