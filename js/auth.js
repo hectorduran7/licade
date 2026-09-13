@@ -143,11 +143,25 @@ if(window.auth) {
             if(logAvatar) logAvatar.textContent = name.charAt(0).toUpperCase();
 
             window.db.collection('usuarios_materias').doc(user.uid).get().then(doc => {
-                if (doc.exists && doc.data().cursando) {
+                if (doc.exists && doc.data() && Array.isArray(doc.data().cursando)) {
                     window.userMySubjects = doc.data().cursando;
+                    try { localStorage.setItem('ungs_my_subjects', JSON.stringify(window.userMySubjects)); } catch(e){}
+                } else if (!doc.exists) {
+                    window.userMySubjects = [];
+                    window.db.collection('usuarios_materias').doc(user.uid).set({ 
+                        cursando: [], 
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+                    }, { merge: true });
                 }
-                if(window.renderApp) window.renderApp();
-            }).catch(() => { if(window.renderApp) window.renderApp(); });
+                if (typeof window.renderApp === 'function') window.renderApp();
+                const mModal = document.getElementById('mySubjectsModal');
+                if (mModal && mModal.classList.contains('active') && typeof window.openMySubjectsModal === 'function') {
+                    window.openMySubjectsModal();
+                }
+            }).catch(err => {
+                console.warn('[usuarios_materias error]', err);
+                if (typeof window.renderApp === 'function') window.renderApp();
+            });
         } else {
             // Also check localStorage fallback for seamless sync across pages
             const mock = localStorage.getItem('mock_user_email');

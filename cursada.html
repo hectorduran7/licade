@@ -561,7 +561,16 @@
 
         function renderSubjectsList() {
             const container = document.getElementById('cursadaSubjectsList');
-            if (!container || !window.MATERIAS_ADE) return;
+            if (!container) return;
+            if (!window.MATERIAS_ADE || !Array.isArray(window.MATERIAS_ADE) || window.MATERIAS_ADE.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; color:var(--text-muted);">
+                        <div class="spinner" style="margin:0 auto 12px auto;"></div>
+                        <p style="font-size:14px; margin:0;">Cargando catálogo oficial de materias...</p>
+                    </div>
+                `;
+                return;
+            }
 
             let list = window.MATERIAS_ADE;
             let html = '';
