@@ -1,5 +1,5 @@
 /**
- * protection.js — Protección de código fuente y bloqueo de inspector
+ * protection.js — Protección de código fuente y bloqueo de atajos de inspector
  * La Biblioteca de ADE (UNGS)
  */
 (function () {
@@ -69,26 +69,4 @@
       return false;
     }
   });
-
-  // 4. Detección heurística de apertura de DevTools
-  var threshold = 160;
-  var devtoolsOpen = false;
-
-  function checkDevTools() {
-    var widthDiff = window.outerWidth - window.innerWidth;
-    var heightDiff = window.outerHeight - window.innerHeight;
-
-    if (widthDiff > threshold || heightDiff > threshold) {
-      if (!devtoolsOpen) {
-        devtoolsOpen = true;
-        try {
-          window.location.replace(window.location.href.split('?')[0]);
-        } catch (err) {}
-      }
-    } else {
-      devtoolsOpen = false;
-    }
-  }
-
-  setInterval(checkDevTools, 1200);
 })();

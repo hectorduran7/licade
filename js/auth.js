@@ -98,6 +98,7 @@ window.handleAuthLogin = function() {
                 if (name && cred.user) { cred.user.updateProfile({ displayName: name }); }
                 if(window.closeModal) window.closeModal('authModal');
                 const payload = { cursando: [], createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+                window.db.collection('users_pomodoro').doc(cred.user.uid).set({ timerState: {} }, { merge: true }).catch(console.warn);
                 window.db.collection('usuarios_materias').doc(cred.user.uid).set(payload, { merge: true }).catch(console.warn);
                 window.db.collection('users_materias').doc(cred.user.uid).set(payload, { merge: true }).catch(console.warn);
                 localStorage.setItem('mock_user_email', cred.user.email);
@@ -125,6 +126,7 @@ window.handleAuthLogout = function() {
 if(window.auth) {
     window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
 
+    // Single unified auth listener - NO RELOADS OR REDIRECTS
     window.auth.onAuthStateChanged(user => {
         window.currentUser = user;
         const rLabel = document.getElementById('railAuthLabel');
@@ -148,16 +150,16 @@ if(window.auth) {
             if(logEmail) logEmail.textContent = user.email;
             if(logAvatar) logAvatar.textContent = name.charAt(0).toUpperCase();
 
-            // Parallel multi-collection fetch with full schema mapping
+            // Parallel multi-collection fetch with full schema mapping - ONE-SHOT GET
             Promise.allSettled([
+                window.db.collection('users_pomodoro').doc(user.uid).get(),
+                window.db.collection('usuarios_estudio').doc(user.uid).get(),
                 window.db.collection('usuarios_materias').doc(user.uid).get(),
                 window.db.collection('users_materias').doc(user.uid).get(),
                 window.db.collection('usuarios_cursada').doc(user.uid).get(),
                 window.db.collection('users_cursada').doc(user.uid).get(),
                 window.db.collection('usuarios_progreso').doc(user.uid).get(),
-                window.db.collection('users_progreso').doc(user.uid).get(),
-                window.db.collection('users_pomodoro').doc(user.uid).get(),
-                window.db.collection('usuarios_estudio').doc(user.uid).get()
+                window.db.collection('users_progreso').doc(user.uid).get()
             ]).then(results => {
                 let subjects = [];
                 let entries = [];
@@ -168,14 +170,14 @@ if(window.auth) {
                         const data = res.value.data();
                         if (!data) return;
 
-                        // Check enrolled subjects
+                        // 1. Enrolled subjects
                         if (Array.isArray(data.cursando) && data.cursando.length > 0 && subjects.length === 0) {
                             subjects = data.cursando;
                         } else if (Array.isArray(data.enrolled) && data.enrolled.length > 0 && subjects.length === 0) {
                             subjects = data.enrolled;
                         }
 
-                        // Check progress / approved grades
+                        // 2. Progress / Approved grades
                         const rawGrades = data.entries || data.aprobadas || data.materiasAprobadas || [];
                         if (Array.isArray(rawGrades) && rawGrades.length > 0) {
                             rawGrades.forEach(item => {
@@ -191,7 +193,7 @@ if(window.auth) {
                             });
                         }
 
-                        // Check study / pomodoro state
+                        // 3. Study / Pomodoro state from users_pomodoro & usuarios_estudio
                         const rStudy = data.timerState || data;
                         if (rStudy && (rStudy.sessionHistory || rStudy.globalHistory || rStudy.subjectStats || rStudy.globalSessions || rStudy.globalTime || rStudy.globalFocusMinutes)) {
                             if (!studyState) studyState = {};
@@ -237,8 +239,8 @@ if(window.auth) {
             
             const fArea = document.getElementById('authFormArea');
             const lArea = document.getElementById('authLoggedInArea');
-            if(fArea) fArea.classList.remove('hidden');
-            if(lArea) lArea.classList.add('hidden');
+            if(fArea) fArea.classList.add('hidden');
+            if(lArea) lArea.classList.remove('hidden');
             
             window.userMySubjects = [];
             if(window.resetAppTabs) window.resetAppTabs();
