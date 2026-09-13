@@ -882,11 +882,15 @@
             }
             restChronoRunning = false;
             restChronoStartTime = null;
+            restBreakSubject = '';
             if (restChronoInterval) {
                 clearInterval(restChronoInterval);
                 restChronoInterval = null;
             }
+            // Reset the secondary counter DOM completely
             const pill = document.getElementById('activePauseBreakPill');
+            const count = document.getElementById('activePauseCountdown');
+            if (count) count.textContent = '00:00';
             if (pill && !blockBreakRunning) {
                 pill.style.display = 'none';
             }
@@ -1132,6 +1136,7 @@
                     timerWorker.onmessage = function(e) {
                         const data = e.data || {};
                         if (data.type === 'TICK') {
+                            if (!timerRunning) return; // Ghost-tick guard: ignore stale ticks after pause/reset
                             currentSeconds = data.currentSeconds;
                             updateDisplay();
                         } else if (data.type === 'COMPLETE') {
@@ -1162,6 +1167,7 @@
         }
 
         function timerTick() {
+            if (!timerRunning) return; // Ghost-tick guard: ignore stale interval ticks after pause/reset
             const now = Date.now();
 
             if (isUnlimited) {
@@ -1222,23 +1228,31 @@
 
         window.pauseTimer = function() {
             const wasUnlimited = isUnlimited;
-            timerRunning = false;
+            timerRunning = false; // FIRST: block all ghost ticks immediately
 
-            if (timerWorker) {
-                timerWorker.postMessage({ type: 'PAUSE' });
-            }
+            // Clear local fallback interval immediately
             if (timerInterval) {
                 clearInterval(timerInterval);
                 timerInterval = null;
             }
 
-            if (playBtn) playBtn.disabled = false;
-            if (pauseBtn) pauseBtn.disabled = true;
-
+            // Freeze chrono accumulated value before worker async
             if (isUnlimited && chronoStartTime) {
                 chronoAccumulated += (Date.now() - chronoStartTime);
                 chronoStartTime = null;
+                currentSeconds = Math.floor(chronoAccumulated / 1000);
             }
+
+            // Freeze the display NOW (before any async worker response)
+            updateDisplay();
+
+            // THEN tell the worker to stop (may emit one last TICK, but guard blocks it)
+            if (timerWorker) {
+                timerWorker.postMessage({ type: 'PAUSE' });
+            }
+
+            if (playBtn) playBtn.disabled = false;
+            if (pauseBtn) pauseBtn.disabled = true;
 
             saveTimerLocalState();
 
@@ -1253,6 +1267,9 @@
             stopRestChrono();
             window.stopActiveBreak();
 
+            // Ensure absolutely stopped
+            timerRunning = false;
+
             if (timerWorker) {
                 timerWorker.postMessage({ type: 'RESET' });
             }
@@ -1261,16 +1278,20 @@
                 timerInterval = null;
             }
 
+            // Zero all time state
+            chronoAccumulated = 0;
+            chronoStartTime = null;
+            targetEndTime = null;
+
             if (isUnlimited) {
                 currentSeconds = 0;
-                chronoAccumulated = 0;
-                chronoStartTime = null;
             } else {
                 const val = parseInt(durationNumber ? durationNumber.textContent : '25', 10);
                 currentSeconds = val * 60;
                 initialDurationSeconds = currentSeconds;
-                targetEndTime = null;
             }
+
+            // Lock the display immediately to the reset value
             updateDisplay();
             clearTimerLocalState();
             if (finishBtn) finishBtn.disabled = true;
@@ -2175,12 +2196,12 @@
                 window.auth.onAuthStateChanged(user => {
                     window.currentUser = user;
                     if (user && window.db) {
-                        // STRICT PRIMARY: users_pomodoro
+                        // STRICT PRIMARY: users_pomodoro — force server fetch, bypass stale cache
                         Promise.allSettled([
-                            window.db.collection('users_pomodoro').doc(user.uid).get(),
-                            window.db.collection('usuarios_estudio').doc(user.uid).get(),
-                            window.db.collection('users_pomodoro').doc(user.uid).collection('sessions').get(),
-                            window.db.collection('usuarios_estudio').doc(user.uid).collection('sessions').get()
+                            window.db.collection('users_pomodoro').doc(user.uid).get({ source: 'server' }),
+                            window.db.collection('usuarios_estudio').doc(user.uid).get({ source: 'server' }),
+                            window.db.collection('users_pomodoro').doc(user.uid).collection('sessions').get({ source: 'server' }),
+                            window.db.collection('usuarios_estudio').doc(user.uid).collection('sessions').get({ source: 'server' })
                         ]).then(results => {
                             let combinedDocs = [];
                             let subDocs = [];
