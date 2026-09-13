@@ -114,14 +114,34 @@ window.handlePasswordReset = function() {
 };
 
 window.handleAuthLogout = function() { 
-    window.auth.signOut().then(() => { 
-        if(window.closeModal) window.closeModal('authModal'); 
+    const authObj = window.auth || (window.firebase && window.firebase.auth && window.firebase.auth());
+    const onLogoutSuccess = () => {
+        if (window.closeModal) window.closeModal('authModal');
+        localStorage.removeItem('ungs_grades_backup_guest');
+        localStorage.removeItem('user_mode');
         localStorage.removeItem('mock_user_email');
+        localStorage.removeItem('ungs_my_subjects');
+        localStorage.removeItem('ungs_study_stats');
+        localStorage.removeItem('ungs_pomodoro_stats');
+        localStorage.removeItem('ungs_timer_state');
+        localStorage.removeItem('ungs_block_break_state');
         window.currentUser = null;
         window.userMySubjects = [];
-        if (typeof window.renderApp === 'function') window.renderApp();
-    }); 
+        window.location.replace('index.html');
+    };
+
+    if (authObj && typeof authObj.signOut === 'function') {
+        authObj.signOut().then(onLogoutSuccess).catch(err => {
+            console.error('[SignOut error]', err);
+            onLogoutSuccess();
+        });
+    } else {
+        onLogoutSuccess();
+    }
 };
+
+window.signOut = window.handleAuthLogout;
+window.logout = window.handleAuthLogout;
 
 if(window.auth) {
     window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);

@@ -254,16 +254,9 @@
         function isValidSubjectName(name) {
             if (!name || typeof name !== 'string') return false;
             const clean = normalizeString(name);
-            if (!clean || clean.length < 3) return false;
+            if (!clean || clean.length < 2) return false;
             if (METADATA_KEYS.has(clean)) return false;
             if (clean.includes('actualizacion') || clean.includes('updatedat') || clean.includes('createdat')) return false;
-
-            if (window.MATERIAS_ADE && Array.isArray(window.MATERIAS_ADE) && window.MATERIAS_ADE.length > 0) {
-                return window.MATERIAS_ADE.some(m => {
-                    const mNorm = normalizeString(m.name);
-                    return mNorm === clean || mNorm.includes(clean) || clean.includes(mNorm);
-                });
-            }
             return true;
         }
 
@@ -286,33 +279,34 @@
             list.forEach(item => {
                 if (!item) return;
                 const sName = typeof item === 'string' ? item : (item.subj || item.materia || item.name || item.subject || '');
-                if (isValidSubjectName(sName)) {
-                    const officialName = getOfficialSubjectName(sName);
-                    if (!result.some(e => normalizeString(e.subj) === normalizeString(officialName))) {
-                        let isNum = false;
-                        let gVal = 'Aprobado';
-                        const rawG = (item && item.grade !== undefined) ? item.grade : ((item && item.nota !== undefined) ? item.nota : 'Aprobado');
-                        
-                        if (typeof rawG === 'number' && !isNaN(rawG) && rawG >= 1 && rawG <= 10) {
-                            isNum = true;
-                            gVal = Number(rawG.toFixed(2));
-                        } else if (typeof rawG === 'string') {
-                            const p = parseFloat(rawG.replace(',', '.'));
-                            if (!isNaN(p) && p >= 1 && p <= 10 && !['A','AP','APROBADO','APROBADA','EQUIV'].includes(rawG.trim().toUpperCase())) {
-                                isNum = true;
-                                gVal = Number(p.toFixed(2));
-                            } else {
-                                gVal = 'Aprobado';
-                            }
-                        }
+                if (!sName || typeof sName !== 'string') return;
+                if (!isValidSubjectName(sName)) return;
 
-                        result.push({
-                            subj: officialName,
-                            grade: gVal,
-                            isNumeric: isNum,
-                            date: (item && (item.date || item.fecha)) || new Date().toISOString()
-                        });
+                const officialName = getOfficialSubjectName(sName) || sName.trim();
+                if (!result.some(e => normalizeString(e.subj) === normalizeString(officialName))) {
+                    let isNum = false;
+                    let gVal = 'Aprobado';
+                    const rawG = (item && item.grade !== undefined) ? item.grade : ((item && item.nota !== undefined) ? item.nota : 'Aprobado');
+                    
+                    if (typeof rawG === 'number' && !isNaN(rawG) && rawG >= 1 && rawG <= 10) {
+                        isNum = true;
+                        gVal = Number(rawG.toFixed(2));
+                    } else if (typeof rawG === 'string') {
+                        const p = parseFloat(rawG.replace(',', '.'));
+                        if (!isNaN(p) && p >= 1 && p <= 10 && !['A','AP','APROBADO','APROBADA','EQUIV'].includes(rawG.trim().toUpperCase())) {
+                            isNum = true;
+                            gVal = Number(p.toFixed(2));
+                        } else {
+                            gVal = 'Aprobado';
+                        }
                     }
+
+                    result.push({
+                        subj: officialName,
+                        grade: gVal,
+                        isNumeric: isNum,
+                        date: (item && (item.date || item.fecha)) || new Date().toISOString()
+                    });
                 }
             });
             return result;
@@ -473,7 +467,7 @@
         }
 
         function saveAndRender() {
-            entries = cleanEntriesList(entries);
+            if (!Array.isArray(entries)) entries = [];
 
             const list = document.getElementById('gradeList');
             const clearBtn = document.getElementById('btnClearAll');
@@ -953,25 +947,25 @@
                             // STRICT SINGLE SOURCE OF TRUTH: users_grades
                             const res = await window.db.collection('users_grades').doc(user.uid).get();
 
-                            let loadedEntries = [];
                             if (res && res.exists) {
                                 const d = res.data();
-                                if (d) {
-                                    // Fast-path: check direct containers first
-                                    if (Array.isArray(d.entries) && d.entries.length > 0) {
-                                        loadedEntries = deepExtractGrades(d.entries);
-                                    } else if (Array.isArray(d.aprobadas) && d.aprobadas.length > 0) {
-                                        loadedEntries = deepExtractGrades(d.aprobadas);
-                                    } else if (d.grades && typeof d.grades === 'object') {
-                                        loadedEntries = deepExtractGrades(d.grades);
-                                    } else {
-                                        loadedEntries = deepExtractGrades(d);
-                                    }
+                                if (d && d.entries && Array.isArray(d.entries)) {
+                                    // FAST-PATH DIRECTO: Tomar el array oficial directamente sin filtros recursivos
+                                    entries = cleanEntriesList(d.entries);
+                                } else if (d && d.aprobadas && Array.isArray(d.aprobadas)) {
+                                    entries = cleanEntriesList(d.aprobadas.map(a => ({ subj: a, grade: 'Aprobado' })));
+                                } else if (d && d.grades && typeof d.grades === 'object') {
+                                    entries = cleanEntriesList(Object.keys(d.grades).map(k => ({ subj: k, grade: d.grades[k] })));
+                                } else if (d) {
+                                    entries = cleanEntriesList(deepExtractGrades(d));
+                                } else {
+                                    entries = [];
                                 }
+                            } else {
+                                entries = [];
                             }
 
                             // Cloud is single source of truth
-                            entries = cleanEntriesList(loadedEntries);
                             if (entries.length > 0) {
                                 localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
                             } else {

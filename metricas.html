@@ -1014,40 +1014,91 @@
 
                                 const seenKeys = new Set();
 
+                                function ingestSession(s) {
+                                    if (!s || typeof s !== 'object') return;
+                                    const subj = s.subject || s.materia || s.name || s.subj || 'Estudio Libre';
+                                    const mode = s.mode || s.tipo || (s.isBreak ? 'Descanso' : 'Estudio');
+                                    const date = s.date || s.fecha || new Date().toLocaleDateString('es-ES');
+                                    const time = s.time || s.hora || '';
+                                    let secs = 0;
+                                    if (typeof s.seconds === 'number') secs = s.seconds;
+                                    else if (typeof s.segundos === 'number') secs = s.segundos;
+                                    else if (s.duration || s.duracion) secs = parseDurationToSeconds(s.duration || s.duracion);
+                                    const dur = s.duration || s.duracion || formatDurationSummary(secs);
+                                    const k = `${date}_${time}_${subj}_${secs}_${mode}`;
+                                    if (!seenKeys.has(k)) {
+                                        seenKeys.add(k);
+                                        mergedSessions.push({ subject: subj, mode: mode, date: date, time: time, seconds: secs, duration: dur });
+                                    }
+                                }
+
+                                // FAST-PATH: Chequeo directo de arrays oficiales de sesiones (d.sessions, d.sessionHistory, d.globalHistory, d.daily)
                                 combinedDocs.forEach(d => {
-                                    const ext = deepExtractPomodoro(d, []);
-                                    ext.sessions.forEach(s => {
-                                        const k = `${s.date}_${s.time}_${s.subject}_${s.seconds}_${s.mode}`;
-                                        if (!seenKeys.has(k)) {
-                                            seenKeys.add(k);
-                                            mergedSessions.push(s);
+                                    if (!d || typeof d !== 'object') return;
+
+                                    const directArrays = [
+                                        d.sessionHistory, d.globalHistory, d.sessions, d.historial, d.records, d.logs,
+                                        d.timerState?.sessionHistory, d.timerState?.globalHistory, d.timerState?.sessions
+                                    ];
+                                    directArrays.forEach(arr => {
+                                        if (Array.isArray(arr) && arr.length > 0) {
+                                            arr.forEach(s => ingestSession(s));
                                         }
                                     });
-                                    Object.keys(ext.subjectStats).forEach(subj => {
-                                        const st = ext.subjectStats[subj];
-                                        if (!mergedSubjectStats[subj]) mergedSubjectStats[subj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
-                                        mergedSubjectStats[subj].sessions = Math.max(mergedSubjectStats[subj].sessions, st.sessions);
-                                        mergedSubjectStats[subj].seconds = Math.max(mergedSubjectStats[subj].seconds, st.seconds);
-                                        mergedSubjectStats[subj].breakSeconds = Math.max(mergedSubjectStats[subj].breakSeconds, st.breakSeconds);
-                                    });
-                                    maxGlobalSessions = Math.max(maxGlobalSessions, ext.globalSessions);
-                                    maxGlobalTime = Math.max(maxGlobalTime, ext.globalTime);
-                                    maxGlobalBreakTime = Math.max(maxGlobalBreakTime, ext.globalBreakTime);
-                                    maxTotalWork = Math.max(maxTotalWork, ext.totalWorkSeconds);
-                                    maxTotalBreak = Math.max(maxTotalBreak, ext.totalBreakSeconds);
-                                    maxStreak = Math.max(maxStreak, ext.streak);
-                                    maxGlobalStreak = Math.max(maxGlobalStreak, ext.globalStreak);
-                                    if (ext.lastStudyDate) lastDate = ext.lastStudyDate;
+
+                                    const dailyMap = d.daily || d.timerState?.daily;
+                                    if (dailyMap && typeof dailyMap === 'object' && !Array.isArray(dailyMap)) {
+                                        Object.keys(dailyMap).forEach(dKey => {
+                                            const entry = dailyMap[dKey];
+                                            if (entry && typeof entry === 'object') {
+                                                if (Array.isArray(entry.sessions)) {
+                                                    entry.sessions.forEach(s => ingestSession({ ...s, date: dKey }));
+                                                } else if (entry.seconds || entry.time || entry.sessions) {
+                                                    ingestSession({
+                                                        subject: entry.subject || entry.materia || 'Estudio Libre',
+                                                        mode: entry.mode || 'Estudio',
+                                                        date: dKey,
+                                                        time: entry.time || '',
+                                                        seconds: Number(entry.seconds || entry.segundos) || 0
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    }
+
+                                    const src = d.timerState || d;
+                                    if (typeof src.globalSessions === 'number') maxGlobalSessions = Math.max(maxGlobalSessions, src.globalSessions);
+                                    if (typeof src.totalSessions === 'number') maxGlobalSessions = Math.max(maxGlobalSessions, src.totalSessions);
+                                    if (typeof src.globalTime === 'number') maxGlobalTime = Math.max(maxGlobalTime, src.globalTime);
+                                    if (typeof src.totalWorkSeconds === 'number') maxTotalWork = Math.max(maxTotalWork, src.totalWorkSeconds);
+                                    if (typeof src.globalBreakTime === 'number') maxGlobalBreakTime = Math.max(maxGlobalBreakTime, src.globalBreakTime);
+                                    if (typeof src.totalBreakSeconds === 'number') maxTotalBreak = Math.max(maxTotalBreak, src.totalBreakSeconds);
+                                    if (typeof src.streak === 'number') maxStreak = Math.max(maxStreak, src.streak);
+                                    if (typeof src.globalStreak === 'number') maxGlobalStreak = Math.max(maxGlobalStreak, src.globalStreak);
+                                    if (typeof src.lastStudyDate === 'string') lastDate = src.lastStudyDate;
+
+                                    const stMap = d.subjectStats || (d.timerState && d.timerState.subjectStats);
+                                    if (stMap && typeof stMap === 'object' && !Array.isArray(stMap)) {
+                                        Object.keys(stMap).forEach(subj => {
+                                            const st = stMap[subj];
+                                            if (st && typeof st === 'object') {
+                                                if (!mergedSubjectStats[subj]) mergedSubjectStats[subj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
+                                                mergedSubjectStats[subj].sessions = Math.max(mergedSubjectStats[subj].sessions, Number(st.sessions || st.sesiones) || 0);
+                                                mergedSubjectStats[subj].seconds = Math.max(mergedSubjectStats[subj].seconds, Number(st.seconds || st.segundos) || 0);
+                                                mergedSubjectStats[subj].breakSeconds = Math.max(mergedSubjectStats[subj].breakSeconds, Number(st.breakSeconds || st.segundosDescanso) || 0);
+                                            }
+                                        });
+                                    }
                                 });
 
                                 if (subDocs.length > 0) {
-                                    const subExt = deepExtractPomodoro(null, subDocs);
-                                    subExt.sessions.forEach(s => {
-                                        const k = `${s.date}_${s.time}_${s.subject}_${s.seconds}_${s.mode}`;
-                                        if (!seenKeys.has(k)) {
-                                            seenKeys.add(k);
-                                            mergedSessions.push(s);
-                                        }
+                                    subDocs.forEach(s => ingestSession(s));
+                                }
+
+                                if (mergedSessions.length === 0) {
+                                    combinedDocs.forEach(d => {
+                                        const ext = deepExtractPomodoro(d, []);
+                                        ext.sessions.forEach(s => ingestSession(s));
                                     });
                                 }
 
