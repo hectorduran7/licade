@@ -9,6 +9,7 @@ window.openSubjectViewer = function(name, driveLink) {
 
 let activeTab = 'TODAS';
 const TABS = [
+    { id: 'CURSANDO', label: 'Mis Materias' },
     { id: 'TODAS', label: 'Todas' },
     { id: 'PRIMER AÑO', label: '1º Año' },
     { id: 'SEGUNDO AÑO', label: '2º Año' },
@@ -43,15 +44,32 @@ window.renderApp = function() {
         }
 
         const baseSubset = window.MATERIAS_ADE;
+        const myEnrolledList = Array.isArray(window.userMySubjects) ? window.userMySubjects : [];
+        const myCount = myEnrolledList.length;
 
         if (tabsContainer) {
             tabsContainer.innerHTML = '';
             TABS.forEach(tab => {
-                const count = tab.id === 'TODAS' 
-                    ? baseSubset.length 
-                    : baseSubset.filter(s => s.year === tab.id).length;
+                let count = 0;
+                if (tab.id === 'CURSANDO') {
+                    count = myCount;
+                } else if (tab.id === 'TODAS') {
+                    count = baseSubset.length;
+                } else {
+                    count = baseSubset.filter(s => s.year === tab.id).length;
+                }
 
-                if (count > 0 || tab.id === 'TODAS') {
+                if (tab.id === 'CURSANDO') {
+                    if (count > 0 || (window.currentUser && myCount > 0)) {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'tab-btn' + (activeTab === 'CURSANDO' ? ' active' : '');
+                        btn.style.borderColor = 'rgba(50, 215, 75, 0.35)';
+                        btn.onclick = () => { activeTab = 'CURSANDO'; window.renderApp(); };
+                        btn.innerHTML = `<span style="display:inline-flex; align-items:center; gap:5px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> ${tab.label}</span> <span class="tab-badge" style="background:rgba(50,215,75,0.2); color:#32D74B;">${count}</span>`;
+                        tabsContainer.appendChild(btn);
+                    }
+                } else if (count > 0 || tab.id === 'TODAS') {
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = 'tab-btn' + (activeTab === tab.id ? ' active' : '');
@@ -63,9 +81,28 @@ window.renderApp = function() {
         }
 
         let filtered = baseSubset;
-        if (activeTab !== 'TODAS') {
+        if (activeTab === 'CURSANDO') {
+            filtered = filtered.filter(s => myEnrolledList.includes(s.name));
+            if (filtered.length === 0 && myEnrolledList.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding: 48px 20px; text-align: center;">
+                        <div style="width: 48px; height: 48px; border-radius: 16px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: var(--text-muted);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        </div>
+                        <h3 style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">No tienes materias seleccionadas</h3>
+                        <p style="color: var(--text-muted); font-size: 13px; max-width: 380px; margin: 0 auto 18px auto;">Selecciona las materias que estás cursando este cuatrimestre para tener acceso rápido.</p>
+                        <button type="button" class="btn-primary-solid" style="margin: 0 auto; display: inline-flex; align-items: center; gap: 8px;" onclick="window.openMySubjectsModal && window.openMySubjectsModal()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            <span>Seleccionar Mis Materias</span>
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+        } else if (activeTab !== 'TODAS') {
             filtered = filtered.filter(s => s.year === activeTab);
         }
+
         if (query) {
             filtered = filtered.filter(s => 
                 (s.name && s.name.toLowerCase().includes(query)) || 
@@ -124,6 +161,7 @@ window.renderApp = function() {
                 const safeReq = window.sanitizeHTML ? window.sanitizeHTML(m.req || 'Ninguna') : (m.req || 'Ninguna');
                 const safeDiff = m.diff || '3.0';
 
+                                const cleanName = (m.name || '').replace(/'/g, "\'");
                 row.innerHTML =
                     '<div class="row-main">' +
                         '<div class="row-title-line">' +
@@ -136,8 +174,8 @@ window.renderApp = function() {
                         '</div>' +
                     '</div>' +
                     '<div class="row-end">' +
-                        '<span class="diff-chip" id="diff-chip-' + m.id + '" onclick="event.stopPropagation(); window.openDiffModal(\'' + m.id + '\', \'' + (m.name || '').replace(/'/g, "\\'") + '\', \'' + safeDiff + '\')">' + safeDiff + '</span>' +
-                        '<span class="row-chevron">\u203a</span>' +
+                        '<span class="diff-chip" id="diff-chip-' + m.id + '" onclick="event.stopPropagation(); window.openDiffModal(\'' + m.id + '\', \'' + cleanName + '\', \'' + safeDiff + '\')">' + safeDiff + '</span>' +
+                        '<span class="row-chevron">›</span>' +
                     '</div>';
                 list.appendChild(row);
             });
@@ -279,6 +317,7 @@ window.saveMySubjects = function() {
     const uid = window.currentUser.uid;
     const matPayload = { cursando: window.userMySubjects || [], updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
     const curPayload = { enrolled: window.userMySubjects || [], updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+
     Promise.allSettled([
         window.db.collection('usuarios_materias').doc(uid).set(matPayload, { merge: true }),
         window.db.collection('users_materias').doc(uid).set(matPayload, { merge: true }),
@@ -352,135 +391,111 @@ window.openDiffModal = async function(id, name, defaultDiff) {
             <div class="apple-modal-icon-badge" style="width: 42px; height: 42px; border-radius: 14px; margin-bottom: 8px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             </div>
-            <h3 class="apple-modal-title" style="font-size: 18px; margin: 0 0 4px 0;">Votar Dificultad</h3>
-            <p class="apple-modal-subtitle" id="diffModalTitle" style="font-size: 12px; margin: 0; line-height: 1.3;">Materia</p>
-            <button type="button" class="modal-close" style="position: absolute; top: 0; right: 0;" onclick="window.closeModal && closeModal('diffModal')" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            <h3 class="apple-modal-title" style="font-size: 16px; margin: 0 0 4px 0;" id="diffModalName">Dificultad</h3>
+            <p class="apple-modal-subtitle" style="font-size: 12px; margin: 0;">Votá del 1 al 5 según tu experiencia</p>
         </div>
-
-        <div style="text-align:center; margin:32px 0;">
-            <div id="diffScore" style="font-size:56px; font-weight:800; letter-spacing:-0.04em; color:var(--text-main); line-height:1;">-.-</div>
-            <div id="diffVotesCount" style="font-size:13px; color:var(--text-muted); margin-top:12px;">Cargando votos comunitarios...</div>
+        <div style="display:flex; justify-content:center; gap:8px; margin-bottom:18px;" id="diffStars">
+            <button type="button" class="btn-star" onclick="window.submitDiff(1)">1★</button>
+            <button type="button" class="btn-star" onclick="window.submitDiff(2)">2★</button>
+            <button type="button" class="btn-star" onclick="window.submitDiff(3)">3★</button>
+            <button type="button" class="btn-star" onclick="window.submitDiff(4)">4★</button>
+            <button type="button" class="btn-star" onclick="window.submitDiff(5)">5★</button>
         </div>
-
-        <div id="diffVotingArea" style="margin-top:24px;">
-            <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">TU CALIFICACIÓN (1 AL 5)</div>
-            <div style="display:flex; gap:6px;">
-                <button type="button" class="diff-vote-card diff-vote-btn" data-val="1" style="flex:1;">1</button>
-                <button type="button" class="diff-vote-card diff-vote-btn" data-val="2" style="flex:1;">2</button>
-                <button type="button" class="diff-vote-card diff-vote-btn" data-val="3" style="flex:1;">3</button>
-                <button type="button" class="diff-vote-card diff-vote-btn" data-val="4" style="flex:1;">4</button>
-                <button type="button" class="diff-vote-card diff-vote-btn" data-val="5" style="flex:1;">5</button>
-            </div>
-            <div id="diffVoteError" class="form-error" style="margin-top:16px; text-align:center; display:none;"></div>
+        <div style="text-align:center; font-size:11px; color:var(--text-muted); margin-bottom: 14px;" id="diffCount">
+            Cargando votos de la comunidad...
         </div>
+        <button type="button" class="btn-cancel" onclick="window.closeModal && closeModal('diffModal')">Cerrar</button>
     </div>
 </div>`;
             document.body.insertAdjacentHTML('beforeend', modalHtml);
-            
-            document.querySelectorAll('.diff-vote-btn').forEach(btn => {
-                btn.onclick = () => window.submitDiffVote(btn.getAttribute('data-val'));
-            });
         }
 
-        const titleEl = document.getElementById('diffModalTitle');
-        const scoreEl = document.getElementById('diffScore');
-        const votesEl = document.getElementById('diffVotesCount');
-        const errEl = document.getElementById('diffVoteError');
-
-        if (titleEl) titleEl.textContent = name || 'Materia';
-        if (scoreEl) scoreEl.textContent = defaultDiff || '3.0';
-        if (votesEl) votesEl.textContent = "Cargando votos...";
-        if (errEl) errEl.style.display = 'none';
-
-        window._currentDiffMateriaId = id;
-        document.querySelectorAll('.diff-vote-btn').forEach(b => b.classList.remove('active'));
+        window.currentDiffSubjectId = id;
+        const nameEl = document.getElementById('diffModalName');
+        if (nameEl) nameEl.textContent = name;
+        
+        const countEl = document.getElementById('diffCount');
+        if (countEl) countEl.textContent = 'Calculando votos...';
 
         if (window.openModal) window.openModal('diffModal');
 
-        if (window.db && id) {
+        if (window.db) {
             window.db.collection('materias_dificultad').doc(id.toString()).collection('votos').get()
-            .then(snap => {
-                let total = 0;
-                let count = snap.size;
-                let userVote = null;
-                
-                snap.forEach(doc => {
-                    let v = parseFloat(doc.data().value);
-                    total += v;
-                    if (window.currentUser && doc.id === window.currentUser.uid) {
-                        userVote = v;
+                .then(snap => {
+                    let total = 0;
+                    let count = 0;
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        if (d && typeof d.valor === 'number') {
+                            total += d.valor;
+                            count++;
+                        }
+                    });
+                    const avg = count > 0 ? (total / count).toFixed(1) : defaultDiff;
+                    if (countEl) {
+                        countEl.textContent = count > 0 
+                            ? `Promedio de la comunidad: ${avg}★ (${count} voto${count > 1 ? 's' : ''})`
+                            : `Promedio base: ${defaultDiff}★ (Sé el primero en votar)`;
                     }
+                    const chip = document.getElementById('diff-chip-' + id);
+                    if (chip && count > 0) chip.textContent = avg;
+                })
+                .catch(err => {
+                    console.warn('[Votes load error]', err);
+                    if (countEl) countEl.textContent = `Promedio base: ${defaultDiff}★`;
                 });
-
-                if (count > 0) {
-                    let avg = (total / count).toFixed(1);
-                    if (scoreEl) scoreEl.textContent = avg;
-                    if (votesEl) votesEl.textContent = count + (count === 1 ? ' voto registrado' : ' votos registrados');
-                    
-                    let chip = document.getElementById('diff-chip-' + id);
-                    if(chip) chip.textContent = avg;
-                } else {
-                    if (scoreEl) scoreEl.textContent = defaultDiff || '3.0';
-                    if (votesEl) votesEl.textContent = 'Sé el primero en calificar esta materia';
-                }
-
-                if (userVote) {
-                    let btn = document.querySelector(`.diff-vote-btn[data-val="${userVote}"]`);
-                    if(btn) btn.classList.add('active');
-                }
-            })
-            .catch(e => {
-                console.warn("Error loading votes:", e);
-                if (votesEl) votesEl.textContent = 'No se pudieron cargar los votos';
-            });
         }
     } catch(e) {
         console.error('[openDiffModal error]', e);
     }
 };
 
-window.submitDiffVote = function(val) {
+window.submitDiff = async function(val) {
+    if (!window.currentUser) {
+        alert("Iniciá sesión para votar la dificultad de la materia.");
+        if (window.openModal) window.openModal('authModal');
+        return;
+    }
+
+    const id = window.currentDiffSubjectId;
+    if (!id || !window.db) return;
+
     try {
-        const errEl = document.getElementById('diffVoteError');
-        const votesEl = document.getElementById('diffVotesCount');
+        const countEl = document.getElementById('diffCount');
+        if (countEl) countEl.textContent = 'Guardando voto...';
 
-        if (!window.currentUser) {
-            if (errEl) {
-                errEl.textContent = 'Iniciá sesión para poder votar.';
-                errEl.style.display = 'block';
-            }
-            return;
-        }
-        
-        let numVal = parseFloat(val);
-        let id = window._currentDiffMateriaId;
-        
-        document.querySelectorAll('.diff-vote-btn').forEach(b => b.classList.remove('active'));
-        const activeBtn = document.querySelector(`.diff-vote-btn[data-val="${val}"]`);
-        if (activeBtn) activeBtn.classList.add('active');
-        if (errEl) errEl.style.display = 'none';
-        if (votesEl) votesEl.textContent = 'Guardando voto...';
+        await window.db.collection('materias_dificultad').doc(id.toString()).collection('votos').doc(window.currentUser.uid)
+            .set({
+                valor: Number(val),
+                user: window.currentUser.email,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
 
-        if (!window.db || !id) return;
-
-        window.db.collection('materias_dificultad').doc(id.toString()).collection('votos').doc(window.currentUser.uid)
-        .set({
-            value: numVal,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .then(() => {
-            let name = document.getElementById('diffModalTitle')?.textContent;
-            let defaultDiff = document.getElementById('diffScore')?.textContent;
-            window.openDiffModal(id, name, defaultDiff); 
-        })
-        .catch(e => {
-            console.error('[submitDiffVote error]', e);
-            if (errEl) {
-                errEl.textContent = 'Error al guardar el voto.';
-                errEl.style.display = 'block';
+        const snap = await window.db.collection('materias_dificultad').doc(id.toString()).collection('votos').get();
+        let total = 0;
+        let count = 0;
+        snap.forEach(doc => {
+            const d = doc.data();
+            if (d && typeof d.valor === 'number') {
+                total += d.valor;
+                count++;
             }
         });
-    } catch(e) {
-        console.error('[submitDiffVote crash prevented]', e);
+
+        const avg = count > 0 ? (total / count).toFixed(1) : val.toFixed(1);
+        const chip = document.getElementById('diff-chip-' + id);
+        if (chip) chip.textContent = avg;
+
+        if (countEl) {
+            countEl.innerHTML = `<span style="color:var(--success); font-weight:600;">¡Voto guardado con éxito!</span> Promedio: ${avg}★ (${count} votos)`;
+        }
+
+        setTimeout(() => {
+            if (window.closeModal) window.closeModal('diffModal');
+        }, 1500);
+
+    } catch(err) {
+        console.error('[submitDiff error]', err);
+        alert("Hubo un error al registrar tu voto.");
     }
 };

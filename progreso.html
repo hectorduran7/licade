@@ -149,6 +149,23 @@
     <!-- Progreso Page Logic -->
     <script>
         const TOTAL_MATERIAS = 38;
+        function normalizeGradeEntry(e) {
+            if (!e) return null;
+            if (typeof e === 'string') {
+                return { subj: e.trim(), grade: 'Aprobado', isNumeric: false, date: new Date().toISOString() };
+            }
+            const subj = (e.subj || e.materia || e.name || e.subject || '').trim();
+            if (!subj) return null;
+            const gradeRaw = e.grade !== undefined ? e.grade : (e.nota !== undefined ? e.nota : 'Aprobado');
+            const isNum = typeof gradeRaw === 'number' || (!isNaN(parseFloat(gradeRaw)) && isFinite(gradeRaw) && !['A','AP','APROBADO','APROBADA','EQUIV'].includes(String(gradeRaw).toUpperCase()));
+            const finalGrade = isNum ? Number(parseFloat(gradeRaw).toFixed(2)) : String(gradeRaw);
+            return {
+                subj: subj,
+                grade: finalGrade,
+                isNumeric: isNum,
+                date: e.date || e.fecha || new Date().toISOString()
+            };
+        }
         let entries = [];
 
         function showLoading(show, text) {
