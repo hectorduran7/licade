@@ -44,7 +44,7 @@ window.renderApp = function() {
         }
 
         const baseSubset = window.MATERIAS_ADE;
-        const myEnrolledList = Array.isArray(window.userMySubjects) ? window.userMySubjects : [];
+        const myEnrolledList = Array.isArray(window.userMySubjects) ? window.userMySubjects : (window.userMySubjects && typeof window.userMySubjects === 'object' ? Object.values(window.userMySubjects) : []);
         const myCount = myEnrolledList.length;
 
         if (tabsContainer) {
@@ -353,6 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (savedMySubjs) {
             const parsed = JSON.parse(savedMySubjs);
             if (Array.isArray(parsed)) window.userMySubjects = parsed;
+            else if (parsed && typeof parsed === 'object') window.userMySubjects = Object.values(parsed);
         }
     } catch(e) {}
 

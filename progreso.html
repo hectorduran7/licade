@@ -273,10 +273,18 @@
             return name.trim();
         }
 
+        function toSafeArray(val) {
+            if (!val) return [];
+            if (Array.isArray(val)) return val;
+            if (typeof val === 'object') return Object.values(val);
+            return [];
+        }
+
         function cleanEntriesList(list) {
-            if (!Array.isArray(list)) return [];
+            const safeList = toSafeArray(list);
+            if (!safeList || safeList.length === 0) return [];
             const result = [];
-            list.forEach(item => {
+            safeList.forEach(item => {
                 if (!item) return;
                 const sName = typeof item === 'string' ? item : (item.subj || item.materia || item.name || item.subject || '');
                 if (!sName || typeof sName !== 'string') return;
@@ -369,21 +377,35 @@
                 });
             } else if (typeof node === 'object') {
                 // Direct fast-path for known container arrays/maps
-                if (Array.isArray(node.entries)) {
-                    deepExtractGrades(node.entries, depth + 1, results);
+                const rEntries = toSafeArray(node.entries);
+                if (rEntries.length > 0) {
+                    deepExtractGrades(rEntries, depth + 1, results);
                 }
-                if (Array.isArray(node.aprobadas)) {
-                    deepExtractGrades(node.aprobadas, depth + 1, results);
+                const rAprob = toSafeArray(node.aprobadas);
+                if (rAprob.length > 0) {
+                    deepExtractGrades(rAprob, depth + 1, results);
                 }
-                if (Array.isArray(node.materiasAprobadas)) {
-                    deepExtractGrades(node.materiasAprobadas, depth + 1, results);
+                const rMatAprob = toSafeArray(node.materiasAprobadas);
+                if (rMatAprob.length > 0) {
+                    deepExtractGrades(rMatAprob, depth + 1, results);
                 }
-                if (node.grades && typeof node.grades === 'object' && !Array.isArray(node.grades)) {
-                    Object.keys(node.grades).forEach(k => {
-                        if (isValidSubjectName(k)) {
-                            addEntry(k, node.grades[k]);
-                        }
-                    });
+                if (node.grades && typeof node.grades === 'object') {
+                    if (Array.isArray(node.grades)) {
+                        deepExtractGrades(node.grades, depth + 1, results);
+                    } else {
+                        Object.keys(node.grades).forEach(k => {
+                            if (isValidSubjectName(k)) {
+                                addEntry(k, node.grades[k]);
+                            }
+                        });
+                    }
+                }
+
+                // If node is itself a single subject entry object
+                const directSubj = node.subj || node.materia || node.name || node.subject;
+                if (directSubj && isValidSubjectName(directSubj)) {
+                    const gVal = node.grade !== undefined ? node.grade : (node.nota !== undefined ? node.nota : (node.calificacion !== undefined ? node.calificacion : 'Aprobado'));
+                    addEntry(directSubj, gVal, node.date || node.fecha);
                 }
 
                 // General traversal for any remaining keys/subobjects
@@ -949,11 +971,17 @@
 
                             if (res && res.exists) {
                                 const d = res.data();
-                                if (d && d.entries && Array.isArray(d.entries)) {
-                                    // FAST-PATH DIRECTO: Tomar el array oficial directamente sin filtros recursivos
-                                    entries = cleanEntriesList(d.entries);
-                                } else if (d && d.aprobadas && Array.isArray(d.aprobadas)) {
-                                    entries = cleanEntriesList(d.aprobadas.map(a => ({ subj: a, grade: 'Aprobado' })));
+                                const rEntries = toSafeArray(d?.entries);
+                                const rAprob = toSafeArray(d?.aprobadas);
+                                const rMatAprob = toSafeArray(d?.materiasAprobadas);
+
+                                if (rEntries.length > 0) {
+                                    // FAST-PATH DIRECTO: Tomar el array o mapa oficial directamente
+                                    entries = cleanEntriesList(rEntries);
+                                } else if (rAprob.length > 0) {
+                                    entries = cleanEntriesList(rAprob.map(a => typeof a === 'string' ? { subj: a, grade: 'Aprobado' } : a));
+                                } else if (rMatAprob.length > 0) {
+                                    entries = cleanEntriesList(rMatAprob.map(a => typeof a === 'string' ? { subj: a, grade: 'Aprobado' } : a));
                                 } else if (d && d.grades && typeof d.grades === 'object') {
                                     entries = cleanEntriesList(Object.keys(d.grades).map(k => ({ subj: k, grade: d.grades[k] })));
                                 } else if (d) {

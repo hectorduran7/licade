@@ -2016,6 +2016,13 @@
                 }
             }
         });
+        function toSafeArray(val) {
+            if (!val) return [];
+            if (Array.isArray(val)) return val;
+            if (typeof val === 'object') return Object.values(val);
+            return [];
+        }
+
         function deepExtractPomodoro(docData, subDocList) {
             const extracted = {
                 sessions: [],
@@ -2080,6 +2087,22 @@
                     });
                     return;
                 }
+
+                // If node is itself a session object
+                if (node.subject || node.materia || (node.seconds !== undefined && node.mode) || (node.segundos !== undefined && node.mode)) {
+                    addSession(node);
+                    return;
+                }
+
+                // Direct check for session container maps or arrays
+                ['sessionHistory', 'globalHistory', 'sessions', 'historial', 'records', 'logs'].forEach(k => {
+                    if (node[k]) {
+                        const safe = toSafeArray(node[k]);
+                        if (safe.length > 0) {
+                            safe.forEach(s => addSession(s));
+                        }
+                    }
+                });
 
                 if (typeof node.globalSessions === 'number') extracted.globalSessions = Math.max(extracted.globalSessions, node.globalSessions);
                 if (typeof node.totalSessions === 'number') extracted.globalSessions = Math.max(extracted.globalSessions, node.totalSessions);
@@ -2215,20 +2238,22 @@
                                         d.sessionHistory, d.globalHistory, d.sessions, d.historial, d.records, d.logs,
                                         d.timerState?.sessionHistory, d.timerState?.globalHistory, d.timerState?.sessions
                                     ];
-                                    directArrays.forEach(arr => {
-                                        if (Array.isArray(arr) && arr.length > 0) {
+                                    directArrays.forEach(item => {
+                                        const arr = toSafeArray(item);
+                                        if (arr.length > 0) {
                                             arr.forEach(s => ingestSession(s));
                                         }
                                     });
 
                                     const dailyMap = d.daily || d.timerState?.daily;
-                                    if (dailyMap && typeof dailyMap === 'object' && !Array.isArray(dailyMap)) {
+                                    if (dailyMap && typeof dailyMap === 'object') {
                                         Object.keys(dailyMap).forEach(dKey => {
                                             const entry = dailyMap[dKey];
                                             if (entry && typeof entry === 'object') {
-                                                if (Array.isArray(entry.sessions)) {
-                                                    entry.sessions.forEach(s => ingestSession({ ...s, date: dKey }));
-                                                } else if (entry.seconds || entry.time || entry.sessions) {
+                                                const sArr = toSafeArray(entry.sessions);
+                                                if (sArr.length > 0) {
+                                                    sArr.forEach(s => ingestSession({ ...s, date: dKey }));
+                                                } else if (entry.seconds || entry.time || entry.sessions || entry.duration) {
                                                     ingestSession({
                                                         subject: entry.subject || entry.materia || 'Estudio Libre',
                                                         mode: entry.mode || 'Estudio',

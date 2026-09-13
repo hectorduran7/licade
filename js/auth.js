@@ -186,22 +186,28 @@ if(window.auth) {
                 let entries = [];
                 let studyState = null;
 
+                function toSafeArray(val) {
+                    if (!val) return [];
+                    if (Array.isArray(val)) return val;
+                    if (typeof val === 'object') return Object.values(val);
+                    return [];
+                }
+
                 results.forEach(res => {
                     if (res.status === 'fulfilled' && res.value && res.value.exists) {
                         const data = res.value.data();
                         if (!data) return;
 
                         // 1. Enrolled subjects
-                        if (Array.isArray(data.cursando) && data.cursando.length > 0 && subjects.length === 0) {
-                            subjects = data.cursando;
-                        } else if (Array.isArray(data.enrolled) && data.enrolled.length > 0 && subjects.length === 0) {
-                            subjects = data.enrolled;
+                        const rawCursando = toSafeArray(data.cursando || data.enrolled);
+                        if (rawCursando.length > 0 && subjects.length === 0) {
+                            subjects = rawCursando.map(s => typeof s === 'string' ? s : (s.name || s.subj || s.materia || '')).filter(Boolean);
                         }
 
                         // 2. Progress / Approved grades (guarded against metadata pollution)
                         const metaBlock = new Set(['ultimaactualizacion', 'updatedat', 'createdat', 'lastupdated', 'timestamp', 'fechaactualizacion', 'userid', 'uid', 'email', 'cursando', 'enrolled', 'timerstate']);
-                        const rawGrades = data.entries || data.aprobadas || data.materiasAprobadas || [];
-                        if (Array.isArray(rawGrades) && rawGrades.length > 0) {
+                        const rawGrades = toSafeArray(data.entries || data.aprobadas || data.materiasAprobadas);
+                        if (rawGrades.length > 0) {
                             rawGrades.forEach(item => {
                                 const subjName = typeof item === 'string' ? item : (item.subj || item.materia || item.name || '');
                                 const cleanSubj = (subjName || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');

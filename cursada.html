@@ -1091,32 +1091,39 @@
                             window.db.collection('usuarios_materias').doc(user.uid).get(),
                             window.db.collection('users_materias').doc(user.uid).get()
                         ]).then(results => {
-                            let progList = [];
-                            results.forEach(res => {
-                                if (res.status === 'fulfilled' && res.value && res.value.exists) {
-                                    const d = res.value.data();
-                                    if (d) {
-                                        const rawAprobs = d.entries || d.aprobadas || d.materiasAprobadas || [];
-                                        if (Array.isArray(rawAprobs)) {
-                                            rawAprobs.forEach(item => {
-                                                const name = typeof item === 'string' ? item : (item.subj || item.materia || item.name);
-                                                if (name && !progList.includes(name.trim())) {
-                                                    progList.push(name.trim());
-                                                }
-                                            });
-                                        }
+                        function toSafeArray(val) {
+                            if (!val) return [];
+                            if (Array.isArray(val)) return val;
+                            if (typeof val === 'object') return Object.values(val);
+                            return [];
+                        }
 
-                                        if (Array.isArray(d.enrolled) && d.enrolled.length > 0 && enrolledSubjects.size === 0) {
-                                            enrolledSubjects = new Set(d.enrolled);
-                                        } else if (Array.isArray(d.cursando) && d.cursando.length > 0 && enrolledSubjects.size === 0) {
-                                            enrolledSubjects = new Set(d.cursando);
+                        let progList = [];
+                        results.forEach(res => {
+                            if (res.status === 'fulfilled' && res.value && res.value.exists) {
+                                const d = res.value.data();
+                                if (d) {
+                                    const rawAprobs = toSafeArray(d.entries || d.aprobadas || d.materiasAprobadas);
+                                    rawAprobs.forEach(item => {
+                                        const name = typeof item === 'string' ? item : (item.subj || item.materia || item.name);
+                                        if (name && !progList.includes(name.trim())) {
+                                            progList.push(name.trim());
                                         }
+                                    });
 
-                                        if (Array.isArray(d.schedules) && schedules.length === 0) schedules = d.schedules;
-                                        if (Array.isArray(d.exams) && examDates.length === 0) examDates = d.exams;
+                                    const curList = toSafeArray(d.enrolled || d.cursando);
+                                    if (curList.length > 0 && enrolledSubjects.size === 0) {
+                                        const names = curList.map(item => typeof item === 'string' ? item : (item.name || item.subj || item.materia)).filter(Boolean);
+                                        enrolledSubjects = new Set(names);
                                     }
+
+                                    const sList = toSafeArray(d.schedules);
+                                    if (sList.length > 0 && schedules.length === 0) schedules = sList;
+                                    const exList = toSafeArray(d.exams);
+                                    if (exList.length > 0 && examDates.length === 0) examDates = exList;
                                 }
-                            });
+                            }
+                        });
 
                             approvedSubjects = new Set(progList);
                             renderAll();
