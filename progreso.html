@@ -422,7 +422,11 @@
 
         function syncToStorage() {
             entries = cleanEntriesList(entries);
-            localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
+            if (entries.length > 0) {
+                localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
+            } else {
+                localStorage.removeItem('ungs_grades_backup_guest');
+            }
 
             if (window.currentUser && window.currentUser.uid && window.db) {
                 const uid = window.currentUser.uid;
@@ -442,12 +446,9 @@
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
-                // Overwrite users_grades directly so deleted entries never resurrect
+                // STRICT SINGLE SOURCE OF TRUTH: Direct set (NO merge: true) to ensure total overwrite and clean deletion
                 window.db.collection('users_grades').doc(uid).set(progPayload).catch(console.warn);
-                window.db.collection('usuarios_progreso').doc(uid).set(progPayload).catch(console.warn);
-                window.db.collection('users_progreso').doc(uid).set(progPayload).catch(console.warn);
-                window.db.collection('usuarios_materias').doc(uid).set(matPayload, { merge: true }).catch(console.warn);
-                window.db.collection('users_materias').doc(uid).set(matPayload, { merge: true }).catch(console.warn);
+                window.db.collection('usuarios_materias').doc(uid).set(matPayload).catch(console.warn);
             }
         }
 
@@ -929,34 +930,29 @@
                     if (user && window.db) {
                         showLoading(true, 'Sincronizando progreso académico...');
                         try {
-                            // STRICT PRIMARY: users_grades
-                            const results = await Promise.allSettled([
-                                window.db.collection('users_grades').doc(user.uid).get(),
-                                window.db.collection('usuarios_progreso').doc(user.uid).get(),
-                                window.db.collection('users_progreso').doc(user.uid).get(),
-                                window.db.collection('users_progress').doc(user.uid).get(),
-                                window.db.collection('usuarios_materias').doc(user.uid).get(),
-                                window.db.collection('users_materias').doc(user.uid).get()
-                            ]);
+                            // STRICT SINGLE SOURCE OF TRUTH: users_grades
+                            const res = await window.db.collection('users_grades').doc(user.uid).get();
 
                             let loadedEntries = [];
-                            results.forEach(res => {
-                                if (res.status === 'fulfilled' && res.value && res.value.exists) {
-                                    const d = res.value.data();
-                                    if (d) {
-                                        const parsed = deepExtractGrades(d);
-                                        parsed.forEach(p => {
-                                            if (isValidSubjectName(p.subj) && !loadedEntries.some(e => normalizeString(e.subj) === normalizeString(p.subj))) {
-                                                loadedEntries.push(p);
-                                            }
-                                        });
-                                    }
+                            if (res && res.exists) {
+                                const d = res.data();
+                                if (d) {
+                                    const parsed = deepExtractGrades(d);
+                                    parsed.forEach(p => {
+                                        if (isValidSubjectName(p.subj) && !loadedEntries.some(e => normalizeString(e.subj) === normalizeString(p.subj))) {
+                                            loadedEntries.push(p);
+                                        }
+                                    });
                                 }
-                            });
+                            }
 
                             // Cloud is single source of truth
                             entries = cleanEntriesList(loadedEntries);
-                            localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
+                            if (entries.length > 0) {
+                                localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
+                            } else {
+                                localStorage.removeItem('ungs_grades_backup_guest');
+                            }
                             saveAndRender();
                         } catch (err) {
                             console.error('Error al sincronizar datos de progreso:', err);
