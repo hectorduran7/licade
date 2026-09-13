@@ -7,7 +7,7 @@ window.currentAuthMode = 'login';
 
 window.openLoginModal = function() {
     if(window.openModal) window.openModal('authModal');
-}
+};
 
 window.switchAuthTab = function(mode) {
     window.currentAuthMode = mode;
@@ -34,13 +34,12 @@ window.switchAuthTab = function(mode) {
         : 'Registrate gratis para sincronizar tu avance académico.';
 
     if(err) err.classList.add('hidden');
-}
+};
 
 window.handleAuthAction = function() {
     window.handleAuthLogin();
-}
+};
 
-// Named exactly as prompt requested
 window.handleAuthLogin = function() {
     const email = document.getElementById('authEmail')?.value.trim();
     const pass = document.getElementById('authPass')?.value;
@@ -83,8 +82,10 @@ window.handleAuthLogin = function() {
                 setBtnText('Ingresar');
                 if(btn) btn.disabled = false;
                 if(window.closeModal) window.closeModal('authModal');
-                document.getElementById('authEmail').value = '';
-                document.getElementById('authPass').value = '';
+                const inpEmail = document.getElementById('authEmail');
+                const inpPass = document.getElementById('authPass');
+                if (inpEmail) inpEmail.value = '';
+                if (inpPass) inpPass.value = '';
                 localStorage.setItem('mock_user_email', cred.user.email);
             })
             .catch(function(e) { showError("Error: Verifica tus credenciales."); });
@@ -96,25 +97,28 @@ window.handleAuthLogin = function() {
                 if(btn) btn.disabled = false;
                 if (name && cred.user) { cred.user.updateProfile({ displayName: name }); }
                 if(window.closeModal) window.closeModal('authModal');
-                window.db.collection('usuarios_materias').doc(cred.user.uid).set({ cursando: [] });
+                window.db.collection('usuarios_materias').doc(cred.user.uid).set({ cursando: [], createdAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
                 localStorage.setItem('mock_user_email', cred.user.email);
             })
             .catch(function(e) { showError(e.message); });
     }
-}
+};
 
 window.handlePasswordReset = function() {
     const email = document.getElementById('authEmail')?.value.trim();
     if (!email) { alert("Ingresá tu correo en el campo superior."); return; }
     window.auth.sendPasswordResetEmail(email).then(function() { alert("Correo enviado."); }).catch(function(e) { alert("Error."); });
-}
+};
 
 window.handleAuthLogout = function() { 
     window.auth.signOut().then(() => { 
         if(window.closeModal) window.closeModal('authModal'); 
         localStorage.removeItem('mock_user_email');
+        window.currentUser = null;
+        window.userMySubjects = [];
+        if (typeof window.renderApp === 'function') window.renderApp();
     }); 
-}
+};
 
 if(window.auth) {
     window.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
@@ -145,8 +149,10 @@ if(window.auth) {
             Promise.all([
                 window.db.collection('usuarios_materias').doc(user.uid).get(),
                 window.db.collection('usuarios_cursada').doc(user.uid).get(),
-                window.db.collection('usuarios_progreso').doc(user.uid).get()
-            ]).then(([matDoc, cursadaDoc, progDoc]) => {
+                window.db.collection('usuarios_progreso').doc(user.uid).get(),
+                window.db.collection('usuarios_estudio').doc(user.uid).get()
+            ]).then(([matDoc, cursadaDoc, progDoc, estudioDoc]) => {
+                // 1. Materias cursando
                 let subjects = [];
                 if (matDoc.exists && matDoc.data() && Array.isArray(matDoc.data().cursando)) {
                     subjects = matDoc.data().cursando;
@@ -157,8 +163,49 @@ if(window.auth) {
                 window.userMySubjects = subjects;
                 try { localStorage.setItem('ungs_my_subjects', JSON.stringify(subjects)); } catch(e){}
 
-                if (progDoc.exists && progDoc.data() && Array.isArray(progDoc.data().entries)) {
-                    try { localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(progDoc.data().entries)); } catch(e){}
+                // 2. Progreso y materias aprobadas
+                let entries = [];
+                if (progDoc.exists && progDoc.data()) {
+                    const pData = progDoc.data();
+                    if (Array.isArray(pData.entries)) {
+                        entries = pData.entries;
+                    } else if (Array.isArray(pData.aprobadas)) {
+                        entries = pData.aprobadas.map(subj => ({
+                            subj: typeof subj === 'string' ? subj : (subj.name || subj.subj),
+                            grade: (subj && subj.grade) ? subj.grade : 'Aprobado',
+                            isNumeric: (subj && typeof subj.grade === 'number'),
+                            date: (subj && subj.date) || new Date().toISOString()
+                        }));
+                    }
+                } else if (matDoc.exists && matDoc.data()) {
+                    const mData = matDoc.data();
+                    const aprobs = Array.isArray(mData.aprobadas) ? mData.aprobadas : [];
+                    if (aprobs.length > 0) {
+                        entries = aprobs.map(subj => ({
+                            subj: typeof subj === 'string' ? subj : (subj.name || subj.subj),
+                            grade: 'Aprobado',
+                            isNumeric: false,
+                            date: new Date().toISOString()
+                        }));
+                    }
+                }
+
+                if (entries.length > 0) {
+                    try { localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries)); } catch(e){}
+                }
+
+                // 3. Estudio / Pomodoro / Metricas
+                if (estudioDoc && estudioDoc.exists && estudioDoc.data()) {
+                    const eData = estudioDoc.data();
+                    const remoteState = eData.timerState || eData;
+                    if (remoteState && typeof remoteState === 'object') {
+                        try {
+                            const curLocal = localStorage.getItem('ungs_study_stats');
+                            let localObj = curLocal ? JSON.parse(curLocal) : {};
+                            const merged = Object.assign({}, localObj, remoteState);
+                            localStorage.setItem('ungs_study_stats', JSON.stringify(merged));
+                        } catch(e){}
+                    }
                 }
 
                 if (!matDoc.exists) {
@@ -179,10 +226,8 @@ if(window.auth) {
                 if (typeof window.renderApp === 'function') window.renderApp();
             });
         } else {
-            // Also check localStorage fallback for seamless sync across pages
             const mock = localStorage.getItem('mock_user_email');
             if(mock && !user) {
-                // Not fully auth'd but we have local memory
                 if (rLabel) rLabel.textContent = mock.split('@')[0];
             } else {
                 if (rLabel) rLabel.textContent = 'Iniciar Sesión';
@@ -206,10 +251,9 @@ window.handleGoogleLogin = function() {
     window.auth.signInWithPopup(provider)
         .then((cred) => {
             if(window.closeModal) window.closeModal('authModal');
-            // Ensure document exists
             window.db.collection('usuarios_materias').doc(cred.user.uid).get().then(doc => {
                 if(!doc.exists) {
-                    window.db.collection('usuarios_materias').doc(cred.user.uid).set({ cursando: [] }, {merge: true});
+                    window.db.collection('usuarios_materias').doc(cred.user.uid).set({ cursando: [], createdAt: firebase.firestore.FieldValue.serverTimestamp() }, {merge: true});
                 }
             });
         })
@@ -220,4 +264,4 @@ window.handleGoogleLogin = function() {
                 err.classList.remove('hidden');
             }
         });
-}
+};

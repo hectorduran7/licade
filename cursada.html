@@ -467,11 +467,34 @@
                 const cachedGrades = localStorage.getItem('ungs_grades_backup_guest');
                 if (cachedGrades) {
                     const entries = JSON.parse(cachedGrades) || [];
-                    approvedSubjects = new Set(entries.map(e => e.subj.trim()));
+                    approvedSubjects = new Set(entries.map(e => (typeof e === 'string' ? e : e.subj).trim()));
                 }
             } catch(e) {
                 approvedSubjects = new Set();
             }
+        }
+
+        function updateFilterCounts() {
+            if (!window.MATERIAS_ADE || !Array.isArray(window.MATERIAS_ADE)) return;
+            let counts = { all: 0, available: 0, enrolled: 0, blocked: 0, approved: 0 };
+            window.MATERIAS_ADE.forEach(m => {
+                counts.all++;
+                const elig = checkSubjectEligibility(m);
+                if (elig.status === 'AVAILABLE') counts.available++;
+                else if (elig.status === 'ENROLLED') counts.enrolled++;
+                else if (elig.status === 'BLOCKED') counts.blocked++;
+                else if (elig.status === 'APPROVED') counts.approved++;
+            });
+            const bAll = document.getElementById('filterAll');
+            const bAvail = document.getElementById('filterAvailable');
+            const bEnr = document.getElementById('filterEnrolled');
+            const bBlock = document.getElementById('filterBlocked');
+            const bApp = document.getElementById('filterApproved');
+            if (bAll) bAll.textContent = `Todas (${counts.all})`;
+            if (bAvail) bAvail.textContent = `Habilitadas (${counts.available})`;
+            if (bEnr) bEnr.textContent = `Inscriptas (${counts.enrolled})`;
+            if (bBlock) bBlock.textContent = `Bloqueadas (${counts.blocked})`;
+            if (bApp) bApp.textContent = `Aprobadas (${counts.approved})`;
         }
 
         function saveCursadaData() {
@@ -645,6 +668,7 @@
 
             container.innerHTML = html;
             updateSelectOptions();
+            updateFilterCounts();
         }
 
         window.toggleEnrollment = function(subjectName) {
@@ -1047,6 +1071,7 @@
 
             if (window.auth) {
                 window.auth.onAuthStateChanged(user => {
+                    window.currentUser = user;
                     if (user && window.db) {
                         showLoading(true, 'Sincronizando con tu usuario...');
                         Promise.all([
@@ -1054,15 +1079,33 @@
                             window.db.collection('usuarios_cursada').doc(user.uid).get(),
                             window.db.collection('usuarios_materias').doc(user.uid).get()
                         ]).then(([progDoc, cursadaDoc, matDoc]) => {
-                            if (progDoc.exists && progDoc.data().entries) {
-                                approvedSubjects = new Set(progDoc.data().entries.map(e => e.subj.trim()));
+                            let progList = [];
+                            if (progDoc.exists && progDoc.data()) {
+                                const p = progDoc.data();
+                                if (Array.isArray(p.entries)) {
+                                    progList = p.entries.map(e => (typeof e === 'string' ? e : e.subj)).filter(Boolean);
+                                } else if (Array.isArray(p.aprobadas)) {
+                                    progList = p.aprobadas.map(e => (typeof e === 'string' ? e : e.subj)).filter(Boolean);
+                                }
                             }
+                            if (matDoc.exists && matDoc.data()) {
+                                const m = matDoc.data();
+                                const mApp = Array.isArray(m.aprobadas) ? m.aprobadas : (Array.isArray(m.materiasAprobadas) ? m.materiasAprobadas : []);
+                                mApp.forEach(subj => {
+                                    const sName = typeof subj === 'string' ? subj : (subj.name || subj.subj);
+                                    if (sName && !progList.includes(sName)) progList.push(sName);
+                                });
+                            }
+                            if (progList.length > 0) {
+                                approvedSubjects = new Set(progList.map(s => s.trim()));
+                            }
+
                             if (cursadaDoc.exists && cursadaDoc.data()) {
                                 const data = cursadaDoc.data();
                                 enrolledSubjects = new Set(data.enrolled || []);
                                 schedules = data.schedules || [];
                                 examDates = data.exams || [];
-                            } else if (matDoc.exists && matDoc.data().cursando && enrolledSubjects.size === 0) {
+                            } else if (matDoc.exists && matDoc.data() && Array.isArray(matDoc.data().cursando) && enrolledSubjects.size === 0) {
                                 enrolledSubjects = new Set(matDoc.data().cursando || []);
                             } else if (enrolledSubjects.size > 0) {
                                 saveCursadaData();

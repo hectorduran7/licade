@@ -162,10 +162,8 @@
             const select = document.getElementById('subjIn');
             if (!select || !window.MATERIAS_ADE) return;
             
-            // Clear existing options except default
             select.innerHTML = '<option value="">Seleccioná una materia del plan...</option>';
 
-            // Group by year
             const grouped = {};
             window.MATERIAS_ADE.forEach(m => {
                 const y = m.year || 'OTROS';
@@ -187,16 +185,21 @@
         }
 
         function syncToStorage() {
-            // Mirror to localStorage for offline / guest access
             localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
 
-            // Sync to Firestore if authenticated
-            if (window.currentUser && window.db) {
+            if (window.currentUser && window.currentUser.uid && window.db) {
                 window.db.collection('usuarios_progreso').doc(window.currentUser.uid).set({
                     entries: entries,
-                    updatedAt: new Date().toISOString()
-                }).catch(err => {
-                    console.error('Error guardando en Firestore:', err);
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true }).catch(err => {
+                    console.error('Error guardando en usuarios_progreso:', err);
+                });
+
+                window.db.collection('usuarios_materias').doc(window.currentUser.uid).set({
+                    aprobadas: entries.map(e => e.subj),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true }).catch(err => {
+                    console.error('Error sincronizando aprobadas en usuarios_materias:', err);
                 });
             }
         }
@@ -221,9 +224,10 @@
                     const isPassed = !entry.isNumeric;
                     const gradeDisplay = isPassed ? 'Aprobado' : entry.grade;
                     const badgeColor = isPassed ? 'var(--success)' : 'var(--primary)';
+                    const safeName = window.sanitizeHTML ? window.sanitizeHTML(entry.subj) : entry.subj;
                     return `
                         <div class="grade-item">
-                            <span style="font-weight:500; font-size:14px; color:var(--text-main);">${window.sanitizeHTML(entry.subj)}</span>
+                            <span style="font-weight:500; font-size:14px; color:var(--text-main);">${safeName}</span>
                             <div style="display:flex; align-items:center; gap:12px;">
                                 <span style="font-weight:700; font-size:15px; color:${badgeColor};">${gradeDisplay}</span>
                                 <button type="button" class="btn-del" onclick="window.removeEntry(${index})" title="Eliminar materia">
@@ -329,72 +333,71 @@
 
         window.descargarPDF = function() {
             if (entries.length === 0) {
-                alert('Primero agrega al menos una materia para exportar.');
+                alert('No hay materias en el historial para exportar a PDF.');
                 return;
             }
 
-            const color = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#0A84FF';
-            const avg = document.getElementById('statAverage')?.innerText || '0.00';
-            const count = entries.length;
-            const pct = document.getElementById('statPercent')?.innerText || '0%';
+            showLoading(true, 'Generando reporte en PDF...');
 
             const wrapper = document.createElement('div');
-            wrapper.style.cssText = 'background:#ffffff; color:#1a1a1a; padding:40px; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;';
-            
-            let html = `
-                <div style="text-align:center; border-bottom:2px solid ${color}; padding-bottom:20px; margin-bottom:24px;">
-                    <h1 style="font-size:22px; margin:0 0 6px 0; color:#111;">KNOWY • REPORTE ACADÉMICO</h1>
-                    <p style="font-size:13px; color:#666; margin:0;">Licenciatura en Administración de Empresas • UNGS</p>
-                    <p style="font-size:12px; color:#888; margin-top:4px;">Fecha: ${new Date().toLocaleDateString('es-ES')}</p>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; margin-bottom:24px; background:#f9fafb; padding:16px; border-radius:8px;">
-                    <div><strong>Materias Aprobadas:</strong> ${count} / ${TOTAL_MATERIAS} (${pct})</div>
-                    <div><strong>Promedio Histórico:</strong> <span style="color:${color}; font-weight:700;">${avg}</span></div>
-                </div>
+            wrapper.style.cssText = 'padding:32px; background:#ffffff; color:#000000; font-family:-apple-system,BlinkMacSystemFont,sans-serif; width:750px;';
 
-                <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            let sum = 0;
+            let count = 0;
+            entries.forEach(e => {
+                if (e.isNumeric) {
+                    sum += Number(e.grade);
+                    count++;
+                }
+            });
+            const avg = count > 0 ? (sum / count).toFixed(2) : 'N/A';
+            const pct = ((entries.length / TOTAL_MATERIAS) * 100).toFixed(1);
+
+            let rows = entries.map((e, idx) => `
+                <tr style="border-bottom: 1px solid #eeeeee;">
+                    <td style="padding: 10px 8px; font-size: 13px;">${idx + 1}</td>
+                    <td style="padding: 10px 8px; font-size: 13px; font-weight: 600;">${e.subj}</td>
+                    <td style="padding: 10px 8px; font-size: 13px; text-align: right; font-weight: 700;">${e.grade}</td>
+                </tr>
+            `).join('');
+
+            wrapper.innerHTML = `
+                <div style="border-bottom: 2px solid #000; padding-bottom: 16px; margin-bottom: 20px;">
+                    <h1 style="margin: 0; font-size: 22px; font-weight: 800;">La Biblioteca de ADE - UNGS</h1>
+                    <p style="margin: 4px 0 0 0; font-size: 14px; color: #555;">Historial Académico y Avance de Carrera</p>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 24px; background: #f8f9fa; padding: 14px; border-radius: 8px;">
+                    <div><strong>Materias Aprobadas:</strong> ${entries.length} / ${TOTAL_MATERIAS} (${pct}%)</div>
+                    <div><strong>Promedio Numérico:</strong> ${avg}</div>
+                    <div><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-ES')}</div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse;">
                     <thead>
-                        <tr style="background:#f3f4f6; border-bottom:2px solid #e5e7eb;">
-                            <th style="padding:10px; text-align:left;">#</th>
-                            <th style="padding:10px; text-align:left;">Materia</th>
-                            <th style="padding:10px; text-align:right;">Calificación</th>
+                        <tr style="border-bottom: 2px solid #ddd; text-align: left;">
+                            <th style="padding: 8px; font-size: 12px; color: #777;">#</th>
+                            <th style="padding: 8px; font-size: 12px; color: #777;">Materia</th>
+                            <th style="padding: 8px; font-size: 12px; color: #777; text-align: right;">Calificación</th>
                         </tr>
                     </thead>
-                    <tbody>
-            `;
-
-            entries.forEach((e, idx) => {
-                const gradeStr = e.isNumeric ? e.grade : 'Aprobado';
-                html += `
-                    <tr style="border-bottom:1px solid #f3f4f6;">
-                        <td style="padding:10px; color:#888;">${idx + 1}</td>
-                        <td style="padding:10px; font-weight:500;">${window.sanitizeHTML(e.subj)}</td>
-                        <td style="padding:10px; text-align:right; font-weight:700; color:${color};">${gradeStr}</td>
-                    </tr>
-                `;
-            });
-
-            html += `
-                    </tbody>
+                    <tbody>${rows}</tbody>
                 </table>
-                <p style="text-align:right; font-size:11px; color:#888; margin-top:20px;">Generado automáticamente por la Biblioteca de ADE.</p>
+                <div style="margin-top: 30px; font-size: 11px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 12px;">
+                    Generado automáticamente desde La Biblioteca de ADE • licade.web.app
+                </div>
             `;
 
-            wrapper.innerHTML = html;
             document.body.appendChild(wrapper);
 
-            showLoading(true, 'Generando archivo PDF...');
+            const opt = {
+                margin: 10,
+                filename: 'Mi_Historial_ADE_UNGS.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
             setTimeout(() => {
-                html2pdf()
-                    .set({
-                        margin: 12,
-                        filename: 'Reporte_Progreso_ADE_UNGS.pdf',
-                        html2canvas: { scale: 2, backgroundColor: '#ffffff' },
-                        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                    })
-                    .from(wrapper)
-                    .save()
+                html2pdf().set(opt).from(wrapper).save()
                     .then(() => {
                         wrapper.remove();
                         showLoading(false);
@@ -412,7 +415,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             populateSubjectSelect();
 
-            // Load initial guest cache first for immediate render
             try {
                 const cached = localStorage.getItem('ungs_grades_backup_guest');
                 if (cached) entries = JSON.parse(cached) || [];
@@ -421,9 +423,9 @@
             }
             saveAndRender();
 
-            // Hook into Firebase Auth changes
             if (window.auth) {
                 window.auth.onAuthStateChanged(async user => {
+                    window.currentUser = user;
                     if (user && window.db) {
                         showLoading(true, 'Sincronizando con tu usuario...');
                         try {
@@ -433,15 +435,36 @@
                                 window.db.collection('usuarios_cursada').doc(user.uid).get()
                             ]);
 
-                            if (progDoc.exists && progDoc.data() && Array.isArray(progDoc.data().entries)) {
-                                entries = progDoc.data().entries;
-                            } else if (matDoc.exists && matDoc.data() && Array.isArray(matDoc.data().aprobadas) && matDoc.data().aprobadas.length > 0) {
-                                entries = matDoc.data().aprobadas.map(subj => ({
-                                    subj: subj,
-                                    grade: 'Aprobado',
-                                    isNumeric: false,
-                                    date: new Date().toISOString()
-                                }));
+                            let loadedEntries = [];
+                            if (progDoc.exists && progDoc.data()) {
+                                const p = progDoc.data();
+                                if (Array.isArray(p.entries) && p.entries.length > 0) {
+                                    loadedEntries = p.entries;
+                                } else if (Array.isArray(p.aprobadas) && p.aprobadas.length > 0) {
+                                    loadedEntries = p.aprobadas.map(subj => ({
+                                        subj: typeof subj === 'string' ? subj : (subj.name || subj.subj),
+                                        grade: (subj && subj.grade) ? subj.grade : 'Aprobado',
+                                        isNumeric: (subj && typeof subj.grade === 'number'),
+                                        date: (subj && subj.date) || new Date().toISOString()
+                                    }));
+                                }
+                            }
+
+                            if (loadedEntries.length === 0 && matDoc.exists && matDoc.data()) {
+                                const m = matDoc.data();
+                                const aprobs = Array.isArray(m.aprobadas) ? m.aprobadas : (Array.isArray(m.materiasAprobadas) ? m.materiasAprobadas : []);
+                                if (aprobs.length > 0) {
+                                    loadedEntries = aprobs.map(subj => ({
+                                        subj: typeof subj === 'string' ? subj : (subj.name || subj.subj),
+                                        grade: (subj && subj.grade) ? subj.grade : 'Aprobado',
+                                        isNumeric: (subj && typeof subj.grade === 'number'),
+                                        date: (subj && subj.date) || new Date().toISOString()
+                                    }));
+                                }
+                            }
+
+                            if (loadedEntries.length > 0) {
+                                entries = loadedEntries;
                                 syncToStorage();
                             } else if (entries.length > 0) {
                                 syncToStorage();

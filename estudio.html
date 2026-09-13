@@ -647,11 +647,11 @@
             }));
             localStorage.setItem('ungs_study_stats', JSON.stringify(timerState));
 
-            if (window.currentUser && window.db) {
+            if (window.currentUser && window.currentUser.uid && window.db) {
                 window.db.collection('usuarios_estudio').doc(window.currentUser.uid).set({
                     timerState: timerState,
-                    updatedAt: new Date().toISOString()
-                }).catch(console.error);
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true }).catch(console.error);
             }
         }
 
@@ -1833,14 +1833,51 @@
 
             if (window.auth) {
                 window.auth.onAuthStateChanged(user => {
+                    window.currentUser = user;
                     if (user && window.db) {
                         window.db.collection('usuarios_estudio').doc(user.uid).get().then(doc => {
-                            if (doc.exists && doc.data().timerState) {
-                                timerState = Object.assign(timerState, doc.data().timerState);
-                                populateSubjectFilters();
-                                populateSubjectSelects();
-                                updateStats();
-                                updateHistory();
+                            if (doc.exists && doc.data()) {
+                                const d = doc.data();
+                                const rState = d.timerState || d;
+                                if (rState && typeof rState === 'object') {
+                                    if (Array.isArray(rState.sessionHistory) && rState.sessionHistory.length > 0) {
+                                        const existing = new Set((timerState.sessionHistory || []).map(s => `${s.date}_${s.time}_${s.subject}_${s.seconds}`));
+                                        rState.sessionHistory.forEach(s => {
+                                            const k = `${s.date}_${s.time}_${s.subject}_${s.seconds}`;
+                                            if (!existing.has(k)) { timerState.sessionHistory.push(s); existing.add(k); }
+                                        });
+                                    }
+                                    if (Array.isArray(rState.globalHistory) && rState.globalHistory.length > 0) {
+                                        const existingG = new Set((timerState.globalHistory || []).map(s => `${s.date}_${s.time}_${s.subject}_${s.seconds}`));
+                                        rState.globalHistory.forEach(s => {
+                                            const k = `${s.date}_${s.time}_${s.subject}_${s.seconds}`;
+                                            if (!existingG.has(k)) { timerState.globalHistory.push(s); existingG.add(k); }
+                                        });
+                                    }
+                                    if (rState.subjectStats && typeof rState.subjectStats === 'object') {
+                                        if (!timerState.subjectStats) timerState.subjectStats = {};
+                                        Object.keys(rState.subjectStats).forEach(subj => {
+                                            const rs = rState.subjectStats[subj];
+                                            if (rs && typeof rs === 'object') {
+                                                if (!timerState.subjectStats[subj]) timerState.subjectStats[subj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
+                                                timerState.subjectStats[subj].sessions = Math.max(timerState.subjectStats[subj].sessions || 0, rs.sessions || 0);
+                                                timerState.subjectStats[subj].seconds = Math.max(timerState.subjectStats[subj].seconds || 0, rs.seconds || 0);
+                                                timerState.subjectStats[subj].breakSeconds = Math.max(timerState.subjectStats[subj].breakSeconds || 0, rs.breakSeconds || 0);
+                                            }
+                                        });
+                                    }
+                                    timerState.globalSessions = Math.max(Number(timerState.globalSessions) || 0, Number(rState.globalSessions) || 0);
+                                    timerState.globalTime = Math.max(Number(timerState.globalTime) || 0, Number(rState.globalTime) || ((Number(rState.globalFocusMinutes) || 0) * 60) || 0);
+                                    timerState.globalBreakTime = Math.max(Number(timerState.globalBreakTime) || 0, Number(rState.globalBreakTime) || ((Number(rState.globalBreakMinutes) || 0) * 60) || 0);
+                                    timerState.streak = Math.max(Number(timerState.streak) || 0, Number(rState.streak) || 0);
+                                    timerState.globalStreak = Math.max(Number(timerState.globalStreak) || 0, Number(rState.globalStreak) || 0);
+
+                                    try { localStorage.setItem('ungs_study_stats', JSON.stringify(timerState)); } catch(e){}
+                                    populateSubjectFilters();
+                                    populateSubjectSelects();
+                                    updateStats();
+                                    updateHistory();
+                                }
                             } else if (timerState.globalSessions > 0) {
                                 saveTimerLocalState();
                             }

@@ -276,18 +276,25 @@ window.saveMySubjects = function() {
         return;
     }
 
-    window.db.collection('usuarios_materias').doc(window.currentUser.uid)
-        .set({ 
-            cursando: window.userMySubjects || [],
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true })
-        .then(() => {
-            finalize();
-        })
-        .catch(e => {
-            console.error('[saveMySubjects] Error al guardar en Firestore:', e);
-            finalize();
-        });
+    Promise.all([
+        window.db.collection('usuarios_materias').doc(window.currentUser.uid)
+            .set({ 
+                cursando: window.userMySubjects || [],
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }),
+        window.db.collection('usuarios_cursada').doc(window.currentUser.uid)
+            .set({
+                enrolled: window.userMySubjects || [],
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true })
+    ])
+    .then(() => {
+        finalize();
+    })
+    .catch(e => {
+        console.error('[saveMySubjects] Error al guardar en Firestore:', e);
+        finalize();
+    });
 };
 
 // Keyboard Shortcuts
