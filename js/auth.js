@@ -178,12 +178,14 @@ if(window.auth) {
                             subjects = data.enrolled;
                         }
 
-                        // 2. Progress / Approved grades
+                        // 2. Progress / Approved grades (guarded against metadata pollution)
+                        const metaBlock = new Set(['ultimaactualizacion', 'updatedat', 'createdat', 'lastupdated', 'timestamp', 'fechaactualizacion', 'userid', 'uid', 'email', 'cursando', 'enrolled', 'timerstate']);
                         const rawGrades = data.entries || data.aprobadas || data.materiasAprobadas || [];
                         if (Array.isArray(rawGrades) && rawGrades.length > 0) {
                             rawGrades.forEach(item => {
                                 const subjName = typeof item === 'string' ? item : (item.subj || item.materia || item.name || '');
-                                if (subjName && !entries.some(e => e.subj.toLowerCase() === subjName.toLowerCase())) {
+                                const cleanSubj = (subjName || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+                                if (subjName && !metaBlock.has(cleanSubj) && !cleanSubj.includes('actualizacion') && !entries.some(e => e.subj.toLowerCase() === subjName.toLowerCase())) {
                                     entries.push({
                                         subj: subjName,
                                         grade: (item && item.grade !== undefined) ? item.grade : ((item && item.nota !== undefined) ? item.nota : 'Aprobado'),

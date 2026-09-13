@@ -8,9 +8,6 @@
     <!-- CSS Module -->
     <link rel="stylesheet" href="css/styles.css">
 
-    <!-- Anti-Inspection & DevTools Protection -->
-    <script src="protection.js"></script>
-
     <!-- Firebase SDK Compat v10.13.0 -->
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
@@ -18,6 +15,8 @@
 
     <!-- html2pdf.js for PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- PDF.js for SIU Guaraní PDF Reading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
@@ -75,7 +74,7 @@
                     <span class="stat-summary-value" id="statPercent" style="color:var(--primary);">0.0%</span>
                 </div>
                 <div class="stat-summary-card">
-                    <span class="stat-summary-label">Promedio Histórico</span>
+                    <span class="stat-summary-label">Promedio Numérico</span>
                     <span class="stat-summary-value" id="statAverage">0.00</span>
                 </div>
                 <div class="stat-summary-card">
@@ -94,12 +93,18 @@
 
         <!-- Panel 2: Calificaciones y Calculadora -->
         <section class="dashboard-panel">
-            <div class="panel-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                Cargar Materia Aprobada o Equivalencia
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <div class="panel-title" style="margin-bottom:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Cargar Materia Aprobada o Equivalencia
+                </div>
+                <button type="button" onclick="window.openSiuModal()" class="viewer-btn" style="border-color:color-mix(in srgb, var(--primary) 35%, transparent); color:var(--primary); font-weight:600; display:inline-flex; align-items:center; gap:8px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Subir PDF / Importar SIU Guaraní
+                </button>
             </div>
 
-            <form id="gradeForm" onsubmit="event.preventDefault(); window.addEntry();" class="calc-row">
+            <form id="gradeForm" onsubmit="event.preventDefault(); window.addEntry();" class="calc-row" style="margin-top:18px;">
                 <select id="subjIn" class="calc-input" style="flex:2; min-width:220px;" required>
                     <option value="">Seleccioná una materia del plan...</option>
                 </select>
@@ -119,6 +124,10 @@
             </div>
 
             <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:24px; justify-content:space-between; align-items:center;">
+                <button type="button" onclick="window.openSiuModal()" class="btn-dark" style="flex:1; min-width:240px; display:flex; align-items:center; justify-content:center; gap:8px; border-color:var(--primary); color:var(--primary); font-weight:600;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Cargar PDF / Analítico SIU Guaraní
+                </button>
                 <button type="button" onclick="window.descargarPDF()" class="btn-primary-solid" style="flex:1; min-width:240px;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Descargar Historial (PDF)
@@ -139,16 +148,178 @@
         </div>
     </main>
 
+    <!-- SIU Guaraní Importer Modal -->
+    <div id="siuModal" class="modal-overlay" onclick="window.closeOnOutsideClick && closeOnOutsideClick(event, 'siuModal')">
+        <div class="modal-content" style="max-width: 620px;">
+            <div class="modal-header">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:38px; height:38px; border-radius:12px; background:var(--primary-glow); color:var(--primary); display:flex; align-items:center; justify-content:center;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 17px; font-weight: 700; color: var(--text-main); margin: 0;">Importador SIU Guaraní (PDF / Texto)</h3>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Cargá tu Historia Académica oficial para autocompletar notas</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close" onclick="window.closeModal && closeModal('siuModal')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+
+            <!-- PDF Upload Drop Zone -->
+            <div id="siuPdfDropZone" class="pdf-drop-zone" onclick="document.getElementById('siuPdfFileInput').click()" style="margin-bottom: 16px;">
+                <div class="pdf-drop-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                </div>
+                <div style="font-weight: 700; font-size: 14px; color: var(--text-main); margin-bottom: 4px;">
+                    Arrastrá acá tu PDF de Historia Académica o hacé clic
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                    Descargalo de SIU Guaraní (Reportes &gt; Historia Académica &gt; Imprimir/PDF)
+                </div>
+                <input type="file" id="siuPdfFileInput" accept=".pdf,application/pdf" style="display:none;" onchange="window.handleSiuPdfFile(event)">
+            </div>
+
+            <div class="apple-auth-divider" style="margin: 16px 0;">
+                <span>O PEGAR TEXTO DIRECTO</span>
+            </div>
+
+            <textarea id="siuRawInput" class="calc-input" rows="4" placeholder="Pegá acá el texto copiado de SIU Guaraní (ej. Administración General 8 (Ocho) Promoción 12/12/2023...)" style="width: 100%; resize: vertical; font-family: monospace; font-size: 12px; border-radius: 12px;"></textarea>
+
+            <div style="display:flex; gap:10px; margin-top:12px;">
+                <button type="button" class="btn-primary-solid" onclick="window.parseSiuText()" style="flex:1;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    Analizar y Detectar Materias
+                </button>
+                <button type="button" class="btn-dark" onclick="document.getElementById('siuRawInput').value=''; document.getElementById('siuPreviewContainer').style.display='none';">
+                    Limpiar
+                </button>
+            </div>
+
+            <!-- Preview Results -->
+            <div id="siuPreviewContainer" style="display:none; margin-top:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em;">
+                        Materias Detectadas (<span id="siuDetectedCount" style="color:var(--primary);">0</span>)
+                    </span>
+                    <button type="button" onclick="window.toggleAllSiuCheckboxes()" style="background:none; border:none; color:var(--primary); font-size:12px; cursor:pointer; font-weight:600;">
+                        Seleccionar / Deseleccionar Todo
+                    </button>
+                </div>
+
+                <div id="siuPreviewList" class="siu-preview-container"></div>
+
+                <div style="display:flex; gap:10px; margin-top:16px;">
+                    <button type="button" id="btnConfirmSiuImport" class="btn-primary-solid" onclick="window.confirmSiuImport()" style="flex:1;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Procesar e Importar al Progreso
+                    </button>
+                    <button type="button" class="btn-dark" onclick="window.closeModal && closeModal('siuModal')">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Core Scripts -->
     <script src="firebase-config.js"></script>
     <script src="js/materias-data.js"></script>
     <script src="js/app.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/sidebar.js"></script>
+
     <!-- Progreso Page Logic -->
     <script>
         const TOTAL_MATERIAS = 38;
         let entries = [];
+        let parsedSiuItems = [];
+
+        // Metadata blocklist to strictly prevent pollution in the academic history
+        const METADATA_KEYS = new Set([
+            'ultimaactualizacion', 'ultima_actualizacion', 'updatedat', 'createdat', 
+            'lastupdated', 'timestamp', 'fechaactualizacion', 'fecha_actualizacion', 
+            'userid', 'uid', 'email', 'cursando', 'enrolled', 'timerstate', 
+            'timer_state', 'stats', 'subjectstats', 'sessionhistory', 'globalhistory', 
+            'aprobadas', 'entries', 'grades', 'scores', 'records', 'notas', 
+            'materias', 'materiasaprobadas', 'fecha', 'date', 'version', 'id', 'total'
+        ]);
+
+        function normalizeString(str) {
+            return (str || '')
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/[^a-z0-9\s]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
+        function isValidSubjectName(name) {
+            if (!name || typeof name !== 'string') return false;
+            const clean = normalizeString(name);
+            if (!clean || clean.length < 3) return false;
+            if (METADATA_KEYS.has(clean)) return false;
+            if (clean.includes('actualizacion') || clean.includes('updatedat') || clean.includes('createdat')) return false;
+
+            // Validate against official MATERIAS_ADE catalog if available
+            if (window.MATERIAS_ADE && Array.isArray(window.MATERIAS_ADE) && window.MATERIAS_ADE.length > 0) {
+                return window.MATERIAS_ADE.some(m => {
+                    const mNorm = normalizeString(m.name);
+                    return mNorm === clean || mNorm.includes(clean) || clean.includes(mNorm);
+                });
+            }
+            return true;
+        }
+
+        function getOfficialSubjectName(name) {
+            if (!name || typeof name !== 'string') return name;
+            const clean = normalizeString(name);
+            if (window.MATERIAS_ADE && Array.isArray(window.MATERIAS_ADE)) {
+                const found = window.MATERIAS_ADE.find(m => {
+                    const mNorm = normalizeString(m.name);
+                    return mNorm === clean || mNorm.includes(clean) || clean.includes(mNorm);
+                });
+                if (found) return found.name;
+            }
+            return name.trim();
+        }
+
+        function cleanEntriesList(list) {
+            if (!Array.isArray(list)) return [];
+            const result = [];
+            list.forEach(item => {
+                if (!item) return;
+                const sName = typeof item === 'string' ? item : (item.subj || item.materia || item.name || item.subject || '');
+                if (isValidSubjectName(sName)) {
+                    const officialName = getOfficialSubjectName(sName);
+                    if (!result.some(e => normalizeString(e.subj) === normalizeString(officialName))) {
+                        let isNum = false;
+                        let gVal = 'Aprobado';
+                        const rawG = (item && item.grade !== undefined) ? item.grade : ((item && item.nota !== undefined) ? item.nota : 'Aprobado');
+                        
+                        if (typeof rawG === 'number' && !isNaN(rawG) && rawG >= 1 && rawG <= 10) {
+                            isNum = true;
+                            gVal = Number(rawG.toFixed(2));
+                        } else if (typeof rawG === 'string') {
+                            const p = parseFloat(rawG.replace(',', '.'));
+                            if (!isNaN(p) && p >= 1 && p <= 10 && !['A','AP','APROBADO','APROBADA','EQUIV'].includes(rawG.trim().toUpperCase())) {
+                                isNum = true;
+                                gVal = Number(p.toFixed(2));
+                            } else {
+                                gVal = 'Aprobado';
+                            }
+                        }
+
+                        result.push({
+                            subj: officialName,
+                            grade: gVal,
+                            isNumeric: isNum,
+                            date: (item && (item.date || item.fecha)) || new Date().toISOString()
+                        });
+                    }
+                }
+            });
+            return result;
+        }
 
         function showLoading(show, text) {
             const overlay = document.getElementById('loadingOverlay');
@@ -162,40 +333,39 @@
             const extracted = [];
 
             function pushEntry(sName, gVal, dt) {
-                if (!sName || typeof sName !== 'string') return;
-                const cleanName = sName.trim();
-                if (!cleanName) return;
-                if (extracted.some(e => e.subj.toLowerCase() === cleanName.toLowerCase())) return;
+                if (!isValidSubjectName(sName)) return;
+                const officialName = getOfficialSubjectName(sName);
+                if (extracted.some(e => normalizeString(e.subj) === normalizeString(officialName))) return;
 
                 let isNum = false;
                 let finalGrade = 'Aprobado';
 
-                if (typeof gVal === 'number' && !isNaN(gVal)) {
+                if (typeof gVal === 'number' && !isNaN(gVal) && gVal >= 1 && gVal <= 10) {
                     isNum = true;
                     finalGrade = Number(gVal.toFixed(2));
                 } else if (typeof gVal === 'string') {
                     const trimmedG = gVal.trim().toUpperCase();
                     const parsed = parseFloat(gVal.replace(',', '.'));
-                    if (!isNaN(parsed) && isFinite(parsed) && !['A', 'AP', 'APROBADO', 'APROBADA', 'EQUIV', 'EQUIVALENCIA'].includes(trimmedG)) {
+                    if (!isNaN(parsed) && parsed >= 1 && parsed <= 10 && !['A', 'AP', 'APROBADO', 'APROBADA', 'EQUIV', 'EQUIVALENCIA'].includes(trimmedG)) {
                         isNum = true;
                         finalGrade = Number(parsed.toFixed(2));
                     } else {
-                        finalGrade = (['A', 'AP', 'APROBADO', 'APROBADA', 'EQUIV', 'EQUIVALENCIA'].includes(trimmedG)) ? 'Aprobado' : (gVal || 'Aprobado');
+                        finalGrade = 'Aprobado';
                     }
                 } else if (gVal && typeof gVal === 'object') {
                     const rawG = gVal.grade !== undefined ? gVal.grade : (gVal.nota !== undefined ? gVal.nota : (gVal.calificacion !== undefined ? gVal.calificacion : 'Aprobado'));
-                    return pushEntry(cleanName, rawG, gVal.date || gVal.fecha || dt);
+                    return pushEntry(officialName, rawG, gVal.date || gVal.fecha || dt);
                 }
 
                 extracted.push({
-                    subj: cleanName,
+                    subj: officialName,
                     grade: finalGrade,
                     isNumeric: isNum,
                     date: dt || new Date().toISOString()
                 });
             }
 
-            // 1. Array and Object containers
+            // 1. Array containers
             const containerKeys = ['entries', 'grades', 'aprobadas', 'materiasAprobadas', 'materias', 'subjects', 'scores', 'records', 'notas'];
             for (const k of containerKeys) {
                 if (!d[k]) continue;
@@ -212,6 +382,7 @@
                     });
                 } else if (typeof d[k] === 'object') {
                     Object.keys(d[k]).forEach(subKey => {
+                        if (!isValidSubjectName(subKey)) return;
                         const val = d[k][subKey];
                         if (typeof val === 'number' || typeof val === 'string') {
                             pushEntry(subKey, val);
@@ -224,16 +395,17 @@
                 }
             }
 
-            // 2. Direct keys on root object
-            const reserved = new Set(['updatedAt', 'createdAt', 'timerState', 'userId', 'uid', 'email', 'cursando', 'enrolled']);
+            // 2. Direct root keys (strictly guarded against metadata)
             Object.keys(d).forEach(rootKey => {
-                if (reserved.has(rootKey) || containerKeys.includes(rootKey)) return;
+                if (containerKeys.includes(rootKey) || !isValidSubjectName(rootKey)) return;
                 const val = d[rootKey];
-                if (typeof val === 'number' || typeof val === 'string') {
+                if (typeof val === 'number' && val >= 1 && val <= 10) {
                     pushEntry(rootKey, val);
-                } else if (val && typeof val === 'object' && (val.grade !== undefined || val.nota !== undefined || val.name !== undefined || val.subj !== undefined || val.calificacion !== undefined)) {
-                    const sName = val.subj || val.materia || val.name || val.subject || val.nombre || rootKey;
-                    const gVal = val.grade !== undefined ? val.grade : (val.nota !== undefined ? val.nota : (val.calificacion !== undefined ? val.calificacion : 'Aprobado'));
+                } else if (typeof val === 'string' && val.length < 20) {
+                    pushEntry(rootKey, val);
+                } else if (val && typeof val === 'object' && (val.grade !== undefined || val.nota !== undefined || val.name !== undefined)) {
+                    const sName = val.subj || val.materia || val.name || val.subject || rootKey;
+                    const gVal = val.grade !== undefined ? val.grade : (val.nota !== undefined ? val.nota : 'Aprobado');
                     pushEntry(sName, gVal, val.date || val.fecha);
                 }
             });
@@ -268,6 +440,8 @@
         }
 
         function syncToStorage() {
+            // Guarantee pure academic entries without metadata pollution
+            entries = cleanEntriesList(entries);
             localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries));
 
             if (window.currentUser && window.currentUser.uid && window.db) {
@@ -298,6 +472,8 @@
         }
 
         function saveAndRender() {
+            entries = cleanEntriesList(entries);
+
             const list = document.getElementById('gradeList');
             const clearBtn = document.getElementById('btnClearAll');
             if (!list) return;
@@ -309,7 +485,7 @@
             if (entries.length === 0) {
                 list.innerHTML = `
                     <div style="text-align:center; padding:40px 20px; background:rgba(255,255,255,0.02); border:1px dashed var(--border); border-radius:16px;">
-                        <p style="color:var(--text-muted); font-size:14px;">No hay materias cargadas aún. Seleccioná una materia del selector superior.</p>
+                        <p style="color:var(--text-muted); font-size:14px;">No hay materias cargadas aún. Seleccioná una materia del selector o subí tu archivo de SIU Guaraní.</p>
                     </div>
                 `;
             } else {
@@ -372,12 +548,12 @@
             const subj = subjEl.value.trim();
             const gradeRaw = gradeEl.value.trim().toUpperCase();
 
-            if (!subj) {
-                alert('Por favor seleccioná una materia de la lista.');
+            if (!subj || !isValidSubjectName(subj)) {
+                alert('Por favor seleccioná una materia válida de la lista.');
                 return;
             }
 
-            if (entries.some(e => e.subj.toLowerCase() === subj.toLowerCase())) {
+            if (entries.some(e => normalizeString(e.subj) === normalizeString(subj))) {
                 alert('Ya has cargado esta materia en tu lista.');
                 return;
             }
@@ -391,8 +567,9 @@
                 return;
             }
 
+            const officialName = getOfficialSubjectName(subj);
             const newEntry = {
-                subj: subj,
+                subj: officialName,
                 grade: isNumeric ? Number(gradeNum.toFixed(2)) : 'Aprobado',
                 isNumeric: isNumeric,
                 date: new Date().toISOString()
@@ -422,6 +599,260 @@
                 saveAndRender();
                 syncToStorage();
             }
+        };
+
+        // ==================== SIU GUARANÍ IMPORTER (PDF & TEXT) ====================
+        window.openSiuModal = function() {
+            if (window.openModal) {
+                window.openModal('siuModal');
+            } else {
+                const m = document.getElementById('siuModal');
+                if (m) m.classList.add('active');
+            }
+        };
+
+        // PDF Drag & Drop Setup
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById('siuPdfDropZone');
+            if (dropZone) {
+                ['dragenter', 'dragover'].forEach(name => {
+                    dropZone.addEventListener(name, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropZone.classList.add('dragover');
+                    });
+                });
+                ['dragleave', 'drop'].forEach(name => {
+                    dropZone.addEventListener(name, (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dropZone.classList.remove('dragover');
+                    });
+                });
+                dropZone.addEventListener('drop', (e) => {
+                    const dt = e.dataTransfer;
+                    if (dt && dt.files && dt.files.length > 0) {
+                        const file = dt.files[0];
+                        if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                            processSiuPdfFile(file);
+                        } else {
+                            alert('Por favor subí un archivo en formato PDF.');
+                        }
+                    }
+                });
+            }
+        });
+
+        window.handleSiuPdfFile = function(e) {
+            const file = e.target.files && e.target.files[0];
+            if (file) {
+                processSiuPdfFile(file);
+            }
+        };
+
+        async function processSiuPdfFile(file) {
+            showLoading(true, 'Extrayendo texto del PDF del SIU Guaraní...');
+            try {
+                if (typeof pdfjsLib === 'undefined') {
+                    throw new Error('PDF.js no se cargó correctamente');
+                }
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                let extractedText = '';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    extractedText += pageText + '\n';
+                }
+
+                const rawInput = document.getElementById('siuRawInput');
+                if (rawInput) rawInput.value = extractedText;
+                
+                showLoading(false);
+                window.parseSiuText();
+            } catch (err) {
+                console.error('Error al procesar el PDF:', err);
+                showLoading(false);
+                alert('No se pudo leer el archivo PDF. Podés copiar y pegar el texto de tu Historia Académica en el cuadro inferior.');
+            }
+        }
+
+        window.parseSiuText = function() {
+            const raw = document.getElementById('siuRawInput')?.value || '';
+            if (!raw.trim()) {
+                alert('Por favor subí un PDF o pegá el texto copiado de SIU Guaraní antes de analizar.');
+                return;
+            }
+
+            if (!window.MATERIAS_ADE || window.MATERIAS_ADE.length === 0) {
+                alert('Error: No se pudo cargar el catálogo de materias de ADE.');
+                return;
+            }
+
+            parsedSiuItems = [];
+            const lines = raw.split(/\r?\n|\t/);
+
+            window.MATERIAS_ADE.forEach(materia => {
+                const mNorm = normalizeString(materia.name);
+                let matchedLine = null;
+
+                for (const line of lines) {
+                    const lineNorm = normalizeString(line);
+                    if (lineNorm.includes(mNorm)) {
+                        matchedLine = line;
+                        break;
+                    }
+                }
+
+                if (!matchedLine) {
+                    const tokens = mNorm.split(' ').filter(t => t.length > 2 && !['del','las','los','por','con','para','una','uno'].includes(t));
+                    if (tokens.length > 0) {
+                        for (const line of lines) {
+                            const lineNorm = normalizeString(line);
+                            const matchCount = tokens.filter(t => lineNorm.includes(t)).length;
+                            if (matchCount === tokens.length || (tokens.length >= 3 && matchCount >= tokens.length - 1)) {
+                                matchedLine = line;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (matchedLine) {
+                    let grade = 'Aprobado';
+                    let isNumeric = false;
+
+                    const numMatch = matchedLine.match(/(?:nota\s*[:=]?\s*|\t|\s+|^)(10|[1-9](?:[.,]\d+)?)(?:\s*\([a-záéíóúñ]+\)|\s+|$|\t)/i);
+                    const wordMap = { diez: 10, nueve: 9, ocho: 8, siete: 7, seis: 6, cinco: 5, cuatro: 4, tres: 3, dos: 2, uno: 1 };
+                    let wordMatch = null;
+                    for (const [w, val] of Object.entries(wordMap)) {
+                        if (new RegExp(`\\b${w}\\b`, 'i').test(matchedLine)) {
+                            wordMatch = val;
+                            break;
+                        }
+                    }
+
+                    if (numMatch && !isNaN(parseFloat(numMatch[1].replace(',', '.')))) {
+                        const n = parseFloat(numMatch[1].replace(',', '.'));
+                        if (n >= 1 && n <= 10) {
+                            grade = Number(n.toFixed(2));
+                            isNumeric = true;
+                        }
+                    } else if (wordMatch) {
+                        grade = wordMatch;
+                        isNumeric = true;
+                    } else if (/equivalencia|aprobada?|promocionada?|taller/i.test(matchedLine)) {
+                        grade = 'Aprobado';
+                        isNumeric = false;
+                    }
+
+                    const alreadyExists = entries.some(e => normalizeString(e.subj) === mNorm);
+
+                    parsedSiuItems.push({
+                        subject: materia.name,
+                        grade: grade,
+                        isNumeric: isNumeric,
+                        selected: true,
+                        alreadyExists: alreadyExists
+                    });
+                }
+            });
+
+            const container = document.getElementById('siuPreviewContainer');
+            const list = document.getElementById('siuPreviewList');
+            const countEl = document.getElementById('siuDetectedCount');
+
+            if (!container || !list) return;
+
+            if (parsedSiuItems.length === 0) {
+                list.innerHTML = `
+                    <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">
+                        No se detectaron materias del plan oficial de ADE en el texto. Asegurate de que el archivo o texto contenga la Historia Académica completa.
+                    </div>
+                `;
+                if (countEl) countEl.textContent = '0';
+                container.style.display = 'block';
+                return;
+            }
+
+            if (countEl) countEl.textContent = parsedSiuItems.length;
+
+            list.innerHTML = parsedSiuItems.map((item, idx) => {
+                const gradeText = item.isNumeric ? `Nota: ${item.grade}` : 'Aprobado';
+                const badgeClass = item.isNumeric ? 'siu-grade-badge' : 'siu-grade-badge approved';
+                const updateNotice = item.alreadyExists ? '<span style="font-size:10px; color:var(--warning); font-weight:700; margin-left:6px;">(Ya cargada)</span>' : '';
+
+                return `
+                    <div class="siu-preview-item">
+                        <div class="siu-preview-left">
+                            <input type="checkbox" id="siu_check_${idx}" class="siu-checkbox" ${item.selected ? 'checked' : ''} onchange="window.toggleSiuItem(${idx}, this.checked)">
+                            <div style="display:flex; flex-direction:column; gap:2px;">
+                                <span class="siu-subject-name">${window.sanitizeHTML(item.subject)} ${updateNotice}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="${badgeClass}">${gradeText}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.style.display = 'block';
+        };
+
+        window.toggleSiuItem = function(idx, checked) {
+            if (parsedSiuItems[idx]) {
+                parsedSiuItems[idx].selected = checked;
+            }
+        };
+
+        window.toggleAllSiuCheckboxes = function() {
+            const allChecked = parsedSiuItems.every(i => i.selected);
+            parsedSiuItems.forEach(i => i.selected = !allChecked);
+            const checkboxes = document.querySelectorAll('.siu-checkbox');
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+        };
+
+        window.confirmSiuImport = function() {
+            const toImport = parsedSiuItems.filter(i => i.selected);
+            if (toImport.length === 0) {
+                alert('Por favor seleccioná al menos una materia para importar.');
+                return;
+            }
+
+            showLoading(true, 'Procesando e importando notas...');
+
+            toImport.forEach(item => {
+                const existingIdx = entries.findIndex(e => normalizeString(e.subj) === normalizeString(item.subject));
+                const entryObj = {
+                    subj: item.subject,
+                    grade: item.grade,
+                    isNumeric: item.isNumeric,
+                    date: new Date().toISOString()
+                };
+
+                if (existingIdx !== -1) {
+                    entries[existingIdx] = entryObj;
+                } else {
+                    entries.push(entryObj);
+                }
+            });
+
+            saveAndRender();
+            syncToStorage();
+
+            if (window.closeModal) window.closeModal('siuModal');
+            showLoading(false);
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-notice';
+            toast.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#32D74B" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Se importaron con éxito ${toImport.length} materias desde SIU Guaraní.`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
         };
 
         window.descargarPDF = function() {
@@ -510,7 +941,10 @@
 
             try {
                 const cached = localStorage.getItem('ungs_grades_backup_guest');
-                if (cached) entries = JSON.parse(cached) || [];
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    entries = cleanEntriesList(parsed);
+                }
             } catch(e) {
                 entries = [];
             }
@@ -541,7 +975,7 @@
                                     if (d) {
                                         const parsed = extractGradesFromDoc(d);
                                         parsed.forEach(p => {
-                                            if (!loadedEntries.some(e => e.subj.toLowerCase() === p.subj.toLowerCase())) {
+                                            if (isValidSubjectName(p.subj) && !loadedEntries.some(e => normalizeString(e.subj) === normalizeString(p.subj))) {
                                                 loadedEntries.push(p);
                                             }
                                         });
@@ -550,9 +984,10 @@
                             });
 
                             if (loadedEntries.length > 0) {
-                                entries = loadedEntries;
+                                entries = cleanEntriesList(loadedEntries);
                                 syncToStorage();
                             } else if (entries.length > 0) {
+                                entries = cleanEntriesList(entries);
                                 syncToStorage();
                             }
 
