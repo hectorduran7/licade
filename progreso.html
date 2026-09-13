@@ -238,9 +238,7 @@
             'ultimaactualizacion', 'ultima_actualizacion', 'updatedat', 'createdat', 
             'lastupdated', 'timestamp', 'fechaactualizacion', 'fecha_actualizacion', 
             'userid', 'uid', 'email', 'cursando', 'enrolled', 'timerstate', 
-            'timer_state', 'stats', 'subjectstats', 'sessionhistory', 'globalhistory', 
-            'aprobadas', 'entries', 'grades', 'scores', 'records', 'notas', 
-            'materias', 'materiasaprobadas', 'fecha', 'date', 'version', 'id', 'total', 'tipo'
+            'timer_state', 'stats'
         ]);
 
         function normalizeString(str) {
@@ -329,7 +327,7 @@
 
         // Deep Recursive Parsing for all forms of nested grade objects/arrays
         function deepExtractGrades(node, depth = 0, results = []) {
-            if (!node || depth > 5) return results;
+            if (!node || depth > 7) return results;
 
             function addEntry(name, gradeVal, dateVal) {
                 if (!isValidSubjectName(name)) return;
@@ -368,7 +366,7 @@
                     } else if (item && typeof item === 'object') {
                         const sName = item.subj || item.materia || item.name || item.subject || item.nombre || item.title || '';
                         const gVal = item.grade !== undefined ? item.grade : (item.nota !== undefined ? item.nota : (item.calificacion !== undefined ? item.calificacion : 'Aprobado'));
-                        if (sName) {
+                        if (sName && isValidSubjectName(sName)) {
                             addEntry(sName, gVal, item.date || item.fecha);
                         } else {
                             deepExtractGrades(item, depth + 1, results);
@@ -376,8 +374,30 @@
                     }
                 });
             } else if (typeof node === 'object') {
+                // Direct fast-path for known container arrays/maps
+                if (Array.isArray(node.entries)) {
+                    deepExtractGrades(node.entries, depth + 1, results);
+                }
+                if (Array.isArray(node.aprobadas)) {
+                    deepExtractGrades(node.aprobadas, depth + 1, results);
+                }
+                if (Array.isArray(node.materiasAprobadas)) {
+                    deepExtractGrades(node.materiasAprobadas, depth + 1, results);
+                }
+                if (node.grades && typeof node.grades === 'object' && !Array.isArray(node.grades)) {
+                    Object.keys(node.grades).forEach(k => {
+                        if (isValidSubjectName(k)) {
+                            addEntry(k, node.grades[k]);
+                        }
+                    });
+                }
+
+                // General traversal for any remaining keys/subobjects
                 Object.keys(node).forEach(k => {
-                    if (METADATA_KEYS.has(normalizeString(k)) || k.toLowerCase().includes('actualizacion') || k.toLowerCase().includes('updated')) return;
+                    const kNorm = normalizeString(k);
+                    if (METADATA_KEYS.has(kNorm) || k.toLowerCase().includes('actualizacion') || k.toLowerCase().includes('updated')) return;
+                    if (['entries', 'aprobadas', 'materiasaprobadas', 'grades'].includes(kNorm)) return;
+
                     const val = node[k];
                     if (isValidSubjectName(k)) {
                         if (typeof val === 'number' || typeof val === 'string') {
@@ -937,12 +957,16 @@
                             if (res && res.exists) {
                                 const d = res.data();
                                 if (d) {
-                                    const parsed = deepExtractGrades(d);
-                                    parsed.forEach(p => {
-                                        if (isValidSubjectName(p.subj) && !loadedEntries.some(e => normalizeString(e.subj) === normalizeString(p.subj))) {
-                                            loadedEntries.push(p);
-                                        }
-                                    });
+                                    // Fast-path: check direct containers first
+                                    if (Array.isArray(d.entries) && d.entries.length > 0) {
+                                        loadedEntries = deepExtractGrades(d.entries);
+                                    } else if (Array.isArray(d.aprobadas) && d.aprobadas.length > 0) {
+                                        loadedEntries = deepExtractGrades(d.aprobadas);
+                                    } else if (d.grades && typeof d.grades === 'object') {
+                                        loadedEntries = deepExtractGrades(d.grades);
+                                    } else {
+                                        loadedEntries = deepExtractGrades(d);
+                                    }
                                 }
                             }
 
