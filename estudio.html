@@ -1,2395 +1,4371 @@
 <!DOCTYPE html>
+
 <html lang="es" data-theme="orange">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
     <title>Sesión de Estudio | La Biblioteca de ADE</title>
 
+
+
     <!-- CSS Module -->
+
     <link rel="stylesheet" href="css/styles.css">
 
+
+
     <!-- Anti-Inspection & DevTools Protection -->
+
     <script src="protection.js"></script>
 
+
+
     <!-- Firebase SDK Compat v10.13.0 -->
+
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 
+
+
     <!-- Canvas Confetti -->
+
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
+
+
     <!-- Google Analytics -->
+
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
+
     <script>
+
       window.dataLayer = window.dataLayer || [];
+
       function gtag(){dataLayer.push(arguments);}
+
       gtag('js', new Date());
+
       gtag('config', 'G-PQGH6R9SZC');
+
     </script>
+
+
 
     <!-- Theme pre-init -->
+
     <script>
+
         const savedTheme = localStorage.getItem('ungs_theme') || 'orange';
+
         document.documentElement.setAttribute('data-theme', savedTheme);
+
     </script>
+
 </head>
+
 <body>
+
     <!-- Background Effects -->
+
     <div class="bg-mesh"></div>
+
     <div class="bg-spotlight"></div>
 
+
+
     <!-- Sidebar Mount Point -->
+
     <div id="sidebar-mount"></div>
 
+
+
     <!-- Distraction Free Mode Buttons -->
+
     <button class="distraction-free-btn" onclick="window.enterDistractionFreeMode()">
+
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+
         Modo sin distracciones
+
     </button>
+
     <button id="exitDistractionBtnFloat" onclick="window.exitDistractionFreeMode()">
+
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+
         Salir del modo sin distracciones
+
     </button>
+
+
 
     <!-- MAIN APP CONTENT -->
+
     <main class="app-container">
+
         
+
         <!-- ========================================== -->
+
         <!-- VISTA 1: CRONÓMETRO / SESIÓN DE ESTUDIO    -->
+
         <!-- ========================================== -->
+
         <div id="viewCronometro" class="study-view">
+
             <!-- Academic Header -->
+
             <header class="page-header" style="margin-bottom: 28px; text-align: center;">
+
                 <div class="page-kicker">Herramientas de Concentración • UNGS</div>
+
                 <h1 class="page-title" style="margin-bottom: 6px;">Sesión de Estudio</h1>
+
                 <p class="page-subtitle" style="margin: 0 auto; max-width: 620px;">Temporizador Pomodoro personalizable, pausas activas y métricas de enfoque diario.</p>
+
                 
+
                 <!-- Secondary Clean Action Bar under subtitle -->
+
                 <div style="display: flex; justify-content: center; align-items: center; margin-top: 16px;">
+
                     <a href="#metricas" class="btn-dark" id="openMetricsBtn" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; font-size: 13px; font-weight: 700; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); box-shadow: 0 4px 18px rgba(0,0,0,0.35); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); cursor: pointer; text-decoration: none; color: var(--text-main); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+
                         <span>Ver Métricas e Historial</span>
+
                     </a>
+
                 </div>
+
             </header>
 
+
+
             <!-- Vertical Fluid Scroll Layout -->
+
             <div class="study-scroll-layout">
+
                 <!-- 1. HERO TIMER CARD -->
+
                 <section class="glass-card timer-container" style="text-align: center; padding: 36px 24px;">
+
                     <div id="currentSubjectPill" class="current-subject-pill" style="display: none; margin: 0 auto 16px auto;">
+
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+
                         <span id="currentSubjectPillText">Estudio Libre</span>
+
                     </div>
+
+
 
                     <div class="timer-display" id="timerDisplay">25:00</div>
 
+
+
                     <!-- Active Pause / Break indicator in Distraction-Free and standard mode -->
+
                     <div id="activePauseBreakPill" style="display:none; margin: 16px auto 0 auto; background: rgba(50, 215, 75, 0.12); border: 1px solid rgba(50, 215, 75, 0.35); border-radius: 999px; padding: 7px 18px; align-items: center; justify-content: center; gap: 10px; max-width: fit-content; box-shadow: 0 4px 16px rgba(50, 215, 75, 0.15);">
+
                         <div style="width: 8px; height: 8px; border-radius: 50%; background: #32D74B; box-shadow: 0 0 10px #32D74B;"></div>
+
                         <span id="activePauseLabel" style="font-size: 13px; font-weight: 700; color: #32D74B;">Descanso activo (Cronómetro)</span>
+
                         <span id="activePauseCountdown" style="font-size: 14px; font-weight: 800; color: #ffffff; font-variant-numeric: tabular-nums;">00:00</span>
+
                         <button type="button" id="endBreakPillBtn" onclick="window.stopActiveBreak()" style="display:none; background: transparent; border: none; color: rgba(255,255,255,0.7); cursor: pointer; padding: 0 0 0 4px; align-items: center;" title="Finalizar descanso">
+
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+
                         </button>
+
                     </div>
+
+
 
                     <div id="breakMessage" style="display:none; color:var(--primary); font-size:15px; font-weight:700; text-align:center; margin: 12px 0;">
+
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> ¡Excelente trabajo! Momento de descansar.
+
                     </div>
+
+
 
                     <div class="controls" style="margin-top: 24px; justify-content: center; flex-wrap: wrap;">
+
                         <button type="button" class="control-btn btn-primary-solid" id="playBtn" onclick="window.startTimer()">
+
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Iniciar
+
                         </button>
+
                         <button type="button" class="control-btn btn-dark" id="pauseBtn" onclick="window.pauseTimer()" disabled>
+
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pausar
+
                         </button>
+
                         <button type="button" class="control-btn btn-dark" id="resetBtn" onclick="window.resetTimer()">
+
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg> Reiniciar
+
                         </button>
+
                         <button type="button" class="control-btn control-btn-danger" id="finishBtn" onclick="window.finishSession()" disabled>
+
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg> Terminar
+
                         </button>
+
                     </div>
+
                 </section>
 
+
+
                 <!-- 2. CONFIGURATION CARD (Subject + Apple Switch + Duration) -->
+
                 <section class="glass-card" style="display: flex; flex-direction: column; gap: 20px;">
+
                     <!-- Materia Selector -->
+
                     <div>
+
                         <label for="subjectSelect" style="font-size:14px; font-weight:700; color:var(--text-main); display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+
                             ¿Qué vas a estudiar hoy?
+
                         </label>
+
                         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+
                             <select id="subjectSelect" class="calc-input" style="flex: 2; min-width: 220px;">
+
                                 <option value="">Seleccioná una materia del plan...</option>
+
                             </select>
+
                             <button type="button" class="btn-dark" id="freeStudyBtn" style="white-space: nowrap; padding: 0 16px;">
+
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Libre
+
                             </button>
+
                             <button type="button" class="btn-dark" id="customTopicBtn" onclick="window.promptCustomTopic()" style="white-space: nowrap; padding: 0 16px;">
+
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px; margin-right:4px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Otro tema
+
                             </button>
+
                         </div>
+
                     </div>
+
+
 
                     <div style="height: 1px; background: var(--border);"></div>
 
+
+
                     <!-- Apple Toggle Switch for Stopwatch Mode -->
+
                     <div class="apple-switch-wrapper">
+
                         <div class="apple-switch-label">
+
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+
                             <span>Modo Cronómetro (Sin límite de tiempo)</span>
+
                         </div>
+
                         <label class="apple-switch" title="Activar/Desactivar cronómetro sin límite">
+
                             <input type="checkbox" id="unlimitedMode">
+
                             <span class="apple-slider"></span>
+
                         </label>
+
                     </div>
+
+
 
                     <!-- Duration adjustments -->
+
                     <div id="durationSection" style="display: flex; flex-direction: column; gap: 14px;">
+
                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+
                             <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Duración del Bloque</span>
+
                             <div class="duration-input-group" style="margin: 0;">
+
                                 <button type="button" class="duration-btn-decrement" id="durationMinus">−</button>
+
                                 <div class="duration-value"><span id="durationNumber">25</span><span style="font-size:14px; color:var(--text-muted); margin-left:2px;">min</span></div>
+
                                 <button type="button" class="duration-btn-increment" id="durationPlus">+</button>
+
                             </div>
+
                         </div>
+
                         <div class="duration-presets">
+
                             <button type="button" class="preset-btn" data-minutes="10">10m</button>
+
                             <button type="button" class="preset-btn" data-minutes="15">15m</button>
+
                             <button type="button" class="preset-btn active" data-minutes="25">25m</button>
+
                             <button type="button" class="preset-btn" data-minutes="30">30m</button>
+
                             <button type="button" class="preset-btn" data-minutes="45">45m</button>
+
                             <button type="button" class="preset-btn" data-minutes="50">50m</button>
+
                             <button type="button" class="preset-btn" data-minutes="60">60m</button>
+
                             <button type="button" class="preset-btn" data-minutes="90">90m</button>
+
                         </div>
+
                     </div>
+
                 </section>
+
+
 
                 <!-- 3. RECOMMENDED TECHNIQUES CARD -->
+
                 <section class="glass-card techniques-container">
+
                     <div class="techniques-title">
+
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+
                         Técnicas Recomendadas
+
                     </div>
+
                     <div class="techniques-grid">
+
                         <div class="technique-card" onclick="window.applyPresetTechnique(25)" style="cursor:pointer;" title="Hacé clic para aplicar Pomodoro de 25 min">
+
                             <div style="display:flex; justify-content:space-between; align-items:center;">
+
                                 <h4>Pomodoro Clásico</h4>
+
                                 <span class="coming-badge" style="background:var(--primary-glow); color:var(--primary); border-color:transparent;">25 / 5 min</span>
+
                             </div>
+
                             <p>25 minutos de estudio ininterrumpido seguidos de 5 minutos de pausa activa.</p>
+
                         </div>
+
                         <div class="technique-card" onclick="window.applyPresetTechnique(50)" style="cursor:pointer;" title="Hacé clic para aplicar Deep Work de 50 min">
+
                             <div style="display:flex; justify-content:space-between; align-items:center;">
+
                                 <h4>Deep Work</h4>
+
                                 <span class="coming-badge" style="background:var(--primary-glow); color:var(--primary); border-color:transparent;">50 / 10 min</span>
+
                             </div>
+
                             <p>Bloques largos para materias de alta complejidad como Matemáticas o Economía.</p>
+
                         </div>
+
                     </div>
+
                 </section>
+
             </div>
+
+
 
             <!-- Footer Suggestions -->
+
             <div style="margin-top: 24px; text-align: center;">
+
                 <a href="https://forms.gle/cPf3HtrUNwGC7cKo7" class="btn-dark" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; margin:0 auto;">
+
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+
                     Sugerencias para el Temporizador
+
                 </a>
+
             </div>
+
         </div>
 
+
+
         <!-- ========================================== -->
+
         <!-- VISTA 2: MÉTRICAS E HISTORIAL              -->
+
         <!-- ========================================== -->
+
         <div id="viewMetricas" class="study-view" style="display: none; max-width: 960px; margin: 0 auto; padding-bottom: 30px;">
+
             <!-- Navigation Back Action -->
+
             <div style="margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+
                 <a href="#cronometro" class="btn-dark" style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; font-size: 13px; font-weight: 700; border-radius: 12px; text-decoration: none; color: var(--text-main);">
+
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+
                     <span>Volver al Cronómetro</span>
+
                 </a>
+
                 <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">
+
                     Sincronización en tiempo real activa
+
                 </div>
+
             </div>
+
+
 
             <!-- Academic Header -->
+
             <header class="page-header" style="margin-bottom: 24px;">
+
                 <div class="page-kicker">Herramientas de Concentración • UNGS</div>
+
                 <h1 class="page-title" style="margin-bottom: 6px;">Métricas e Historial de Estudio</h1>
+
                 <p class="page-subtitle" style="margin: 0; max-width: 700px;">Panel analítico de concentración, pausas activas y registro de rendimiento por materia.</p>
+
             </header>
 
+
+
             <!-- Main Content Stack -->
+
             <div style="display: flex; flex-direction: column; gap: 24px;">
+
                 <!-- SECTION 1: KPIS & STATS -->
+
                 <section class="glass-card" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+
                         <div style="display: flex; align-items: center; gap: 10px;">
+
                             <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(10, 132, 255, 0.12); border: 1px solid rgba(10, 132, 255, 0.25); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+
                             </div>
+
                             <h2 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0;">Métricas de Rendimiento</h2>
+
                         </div>
+
+
 
                         <!-- Period Switcher -->
+
                         <div class="section-tabs" style="margin: 0;">
+
                             <button type="button" class="section-tab active" id="tabStatsHoy" onclick="window.toggleStats('hoy')">Hoy</button>
+
                             <button type="button" class="section-tab" id="tabStatsGlobal" onclick="window.toggleStats('global')">Total Histórico</button>
+
                             <button type="button" class="section-tab" id="tabStatsMateria" onclick="window.toggleStats('materia')">Por Materia</button>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- Grid Hoy -->
+
                     <div class="stats-grid" id="statsGridHoy">
+
                         <div class="stat-card">
+
                             <div class="stat-label">Racha</div>
+
                             <div class="stat-value" id="statStreak">0</div>
+
                             <div style="font-size:11px; color:var(--text-muted);">días seguidos</div>
+
                         </div>
+
                         <div class="stat-card">
+
                             <div class="stat-label">Sesiones</div>
+
                             <div class="stat-value" id="statSessions">0</div>
+
                             <div style="font-size:11px; color:var(--text-muted);">completadas hoy</div>
+
                         </div>
+
                         <div class="stat-card">
+
                             <div class="stat-label">Tiempo Enfoque</div>
+
                             <div class="stat-value" id="statTime">0m</div>
+
                             <div style="font-size:11px; color:var(--text-muted);">estudio productivo</div>
+
                         </div>
+
                         <div class="stat-card">
+
                             <div class="stat-label">Tiempo Descanso</div>
+
                             <div class="stat-value" id="statBreakTime" style="color: #32D74B;">0m</div>
+
                             <div style="font-size:11px; color:var(--text-muted);">pausa activa</div>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- Grid Total Histórico -->
+
                     <div class="stats-grid hidden" id="statsGridGlobal">
+
                         <div class="stat-card">
+
                             <div class="stat-label">Racha Máxima</div>
+
                             <div class="stat-value" id="statGlobalStreak">0</div>
+
                             <div style="font-size:11px; color:var(--text-muted);">días seguidos</div>
+
                         </div>
+
                         <div class="stat-card">
+
                             <div class="stat-label">Sesiones Totales</div>
+
                             <div class="stat-value" id="statGlobalSessions">0</div>
+
                             <div style="font-size:11px; color:var(--text-muted);">acumuladas</div>
+
                         </div>
+
                         <div class="stat-card">
+
                             <div class="stat-label">Tiempo Enfoque Total</div>
+
                             <div class="stat-value" id="statGlobalTime">0m</div>
+
                             <div style="font-size:11px; color:var(--text-muted);">acumulado</div>
+
                         </div>
+
                         <div class="stat-card">
+
                             <div class="stat-label">Tiempo Descanso Total</div>
+
                             <div class="stat-value" id="statGlobalBreakTime" style="color: #32D74B;">0m</div>
+
                             <div style="font-size:11px; color:var(--text-muted);">acumulado</div>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- Grid Por Materia -->
+
                     <div class="hidden" id="statsGridMateria" style="display: flex; flex-direction: column; gap: 16px;">
+
                         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+
                             <label for="statsSubjectFilter" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Filtrar por materia:</label>
+
                             <select id="statsSubjectFilter" class="calc-input" style="flex: 1; min-width: 220px;" onchange="window.renderSubjectStats()">
+
                                 <option value="ALL">Todas las materias (Desglose global)</option>
+
                             </select>
+
                         </div>
+
+
 
                         <div class="stats-grid" id="statsSubjectCards">
+
                             <div class="stat-card">
+
                                 <div class="stat-label">Materias</div>
+
                                 <div class="stat-value" id="statSubjCount">0</div>
+
                                 <div style="font-size:11px; color:var(--text-muted);">con dedicación</div>
+
                             </div>
+
                             <div class="stat-card">
+
                                 <div class="stat-label">Sesiones</div>
+
                                 <div class="stat-value" id="statSubjSessions">0</div>
+
                                 <div style="font-size:11px; color:var(--text-muted);">en la materia</div>
+
                             </div>
+
                             <div class="stat-card">
+
                                 <div class="stat-label">Tiempo Enfoque</div>
+
                                 <div class="stat-value" id="statSubjTime">0m</div>
+
                                 <div style="font-size:11px; color:var(--text-muted);">dedicación total</div>
+
                             </div>
+
                             <div class="stat-card">
+
                                 <div class="stat-label">Tiempo Descanso</div>
+
                                 <div class="stat-value" id="statSubjBreakTime" style="color: #32D74B;">0m</div>
+
                                 <div style="font-size:11px; color:var(--text-muted);">en la materia</div>
+
                             </div>
+
                         </div>
+
+
 
                         <!-- Subject Breakdown Cards -->
+
                         <div id="statsSubjectBreakdownList" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;"></div>
+
                     </div>
+
                 </section>
+
+
 
                 <!-- SECTION 2: SESSION HISTORY -->
+
                 <section class="glass-card" style="padding: 24px; display: flex; flex-direction: column; gap: 18px;">
+
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+
                         <div style="display: flex; align-items: center; gap: 10px;">
+
                             <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(50, 215, 75, 0.12); border: 1px solid rgba(50, 215, 75, 0.25); display: flex; align-items: center; justify-content: center; color: #32D74B;">
+
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+
                             </div>
+
                             <h2 style="font-size: 17px; font-weight: 800; color: var(--text-main); margin: 0;">Historial de Sesiones</h2>
+
                         </div>
+
+
 
                         <!-- History View Switcher -->
+
                         <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:10px;">
+
                             <div class="section-tabs" style="margin: 0;">
+
                                 <button type="button" class="section-tab active" id="tabHistoryHoy" onclick="window.toggleHistory('hoy')">Hoy</button>
+
                                 <button type="button" class="section-tab" id="tabHistoryGlobal" onclick="window.toggleHistory('global')">Global</button>
+
                                 <button type="button" class="section-tab" id="tabHistoryMateria" onclick="window.toggleHistory('materia')">Por Materia</button>
+
                             </div>
+
                             <button type="button" onclick="window.clearAllStudyData && window.clearAllStudyData()" style="background:transparent; border:1px solid rgba(255,69,58,0.25); color:#FF453A; padding:5px 10px; border-radius:8px; font-size:11px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:5px; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,69,58,0.1)'" onmouseout="this.style.background='transparent'">
+
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+
                                 <span>Limpiar Historial</span>
+
                             </button>
+
                         </div>
+
                     </div>
+
+
 
                     <!-- History Lists -->
+
                     <div class="history-list" id="historyListHoy">
+
                         <div style="text-align:center; padding:36px; color:var(--text-muted); font-size:13px;">Sin sesiones completadas hoy.</div>
+
                     </div>
+
+
 
                     <div class="history-list hidden" id="historyListGlobal">
+
                         <div style="text-align:center; padding:36px; color:var(--text-muted); font-size:13px;">Sin historial acumulado aún.</div>
+
                     </div>
+
+
 
                     <div class="history-list hidden" id="historyListMateria">
+
                         <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
+
                             <label for="historySubjectFilterSelect" style="font-size: 13px; font-weight: 600; color: var(--text-muted);">Filtrar por:</label>
+
                             <select id="historySubjectFilterSelect" class="calc-input" style="flex: 1; min-width: 220px;" onchange="window.filterHistoryBySelectedSubject()">
+
                                 <option value="ALL">Todas las materias</option>
+
                             </select>
+
                         </div>
+
                         <div id="historyMateriaFilteredList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+
                     </div>
+
                 </section>
 
+
+
                 <!-- Bottom CTA: Return / Start Session -->
+
                 <div style="text-align: center; margin-top: 10px;">
+
                     <a href="#cronometro" class="btn-primary-solid" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 28px; font-size: 14px; font-weight: 700; border-radius: 14px; text-decoration: none;">
+
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+
                         <span>Iniciar Nueva Sesión de Concentración</span>
+
                     </a>
+
                 </div>
+
             </div>
+
         </div>
+
     </main>
 
+
+
     <!-- Modal Limpio y Elegante de Descanso Post-Bloque -->
+
     <div id="breakModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 99999; align-items: center; justify-content: center; padding: 20px;">
+
         <div class="glass-card" style="max-width: 440px; width: 100%; text-align: center; padding: 32px 24px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9); border-radius: 24px;">
+
             <div style="width: 52px; height: 52px; border-radius: 16px; background: rgba(255, 159, 10, 0.12); border: 1px solid rgba(255, 159, 10, 0.3); display: flex; align-items: center; justify-content: center; color: #FF9F0A; margin: 0 auto 16px auto;">
+
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+
             </div>
+
             <h3 style="font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0 0 8px 0; line-height: 1.35;">
+
                 Bloque de estudio finalizado.<br><span style="color: var(--primary); font-weight: 700;">¿Cuánto querés descansar?</span>
+
             </h3>
+
             <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 22px 0;">Tomate una pausa activa para despejar la mente antes de tu próxima sesión.</p>
+
             
+
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px;">
+
                 <button type="button" class="btn-dark break-preset-select active" data-minutes="5" style="padding: 11px 0; font-weight: 700; font-size: 13px; border-radius: 12px;" onclick="window.selectBreakModalPreset(5)">5 min</button>
+
                 <button type="button" class="btn-dark break-preset-select" data-minutes="10" style="padding: 11px 0; font-weight: 700; font-size: 13px; border-radius: 12px;" onclick="window.selectBreakModalPreset(10)">10 min</button>
+
                 <button type="button" class="btn-dark break-preset-select" data-minutes="15" style="padding: 11px 0; font-weight: 700; font-size: 13px; border-radius: 12px;" onclick="window.selectBreakModalPreset(15)">15 min</button>
+
                 <button type="button" class="btn-dark break-preset-select" data-minutes="20" style="padding: 11px 0; font-weight: 700; font-size: 13px; border-radius: 12px;" onclick="window.selectBreakModalPreset(20)">20 min</button>
+
             </div>
+
             
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px;">
+
                 <button type="button" class="btn-dark" style="padding: 10px 8px; font-size: 12px; font-weight: 600; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.promptCustomBreak()">
+
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+
                     Personalizado...
+
                 </button>
+
                 <button type="button" class="btn-dark" style="padding: 10px 8px; font-size: 12px; font-weight: 600; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" onclick="window.startFreeBreakChrono()">
+
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+
                     Cronómetro libre
+
                 </button>
+
             </div>
+
+
 
             <div style="display: flex; flex-direction: column; gap: 8px;">
+
                 <button type="button" class="btn-primary-solid" id="confirmStartBreakBtn" style="width: 100%; padding: 12px; font-size: 14px; font-weight: 700; border-radius: 12px;" onclick="window.confirmSelectedBreak()">
+
                     Iniciar Descanso
+
                 </button>
+
                 <button type="button" class="btn-dark" style="width: 100%; padding: 10px 16px; font-size: 13px; border-radius: 12px; color: var(--text-muted);" onclick="window.closeBreakModal()">
+
                     Omitir descanso
+
                 </button>
+
             </div>
+
         </div>
+
     </div>
 
+
+
     <!-- Core Scripts -->
+
     <script src="firebase-config.js"></script>
+
     <script src="js/materias-data.js"></script>
+
     <script src="js/app.js"></script>
+
     <script src="js/auth.js"></script>
+
     <script src="js/sidebar.js"></script>
 
+
+
     <!-- Estudio Page Logic -->
+
     <script>
+
         // DOM Elements - Timer
+
         const subjectSelect = document.getElementById('subjectSelect');
+
         const currentSubjectPill = document.getElementById('currentSubjectPill');
+
         const currentSubjectPillText = document.getElementById('currentSubjectPillText');
+
         const finishBtn = document.getElementById('finishBtn');
+
         const playBtn = document.getElementById('playBtn');
+
         const pauseBtn = document.getElementById('pauseBtn');
+
         const resetBtn = document.getElementById('resetBtn');
+
         const durationNumber = document.getElementById('durationNumber');
+
         const durationMinus = document.getElementById('durationMinus');
+
         const durationPlus = document.getElementById('durationPlus');
+
         const durationSection = document.getElementById('durationSection');
+
         const unlimitedCheck = document.getElementById('unlimitedMode');
+
         const presetBtns = document.querySelectorAll('.preset-btn');
+
         const timerDisplay = document.getElementById('timerDisplay');
+
         const breakMessage = document.getElementById('breakMessage');
 
+
+
         // State Variables - Timer
+
         let currentSubject = '';
+
         let timerRunning = false;
+
         let timerInterval = null;
+
         let timerWorker = null;
+
         let currentSeconds = 25 * 60;
+
         let initialDurationSeconds = 25 * 60;
+
         let isUnlimited = false;
+
         let targetEndTime = null;
+
         let chronoStartTime = null;
+
         let chronoAccumulated = 0;
 
+
+
         // State Variables - Rest & Break System (Contextual & Automatic)
+
         let restChronoRunning = false;
+
         let restChronoStartTime = null;
+
         let restChronoInterval = null;
 
+
+
         let blockBreakRunning = false;
+
         let blockBreakSeconds = 0;
+
         let blockBreakMinutes = 5;
+
         let blockBreakStart = null;
+
         let blockBreakEnd = null;
+
         let blockBreakInterval = null;
+
         let restBreakSubject = '';
+
         let selectedBreakMinutes = 5;
 
+
+
         let timerState = {
+
             sessionsCompleted: 0,
+
             totalWorkSeconds: 0,
+
             totalBreakSeconds: 0,
+
             sessionHistory: [],
+
             globalSessions: 0,
+
             globalTime: 0,
+
             globalBreakTime: 0,
+
             globalHistory: [],
+
             streak: 0,
+
             lastStudyDate: null
+
         };
 
+
+
         // Populate Subject Select with Optgroups by Year
+
         function populateSubjectSelect() {
+
             if (!subjectSelect || !window.MATERIAS_ADE) return;
+
             
+
             subjectSelect.innerHTML = '<option value="">Seleccioná una materia del plan...</option><option value="Estudio Libre">Estudio Libre</option>';
 
+
+
             const grouped = {};
+
             window.MATERIAS_ADE.forEach(m => {
+
                 const y = m.year || 'Otros';
+
                 if (!grouped[y]) grouped[y] = [];
+
                 grouped[y].push(m.name);
+
             });
 
+
+
             for (const year in grouped) {
+
                 const group = document.createElement('optgroup');
+
                 group.label = year;
+
                 grouped[year].forEach(name => {
+
                     const opt = document.createElement('option');
+
                     opt.value = name;
+
                     opt.textContent = name;
+
                     group.appendChild(opt);
+
                 });
+
                 subjectSelect.appendChild(group);
+
             }
+
         }
 
+
+
         function setSubject(name) {
+
             const safeName = window.sanitizeText ? window.sanitizeText(name.trim()) : name.trim();
+
             if (!safeName) return;
+
+
 
             currentSubject = safeName;
 
+
+
             // Check if option exists in select, otherwise add it
+
             if (subjectSelect) {
+
                 let found = false;
+
                 for (let i = 0; i < subjectSelect.options.length; i++) {
+
                     if (subjectSelect.options[i].value.toLowerCase() === safeName.toLowerCase()) {
+
                         subjectSelect.selectedIndex = i;
+
                         found = true;
+
                         break;
+
                     }
+
                 }
+
                 if (!found) {
+
                     const customOpt = document.createElement('option');
+
                     customOpt.value = safeName;
+
                     customOpt.textContent = safeName;
+
                     customOpt.selected = true;
+
                     subjectSelect.appendChild(customOpt);
+
                 }
+
             }
+
+
 
             if (currentSubjectPill && currentSubjectPillText) {
+
                 currentSubjectPillText.textContent = currentSubject;
+
                 currentSubjectPill.style.display = 'inline-flex';
+
             }
+
+
 
             saveTimerLocalState();
+
         }
+
+
 
         if (subjectSelect) {
+
             subjectSelect.addEventListener('change', () => {
+
                 if (subjectSelect.value) {
+
                     setSubject(subjectSelect.value);
+
                     showNotification('Materia seleccionada: ' + subjectSelect.value);
+
                 }
+
             });
+
         }
+
+
 
         const freeBtn = document.getElementById('freeStudyBtn');
+
         if (freeBtn) {
+
             freeBtn.addEventListener('click', () => {
+
                 setSubject('Estudio Libre');
+
                 showNotification('Modo: Estudio Libre');
+
             });
+
         }
+
+
 
         window.promptCustomTopic = function() {
+
             const custom = prompt('¿Qué tema o materia específica vas a estudiar?', currentSubject || '');
+
             if (custom && custom.trim()) {
+
                 setSubject(custom.trim());
+
                 showNotification('Tema fijado: ' + custom.trim());
+
             }
+
         };
+
+
 
         window.applyPresetTechnique = function(minutes) {
+
             if (unlimitedCheck && unlimitedCheck.checked) {
+
                 unlimitedCheck.checked = false;
+
                 unlimitedCheck.dispatchEvent(new Event('change'));
+
             }
+
             updateDuration(minutes);
+
             showNotification(`Técnica aplicada: ${minutes} min de enfoque`);
+
         };
+
+
 
         // Duration Adjustments
+
         function updateDuration(val) {
+
             if (durationNumber) durationNumber.textContent = val;
+
             presetBtns.forEach(b => {
+
                 const min = parseInt(b.getAttribute('data-minutes'), 10);
+
                 b.classList.toggle('active', min === val);
+
             });
+
             if (unlimitedCheck && !unlimitedCheck.checked && !timerRunning) {
+
                 currentSeconds = val * 60;
+
                 initialDurationSeconds = currentSeconds;
+
                 updateDisplay();
+
                 clearTimerLocalState();
+
             }
+
         }
+
+
 
         if (durationMinus) {
+
             durationMinus.addEventListener('click', () => {
+
                 const v = parseInt(durationNumber.textContent, 10);
+
                 if (v > 1) updateDuration(v - 1);
+
             });
+
         }
+
+
 
         if (durationPlus) {
+
             durationPlus.addEventListener('click', () => {
+
                 const v = parseInt(durationNumber.textContent, 10);
+
                 if (v < 180) updateDuration(v + 1);
+
             });
+
         }
+
+
 
         presetBtns.forEach(btn => {
+
             btn.addEventListener('click', function() {
+
                 const min = parseInt(this.getAttribute('data-minutes'), 10);
+
                 updateDuration(min);
+
             });
+
         });
 
+
+
         if (unlimitedCheck) {
+
             unlimitedCheck.addEventListener('change', function() {
+
                 isUnlimited = this.checked;
+
                 if (durationMinus) durationMinus.disabled = isUnlimited;
+
                 if (durationPlus) durationPlus.disabled = isUnlimited;
+
                 presetBtns.forEach(b => b.disabled = isUnlimited);
+
                 if (durationSection) durationSection.style.opacity = isUnlimited ? '0.35' : '1';
+
                 if (!timerRunning) {
+
                     currentSeconds = isUnlimited ? 0 : parseInt(durationNumber.textContent, 10) * 60;
+
                     initialDurationSeconds = currentSeconds;
+
                     updateDisplay();
+
                 }
+
                 clearTimerLocalState();
+
             });
+
         }
+
+
 
         // Local & Cloud State Management
+
         function saveTimerLocalState() {
+
             try {
+
                 localStorage.setItem('ungs_timer_state', JSON.stringify({
+
                     running: timerRunning,
+
                     subject: currentSubject,
+
                     unlimited: isUnlimited,
+
                     initialDuration: initialDurationSeconds,
+
                     currentSecs: currentSeconds,
+
                     targetEnd: targetEndTime,
+
                     chronoStart: chronoStartTime,
+
                     chronoAcc: chronoAccumulated
+
                 }));
+
                 localStorage.setItem('ungs_study_stats', JSON.stringify(timerState));
+
             } catch(e){}
 
+
+
             if (window.currentUser && window.currentUser.uid && window.db) {
+
                 const uid = window.currentUser.uid;
+
                 const payload = {
+
                     timerState: {
+
                         sessionHistory: timerState.sessionHistory || [],
+
                         globalHistory: timerState.globalHistory || [],
+
                         subjectStats: timerState.subjectStats || {},
+
                         globalSessions: timerState.globalSessions || 0,
+
                         globalTime: timerState.globalTime || 0,
+
                         globalBreakTime: timerState.globalBreakTime || 0,
+
                         streak: timerState.streak || 0,
+
                         globalStreak: timerState.globalStreak || 0,
+
                         totalWorkSeconds: timerState.totalWorkSeconds || 0,
+
                         totalBreakSeconds: timerState.totalBreakSeconds || 0,
+
                         sessionsCompleted: timerState.sessionsCompleted || 0,
+
                         lastStudyDate: timerState.lastStudyDate || null
+
                     },
+
                     sessionHistory: timerState.sessionHistory || [],
+
                     globalHistory: timerState.globalHistory || [],
+
                     subjectStats: timerState.subjectStats || {},
+
                     globalSessions: timerState.globalSessions || 0,
+
                     globalTime: timerState.globalTime || 0,
+
                     globalBreakTime: timerState.globalBreakTime || 0,
+
                     streak: timerState.streak || 0,
+
                     globalStreak: timerState.globalStreak || 0,
+
                     totalWorkSeconds: timerState.totalWorkSeconds || 0,
+
                     totalBreakSeconds: timerState.totalBreakSeconds || 0,
+
                     sessionsCompleted: timerState.sessionsCompleted || 0,
+
                     lastStudyDate: timerState.lastStudyDate || null,
+
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+
                 };
+
                 // STRICT PRIMARY: users_pomodoro
+
                 window.db.collection('users_pomodoro').doc(uid).set(payload, { merge: true }).catch(console.warn);
+
                 window.db.collection('usuarios_estudio').doc(uid).set(payload, { merge: true }).catch(console.warn);
+
             }
+
         }
+
+
 
         function clearTimerLocalState() {
+
             localStorage.removeItem('ungs_timer_state');
+
         }
+
+
 
         function loadTimerLocalState() {
+
             try {
+
                 // Primary & legacy storage keys
+
                 const savedStats = localStorage.getItem('ungs_study_stats') || localStorage.getItem('ungs_pomodoro_stats');
+
                 if (savedStats) {
+
                     const parsed = JSON.parse(savedStats);
+
                     if (parsed && typeof parsed === 'object') {
+
                         timerState = Object.assign(timerState, parsed);
+
                     }
+
                 }
+
+
 
                 if (!Array.isArray(timerState.sessionHistory)) timerState.sessionHistory = [];
+
                 if (!Array.isArray(timerState.globalHistory)) timerState.globalHistory = [];
+
                 if (!timerState.subjectStats || typeof timerState.subjectStats !== 'object') timerState.subjectStats = {};
 
+
+
                 const saved = localStorage.getItem('ungs_timer_state');
+
                 if (saved) {
+
                     const state = JSON.parse(saved);
+
                     currentSubject = state.subject || '';
+
                     isUnlimited = state.unlimited || false;
+
                     initialDurationSeconds = state.initialDuration || 25 * 60;
+
                     currentSeconds = state.currentSecs || 25 * 60;
+
                     targetEndTime = state.targetEnd || null;
+
                     chronoStartTime = state.chronoStart || null;
+
                     chronoAccumulated = state.chronoAcc || 0;
 
+
+
                     if (currentSubject) {
+
                         setSubject(currentSubject);
+
                     }
+
+
 
                     if (isUnlimited && unlimitedCheck) {
+
                         unlimitedCheck.checked = true;
+
                         if (durationMinus) durationMinus.disabled = true;
+
                         if (durationPlus) durationPlus.disabled = true;
+
                         presetBtns.forEach(b => b.disabled = true);
+
                         if (durationSection) durationSection.style.opacity = '0.35';
+
                     } else {
+
                         updateDuration(Math.floor(initialDurationSeconds / 60));
+
                     }
+
+
 
                     if (state.running) {
+
                         timerRunning = true;
+
                         if (playBtn) playBtn.disabled = true;
+
                         if (pauseBtn) pauseBtn.disabled = false;
+
                         if (finishBtn) finishBtn.disabled = false;
+
                         if (timerWorker) {
+
                             timerWorker.postMessage({
+
                                 type: 'START',
+
                                 isUnlimited: isUnlimited,
+
                                 targetEndTime: targetEndTime,
+
                                 chronoStartTime: chronoStartTime,
+
                                 chronoAccumulated: chronoAccumulated
+
                             });
+
                         } else {
+
                             if (!timerInterval) timerInterval = setInterval(timerTick, 250);
+
                         }
+
                     }
+
                 }
+
             } catch(e) {
+
                 console.warn('Error cargando estado local:', e);
+
             }
+
         }
+
+
 
         // Formatting & Parsing Functions
+
         function parseDurationToSeconds(dur) {
+
             if (typeof dur === 'number') return dur;
+
             if (!dur || typeof dur !== 'string') return 0;
+
             dur = dur.trim().toLowerCase();
+
             
+
             let totalSecs = 0;
+
             const hourMatch = dur.match(/(\d+)\s*h/);
+
             if (hourMatch) {
+
                 totalSecs += parseInt(hourMatch[1], 10) * 3600;
+
             }
+
             const minMatch = dur.match(/(\d+)\s*m/);
+
             if (minMatch) {
+
                 totalSecs += parseInt(minMatch[1], 10) * 60;
+
             }
+
             const secMatch = dur.match(/(\d+)\s*s/);
+
             if (secMatch) {
+
                 totalSecs += parseInt(secMatch[1], 10);
+
             }
+
             
+
             if (totalSecs === 0) {
+
                 if (dur.includes(':')) {
+
                     const parts = dur.split(':').map(p => parseInt(p, 10) || 0);
+
                     if (parts.length === 2) totalSecs = parts[0] * 60 + parts[1];
+
                     else if (parts.length === 3) totalSecs = parts[0] * 3600 + parts[1] * 60 + parts[2];
+
                 } else {
+
                     const num = parseInt(dur, 10);
+
                     if (!isNaN(num)) totalSecs = num * 60;
+
                 }
+
             }
+
             return totalSecs;
+
         }
+
+
 
         function formatCountdownDisplay(secs) {
+
             const totalSecs = Math.max(0, Math.ceil(secs));
+
             const hours = Math.floor(totalSecs / 3600);
+
             const mins = Math.floor((totalSecs % 3600) / 60);
+
             const s = totalSecs % 60;
+
             if (hours > 0) {
+
                 return `${hours}h ${String(mins).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+
             }
+
             return String(mins).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+
         }
+
+
 
         function formatDurationSummary(s) {
+
             const totalSecs = Math.max(0, Math.floor(s || 0));
+
             const hours = Math.floor(totalSecs / 3600);
+
             const mins = Math.floor((totalSecs % 3600) / 60);
+
             const secs = totalSecs % 60;
+
             if (hours > 0) {
+
                 return mins > 0 ? `${hours}h ${String(mins).padStart(2, '0')}m` : `${hours}h 00m`;
+
             } else if (mins > 0) {
+
                 return `${mins}m`;
+
             } else if (secs > 0) {
+
                 return `${secs}s`;
+
             } else {
+
                 return '0m';
+
             }
+
         }
+
+
 
         function formatSessionDuration(s) {
+
             const totalSecs = Math.max(0, Math.floor(s || 0));
+
             const hours = Math.floor(totalSecs / 3600);
+
             const mins = Math.floor((totalSecs % 3600) / 60);
+
             if (hours > 0) {
+
                 return mins > 0 ? `${hours}h ${String(mins).padStart(2, '0')}m` : `${hours}h 00m`;
+
             } else {
+
                 return `${Math.max(1, mins)} min`;
+
             }
+
         }
+
+
 
         function formatTimerDisplay(totalSeconds) {
+
             const s = Math.max(0, Math.floor(totalSeconds));
+
             const hours = Math.floor(s / 3600);
+
             const mins = Math.floor((s % 3600) / 60);
+
             const secs = s % 60;
+
             if (hours > 0) {
+
                 return `${hours}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
+
             } else {
+
                 return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
             }
+
         }
+
+
 
         // 1. Cronómetro de Descanso Secundario (Pausa en Modo Cronómetro o Descanso Libre)
+
         function startRestChrono() {
+
             stopRestChrono();
+
             if (blockBreakRunning) {
+
                 window.stopActiveBreak();
+
             }
+
+
 
             restChronoRunning = true;
+
             restChronoStartTime = Date.now();
+
             restBreakSubject = currentSubject || 'Estudio Libre';
 
+
+
             const pill = document.getElementById('activePauseBreakPill');
+
             const label = document.getElementById('activePauseLabel');
+
             const count = document.getElementById('activePauseCountdown');
+
             const endBtn = document.getElementById('endBreakPillBtn');
+
             if (pill) pill.style.display = 'inline-flex';
+
             if (label) label.textContent = 'Descanso activo (Cronómetro)';
+
             if (count) count.textContent = '00:00';
+
             if (endBtn) endBtn.style.display = 'inline-flex';
+
+
 
             if (restChronoInterval) clearInterval(restChronoInterval);
+
             restChronoInterval = setInterval(restChronoTick, 250);
+
         }
+
+
 
         function restChronoTick() {
+
             if (!restChronoRunning || !restChronoStartTime) return;
+
             const elapsed = Math.floor((Date.now() - restChronoStartTime) / 1000);
+
             const count = document.getElementById('activePauseCountdown');
+
             if (count) count.textContent = formatTimerDisplay(elapsed);
+
         }
 
+
+
+        
         function stopRestChrono() {
-            if (restChronoRunning && restChronoStartTime) {
-                const elapsed = Math.floor((Date.now() - restChronoStartTime) / 1000);
-                if (elapsed >= 3) {
-                    recordCompletedBreak(elapsed, restBreakSubject || currentSubject);
-                }
-            }
-            restChronoRunning = false;
+            if (restInterval) { clearInterval(restInterval); restInterval = null; }
+            restChronoAccumulated = 0;
             restChronoStartTime = null;
-            restBreakSubject = '';
-            if (restChronoInterval) {
-                clearInterval(restChronoInterval);
-                restChronoInterval = null;
-            }
-            // Reset the secondary counter DOM completely
-            const pill = document.getElementById('activePauseBreakPill');
-            const count = document.getElementById('activePauseCountdown');
-            if (count) count.textContent = '00:00';
-            if (pill && !blockBreakRunning) {
-                pill.style.display = 'none';
-            }
+            document.getElementById('restChronoDisplay').textContent = '';
         }
 
-        // 2. Modal y Cuenta Regresiva de Descanso Post-Bloque
+
         window.openBreakModal = function() {
+
             const modal = document.getElementById('breakModal');
+
             if (modal) {
+
                 modal.style.display = 'flex';
+
                 window.selectBreakModalPreset(5);
+
             }
+
         };
+
+
 
         window.closeBreakModal = function() {
+
             const modal = document.getElementById('breakModal');
+
             if (modal) modal.style.display = 'none';
+
         };
+
+
 
         window.selectBreakModalPreset = function(mins) {
+
             selectedBreakMinutes = mins;
+
             const buttons = document.querySelectorAll('.break-preset-select');
+
             buttons.forEach(btn => {
+
                 const m = parseInt(btn.getAttribute('data-minutes'), 10);
+
                 btn.classList.toggle('active', m === mins);
+
             });
+
             const confirmBtn = document.getElementById('confirmStartBreakBtn');
+
             if (confirmBtn) {
+
                 confirmBtn.textContent = `Iniciar Descanso (${mins} min)`;
+
             }
+
         };
+
+
 
         window.confirmSelectedBreak = function() {
+
             window.startBlockBreak(selectedBreakMinutes || 5);
+
         };
+
+
 
         window.startFreeBreakChrono = function() {
+
             window.closeBreakModal();
+
             startRestChrono();
+
             showNotification('Descanso libre iniciado en modo cronómetro.');
+
         };
 
+
+
         window.startBlockBreak = function(minutes) {
+
             const mins = parseInt(minutes, 10) || 5;
+
             window.closeBreakModal();
+
             stopRestChrono();
 
+
+
             blockBreakRunning = true;
+
             blockBreakMinutes = mins;
+
             blockBreakSeconds = mins * 60;
+
             blockBreakStart = Date.now();
+
             blockBreakEnd = Date.now() + (blockBreakSeconds * 1000);
+
             restBreakSubject = currentSubject || 'Estudio Libre';
 
+
+
             const pill = document.getElementById('activePauseBreakPill');
+
             const label = document.getElementById('activePauseLabel');
+
             const count = document.getElementById('activePauseCountdown');
+
             const endBtn = document.getElementById('endBreakPillBtn');
 
+
+
             if (pill) pill.style.display = 'inline-flex';
+
             if (label) label.textContent = 'Descanso en curso:';
+
             if (count) count.textContent = formatCountdownDisplay(blockBreakSeconds);
+
             if (endBtn) endBtn.style.display = 'inline-flex';
+
+
 
             saveBreakLocalState();
 
+
+
             if (blockBreakInterval) clearInterval(blockBreakInterval);
+
             blockBreakInterval = setInterval(blockBreakTick, 250);
+
             showNotification(`Descanso de ${mins} min iniciado. ¡Relajá la vista!`);
+
         };
+
+
 
         window.promptCustomBreak = function() {
+
             const input = prompt('¿Cuántos minutos querés descansar?', '5');
+
             if (input !== null) {
+
                 const mins = parseInt(input.trim(), 10);
+
                 if (!isNaN(mins) && mins > 0) {
+
                     window.startBlockBreak(mins);
+
                 } else {
+
                     showNotification('Por favor, ingresá una cantidad de minutos válida.');
+
                 }
+
             }
+
         };
 
+
+
         function blockBreakTick() {
+
             const now = Date.now();
+
             const diff = blockBreakEnd - now;
+
             if (diff <= 0) {
+
                 blockBreakRunning = false;
+
                 if (blockBreakInterval) {
+
                     clearInterval(blockBreakInterval);
+
                     blockBreakInterval = null;
+
                 }
+
                 blockBreakEnd = null;
+
                 const totalRest = blockBreakMinutes * 60;
+
                 blockBreakSeconds = 0;
+
                 saveBreakLocalState();
 
+
+
                 const pill = document.getElementById('activePauseBreakPill');
+
                 if (pill) pill.style.display = 'none';
+
+
 
                 recordCompletedBreak(totalRest, restBreakSubject || currentSubject);
 
+
+
                 playSoundAlert();
+
                 if (navigator.vibrate) navigator.vibrate([400, 200, 400]);
+
                 if (typeof confetti === 'function') {
+
                     confetti({
+
                         particleCount: 90,
+
                         spread: 60,
+
                         origin: { y: 0.6 },
+
                         colors: ['#32D74B', '#0A84FF', '#ffffff']
+
                     });
+
                 }
+
                 showNotification('¡Tiempo de descanso finalizado! Listo para retomar el estudio.');
+
             } else {
+
                 const rem = Math.ceil(diff / 1000);
+
                 const count = document.getElementById('activePauseCountdown');
+
                 if (count) count.textContent = formatCountdownDisplay(rem);
+
             }
+
         }
 
+
+
         window.stopActiveBreak = function() {
+
             if (restChronoRunning) {
+
                 stopRestChrono();
+
                 showNotification('Descanso finalizado.');
+
                 return;
+
             }
+
             if (blockBreakRunning) {
+
                 const elapsed = blockBreakStart ? Math.floor((Date.now() - blockBreakStart) / 1000) : 0;
+
                 if (elapsed >= 3) {
+
                     recordCompletedBreak(elapsed, restBreakSubject || currentSubject);
+
                 }
+
                 blockBreakRunning = false;
+
                 if (blockBreakInterval) {
+
                     clearInterval(blockBreakInterval);
+
                     blockBreakInterval = null;
+
                 }
+
                 blockBreakEnd = null;
+
                 blockBreakSeconds = 0;
+
                 saveBreakLocalState();
+
                 showNotification('Descanso finalizado.');
+
             }
+
             const pill = document.getElementById('activePauseBreakPill');
+
             if (pill) pill.style.display = 'none';
+
         };
 
+
+
         function recordCompletedBreak(secs, subject) {
+
             if (!secs || secs < 3) return;
+
             const safeSubj = subject || currentSubject || 'Estudio Libre';
+
             const formattedDuration = formatDurationSummary(secs);
+
             const breakRecord = {
+
                 mode: 'Descanso',
+
                 time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+
                 duration: formattedDuration,
+
                 seconds: secs,
+
                 subject: window.sanitizeText ? window.sanitizeText(safeSubj) : safeSubj,
+
                 date: new Date().toLocaleDateString('es-ES')
+
             };
 
+
+
             if (!timerState.subjectStats || typeof timerState.subjectStats !== 'object') {
+
                 timerState.subjectStats = {};
+
             }
+
             if (!timerState.subjectStats[safeSubj]) {
+
                 timerState.subjectStats[safeSubj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
+
             }
+
             timerState.subjectStats[safeSubj].breakSeconds = (timerState.subjectStats[safeSubj].breakSeconds || 0) + secs;
 
+
+
             if (typeof timerState.totalBreakSeconds !== 'number') timerState.totalBreakSeconds = 0;
+
             if (typeof timerState.globalBreakTime !== 'number') timerState.globalBreakTime = 0;
 
+
+
             timerState.totalBreakSeconds += secs;
+
             timerState.globalBreakTime += secs;
+
             if (!Array.isArray(timerState.sessionHistory)) timerState.sessionHistory = [];
+
             if (!Array.isArray(timerState.globalHistory)) timerState.globalHistory = [];
+
             timerState.sessionHistory.push(breakRecord);
+
             timerState.globalHistory.unshift(breakRecord);
+
+
 
             if (timerState.globalHistory.length > 100) timerState.globalHistory.pop();
 
+
+
             updateStats();
+
             updateHistory();
+
             saveTimerLocalState();
+
         }
+
+
 
         function saveBreakLocalState() {
+
             try {
+
                 if (blockBreakRunning && blockBreakEnd) {
+
                     localStorage.setItem('ungs_block_break_state', JSON.stringify({
+
                         isRunning: true,
+
                         targetBreakEnd: blockBreakEnd,
+
                         totalSecs: blockBreakSeconds,
+
                         minutes: blockBreakMinutes,
+
                         subject: restBreakSubject
+
                     }));
+
                 } else {
+
                     localStorage.removeItem('ungs_block_break_state');
+
                 }
+
             } catch (err) {
+
                 console.warn('Error guardando descanso:', err);
+
             }
+
         }
+
+
 
         function loadBreakLocalState() {
+
             try {
+
                 const saved = localStorage.getItem('ungs_block_break_state');
+
                 if (saved) {
+
                     const parsed = JSON.parse(saved);
+
                     if (parsed && parsed.isRunning && parsed.targetBreakEnd) {
+
                         const now = Date.now();
+
                         const diff = Math.ceil((parsed.targetBreakEnd - now) / 1000);
+
                         if (diff > 0) {
+
                             blockBreakRunning = true;
+
                             blockBreakEnd = parsed.targetBreakEnd;
+
                             blockBreakSeconds = diff;
+
                             blockBreakMinutes = parsed.minutes || Math.ceil(diff / 60);
+
                             restBreakSubject = parsed.subject || '';
 
+
+
                             const pill = document.getElementById('activePauseBreakPill');
+
                             const label = document.getElementById('activePauseLabel');
+
                             const count = document.getElementById('activePauseCountdown');
+
                             const endBtn = document.getElementById('endBreakPillBtn');
 
+
+
                             if (pill) pill.style.display = 'inline-flex';
+
                             if (label) label.textContent = 'Descanso en curso:';
+
                             if (count) count.textContent = formatCountdownDisplay(diff);
+
                             if (endBtn) endBtn.style.display = 'inline-flex';
 
+
+
                             if (!blockBreakInterval) blockBreakInterval = setInterval(blockBreakTick, 250);
+
                         } else {
+
                             localStorage.removeItem('ungs_block_break_state');
+
                         }
+
                     }
+
                 }
+
             } catch (err) {
+
                 console.warn('Error cargando descanso:', err);
+
             }
+
         }
+
+
 
         // Web Worker Bridge with Fallback
+
         function initTimerWorker() {
+
             if (window.Worker) {
+
                 try {
+
                     timerWorker = new Worker('js/timer.worker.js');
+
                     timerWorker.onmessage = function(e) {
+
                         const data = e.data || {};
+
                         if (data.type === 'TICK') {
+                            if (!timerRunning) return; // GUARDA ESTRICTA
+
                             if (!timerRunning) return; // Ghost-tick guard: ignore stale ticks after pause/reset
+
                             currentSeconds = data.currentSeconds;
+
                             updateDisplay();
+
                         } else if (data.type === 'COMPLETE') {
+
                             currentSeconds = 0;
+
                             updateDisplay();
+
                             completeSession();
+
                         } else if (data.type === 'PAUSED') {
+
                             if (typeof data.chronoAccumulated === 'number') {
+
                                 chronoAccumulated = data.chronoAccumulated;
+
                             }
+
                         }
+
                     };
+
                     timerWorker.onerror = function(err) {
+
                         console.warn('Timer worker error, using setInterval fallback:', err);
+
                         timerWorker = null;
+
                     };
+
                 } catch (err) {
+
                     console.warn('Could not initialize timer worker, using setInterval fallback:', err);
+
                     timerWorker = null;
+
                 }
+
             }
+
         }
+
+
 
         // Timer Execution
+
         function updateDisplay() {
+
             if (!timerDisplay) return;
+
             timerDisplay.textContent = formatTimerDisplay(currentSeconds);
+
         }
+
+
 
         function timerTick() {
+            if (!timerRunning) return; // GUARDA ESTRICTA
+
             if (!timerRunning) return; // Ghost-tick guard: ignore stale interval ticks after pause/reset
+
             const now = Date.now();
 
+
+
             if (isUnlimited) {
+
                 currentSeconds = Math.floor((chronoAccumulated + (now - chronoStartTime)) / 1000);
+
                 updateDisplay();
+
             } else {
+
                 const diff = targetEndTime - now;
+
                 if (diff <= 0) {
+
                     currentSeconds = 0;
+
                     updateDisplay();
+
                     completeSession();
+
                 } else {
+
                     currentSeconds = Math.ceil(diff / 1000);
+
                     updateDisplay();
+
                 }
+
             }
+
         }
 
+
+
         window.startTimer = function() {
+
             if (timerRunning) return;
+
             if (!currentSubject) {
+
                 setSubject('Estudio Libre');
+
             }
 
+
+
             // Al iniciar o retomar el estudio, detener cualquier descanso activo
+
             stopRestChrono();
+
             if (blockBreakRunning) {
+
                 window.stopActiveBreak();
+
             }
+
+
 
             timerRunning = true;
 
+
+
             if (playBtn) playBtn.disabled = true;
+
             if (pauseBtn) pauseBtn.disabled = false;
+
             if (finishBtn) finishBtn.disabled = false;
+
             if (breakMessage) breakMessage.style.display = 'none';
 
+
+
             if (isUnlimited) {
+
                 chronoStartTime = Date.now();
+
             } else {
+
                 targetEndTime = Date.now() + (currentSeconds * 1000);
+
             }
+
+
 
             saveTimerLocalState();
 
+
+
             if (timerWorker) {
+
                 timerWorker.postMessage({
+
                     type: 'START',
+
                     isUnlimited: isUnlimited,
+
                     targetEndTime: targetEndTime,
+
                     chronoStartTime: chronoStartTime,
+
                     chronoAccumulated: chronoAccumulated
+
                 });
+
             } else {
+
                 if (!timerInterval) timerInterval = setInterval(timerTick, 250);
+
             }
+
         };
+
+
 
         window.pauseTimer = function() {
+
             const wasUnlimited = isUnlimited;
+
             timerRunning = false; // FIRST: block all ghost ticks immediately
 
+
+
             // Clear local fallback interval immediately
+
             if (timerInterval) {
+
                 clearInterval(timerInterval);
+
                 timerInterval = null;
+
             }
+
+
 
             // Freeze chrono accumulated value before worker async
+
             if (isUnlimited && chronoStartTime) {
+
                 chronoAccumulated += (Date.now() - chronoStartTime);
+
                 chronoStartTime = null;
+
                 currentSeconds = Math.floor(chronoAccumulated / 1000);
+
             }
+
+
 
             // Freeze the display NOW (before any async worker response)
+
             updateDisplay();
 
+
+
             // THEN tell the worker to stop (may emit one last TICK, but guard blocks it)
+
             if (timerWorker) {
+
                 timerWorker.postMessage({ type: 'PAUSE' });
+
             }
 
+
+
             if (playBtn) playBtn.disabled = false;
+
             if (pauseBtn) pauseBtn.disabled = true;
+
+
 
             saveTimerLocalState();
 
+
+
             // Regla 1: Al pausar en Modo Cronómetro, activar automáticamente el cronómetro de descanso secundario
+
             if (wasUnlimited) {
+
                 startRestChrono();
+
             }
+
         };
 
+
+
+        
         window.resetTimer = function() {
-            window.pauseTimer();
+            pauseTimer();
             stopRestChrono();
-            window.stopActiveBreak();
+            if (typeof window.stopActiveBreak === 'function') window.stopActiveBreak();
 
-            // Ensure absolutely stopped
             timerRunning = false;
-
-            if (timerWorker) {
-                timerWorker.postMessage({ type: 'RESET' });
+            if (timerWorker) timerWorker.postMessage({ type: 'RESET' });
+            
+            if (isUnlimited) { 
+                currentSeconds = 0; 
+                chronoAccumulated = 0; 
+                chronoStartTime = null; 
+            } else { 
+                currentSeconds = parseInt(document.getElementById('durationNumber').textContent) * 60; 
+                initialDurationSeconds = currentSeconds; 
+                targetEndTime = null; 
             }
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-
-            // Zero all time state
-            chronoAccumulated = 0;
-            chronoStartTime = null;
-            targetEndTime = null;
-
-            if (isUnlimited) {
-                currentSeconds = 0;
-            } else {
-                const val = parseInt(durationNumber ? durationNumber.textContent : '25', 10);
-                currentSeconds = val * 60;
-                initialDurationSeconds = currentSeconds;
-            }
-
-            // Lock the display immediately to the reset value
-            updateDisplay();
-            clearTimerLocalState();
-            if (finishBtn) finishBtn.disabled = true;
-            if (breakMessage) breakMessage.style.display = 'none';
+            updateDisplay(); 
+            clearTimerLocalState(); 
+            document.getElementById('finishBtn').disabled = true;
+            document.getElementById('breakMessage').style.display = 'none';
         };
+
+
+
 
         window.finishSession = function() {
+
             if (!timerRunning && !isUnlimited && currentSeconds === initialDurationSeconds) {
+
                 showNotification('No hay sesión en curso.');
+
                 return;
+
             }
+
+
 
             if (!confirm('¿Terminar la sesión ahora? Se guardará el tiempo estudiado.')) return;
 
+
+
             const studied = isUnlimited
+
                 ? (timerRunning ? Math.floor((chronoAccumulated + (Date.now() - chronoStartTime)) / 1000) : currentSeconds)
+
                 : (initialDurationSeconds - currentSeconds);
 
+
+
             if (studied >= 30) {
+
                 saveCompletedSession(studied);
+
             } else {
+
                 showNotification('Sesión muy corta para computar.');
+
             }
+
+
 
             window.pauseTimer();
+
             window.resetTimer();
+
         };
 
+
+
         function playSoundAlert() {
+
             try {
+
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
+
                 if (!AudioContext) return;
+
                 const ac = new AudioContext();
+
                 const osc = ac.createOscillator();
+
                 const gain = ac.createGain();
 
+
+
                 osc.connect(gain);
+
                 gain.connect(ac.destination);
 
+
+
                 osc.type = 'sine';
+
                 osc.frequency.setValueAtTime(880, ac.currentTime);
+
                 gain.gain.setValueAtTime(0.3, ac.currentTime);
+
                 gain.gain.exponentialRampToValueAtTime(0.01, ac.currentTime + 0.8);
 
+
+
                 osc.start();
+
                 osc.stop(ac.currentTime + 0.8);
+
             } catch(e) {}
+
         }
 
+
+
         function completeSession() {
+
             if (timerWorker) {
+
                 timerWorker.postMessage({ type: 'RESET' });
+
             }
+
             if (timerInterval) {
+
                 clearInterval(timerInterval);
+
                 timerInterval = null;
+
             }
+
             timerRunning = false;
+
+
 
             saveCompletedSession(initialDurationSeconds);
 
+
+
             if (playBtn) playBtn.disabled = false;
+
             if (pauseBtn) pauseBtn.disabled = true;
+
             if (finishBtn) finishBtn.disabled = true;
+
             clearTimerLocalState();
 
+
+
             // Restablecer el tiempo de bloque para la próxima sesión
+
             currentSeconds = initialDurationSeconds;
+
             updateDisplay();
 
+
+
             if (navigator.vibrate) navigator.vibrate([500, 250, 500]);
+
             playSoundAlert();
 
+
+
             if (typeof confetti === 'function') {
+
                 confetti({
+
                     particleCount: 120,
+
                     spread: 70,
+
                     origin: { y: 0.6 },
+
                     colors: ['#0A84FF', '#FF9F0A', '#32D74B', '#ffffff']
+
                 });
+
             }
+
+
 
             showNotification('¡Bloque completado! Guardado en tus métricas.');
+
             
+
             // Regla 2: Desplegar de inmediato el modal de descanso
+
             window.openBreakModal();
+
         }
 
+
+
         function saveCompletedSession(secs) {
+
             const formattedDuration = formatSessionDuration(secs);
+
             const subj = window.sanitizeText ? window.sanitizeText(currentSubject) : (currentSubject || 'Estudio Libre');
+
             const session = {
+
                 mode: 'Estudio',
+
                 time: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+
                 duration: formattedDuration,
+
                 seconds: secs,
+
                 subject: subj,
+
                 date: new Date().toLocaleDateString('es-ES')
+
             };
 
+
+
             if (!timerState.subjectStats || typeof timerState.subjectStats !== 'object') {
+
                 timerState.subjectStats = {};
+
             }
+
             if (!timerState.subjectStats[subj]) {
+
                 timerState.subjectStats[subj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
+
             }
+
             timerState.subjectStats[subj].sessions = (timerState.subjectStats[subj].sessions || 0) + 1;
+
             timerState.subjectStats[subj].seconds = (timerState.subjectStats[subj].seconds || 0) + secs;
 
+
+
             if (!Array.isArray(timerState.sessionHistory)) timerState.sessionHistory = [];
+
             if (!Array.isArray(timerState.globalHistory)) timerState.globalHistory = [];
 
+
+
             timerState.sessionHistory.push(session);
+
             timerState.sessionsCompleted = (timerState.sessionsCompleted || 0) + 1;
+
             timerState.totalWorkSeconds = (timerState.totalWorkSeconds || 0) + secs;
+
             timerState.globalSessions = (timerState.globalSessions || 0) + 1;
+
             timerState.globalTime = (timerState.globalTime || 0) + secs;
+
             timerState.globalHistory.unshift(session);
+
+
 
             if (timerState.globalHistory.length > 100) timerState.globalHistory.pop();
 
+
+
             updateStreak();
+
             updateStats();
+
             updateHistory();
+
             saveTimerLocalState();
 
+
+
             showNotification(`Guardado: ${subj} (${formattedDuration})`);
+
         }
+
+
 
         function updateStreak() {
+
             const today = new Date().toDateString();
+
             const last = timerState.lastStudyDate ? new Date(timerState.lastStudyDate) : null;
+
             const diff = last ? (new Date(today) - new Date(last.toDateString())) / 86400000 : null;
 
+
+
             if (diff === 1) {
+
                 timerState.streak++;
+
             } else if (diff !== 0) {
+
                 timerState.streak = 1;
+
             }
+
             timerState.lastStudyDate = today;
+
         }
+
+
 
         function getSubjectMetrics() {
+
             const metrics = {};
 
+
+
             // A. Base map from timerState.subjectStats if available
+
             if (timerState.subjectStats && typeof timerState.subjectStats === 'object') {
+
                 Object.keys(timerState.subjectStats).forEach(subj => {
+
                     const st = timerState.subjectStats[subj];
+
                     if (st && typeof st === 'object') {
+
                         metrics[subj] = {
+
                             subject: subj,
+
                             sessions: Number(st.sessions) || 0,
+
                             seconds: Number(st.seconds) || 0,
+
                             breakSeconds: Number(st.breakSeconds) || 0,
+
                             lastDate: null
+
                         };
+
                     }
+
                 });
+
             }
+
+
 
             // B. Aggregate from history records (globalHistory + sessionHistory)
+
             const allRecords = [];
+
             if (Array.isArray(timerState.globalHistory)) {
+
                 allRecords.push(...timerState.globalHistory);
+
             }
+
             if (Array.isArray(timerState.sessionHistory)) {
+
                 timerState.sessionHistory.forEach(s => {
+
                     if (!allRecords.includes(s)) allRecords.push(s);
+
                 });
+
             }
+
+
 
             const historyMetrics = {};
+
             allRecords.forEach(sess => {
+
                 if (!sess) return;
+
                 const subj = sess.subject || 'Estudio Libre';
+
                 if (!historyMetrics[subj]) {
+
                     historyMetrics[subj] = {
+
                         subject: subj,
+
                         sessions: 0,
+
                         seconds: 0,
+
                         breakSeconds: 0,
+
                         lastDate: sess.date || null
+
                     };
+
                 }
+
                 const secs = typeof sess.seconds === 'number' ? sess.seconds : parseDurationToSeconds(sess.duration);
+
                 if (sess.mode === 'Descanso') {
+
                     historyMetrics[subj].breakSeconds += secs;
+
                 } else {
+
                     historyMetrics[subj].sessions++;
+
                     historyMetrics[subj].seconds += secs;
+
                 }
+
             });
+
+
 
             // C. Merge historyMetrics into metrics keeping the max to guarantee zero data loss
+
             Object.keys(historyMetrics).forEach(subj => {
+
                 const hm = historyMetrics[subj];
+
                 if (!metrics[subj]) {
+
                     metrics[subj] = hm;
+
                 } else {
+
                     metrics[subj].sessions = Math.max(metrics[subj].sessions, hm.sessions);
+
                     metrics[subj].seconds = Math.max(metrics[subj].seconds, hm.seconds);
+
                     metrics[subj].breakSeconds = Math.max(metrics[subj].breakSeconds, hm.breakSeconds);
+
                     if (!metrics[subj].lastDate) metrics[subj].lastDate = hm.lastDate;
+
                 }
+
             });
 
+
+
             return metrics;
+
         }
 
+
+
         function updateStats() {
+
             const metrics = getSubjectMetrics();
+
             const subjects = Object.keys(metrics);
 
+
+
             // Compute cumulative totals across all registered subjects using reduce
+
             const accumulatedStudySecs = subjects.reduce((sum, s) => sum + (Number(metrics[s].seconds) || 0), 0);
+
             const accumulatedBreakSecs = subjects.reduce((sum, s) => sum + (Number(metrics[s].breakSeconds) || 0), 0);
+
             const accumulatedSessions = subjects.reduce((sum, s) => sum + (Number(metrics[s].sessions) || 0), 0);
 
+
+
             const effectiveGlobalStudy = Math.max(Number(timerState.globalTime) || 0, accumulatedStudySecs);
+
             const effectiveGlobalBreak = Math.max(Number(timerState.globalBreakTime) || 0, accumulatedBreakSecs);
+
             const effectiveGlobalSessions = Math.max(Number(timerState.globalSessions) || 0, accumulatedSessions);
 
+
+
             timerState.globalTime = effectiveGlobalStudy;
+
             timerState.globalBreakTime = effectiveGlobalBreak;
+
             timerState.globalSessions = effectiveGlobalSessions;
 
+
+
             // Compute Today's Metrics
+
             const todayDate = new Date().toLocaleDateString('es-ES');
+
             const todayList = (timerState.sessionHistory || []).filter(s => s && (isTodayDate(s.date) || !s.date));
 
+
+
             const todayStudySecs = todayList
+
                 .filter(s => s.mode !== 'Descanso')
+
                 .reduce((sum, s) => sum + (typeof s.seconds === 'number' ? s.seconds : parseDurationToSeconds(s.duration)), 0);
 
+
+
             const todayBreakSecs = todayList
+
                 .filter(s => s.mode === 'Descanso')
+
                 .reduce((sum, s) => sum + (typeof s.seconds === 'number' ? s.seconds : parseDurationToSeconds(s.duration)), 0);
+
+
 
             const todaySessionsCount = todayList.filter(s => s.mode !== 'Descanso').length;
 
+
+
             const effectiveTodayStudy = Math.max(Number(timerState.totalWorkSeconds) || 0, todayStudySecs);
+
             const effectiveTodayBreak = Math.max(Number(timerState.totalBreakSeconds) || 0, todayBreakSecs);
+
             const effectiveTodaySessions = Math.max(Number(timerState.sessionsCompleted) || 0, todaySessionsCount);
 
+
+
             timerState.totalWorkSeconds = effectiveTodayStudy;
+
             timerState.totalBreakSeconds = effectiveTodayBreak;
+
             timerState.sessionsCompleted = effectiveTodaySessions;
 
+
+
             // Update Hoy Elements
+
             const elStreak = document.getElementById('statStreak');
+
             const elSessions = document.getElementById('statSessions');
+
             const elTime = document.getElementById('statTime');
+
             const elBreakTime = document.getElementById('statBreakTime');
 
+
+
             if (elStreak) elStreak.textContent = timerState.streak || 0;
+
             if (elSessions) elSessions.textContent = effectiveTodaySessions;
+
             if (elTime) elTime.textContent = formatDurationSummary(effectiveTodayStudy);
+
             if (elBreakTime) elBreakTime.textContent = formatDurationSummary(effectiveTodayBreak);
 
+
+
             // Update Total / Global Elements
+
             const elGStreak = document.getElementById('statGlobalStreak');
+
             const elGSessions = document.getElementById('statGlobalSessions');
+
             const elGTime = document.getElementById('statGlobalTime');
+
             const elGBreakTime = document.getElementById('statGlobalBreakTime');
 
+
+
             if (elGStreak) elGStreak.textContent = timerState.globalStreak || timerState.streak || 0;
+
             if (elGSessions) elGSessions.textContent = effectiveGlobalSessions;
+
             if (elGTime) elGTime.textContent = formatDurationSummary(effectiveGlobalStudy);
+
             if (elGBreakTime) elGBreakTime.textContent = formatDurationSummary(effectiveGlobalBreak);
 
+
+
             populateSubjectFilters();
+
             renderSubjectStats();
+
         }
+
+
 
         function populateSubjectFilters() {
+
             const metrics = getSubjectMetrics();
+
             const subjects = Object.keys(metrics);
+
+
 
             const statsSelect = document.getElementById('statsSubjectFilter');
+
             const historySelect = document.getElementById('historySubjectFilterSelect');
 
+
+
             if (statsSelect) {
+
                 const cur = statsSelect.value;
+
                 let opts = '<option value="ALL">Todas las materias (Desglose global)</option>';
+
                 subjects.forEach(s => {
+
                     opts += `<option value="${s}">${s}</option>`;
+
                 });
+
                 statsSelect.innerHTML = opts;
+
                 if (subjects.includes(cur)) statsSelect.value = cur;
+
             }
+
+
 
             if (historySelect) {
+
                 const cur = historySelect.value;
+
                 let opts = '<option value="ALL">Todas las materias</option>';
+
                 subjects.forEach(s => {
+
                     opts += `<option value="${s}">${s}</option>`;
+
                 });
+
                 historySelect.innerHTML = opts;
+
                 if (subjects.includes(cur)) historySelect.value = cur;
+
             }
+
         }
+
+
 
         function populateSubjectSelects() {
+
             populateSubjectSelect();
+
             populateSubjectFilters();
+
         }
+
+
 
         window.renderSubjectStats = function() {
+
             const filterEl = document.getElementById('statsSubjectFilter');
+
             const target = filterEl ? filterEl.value : 'ALL';
 
+
+
             const countEl = document.getElementById('statSubjCount');
+
             const sessEl = document.getElementById('statSubjSessions');
+
             const timeEl = document.getElementById('statSubjTime');
+
             const breakEl = document.getElementById('statSubjBreakTime');
+
             const listEl = document.getElementById('statsSubjectBreakdownList');
 
+
+
             const metrics = getSubjectMetrics();
+
             const subjects = Object.keys(metrics);
 
+
+
             const totalStudySecs = subjects.reduce((sum, s) => sum + (Number(metrics[s].seconds) || 0), 0);
+
             const totalBreakSecs = subjects.reduce((sum, s) => sum + (Number(metrics[s].breakSeconds) || 0), 0);
+
             const totalSessions = subjects.reduce((sum, s) => sum + (Number(metrics[s].sessions) || 0), 0);
 
+
+
             const effectiveGlobalStudy = Math.max(Number(timerState.globalTime) || 0, totalStudySecs);
+
             const effectiveGlobalBreak = Math.max(Number(timerState.globalBreakTime) || 0, totalBreakSecs);
+
             const effectiveGlobalSessions = Math.max(Number(timerState.globalSessions) || 0, totalSessions);
 
+
+
             if (target === 'ALL') {
+
                 const activeCount = subjects.filter(s => (metrics[s].sessions > 0 || metrics[s].seconds > 0 || metrics[s].breakSeconds > 0)).length;
+
                 if (countEl) countEl.textContent = activeCount;
+
                 if (sessEl) sessEl.textContent = effectiveGlobalSessions;
+
                 if (timeEl) timeEl.textContent = formatDurationSummary(effectiveGlobalStudy);
+
                 if (breakEl) breakEl.textContent = formatDurationSummary(effectiveGlobalBreak);
 
+
+
                 if (listEl) {
+
                     if (activeCount === 0) {
+
                         listEl.innerHTML = '<div style="text-align:center; padding:24px; color:var(--text-muted); font-size:13px;">Aún no registrás tiempo en ninguna materia.</div>';
+
                     } else {
+
                         const totalSecsAll = effectiveGlobalStudy > 0 ? effectiveGlobalStudy : 1;
+
                         listEl.innerHTML = subjects
+
                             .filter(s => (metrics[s].sessions > 0 || metrics[s].seconds > 0 || metrics[s].breakSeconds > 0))
+
                             .sort((a, b) => (metrics[b].seconds || 0) - (metrics[a].seconds || 0))
+
                             .map(name => {
+
                                 const data = metrics[name];
+
                                 const sec = data.seconds || 0;
+
                                 const brkSec = data.breakSeconds || 0;
+
                                 const pct = Math.min(100, Math.round((sec / totalSecsAll) * 100));
+
                                 const safeName = window.sanitizeHTML ? window.sanitizeHTML(name) : name;
+
                                 return `
+
                                     <div class="stat-card" style="padding:16px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02); border-radius:14px; margin-bottom:12px;">
+
                                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+
                                             <strong style="color:var(--text-main); font-size:14px;">${safeName}</strong>
+
                                             <span style="color:var(--primary); font-weight:800; font-size:14px;">${formatDurationSummary(sec)}</span>
+
                                         </div>
+
                                         <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-muted); margin-bottom:8px;">
+
                                             <span>${data.sessions || 0} sesión(es) realizadas</span>
+
                                             <span>${pct}% de tu tiempo de estudio</span>
+
                                         </div>
+
                                         <div style="height:6px; background:rgba(255,255,255,0.06); border-radius:999px; overflow:hidden; margin-bottom:10px;">
+
                                             <div style="height:100%; width:${pct}%; background:var(--primary); border-radius:999px;"></div>
+
                                         </div>
+
                                         <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted);">
+
                                             <span>Tiempo de descanso acumulado:</span>
+
                                             <strong style="color:#32D74B;">${formatDurationSummary(brkSec)}</strong>
+
                                         </div>
+
                                     </div>
+
                                 `;
+
                             }).join('');
+
                     }
+
                 }
+
             } else {
+
                 const data = metrics[target] || { sessions: 0, seconds: 0, breakSeconds: 0 };
+
                 const totalSecsAll = effectiveGlobalStudy > 0 ? effectiveGlobalStudy : 1;
+
                 const pct = Math.min(100, Math.round(((data.seconds || 0) / totalSecsAll) * 100));
+
                 const safeName = window.sanitizeHTML ? window.sanitizeHTML(target) : target;
 
+
+
                 if (countEl) countEl.textContent = '1';
+
                 if (sessEl) sessEl.textContent = data.sessions || 0;
+
                 if (timeEl) timeEl.textContent = formatDurationSummary(data.seconds || 0);
+
                 if (breakEl) breakEl.textContent = formatDurationSummary(data.breakSeconds || 0);
 
+
+
                 if (listEl) {
+
                     listEl.innerHTML = `
+
                         <div class="stat-card" style="padding:16px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02); border-radius:14px;">
+
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+
                                 <strong style="color:var(--text-main); font-size:14px;">${safeName}</strong>
+
                                 <span style="color:var(--primary); font-weight:800; font-size:14px;">${formatDurationSummary(data.seconds || 0)}</span>
+
                             </div>
+
                             <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-muted); margin-bottom:8px;">
+
                                 <span>${data.sessions || 0} sesión(es) realizadas</span>
+
                                 <span>Representa el ${pct}% de tu tiempo de estudio</span>
+
                             </div>
+
                             <div style="height:6px; background:rgba(255,255,255,0.06); border-radius:999px; overflow:hidden; margin-bottom:10px;">
+
                                 <div style="height:100%; width:${pct}%; background:var(--primary); border-radius:999px;"></div>
+
                             </div>
+
                             <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted);">
+
                                 <span>Tiempo de descanso acumulado:</span>
+
                                 <strong style="color:#32D74B;">${formatDurationSummary(data.breakSeconds || 0)}</strong>
+
                             </div>
+
                         </div>
+
                     `;
+
                 }
+
             }
+
         };
+
+
 
         function renderHistoryList(arr, id, emptyText) {
+
             const container = document.getElementById(id);
+
             if (!container) return;
+
             if (!arr || !arr.length) {
+
                 container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:13px;"><p>${emptyText}</p></div>`;
+
                 return;
+
             }
+
             container.innerHTML = arr.map(s => {
+
                 const safeSubj = window.sanitizeHTML ? window.sanitizeHTML(s.subject) : (s.subject || 'Estudio Libre');
+
                 const safeDate = window.sanitizeHTML ? window.sanitizeHTML(s.date) : (s.date || '');
+
                 const safeTime = window.sanitizeHTML ? window.sanitizeHTML(s.time) : (s.time || '');
+
                 const safeDur = s.seconds ? formatSessionDuration(s.seconds) : (window.sanitizeHTML ? window.sanitizeHTML(s.duration) : (s.duration || '0m'));
+
                 const isBreak = s.mode === 'Descanso';
+
                 const badge = isBreak
+
                     ? '<span style="background:rgba(50,215,75,0.12); color:#32D74B; border:1px solid rgba(50,215,75,0.25); font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:6px;">Descanso</span>'
+
                     : '<span style="background:rgba(10,132,255,0.12); color:var(--primary); border:1px solid rgba(10,132,255,0.25); font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:6px;">Enfoque</span>';
+
                 const sessKey = encodeURIComponent(`${s.date || ''}_${s.time || ''}_${s.subject || ''}_${s.seconds || ''}_${s.mode || ''}`);
+
                 return `
+
                     <div class="history-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; margin-bottom:8px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px;">
+
                         <div>
+
                             <div class="history-materia" style="font-weight:600; font-size:13px; color:var(--text-main); display:flex; align-items:center;">
+
                                 ${safeSubj}${badge}
+
                             </div>
+
                             <div class="history-date" style="font-size:11px; color:var(--text-muted); margin-top:2px;">
+
                                 ${safeDate}${safeTime ? ' a las ' + safeTime : ''}
+
                             </div>
+
                         </div>
+
                         <div style="display:flex; align-items:center; gap:12px;">
+
                             <span class="history-time" style="font-weight:700; font-size:13px; ${isBreak ? 'color:#32D74B;' : 'color:var(--text-main);'}">
+
                                 ${safeDur}
+
                             </span>
+
                             <button type="button" class="btn-icon" title="Eliminar sesión" onclick="window.deleteStudySession && window.deleteStudySession('${sessKey}')" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:4px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; transition:color 0.2s;" onmouseover="this.style.color='#FF453A'" onmouseout="this.style.color='var(--text-muted)'">
+
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+
                             </button>
+
                         </div>
+
                     </div>
+
                 `;
+
             }).join('');
+
         }
+
+
 
         function recalculateStatsFromHistory() {
+
             const allRecords = [];
+
             if (Array.isArray(timerState.globalHistory)) {
+
                 allRecords.push(...timerState.globalHistory);
+
             }
+
             if (Array.isArray(timerState.sessionHistory)) {
+
                 timerState.sessionHistory.forEach(s => {
+
                     if (!s) return;
+
                     const k = `${s.date || ''}_${s.time || ''}_${s.subject || ''}_${s.seconds || ''}_${s.mode || ''}`;
+
                     if (!allRecords.some(r => `${r.date || ''}_${r.time || ''}_${r.subject || ''}_${r.seconds || ''}_${r.mode || ''}` === k)) {
+
                         allRecords.push(s);
+
                     }
+
                 });
+
             }
+
+
 
             const newSubjectStats = {};
+
             let totalStudy = 0;
+
             let totalBreak = 0;
+
             let totalSess = 0;
 
+
+
             allRecords.forEach(sess => {
+
                 if (!sess) return;
+
                 const subj = sess.subject || 'Estudio Libre';
+
                 if (!newSubjectStats[subj]) {
+
                     newSubjectStats[subj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
+
                 }
+
                 const secs = typeof sess.seconds === 'number' ? sess.seconds : parseDurationToSeconds(sess.duration);
+
                 if (sess.mode === 'Descanso') {
+
                     newSubjectStats[subj].breakSeconds += secs;
+
                     totalBreak += secs;
+
                 } else {
+
                     newSubjectStats[subj].sessions++;
+
                     newSubjectStats[subj].seconds += secs;
+
                     totalStudy += secs;
+
                     totalSess++;
+
                 }
+
             });
 
+
+
             timerState.subjectStats = newSubjectStats;
+
             timerState.globalTime = totalStudy;
+
             timerState.globalBreakTime = totalBreak;
+
             timerState.globalSessions = totalSess;
+
             timerState.totalWorkSeconds = totalStudy;
+
             timerState.totalBreakSeconds = totalBreak;
+
             timerState.sessionsCompleted = totalSess;
+
         }
+
+
 
         function syncCleanPomodoroToFirestore() {
+
             if (window.currentUser && window.currentUser.uid && window.db) {
+
                 const uid = window.currentUser.uid;
+
                 const payload = {
+
                     timerState: {
+
                         sessionHistory: timerState.sessionHistory || [],
+
                         globalHistory: timerState.globalHistory || [],
+
                         subjectStats: timerState.subjectStats || {},
+
                         globalSessions: timerState.globalSessions || 0,
+
                         globalTime: timerState.globalTime || 0,
+
                         globalBreakTime: timerState.globalBreakTime || 0,
+
                         streak: timerState.streak || 0,
+
                         globalStreak: timerState.globalStreak || 0,
+
                         totalWorkSeconds: timerState.totalWorkSeconds || 0,
+
                         totalBreakSeconds: timerState.totalBreakSeconds || 0,
+
                         sessionsCompleted: timerState.sessionsCompleted || 0,
+
                         lastStudyDate: timerState.lastStudyDate || null
+
                     },
+
                     sessionHistory: timerState.sessionHistory || [],
+
                     globalHistory: timerState.globalHistory || [],
+
                     subjectStats: timerState.subjectStats || {},
+
                     globalSessions: timerState.globalSessions || 0,
+
                     globalTime: timerState.globalTime || 0,
+
                     globalBreakTime: timerState.globalBreakTime || 0,
+
                     streak: timerState.streak || 0,
+
                     globalStreak: timerState.globalStreak || 0,
+
                     totalWorkSeconds: timerState.totalWorkSeconds || 0,
+
                     totalBreakSeconds: timerState.totalBreakSeconds || 0,
+
                     sessionsCompleted: timerState.sessionsCompleted || 0,
+
                     lastStudyDate: timerState.lastStudyDate || null,
+
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+
                 };
 
+
+
                 // Clean overwrite to prevent ghost data resurrection
+
                 window.db.collection('users_pomodoro').doc(uid).set(payload).catch(console.warn);
+
                 window.db.collection('usuarios_estudio').doc(uid).set(payload).catch(console.warn);
+
             }
+
         }
+
+
 
         window.deleteStudySession = function(encodedKey) {
+
             if (!confirm('¿Deseas eliminar este registro de sesión de tu historial?')) return;
+
             const targetKey = decodeURIComponent(encodedKey);
 
+
+
             if (Array.isArray(timerState.sessionHistory)) {
+
                 timerState.sessionHistory = timerState.sessionHistory.filter(s => {
+
                     const k = `${s.date || ''}_${s.time || ''}_${s.subject || ''}_${s.seconds || ''}_${s.mode || ''}`;
+
                     return k !== targetKey;
+
                 });
+
             }
+
+
 
             if (Array.isArray(timerState.globalHistory)) {
+
                 timerState.globalHistory = timerState.globalHistory.filter(s => {
+
                     const k = `${s.date || ''}_${s.time || ''}_${s.subject || ''}_${s.seconds || ''}_${s.mode || ''}`;
+
                     return k !== targetKey;
+
                 });
+
             }
+
+
 
             recalculateStatsFromHistory();
+
             syncCleanPomodoroToFirestore();
 
+
+
             try {
+
                 localStorage.setItem('ungs_study_stats', JSON.stringify(timerState));
+
             } catch(e){}
 
+
+
             updateStats();
+
             updateHistory();
+
             showNotification('Sesión eliminada del historial.');
+
         };
+
+
 
         window.clearAllStudyData = function() {
+
             if (!confirm('¿Estás seguro de que deseas vaciar todo el historial y reiniciar las estadísticas a cero? Esta acción no se puede deshacer.')) return;
 
+
+
             timerState = {
+
                 todayDate: getTodayDateString ? getTodayDateString() : new Date().toLocaleDateString('es-ES'),
+
                 todaySessions: 0,
+
                 sessionsCompleted: 0,
+
                 totalWorkSeconds: 0,
+
                 totalBreakSeconds: 0,
+
                 streak: 0,
+
                 globalStreak: 0,
+
                 globalSessions: 0,
+
                 globalTime: 0,
+
                 globalBreakTime: 0,
+
                 lastStudyDate: null,
+
                 sessionHistory: [],
+
                 globalHistory: [],
+
                 subjectStats: {}
+
             };
 
+
+
             try {
+
                 localStorage.removeItem('ungs_study_stats');
+
                 localStorage.removeItem('ungs_pomodoro_stats');
+
             } catch(e){}
+
+
 
             syncCleanPomodoroToFirestore();
 
+
+
             updateStats();
+
             updateHistory();
+
             showNotification('Historial y estadísticas reiniciados a cero.');
+
         };
+
+
 
         window.filterHistoryBySelectedSubject = function() {
+
             const sel = document.getElementById('historySubjectFilterSelect');
+
             const target = sel ? sel.value : 'ALL';
+
             const history = timerState.globalHistory || [];
+
             const filtered = target === 'ALL' ? history : history.filter(s => (s.subject || 'Estudio Libre') === target);
+
             renderHistoryList(filtered, 'historyMateriaFilteredList', 'No hay sesiones registradas para esta materia.');
+
         };
+
+
 
         function updateHistory() {
+
             renderHistoryList((timerState.sessionHistory || []).slice().reverse(), 'historyListHoy', 'Sin sesiones completadas hoy.');
+
             renderHistoryList(timerState.globalHistory || [], 'historyListGlobal', 'Sin historial global acumulado.');
+
             window.filterHistoryBySelectedSubject();
+
         }
+
+
 
         window.toggleStats = function(view) {
+
             const tabHoy = document.getElementById('tabStatsHoy');
+
             const tabGlobal = document.getElementById('tabStatsGlobal');
+
             const tabMateria = document.getElementById('tabStatsMateria');
+
             const gridHoy = document.getElementById('statsGridHoy');
+
             const gridGlobal = document.getElementById('statsGridGlobal');
+
             const gridMateria = document.getElementById('statsGridMateria');
 
+
+
             if (tabHoy) tabHoy.classList.toggle('active', view === 'hoy');
+
             if (tabGlobal) tabGlobal.classList.toggle('active', view === 'global');
+
             if (tabMateria) tabMateria.classList.toggle('active', view === 'materia');
+
+
 
             if (gridHoy) gridHoy.classList.toggle('hidden', view !== 'hoy');
+
             if (gridGlobal) gridGlobal.classList.toggle('hidden', view !== 'global');
+
             if (gridMateria) gridMateria.classList.toggle('hidden', view !== 'materia');
 
+
+
             if (view === 'materia') {
+
                 window.renderSubjectStats();
+
             }
+
         };
+
+
 
         window.toggleHistory = function(view) {
+
             const tabHoy = document.getElementById('tabHistoryHoy');
+
             const tabGlobal = document.getElementById('tabHistoryGlobal');
+
             const tabMateria = document.getElementById('tabHistoryMateria');
+
             const listHoy = document.getElementById('historyListHoy');
+
             const listGlobal = document.getElementById('historyListGlobal');
+
             const listMateria = document.getElementById('historyListMateria');
 
+
+
             if (tabHoy) tabHoy.classList.toggle('active', view === 'hoy');
+
             if (tabGlobal) tabGlobal.classList.toggle('active', view === 'global');
+
             if (tabMateria) tabMateria.classList.toggle('active', view === 'materia');
 
+
+
             if (listHoy) listHoy.classList.toggle('hidden', view !== 'hoy');
+
             if (listGlobal) listGlobal.classList.toggle('hidden', view !== 'global');
+
             if (listMateria) listMateria.classList.toggle('hidden', view !== 'materia');
 
+
+
             if (view === 'materia') {
+
                 window.filterHistoryBySelectedSubject();
+
             }
+
         };
 
+
+
         function showNotification(msg) {
+
             const n = document.createElement('div');
+
             n.className = 'notification';
+
             n.textContent = msg;
+
             document.body.appendChild(n);
+
             setTimeout(() => n.remove(), 3200);
+
         }
+
+
 
         // Hash Routing SPA Controller
+
         function handleHashRouting() {
+
             const hash = (window.location.hash || '').toLowerCase();
+
             const viewCronometro = document.getElementById('viewCronometro');
+
             const viewMetricas = document.getElementById('viewMetricas');
 
+
+
             if (hash === '#metricas' || hash === '#analitica' || hash === '#historial') {
+
                 if (viewCronometro) viewCronometro.style.display = 'none';
+
                 if (viewMetricas) {
+
                     viewMetricas.style.display = 'block';
+
                     window.scrollTo({ top: 0, behavior: 'instant' });
+
                     populateSubjectFilters();
+
                     populateSubjectSelects();
+
                     updateStats();
+
                     updateHistory();
+
                 }
+
                 document.title = 'Métricas e Historial | La Biblioteca de ADE';
+
             } else {
+
                 if (viewMetricas) viewMetricas.style.display = 'none';
+
                 if (viewCronometro) {
+
                     viewCronometro.style.display = 'block';
+
                 }
+
                 document.title = 'Sesión de Estudio | La Biblioteca de ADE';
+
             }
+
         }
+
+
 
         window.addEventListener('hashchange', handleHashRouting);
 
+
+
         // Modo sin distracciones
+
         window.enterDistractionFreeMode = function() {
+
             document.body.classList.add('distraction-free');
+
             if (document.documentElement.requestFullscreen) {
+
                 document.documentElement.requestFullscreen().catch(() => {});
+
             }
+
         };
+
+
 
         window.exitDistractionFreeMode = function() {
+
             document.body.classList.remove('distraction-free');
+
             if (document.exitFullscreen && document.fullscreenElement) {
+
                 document.exitFullscreen().catch(() => {});
+
             }
+
         };
 
+
+
         window.addEventListener('beforeunload', () => {
+
             if (timerRunning || currentSubject) saveTimerLocalState();
+
             saveBreakLocalState();
+
         });
+
+
 
         // Background Visibility and Focus Synchronization
+
         document.addEventListener('visibilitychange', () => {
+
             if (!document.hidden && timerRunning) {
+
                 if (isUnlimited && chronoStartTime) {
+
                     currentSeconds = Math.floor((chronoAccumulated + (Date.now() - chronoStartTime)) / 1000);
+
                     updateDisplay();
+
                 } else if (!isUnlimited && targetEndTime) {
+
                     const diff = targetEndTime - Date.now();
+
                     if (diff <= 0) {
+
                         currentSeconds = 0;
+
                         updateDisplay();
+
                         completeSession();
+
                     } else {
+
                         currentSeconds = Math.ceil(diff / 1000);
+
                         updateDisplay();
+
                     }
+
                 }
+
             }
+
         });
+
+
 
         window.addEventListener('focus', () => {
+
             if (timerRunning) {
+
                 if (isUnlimited && chronoStartTime) {
+
                     currentSeconds = Math.floor((chronoAccumulated + (Date.now() - chronoStartTime)) / 1000);
+
                     updateDisplay();
+
                 } else if (!isUnlimited && targetEndTime) {
+
                     const diff = targetEndTime - Date.now();
+
                     if (diff <= 0) {
+
                         currentSeconds = 0;
+
                         updateDisplay();
+
                         completeSession();
+
                     } else {
+
                         currentSeconds = Math.ceil(diff / 1000);
+
                         updateDisplay();
+
                     }
+
                 }
+
             }
+
         });
+
         function toSafeArray(val) {
+
             if (!val) return [];
+
             if (Array.isArray(val)) return val;
+
             if (typeof val === 'object') return Object.values(val);
+
             return [];
+
         }
 
+
+
         function deepExtractPomodoro(docData, subDocList) {
+
             const extracted = {
+
                 sessions: [],
+
                 subjectStats: {},
+
                 globalSessions: 0,
+
                 globalTime: 0,
+
                 globalBreakTime: 0,
+
                 totalWorkSeconds: 0,
+
                 totalBreakSeconds: 0,
+
                 sessionsCompleted: 0,
+
                 streak: 0,
+
                 globalStreak: 0,
+
                 lastStudyDate: null
+
             };
+
+
 
             const seenSessions = new Set();
 
+
+
             function addSession(s) {
+
                 if (!s || typeof s !== 'object') return;
+
                 const subj = (s.subject || s.materia || s.name || s.subj || 'Estudio Libre').trim();
+
                 const mode = (s.mode || s.tipo || (s.isBreak ? 'Descanso' : 'Estudio')).trim();
+
                 const date = (s.date || s.fecha || (s.timestamp && typeof s.timestamp.toDate === 'function' ? s.timestamp.toDate().toLocaleDateString('es-ES') : '') || new Date().toLocaleDateString('es-ES')).trim();
+
                 const time = (s.time || s.hora || (s.timestamp && typeof s.timestamp.toDate === 'function' ? s.timestamp.toDate().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '') || '').trim();
+
                 
+
                 let secs = 0;
+
                 if (typeof s.seconds === 'number') secs = s.seconds;
+
                 else if (typeof s.segundos === 'number') secs = s.segundos;
+
                 else if (typeof s.durationSeconds === 'number') secs = s.durationSeconds;
+
                 else if (s.duration || s.duracion) secs = parseDurationToSeconds(s.duration || s.duracion);
+
+
 
                 if (secs <= 0 && !s.duration && !s.duracion) return;
 
+
+
                 const dur = s.duration || s.duracion || formatDurationSummary(secs);
+
                 const norm = {
+
                     subject: subj,
+
                     mode: mode,
+
                     date: date,
+
                     time: time,
+
                     seconds: secs,
+
                     duration: dur
+
                 };
 
+
+
                 const key = `${date}_${time}_${subj}_${secs}_${mode}`;
+
                 if (!seenSessions.has(key)) {
+
                     seenSessions.add(key);
+
                     extracted.sessions.push(norm);
+
                 }
+
             }
 
+
+
             function traverse(node, depth) {
+
                 if (!node || typeof node !== 'object' || depth > 7) return;
 
+
+
                 if (Array.isArray(node)) {
+
                     node.forEach(item => {
+
                         if (item && typeof item === 'object') {
+
                             if (item.subject || item.materia || item.mode || item.seconds || item.segundos || item.duration || item.duracion) {
+
                                 addSession(item);
+
                             } else {
+
                                 traverse(item, depth + 1);
+
                             }
+
                         }
+
                     });
+
                     return;
+
                 }
+
+
 
                 // If node is itself a session object
+
                 if (node.subject || node.materia || (node.seconds !== undefined && node.mode) || (node.segundos !== undefined && node.mode)) {
+
                     addSession(node);
+
                     return;
+
                 }
 
+
+
                 // Direct check for session container maps or arrays
+
                 ['sessionHistory', 'globalHistory', 'sessions', 'historial', 'records', 'logs'].forEach(k => {
+
                     if (node[k]) {
+
                         const safe = toSafeArray(node[k]);
+
                         if (safe.length > 0) {
+
                             safe.forEach(s => addSession(s));
+
                         }
+
                     }
+
                 });
 
+
+
                 if (typeof node.globalSessions === 'number') extracted.globalSessions = Math.max(extracted.globalSessions, node.globalSessions);
+
                 if (typeof node.totalSessions === 'number') extracted.globalSessions = Math.max(extracted.globalSessions, node.totalSessions);
+
                 if (typeof node.sessionsCompleted === 'number') extracted.sessionsCompleted = Math.max(extracted.sessionsCompleted, node.sessionsCompleted);
 
+
+
                 if (typeof node.globalTime === 'number') extracted.globalTime = Math.max(extracted.globalTime, node.globalTime);
+
                 if (typeof node.totalWorkSeconds === 'number') extracted.totalWorkSeconds = Math.max(extracted.totalWorkSeconds, node.totalWorkSeconds);
+
                 if (typeof node.totalTime === 'number') extracted.globalTime = Math.max(extracted.globalTime, node.totalTime);
 
+
+
                 if (typeof node.globalBreakTime === 'number') extracted.globalBreakTime = Math.max(extracted.globalBreakTime, node.globalBreakTime);
+
                 if (typeof node.totalBreakSeconds === 'number') extracted.totalBreakSeconds = Math.max(extracted.totalBreakSeconds, node.totalBreakSeconds);
 
+
+
                 if (typeof node.streak === 'number') extracted.streak = Math.max(extracted.streak, node.streak);
+
                 if (typeof node.racha === 'number') extracted.streak = Math.max(extracted.streak, node.racha);
+
                 if (typeof node.globalStreak === 'number') extracted.globalStreak = Math.max(extracted.globalStreak, node.globalStreak);
+
                 if (typeof node.mejorRacha === 'number') extracted.globalStreak = Math.max(extracted.globalStreak, node.mejorRacha);
+
+
 
                 if (typeof node.lastStudyDate === 'string') extracted.lastStudyDate = node.lastStudyDate;
 
+
+
                 if (node.subjectStats && typeof node.subjectStats === 'object' && !Array.isArray(node.subjectStats)) {
+
                     Object.keys(node.subjectStats).forEach(sKey => {
+
                         const val = node.subjectStats[sKey];
+
                         if (val && typeof val === 'object') {
+
                             if (!extracted.subjectStats[sKey]) extracted.subjectStats[sKey] = { sessions: 0, seconds: 0, breakSeconds: 0 };
+
                             extracted.subjectStats[sKey].sessions = Math.max(extracted.subjectStats[sKey].sessions, Number(val.sessions || val.sesiones) || 0);
+
                             extracted.subjectStats[sKey].seconds = Math.max(extracted.subjectStats[sKey].seconds, Number(val.seconds || val.segundos) || 0);
+
                             extracted.subjectStats[sKey].breakSeconds = Math.max(extracted.subjectStats[sKey].breakSeconds, Number(val.breakSeconds || val.segundosDescanso) || 0);
+
                         }
+
                     });
+
                 }
+
+
 
                 Object.keys(node).forEach(key => {
+
                     const lowKey = key.toLowerCase();
+
                     if (['updatedat', 'createdat', 'lastupdated', 'timestamp', 'email', 'uid', 'userid'].includes(lowKey)) return;
+
                     traverse(node[key], depth + 1);
+
                 });
+
             }
+
+
 
             if (docData) {
+
                 traverse(docData, 0);
+
             }
+
+
 
             if (Array.isArray(subDocList)) {
+
                 subDocList.forEach(s => addSession(s));
+
             }
+
+
 
             return extracted;
+
         }
+
+
 
         // Initialize Everything on Load
+
         function initApp() {
+
             initTimerWorker();
+
             loadTimerLocalState();
+
             loadBreakLocalState();
+
             populateSubjectSelect();
+
             populateSubjectFilters();
+
             populateSubjectSelects();
+
             updateStats();
+
             updateHistory();
+
             updateDisplay();
+
             handleHashRouting();
 
+
+
             document.addEventListener('keydown', function(e) {
+
                 if (e.key === 'Escape') {
+
                     if (window.closeBreakModal) window.closeBreakModal();
+
                 }
+
             });
 
+
+
             if (window.auth) {
+
                 window.auth.onAuthStateChanged(user => {
+
                     window.currentUser = user;
+
                     if (user && window.db) {
+
                         // STRICT PRIMARY: users_pomodoro — force server fetch, bypass stale cache
-                        Promise.allSettled([
-                            window.db.collection('users_pomodoro').doc(user.uid).get({ source: 'server' }),
-                            window.db.collection('usuarios_estudio').doc(user.uid).get({ source: 'server' }),
-                            window.db.collection('users_pomodoro').doc(user.uid).collection('sessions').get({ source: 'server' }),
-                            window.db.collection('usuarios_estudio').doc(user.uid).collection('sessions').get({ source: 'server' })
-                        ]).then(results => {
-                            let combinedDocs = [];
-                            let subDocs = [];
 
-                            results.forEach(res => {
-                                if (res.status === 'fulfilled' && res.value) {
-                                    const val = res.value;
-                                    if (val.exists && typeof val.data === 'function') {
-                                        combinedDocs.push(val.data());
-                                    } else if (typeof val.forEach === 'function') {
-                                        val.forEach(docSnap => {
-                                            if (docSnap.exists) subDocs.push(docSnap.data());
-                                        });
-                                    }
-                                }
-                            });
-
-                            if (combinedDocs.length > 0 || subDocs.length > 0) {
-                                let mergedSessions = [];
-                                let mergedSubjectStats = {};
-                                let maxGlobalSessions = 0;
-                                let maxGlobalTime = 0;
-                                let maxGlobalBreakTime = 0;
-                                let maxTotalWork = 0;
-                                let maxTotalBreak = 0;
-                                let maxStreak = 0;
-                                let maxGlobalStreak = 0;
-                                let lastDate = null;
-
-                                const seenKeys = new Set();
-
-                                function ingestSession(s) {
-                                    if (!s || typeof s !== 'object') return;
-                                    const subj = s.subject || s.materia || s.name || s.subj || 'Estudio Libre';
-                                    const mode = s.mode || s.tipo || (s.isBreak ? 'Descanso' : 'Estudio');
-                                    const date = s.date || s.fecha || new Date().toLocaleDateString('es-ES');
-                                    const time = s.time || s.hora || '';
-                                    let secs = 0;
-                                    if (typeof s.seconds === 'number') secs = s.seconds;
-                                    else if (typeof s.segundos === 'number') secs = s.segundos;
-                                    else if (s.duration || s.duracion) secs = parseDurationToSeconds(s.duration || s.duracion);
-                                    const dur = s.duration || s.duracion || formatDurationSummary(secs);
-                                    const k = `${date}_${time}_${subj}_${secs}_${mode}`;
-                                    if (!seenKeys.has(k)) {
-                                        seenKeys.add(k);
-                                        mergedSessions.push({ subject: subj, mode: mode, date: date, time: time, seconds: secs, duration: dur });
-                                    }
-                                }
-
-                                // FAST-PATH: Chequeo directo de arrays oficiales de sesiones (d.sessions, d.sessionHistory, d.globalHistory, d.daily)
-                                combinedDocs.forEach(d => {
-                                    if (!d || typeof d !== 'object') return;
-
-                                    const directArrays = [
-                                        d.sessionHistory, d.globalHistory, d.sessions, d.historial, d.records, d.logs,
-                                        d.timerState?.sessionHistory, d.timerState?.globalHistory, d.timerState?.sessions
-                                    ];
-                                    directArrays.forEach(item => {
-                                        const arr = toSafeArray(item);
-                                        if (arr.length > 0) {
-                                            arr.forEach(s => ingestSession(s));
-                                        }
-                                    });
-
-                                    const dailyMap = d.daily || d.timerState?.daily;
-                                    if (dailyMap && typeof dailyMap === 'object') {
-                                        Object.keys(dailyMap).forEach(dKey => {
-                                            const entry = dailyMap[dKey];
-                                            if (entry && typeof entry === 'object') {
-                                                const sArr = toSafeArray(entry.sessions);
-                                                if (sArr.length > 0) {
-                                                    sArr.forEach(s => ingestSession({ ...s, date: dKey }));
-                                                } else if (entry.seconds || entry.time || entry.sessions || entry.duration) {
-                                                    ingestSession({
-                                                        subject: entry.subject || entry.materia || 'Estudio Libre',
-                                                        mode: entry.mode || 'Estudio',
-                                                        date: dKey,
-                                                        time: entry.time || '',
-                                                        seconds: Number(entry.seconds || entry.segundos) || 0
-                                                    });
-                                                }
-                                            }
-                                        });
-                                    }
-
-                                    const src = d.timerState || d;
-                                    if (typeof src.globalSessions === 'number') maxGlobalSessions = Math.max(maxGlobalSessions, src.globalSessions);
-                                    if (typeof src.totalSessions === 'number') maxGlobalSessions = Math.max(maxGlobalSessions, src.totalSessions);
-                                    if (typeof src.globalTime === 'number') maxGlobalTime = Math.max(maxGlobalTime, src.globalTime);
-                                    if (typeof src.totalWorkSeconds === 'number') maxTotalWork = Math.max(maxTotalWork, src.totalWorkSeconds);
-                                    if (typeof src.globalBreakTime === 'number') maxGlobalBreakTime = Math.max(maxGlobalBreakTime, src.globalBreakTime);
-                                    if (typeof src.totalBreakSeconds === 'number') maxTotalBreak = Math.max(maxTotalBreak, src.totalBreakSeconds);
-                                    if (typeof src.streak === 'number') maxStreak = Math.max(maxStreak, src.streak);
-                                    if (typeof src.globalStreak === 'number') maxGlobalStreak = Math.max(maxGlobalStreak, src.globalStreak);
-                                    if (typeof src.lastStudyDate === 'string') lastDate = src.lastStudyDate;
-
-                                    const stMap = d.subjectStats || (d.timerState && d.timerState.subjectStats);
-                                    if (stMap && typeof stMap === 'object' && !Array.isArray(stMap)) {
-                                        Object.keys(stMap).forEach(subj => {
-                                            const st = stMap[subj];
-                                            if (st && typeof st === 'object') {
-                                                if (!mergedSubjectStats[subj]) mergedSubjectStats[subj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
-                                                mergedSubjectStats[subj].sessions = Math.max(mergedSubjectStats[subj].sessions, Number(st.sessions || st.sesiones) || 0);
-                                                mergedSubjectStats[subj].seconds = Math.max(mergedSubjectStats[subj].seconds, Number(st.seconds || st.segundos) || 0);
-                                                mergedSubjectStats[subj].breakSeconds = Math.max(mergedSubjectStats[subj].breakSeconds, Number(st.breakSeconds || st.segundosDescanso) || 0);
-                                            }
-                                        });
-                                    }
-                                });
-
-                                if (subDocs.length > 0) {
-                                    subDocs.forEach(s => ingestSession(s));
-                                }
-
-                                if (mergedSessions.length === 0) {
-                                    combinedDocs.forEach(d => {
-                                        const ext = deepExtractPomodoro(d, []);
-                                        ext.sessions.forEach(s => ingestSession(s));
-                                    });
-                                }
-
-                                const todayDateStr = new Date().toLocaleDateString('es-ES');
-                                const todaySessions = mergedSessions.filter(s => s.date === todayDateStr);
-
-                                // Strict pure Firestore source of truth
-                                timerState = {
-                                    todayDate: todayDateStr,
-                                    todaySessions: todaySessions.filter(s => s.mode !== 'Descanso').length,
-                                    sessionsCompleted: todaySessions.filter(s => s.mode !== 'Descanso').length,
-                                    totalWorkSeconds: maxTotalWork || todaySessions.filter(s => s.mode !== 'Descanso').reduce((sum, s) => sum + s.seconds, 0),
-                                    totalBreakSeconds: maxTotalBreak || todaySessions.filter(s => s.mode === 'Descanso').reduce((sum, s) => sum + s.seconds, 0),
-                                    streak: maxStreak || (todaySessions.length > 0 ? 1 : 0),
-                                    globalStreak: maxGlobalStreak || maxStreak || (todaySessions.length > 0 ? 1 : 0),
-                                    globalSessions: maxGlobalSessions || mergedSessions.filter(s => s.mode !== 'Descanso').length,
-                                    globalTime: maxGlobalTime || mergedSessions.filter(s => s.mode !== 'Descanso').reduce((sum, s) => sum + s.seconds, 0),
-                                    globalBreakTime: maxGlobalBreakTime || mergedSessions.filter(s => s.mode === 'Descanso').reduce((sum, s) => sum + s.seconds, 0),
-                                    lastStudyDate: lastDate,
-                                    sessionHistory: todaySessions,
-                                    globalHistory: mergedSessions.slice().reverse(),
-                                    subjectStats: mergedSubjectStats
-                                };
-
-                                if (Object.keys(timerState.subjectStats).length === 0) {
-                                    recalculateStatsFromHistory();
-                                }
-
-                                try { localStorage.setItem('ungs_study_stats', JSON.stringify(timerState)); } catch(e){}
-                            } else {
-                                // Explicit zeroing when database is empty
-                                timerState = {
-                                    todayDate: new Date().toLocaleDateString('es-ES'),
-                                    todaySessions: 0,
-                                    sessionsCompleted: 0,
-                                    totalWorkSeconds: 0,
-                                    totalBreakSeconds: 0,
-                                    streak: 0,
-                                    globalStreak: 0,
-                                    globalSessions: 0,
-                                    globalTime: 0,
-                                    globalBreakTime: 0,
-                                    lastStudyDate: null,
-                                    sessionHistory: [],
-                                    globalHistory: [],
-                                    subjectStats: {}
-                                };
-                                try {
-                                    localStorage.removeItem('ungs_study_stats');
-                                    localStorage.removeItem('ungs_pomodoro_stats');
-                                } catch(e){}
-                            }
-
-                            populateSubjectFilters();
-                            populateSubjectSelects();
-                            updateStats();
-                            updateHistory();
-                        }).catch(console.error);
+                        
+                Promise.allSettled([
+                    window.db.collection('users_pomodoro').doc(user.uid).get({ source: 'server' })
+                ]).then(results => {
+                    const res = results[0];
+                    if (res.status === 'fulfilled' && res.value.exists) {
+                        const d = res.value.data();
+                        
+                        // Normalización Mapa-a-Array estricta
+                        let rawSessions = d.sessions || d.sessionHistory || d.globalHistory || [];
+                        if (typeof rawSessions === 'object' && !Array.isArray(rawSessions)) {
+                            rawSessions = Object.values(rawSessions);
+                        }
+                        
+                        window.globalHistory = rawSessions;
+                        updateStats();
+                        updateHistory();
+                    } else {
+                        window.globalHistory = [];
+                        updateStats();
+                        updateHistory();
                     }
+                }).catch(e => console.error("Error Firebase Sync:", e));
+
+
+                    }
+
                 });
+
             }
+
         }
+
+
 
         if (document.readyState === 'loading') {
+
             document.addEventListener('DOMContentLoaded', initApp);
+
         } else {
+
             initApp();
+
         }
+
         window.addEventListener('load', handleHashRouting);
+
         handleHashRouting();
+
     </script>
+
 </body>
+
 </html>
+
