@@ -276,17 +276,14 @@ window.saveMySubjects = function() {
         return;
     }
 
-    Promise.all([
-        window.db.collection('usuarios_materias').doc(window.currentUser.uid)
-            .set({ 
-                cursando: window.userMySubjects || [],
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true }),
-        window.db.collection('usuarios_cursada').doc(window.currentUser.uid)
-            .set({
-                enrolled: window.userMySubjects || [],
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true })
+    const uid = window.currentUser.uid;
+    const matPayload = { cursando: window.userMySubjects || [], updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+    const curPayload = { enrolled: window.userMySubjects || [], updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+    Promise.allSettled([
+        window.db.collection('usuarios_materias').doc(uid).set(matPayload, { merge: true }),
+        window.db.collection('users_materias').doc(uid).set(matPayload, { merge: true }),
+        window.db.collection('usuarios_cursada').doc(uid).set(curPayload, { merge: true }),
+        window.db.collection('users_cursada').doc(uid).set(curPayload, { merge: true })
     ])
     .then(() => {
         finalize();

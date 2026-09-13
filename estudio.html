@@ -648,10 +648,21 @@
             localStorage.setItem('ungs_study_stats', JSON.stringify(timerState));
 
             if (window.currentUser && window.currentUser.uid && window.db) {
-                window.db.collection('usuarios_estudio').doc(window.currentUser.uid).set({
+                const uid = window.currentUser.uid;
+                const payload = {
                     timerState: timerState,
+                    sessionHistory: timerState.sessionHistory || [],
+                    globalHistory: timerState.globalHistory || [],
+                    subjectStats: timerState.subjectStats || {},
+                    globalSessions: timerState.globalSessions || 0,
+                    globalTime: timerState.globalTime || 0,
+                    globalBreakTime: timerState.globalBreakTime || 0,
+                    streak: timerState.streak || 0,
+                    globalStreak: timerState.globalStreak || 0,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true }).catch(console.error);
+                };
+                window.db.collection('users_pomodoro').doc(uid).set(payload, { merge: true }).catch(console.warn);
+                window.db.collection('usuarios_estudio').doc(uid).set(payload, { merge: true }).catch(console.warn);
             }
         }
 
@@ -1835,18 +1846,114 @@
                 window.auth.onAuthStateChanged(user => {
                     window.currentUser = user;
                     if (user && window.db) {
-                        window.db.collection('usuarios_estudio').doc(user.uid).get().then(doc => {
-                            if (doc.exists && doc.data()) {
-                                const d = doc.data();
-                                const rState = d.timerState || d;
-                                if (rState && typeof rState === 'object') {
-                                    if (Array.isArray(rState.sessionHistory) && rState.sessionHistory.length > 0) {
-                                        const existing = new Set((timerState.sessionHistory || []).map(s => `${s.date}_${s.time}_${s.subject}_${s.seconds}`));
-                                        rState.sessionHistory.forEach(s => {
-                                            const k = `${s.date}_${s.time}_${s.subject}_${s.seconds}`;
-                                            if (!existing.has(k)) { timerState.sessionHistory.push(s); existing.add(k); }
+                        Promise.allSettled([
+                            window.db.collection('users_pomodoro').doc(user.uid).get(),
+                            window.db.collection('usuarios_estudio').doc(user.uid).get(),
+                            window.db.collection('users_pomodoro').doc(user.uid).collection('sessions').orderBy('date').get(),
+                            window.db.collection('usuarios_estudio').doc(user.uid).collection('sessions').orderBy('date').get()
+                        ]).then(results => {
+                            results.forEach(res => {
+                                if (res.status === 'fulfilled' && res.value) {
+                                    const val = res.value;
+                                    if (val.exists && typeof val.data === 'function') {
+                                        const d = val.data();
+                                        if (d) {
+                                            const rState = d.timerState || d;
+                                            const sessList = rState.sessionHistory || rState.historial || d.sessionHistory || d.historial || [];
+                                            if (Array.isArray(sessList)) {
+                                                sessList.forEach(s => {
+                                                    if (!s) return;
+                                                    const sName = s.subject || s.materia || s.name || 'Estudio Libre';
+                                                    const sMode = s.mode || s.tipo || (s.isBreak ? 'Descanso' : 'Estudio');
+                                                    const sTime = s.time || s.hora || '';
+                                                    const sDate = s.date || s.fecha || new Date().toLocaleDateString('es-ES');
+                                                    const sSecs = typeof s.seconds === 'number' ? s.seconds : (typeof s.segundos === 'number' ? s.segundos : parseDurationToSeconds(s.duration || s.duracion));
+                                                    const sDur = s.duration || s.duracion || formatDurationSummary(sSecs);
+                                                    const norm = { subject: sName, mode: sMode, time: sTime, date: sDate, seconds: sSecs, duration: sDur };
+                                                    if (!Array.isArray(timerState.sessionHistory)) timerState.sessionHistory = [];
+                                                    const key = `${sDate}_${sTime}_${sName}_${sSecs}`;
+                                                    if (!timerState.sessionHistory.some(x => `${x.date}_${x.time}_${x.subject}_${x.seconds}` === key)) {
+                                                        timerState.sessionHistory.push(norm);
+                                                    }
+                                                });
+                                            }
+
+                                            const gList = rState.globalHistory || rState.historialGlobal || d.globalHistory || d.historialGlobal || [];
+                                            if (Array.isArray(gList)) {
+                                                gList.forEach(s => {
+                                                    if (!s) return;
+                                                    const sName = s.subject || s.materia || s.name || 'Estudio Libre';
+                                                    const sMode = s.mode || s.tipo || (s.isBreak ? 'Descanso' : 'Estudio');
+                                                    const sTime = s.time || s.hora || '';
+                                                    const sDate = s.date || s.fecha || new Date().toLocaleDateString('es-ES');
+                                                    const sSecs = typeof s.seconds === 'number' ? s.seconds : (typeof s.segundos === 'number' ? s.segundos : parseDurationToSeconds(s.duration || s.duracion));
+                                                    const sDur = s.duration || s.duracion || formatDurationSummary(sSecs);
+                                                    const norm = { subject: sName, mode: sMode, time: sTime, date: sDate, seconds: sSecs, duration: sDur };
+                                                    if (!Array.isArray(timerState.globalHistory)) timerState.globalHistory = [];
+                                                    const key = `${sDate}_${sTime}_${sName}_${sSecs}`;
+                                                    if (!timerState.globalHistory.some(x => `${x.date}_${x.time}_${x.subject}_${x.seconds}` === key)) {
+                                                        timerState.globalHistory.push(norm);
+                                                    }
+                                                });
+                                            }
+
+                                            const sStats = rState.subjectStats || rState.materias || rState.estadisticas || d.subjectStats || d.materias || {};
+                                            if (sStats && typeof sStats === 'object') {
+                                                if (!timerState.subjectStats) timerState.subjectStats = {};
+                                                Object.keys(sStats).forEach(subj => {
+                                                    const rs = sStats[subj];
+                                                    if (rs && typeof rs === 'object') {
+                                                        if (!timerState.subjectStats[subj]) timerState.subjectStats[subj] = { sessions: 0, seconds: 0, breakSeconds: 0 };
+                                                        timerState.subjectStats[subj].sessions = Math.max(timerState.subjectStats[subj].sessions || 0, Number(rs.sessions || rs.sesiones) || 0);
+                                                        timerState.subjectStats[subj].seconds = Math.max(timerState.subjectStats[subj].seconds || 0, Number(rs.seconds || rs.segundos || (rs.focusMinutes * 60)) || 0);
+                                                        timerState.subjectStats[subj].breakSeconds = Math.max(timerState.subjectStats[subj].breakSeconds || 0, Number(rs.breakSeconds || rs.segundosDescanso || (rs.breakMinutes * 60)) || 0);
+                                                    }
+                                                });
+                                            }
+
+                                            const gSess = Number(rState.globalSessions || rState.totalSessions || rState.sesiones || d.globalSessions) || 0;
+                                            const gTime = Number(rState.globalTime || rState.totalTime || d.globalTime) || ((Number(rState.globalFocusMinutes || d.globalFocusMinutes) || 0) * 60) || 0;
+                                            const gBreak = Number(rState.globalBreakTime || rState.totalBreakTime || d.globalBreakTime) || ((Number(rState.globalBreakMinutes || d.globalBreakMinutes) || 0) * 60) || 0;
+                                            const strk = Number(rState.streak || rState.racha || d.streak || rState.currentStreak) || 0;
+                                            const gStrk = Number(rState.globalStreak || rState.mejorRacha || d.globalStreak || rState.bestStreak) || 0;
+
+                                            timerState.globalSessions = Math.max(Number(timerState.globalSessions) || 0, gSess);
+                                            timerState.globalTime = Math.max(Number(timerState.globalTime) || 0, gTime);
+                                            timerState.globalBreakTime = Math.max(Number(timerState.globalBreakTime) || 0, gBreak);
+                                            timerState.streak = Math.max(Number(timerState.streak) || 0, strk);
+                                            timerState.globalStreak = Math.max(Number(timerState.globalStreak) || 0, gStrk);
+                                        }
+                                    } else if (typeof val.forEach === 'function') {
+                                        val.forEach(docSnap => {
+                                            if (docSnap.exists) {
+                                                const s = docSnap.data();
+                                                const sName = s.subject || s.materia || s.name || 'Estudio Libre';
+                                                const sMode = s.mode || s.tipo || (s.isBreak ? 'Descanso' : 'Estudio');
+                                                const sTime = s.time || s.hora || '';
+                                                const sDate = s.date || s.fecha || new Date().toLocaleDateString('es-ES');
+                                                const sSecs = typeof s.seconds === 'number' ? s.seconds : (typeof s.segundos === 'number' ? s.segundos : parseDurationToSeconds(s.duration || s.duracion));
+                                                const sDur = s.duration || s.duracion || formatDurationSummary(sSecs);
+                                                const norm = { subject: sName, mode: sMode, time: sTime, date: sDate, seconds: sSecs, duration: sDur };
+                                                if (!Array.isArray(timerState.sessionHistory)) timerState.sessionHistory = [];
+                                                const key = `${sDate}_${sTime}_${sName}_${sSecs}`;
+                                                if (!timerState.sessionHistory.some(x => `${x.date}_${x.time}_${x.subject}_${x.seconds}` === key)) {
+                                                    timerState.sessionHistory.push(norm);
+                                                }
+                                            }
                                         });
                                     }
+                                }
+                            });
+
+                            try { localStorage.setItem('ungs_study_stats', JSON.stringify(timerState)); } catch(e){}
+                            if (typeof populateSubjectFilters === 'function') populateSubjectFilters();
+                            if (typeof populateSubjectSelects === 'function') populateSubjectSelects();
+                            if (typeof updateStats === 'function') updateStats();
+                            if (typeof updateHistory === 'function') updateHistory();
+                        }).catch(console.error);
+                    }
+                });
+            }
                                     if (Array.isArray(rState.globalHistory) && rState.globalHistory.length > 0) {
                                         const existingG = new Set((timerState.globalHistory || []).map(s => `${s.date}_${s.time}_${s.subject}_${s.seconds}`));
                                         rState.globalHistory.forEach(s => {

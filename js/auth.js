@@ -57,7 +57,7 @@ window.handleAuthLogin = function() {
             err.innerText = msg;
             err.classList.remove('hidden');
             err.classList.remove('shake');
-            void err.offsetWidth; // trigger reflow
+            void err.offsetWidth;
             err.classList.add('shake');
         }
         if(btn) {
@@ -97,7 +97,9 @@ window.handleAuthLogin = function() {
                 if(btn) btn.disabled = false;
                 if (name && cred.user) { cred.user.updateProfile({ displayName: name }); }
                 if(window.closeModal) window.closeModal('authModal');
-                window.db.collection('usuarios_materias').doc(cred.user.uid).set({ cursando: [], createdAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+                const payload = { cursando: [], createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+                window.db.collection('usuarios_materias').doc(cred.user.uid).set(payload, { merge: true }).catch(console.warn);
+                window.db.collection('users_materias').doc(cred.user.uid).set(payload, { merge: true }).catch(console.warn);
                 localStorage.setItem('mock_user_email', cred.user.email);
             })
             .catch(function(e) { showError(e.message); });
@@ -146,73 +148,72 @@ if(window.auth) {
             if(logEmail) logEmail.textContent = user.email;
             if(logAvatar) logAvatar.textContent = name.charAt(0).toUpperCase();
 
-            Promise.all([
+            // Parallel multi-collection fetch with full schema mapping
+            Promise.allSettled([
                 window.db.collection('usuarios_materias').doc(user.uid).get(),
+                window.db.collection('users_materias').doc(user.uid).get(),
                 window.db.collection('usuarios_cursada').doc(user.uid).get(),
+                window.db.collection('users_cursada').doc(user.uid).get(),
                 window.db.collection('usuarios_progreso').doc(user.uid).get(),
+                window.db.collection('users_progreso').doc(user.uid).get(),
+                window.db.collection('users_pomodoro').doc(user.uid).get(),
                 window.db.collection('usuarios_estudio').doc(user.uid).get()
-            ]).then(([matDoc, cursadaDoc, progDoc, estudioDoc]) => {
-                // 1. Materias cursando
+            ]).then(results => {
                 let subjects = [];
-                if (matDoc.exists && matDoc.data() && Array.isArray(matDoc.data().cursando)) {
-                    subjects = matDoc.data().cursando;
-                } else if (cursadaDoc.exists && cursadaDoc.data() && Array.isArray(cursadaDoc.data().enrolled)) {
-                    subjects = cursadaDoc.data().enrolled;
-                }
+                let entries = [];
+                let studyState = null;
+
+                results.forEach(res => {
+                    if (res.status === 'fulfilled' && res.value && res.value.exists) {
+                        const data = res.value.data();
+                        if (!data) return;
+
+                        // Check enrolled subjects
+                        if (Array.isArray(data.cursando) && data.cursando.length > 0 && subjects.length === 0) {
+                            subjects = data.cursando;
+                        } else if (Array.isArray(data.enrolled) && data.enrolled.length > 0 && subjects.length === 0) {
+                            subjects = data.enrolled;
+                        }
+
+                        // Check progress / approved grades
+                        const rawGrades = data.entries || data.aprobadas || data.materiasAprobadas || [];
+                        if (Array.isArray(rawGrades) && rawGrades.length > 0) {
+                            rawGrades.forEach(item => {
+                                const subjName = typeof item === 'string' ? item : (item.subj || item.materia || item.name || '');
+                                if (subjName && !entries.some(e => e.subj.toLowerCase() === subjName.toLowerCase())) {
+                                    entries.push({
+                                        subj: subjName,
+                                        grade: (item && item.grade !== undefined) ? item.grade : ((item && item.nota !== undefined) ? item.nota : 'Aprobado'),
+                                        isNumeric: (item && typeof item.grade === 'number') || (item && typeof item.nota === 'number'),
+                                        date: (item && (item.date || item.fecha)) || new Date().toISOString()
+                                    });
+                                }
+                            });
+                        }
+
+                        // Check study / pomodoro state
+                        const rStudy = data.timerState || data;
+                        if (rStudy && (rStudy.sessionHistory || rStudy.globalHistory || rStudy.subjectStats || rStudy.globalSessions || rStudy.globalTime || rStudy.globalFocusMinutes)) {
+                            if (!studyState) studyState = {};
+                            studyState = Object.assign(studyState, rStudy);
+                        }
+                    }
+                });
 
                 window.userMySubjects = subjects;
                 try { localStorage.setItem('ungs_my_subjects', JSON.stringify(subjects)); } catch(e){}
-
-                // 2. Progreso y materias aprobadas
-                let entries = [];
-                if (progDoc.exists && progDoc.data()) {
-                    const pData = progDoc.data();
-                    if (Array.isArray(pData.entries)) {
-                        entries = pData.entries;
-                    } else if (Array.isArray(pData.aprobadas)) {
-                        entries = pData.aprobadas.map(subj => ({
-                            subj: typeof subj === 'string' ? subj : (subj.name || subj.subj),
-                            grade: (subj && subj.grade) ? subj.grade : 'Aprobado',
-                            isNumeric: (subj && typeof subj.grade === 'number'),
-                            date: (subj && subj.date) || new Date().toISOString()
-                        }));
-                    }
-                } else if (matDoc.exists && matDoc.data()) {
-                    const mData = matDoc.data();
-                    const aprobs = Array.isArray(mData.aprobadas) ? mData.aprobadas : [];
-                    if (aprobs.length > 0) {
-                        entries = aprobs.map(subj => ({
-                            subj: typeof subj === 'string' ? subj : (subj.name || subj.subj),
-                            grade: 'Aprobado',
-                            isNumeric: false,
-                            date: new Date().toISOString()
-                        }));
-                    }
-                }
 
                 if (entries.length > 0) {
                     try { localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(entries)); } catch(e){}
                 }
 
-                // 3. Estudio / Pomodoro / Metricas
-                if (estudioDoc && estudioDoc.exists && estudioDoc.data()) {
-                    const eData = estudioDoc.data();
-                    const remoteState = eData.timerState || eData;
-                    if (remoteState && typeof remoteState === 'object') {
-                        try {
-                            const curLocal = localStorage.getItem('ungs_study_stats');
-                            let localObj = curLocal ? JSON.parse(curLocal) : {};
-                            const merged = Object.assign({}, localObj, remoteState);
-                            localStorage.setItem('ungs_study_stats', JSON.stringify(merged));
-                        } catch(e){}
-                    }
-                }
-
-                if (!matDoc.exists) {
-                    window.db.collection('usuarios_materias').doc(user.uid).set({ 
-                        cursando: subjects, 
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp() 
-                    }, { merge: true }).catch(console.warn);
+                if (studyState) {
+                    try {
+                        const curLocal = localStorage.getItem('ungs_study_stats');
+                        let localObj = curLocal ? JSON.parse(curLocal) : {};
+                        const merged = Object.assign({}, localObj, studyState);
+                        localStorage.setItem('ungs_study_stats', JSON.stringify(merged));
+                    } catch(e){}
                 }
 
                 if (typeof window.renderApp === 'function') window.renderApp();
@@ -251,11 +252,9 @@ window.handleGoogleLogin = function() {
     window.auth.signInWithPopup(provider)
         .then((cred) => {
             if(window.closeModal) window.closeModal('authModal');
-            window.db.collection('usuarios_materias').doc(cred.user.uid).get().then(doc => {
-                if(!doc.exists) {
-                    window.db.collection('usuarios_materias').doc(cred.user.uid).set({ cursando: [], createdAt: firebase.firestore.FieldValue.serverTimestamp() }, {merge: true});
-                }
-            });
+            const payload = { cursando: [], createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+            window.db.collection('usuarios_materias').doc(cred.user.uid).set(payload, {merge: true}).catch(console.warn);
+            window.db.collection('users_materias').doc(cred.user.uid).set(payload, {merge: true}).catch(console.warn);
         })
         .catch((error) => {
             const err = document.getElementById('authErrorMsg');
