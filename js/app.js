@@ -211,10 +211,17 @@ window.openMySubjectsModal = function() {
                     const isSelected = Array.isArray(window.userMySubjects) && window.userMySubjects.includes(m.name);
                     const item = document.createElement('div');
                     item.className = `check-item ${isSelected ? 'selected' : ''}`;
+                    
+                    const safeName = window.sanitizeHTML ? window.sanitizeHTML(m.name) : m.name;
                     item.innerHTML = `
-                        <div class="check-box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-                        <span class="check-label">${window.sanitizeHTML ? window.sanitizeHTML(m.name) : m.name}</span>
+                        <div class="check-box">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                        </div>
+                        <span class="check-label">${safeName}</span>
                     `;
+                    
                     item.onclick = () => {
                         item.classList.toggle('selected');
                         if (!Array.isArray(window.userMySubjects)) window.userMySubjects = [];

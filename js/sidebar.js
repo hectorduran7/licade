@@ -18,13 +18,13 @@ function initSidebar() {
     let sidebarHTML = `
         <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleSidebarExpansion(false)"></div>
         <!-- FAB Mobile -->
-        <button class="mobile-fab" onclick="toggleSidebarExpansion(true)">
+        <button type="button" class="mobile-fab" onclick="toggleSidebarExpansion(true)">
             <svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
 
         <aside id="sidebarRail" class="sidebar-rail collapsed">
             <div class="rail-header">
-                <button data-tooltip="ADE UNGS" class="rail-btn" onclick="toggleSidebarExpansion()">
+                <button type="button" data-tooltip="ADE UNGS" class="rail-btn" onclick="toggleSidebarExpansion()">
                     <div class="rail-icon"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
                     <span class="rail-label">ADE UNGS</span>
                 </button>
@@ -35,7 +35,7 @@ function initSidebar() {
                     <div class="rail-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
                     <span class="rail-label">Explorar Materias</span>
                 </a>
-                <button id="btnRailMisMaterias" data-tooltip="Editar Cursada" class="rail-item hidden" onclick="window.openMySubjectsModal && window.openMySubjectsModal()">
+                <button type="button" id="btnRailMisMaterias" data-tooltip="Editar Cursada" class="rail-item hidden" onclick="window.openMySubjectsModal && window.openMySubjectsModal()">
                     <div class="rail-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
                     <span class="rail-label">Editar Cursada</span>
                 </button>
@@ -74,11 +74,11 @@ function initSidebar() {
             </nav>
 
             <div class="rail-footer">
-                <button data-tooltip="Apariencia" class="rail-item" onclick="window.openModal && openModal('settingsModal')">
+                <button type="button" data-tooltip="Apariencia" class="rail-item" onclick="window.openModal && openModal('settingsModal')">
                     <div class="rail-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
                     <span class="rail-label">Apariencia</span>
                 </button>
-                <button id="btnRailAuth" data-tooltip="Iniciar Sesión" class="rail-item rail-btn" onclick="openLoginModal()" title="Cuenta">
+                <button type="button" id="btnRailAuth" data-tooltip="Iniciar Sesión" class="rail-item rail-btn" onclick="openLoginModal()" title="Cuenta">
                     <div class="rail-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
                     <span id="railAuthLabel" class="rail-label">Iniciar Sesión</span>
                 </button>
@@ -86,17 +86,17 @@ function initSidebar() {
         </aside>
     `;
     const container = document.getElementById('sidebar-mount');
-        sidebarHTML += `
+    sidebarHTML += `
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal-overlay" onclick="window.closeOnOutsideClick && closeOnOutsideClick(event, 'settingsModal')">
         <div class="modal-content" style="max-width: 400px; padding: 22px 20px 20px 20px; max-height: 92vh;">
             <div class="apple-modal-header" style="margin-bottom: 18px;">
                 <div class="apple-modal-icon-badge" style="width: 42px; height: 42px; border-radius: 14px; margin-bottom: 8px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 </div>
                 <h3 class="apple-modal-title" style="font-size: 18px; margin: 0 0 4px 0;">Apariencia</h3>
                 <p class="apple-modal-subtitle" style="font-size: 12px; margin: 0; line-height: 1.3;">Personalizá el modo visual y el color de acento del sistema.</p>
-                <button class="modal-close" style="position: absolute; top: 0; right: 0;" onclick="window.closeModal && closeModal('settingsModal')" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button type="button" class="modal-close" style="position: absolute; top: 0; right: 0;" onclick="window.closeModal && closeModal('settingsModal')" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             
             <div style="margin-bottom: 18px;">
@@ -141,7 +141,7 @@ function initSidebar() {
                 </div>
                 <h3 class="apple-modal-title" id="authModalTitle" style="font-size: 18px; margin: 0 0 4px 0;">Iniciar Sesión</h3>
                 <p class="apple-modal-subtitle" id="authModalSubtitle" style="font-size: 12px; margin: 0; line-height: 1.3;">Sincronizá tus materias, notas y agenda en la nube de UNGS.</p>
-                <button class="modal-close" style="position: absolute; top: 0; right: 0;" onclick="window.closeModal && closeModal('authModal')" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button type="button" class="modal-close" style="position: absolute; top: 0; right: 0;" onclick="window.closeModal && closeModal('authModal')" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
 
             <!-- Apple Segmented Control -->
@@ -196,25 +196,26 @@ function initSidebar() {
 
     <!-- My Subjects Modal -->
     <div id="mySubjectsModal" class="modal-overlay" onclick="window.closeOnOutsideClick && closeOnOutsideClick(event, 'mySubjectsModal')">
-                <div class="modal-content" style="max-width: 500px; padding: 22px 20px 20px 20px;">
-            <div class="apple-modal-header" style="margin-bottom: 18px;">
+        <div class="modal-content" style="max-width: 500px; padding: 22px 20px 20px 20px; max-height: 92vh; display: flex; flex-direction: column;">
+            <div class="apple-modal-header" style="margin-bottom: 14px;">
                 <div class="apple-modal-icon-badge" style="width: 42px; height: 42px; border-radius: 14px; margin-bottom: 8px;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 </div>
                 <h3 class="apple-modal-title" style="font-size: 18px; margin: 0 0 4px 0;">Editar Cursada</h3>
                 <p class="apple-modal-subtitle" style="font-size: 12px; margin: 0; line-height: 1.3;">Marcá las materias que estás cursando para tener acceso rápido en la pantalla principal.</p>
-                <button class="modal-close" style="position: absolute; top: 0; right: 0;" onclick="window.closeModal && closeModal('mySubjectsModal')" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button type="button" class="modal-close" style="position: absolute; top: 0; right: 0;" onclick="window.closeModal && closeModal('mySubjectsModal')" aria-label="Cerrar"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             
-            <div id="mySubjectsList" class="check-list"></div>
+            <div id="mySubjectsList" class="check-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 54vh; min-height: 180px; overflow-y: auto;"></div>
             
-            <button class="btn-submit-full" style="margin-top: 24px;" onclick="window.saveMySubjects && saveMySubjects()">
+            <button type="button" class="btn-submit-full" style="margin-top: 16px;" onclick="window.saveMySubjects && saveMySubjects()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Guardar Cambios
             </button>
         </div>
     </div>
-`;
+    `;
+
     if (container) container.innerHTML = sidebarHTML;
 
     // Set active link based on pathname
@@ -237,7 +238,6 @@ function initSidebar() {
     });
 }
 document.addEventListener('DOMContentLoaded', initSidebar);
-
 
 window.openModal = function(id) {
     if (window.toggleSidebarExpansion) window.toggleSidebarExpansion(false);
@@ -285,4 +285,3 @@ window.setAppearanceMode = function(mode) {
     if (btnDark) btnDark.classList.toggle('active', mode === 'dark');
     if (btnLight) btnLight.classList.toggle('active', mode === 'light');
 }
-
