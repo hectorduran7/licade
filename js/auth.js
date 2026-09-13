@@ -142,24 +142,40 @@ if(window.auth) {
             if(logEmail) logEmail.textContent = user.email;
             if(logAvatar) logAvatar.textContent = name.charAt(0).toUpperCase();
 
-            window.db.collection('usuarios_materias').doc(user.uid).get().then(doc => {
-                if (doc.exists && doc.data() && Array.isArray(doc.data().cursando)) {
-                    window.userMySubjects = doc.data().cursando;
-                    try { localStorage.setItem('ungs_my_subjects', JSON.stringify(window.userMySubjects)); } catch(e){}
-                } else if (!doc.exists) {
-                    window.userMySubjects = [];
-                    window.db.collection('usuarios_materias').doc(user.uid).set({ 
-                        cursando: [], 
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp() 
-                    }, { merge: true });
+            Promise.all([
+                window.db.collection('usuarios_materias').doc(user.uid).get(),
+                window.db.collection('usuarios_cursada').doc(user.uid).get(),
+                window.db.collection('usuarios_progreso').doc(user.uid).get()
+            ]).then(([matDoc, cursadaDoc, progDoc]) => {
+                let subjects = [];
+                if (matDoc.exists && matDoc.data() && Array.isArray(matDoc.data().cursando)) {
+                    subjects = matDoc.data().cursando;
+                } else if (cursadaDoc.exists && cursadaDoc.data() && Array.isArray(cursadaDoc.data().enrolled)) {
+                    subjects = cursadaDoc.data().enrolled;
                 }
+
+                window.userMySubjects = subjects;
+                try { localStorage.setItem('ungs_my_subjects', JSON.stringify(subjects)); } catch(e){}
+
+                if (progDoc.exists && progDoc.data() && Array.isArray(progDoc.data().entries)) {
+                    try { localStorage.setItem('ungs_grades_backup_guest', JSON.stringify(progDoc.data().entries)); } catch(e){}
+                }
+
+                if (!matDoc.exists) {
+                    window.db.collection('usuarios_materias').doc(user.uid).set({ 
+                        cursando: subjects, 
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+                    }, { merge: true }).catch(console.warn);
+                }
+
                 if (typeof window.renderApp === 'function') window.renderApp();
+                
                 const mModal = document.getElementById('mySubjectsModal');
                 if (mModal && mModal.classList.contains('active') && typeof window.openMySubjectsModal === 'function') {
                     window.openMySubjectsModal();
                 }
             }).catch(err => {
-                console.warn('[usuarios_materias error]', err);
+                console.warn('[Cross-page Firebase sync error]', err);
                 if (typeof window.renderApp === 'function') window.renderApp();
             });
         } else {

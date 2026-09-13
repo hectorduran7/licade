@@ -423,22 +423,40 @@
 
             // Hook into Firebase Auth changes
             if (window.auth) {
-                window.auth.onAuthStateChanged(user => {
+                window.auth.onAuthStateChanged(async user => {
                     if (user && window.db) {
-                        showLoading(true, 'Cargando tu progreso...');
-                        window.db.collection('usuarios_progreso').doc(user.uid).get().then(doc => {
-                            if (doc.exists && doc.data().entries) {
-                                entries = doc.data().entries || [];
+                        showLoading(true, 'Sincronizando con tu usuario...');
+                        try {
+                            const [progDoc, matDoc, cursadaDoc] = await Promise.all([
+                                window.db.collection('usuarios_progreso').doc(user.uid).get(),
+                                window.db.collection('usuarios_materias').doc(user.uid).get(),
+                                window.db.collection('usuarios_cursada').doc(user.uid).get()
+                            ]);
+
+                            if (progDoc.exists && progDoc.data() && Array.isArray(progDoc.data().entries)) {
+                                entries = progDoc.data().entries;
+                            } else if (matDoc.exists && matDoc.data() && Array.isArray(matDoc.data().aprobadas) && matDoc.data().aprobadas.length > 0) {
+                                entries = matDoc.data().aprobadas.map(subj => ({
+                                    subj: subj,
+                                    grade: 'Aprobado',
+                                    isNumeric: false,
+                                    date: new Date().toISOString()
+                                }));
+                                syncToStorage();
                             } else if (entries.length > 0) {
-                                // Upload local cache to new user cloud doc
                                 syncToStorage();
                             }
+
                             saveAndRender();
-                        }).catch(err => {
-                            console.error('Error al sincronizar datos:', err);
-                        }).finally(() => {
+                        } catch (err) {
+                            console.error('Error al sincronizar datos de progreso:', err);
+                            saveAndRender();
+                        } finally {
                             showLoading(false);
-                        });
+                        }
+                    } else if (!user) {
+                        showLoading(false);
+                        saveAndRender();
                     }
                 });
             }
