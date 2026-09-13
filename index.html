@@ -1,134 +1,115 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="blue" data-mode="dark">
+<html lang="es" data-theme="green">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>La Biblioteca de ADE | UNGS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mantenimiento - La Biblioteca ADE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #22c55e;
+            --primary-glow: rgba(34, 197, 94, 0.2);
+            --bg-base: #000000;
+            --bg-rail: rgba(12, 12, 14, 0.95);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #F5F5F7;
+            --text-muted: #86868b;
+        }
 
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icon.svg" type="image/svg+xml">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+        }
 
-    <!-- CSS Module -->
-    <link rel="stylesheet" href="css/styles.css">
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
 
-    <!-- Anti-Inspection & DevTools Protection -->
-    <script src="protection.js"></script>
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: -2;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 24px 24px; opacity: 0.4; pointer-events: none;
+        }
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PQGH6R9SZC"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-PQGH6R9SZC');
-    </script>
+        .bg-spotlight {
+            position: fixed; top: -20vh; left: 50%; transform: translateX(-50%);
+            width: 80vw; height: 60vh;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, transparent 70%);
+            z-index: -1; pointer-events: none;
+        }
 
-    <!-- Firebase Compat v10.13.0 -->
-    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
+        .maintenance-container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(16, 16, 20, 0.95);
+            backdrop-filter: blur(40px) saturate(190%);
+            -webkit-backdrop-filter: blur(40px) saturate(190%);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 1px 1px 1px 0 rgba(255, 255, 255, 0.1);
+            max-width: 480px;
+            width: 90%;
+            animation: floatIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
 
-    <!-- Theme pre-init -->
-    <script>
-        const savedTheme = localStorage.getItem('ungs_theme') || 'blue';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        const savedMode = localStorage.getItem('ungs_mode') || 'dark';
-        if (savedMode === 'light') document.documentElement.setAttribute('data-light', '1');
-    </script>
+        .icon-container {
+            width: 80px; height: 80px;
+            margin: 0 auto 24px auto;
+            border-radius: 50%;
+            background: var(--primary-glow);
+            color: var(--primary);
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 40px var(--primary-glow);
+        }
+
+        .icon-container svg {
+            width: 40px; height: 40px;
+            stroke-width: 1.5;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        h1 {
+            font-size: 24px; font-weight: 700; margin-bottom: 12px; color: #ffffff;
+            letter-spacing: -0.02em;
+        }
+
+        p {
+            font-size: 14.5px; color: var(--text-muted); line-height: 1.5;
+            font-weight: 400;
+        }
+
+        @keyframes floatIn {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-
     <div class="bg-mesh"></div>
     <div class="bg-spotlight"></div>
-
-    <!-- Sidebar Mount Point (sidebar.js injects here) -->
-    <div id="sidebar-mount"></div>
-
-    <!-- MAIN APP CONTENT -->
-    <main class="app-container">
-        
-        <!-- Academic Header -->
-        <header class="page-header">
-            <!-- Top Quick Links -->
-            <div class="quick-links-pill">
-                <a href="https://guarani3w.ungs.edu.ar/" target="_blank" class="ql-link">
-                    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                    SIU Guaraní
-                </a>
-                <div class="ql-divider"></div>
-                <a href="https://moodle.ungs.edu.ar/" target="_blank" class="ql-link">
-                    <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                    Campus Virtual
-                </a>
-                <div class="ql-divider"></div>
-                <a href="Contactos_Docentes.pdf" target="_blank" class="ql-link">
-                    <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    Mails Docentes
-                </a>
-            </div>
-
-            <h1 class="page-title" style="margin-bottom: 12px;">La Biblioteca de ADE</h1>
-            <p class="page-subtitle" style="margin-bottom: 32px;">Licenciatura en Administración de Empresas &bull; Material y Recursos</p>
-        </header>
-
-        <!-- Promo Banners -->
-        <div class="promo-banners-container">
-            <!-- Particulares -->
-            <div class="promo-banner">
-                <div class="promo-banner-left">
-                    <div class="promo-icon-box">
-                        <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                    </div>
-                    <div class="promo-text-wrap">
-                        <div class="promo-title">¿Das clases particulares?</div>
-                        <div class="promo-subtitle">Llegá a más estudiantes de la carrera.</div>
-                    </div>
-                </div>
-                <button class="btn-promo" onclick="window.open('mailto:bibliotecaadeungs@gmail.com', '_blank')">
-                    <svg viewBox="0 0 24 24"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
-                    Más información
-                </button>
-            </div>
-
-            <!-- Consejos -->
-            <div class="promo-banner-inline" id="bannerConsejos">
-                <div class="promo-icon-small">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                </div>
-                <div class="promo-text-inline">
-                    <strong>¿Tenés consejos de cursada?</strong> Sumá tu recomendación docente desde el menú de la izquierda.
-                </div>
-                <button class="btn-close-promo" onclick="document.getElementById('bannerConsejos').style.display='none'">
-                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
+    
+    <div class="maintenance-container">
+        <div class="icon-container">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
         </div>
-
-        <!-- Spotlight Search -->
-        <div class="search-wrapper">
-            <div class="search-icon-left">
-                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            </div>
-            <input type="text" id="searchInput" class="search-input" placeholder="Buscar materia o correlativa (ej. Economía)..." oninput="if(window.renderApp) window.renderApp()" autocomplete="off" spellcheck="false">
-            <div class="search-hint-right">⌘K</div>
-        </div>
-
-        <!-- Segmented Control Tabs -->
-        <div class="tabs-container" id="tabsContainer"></div>
-
-        <!-- Subjects Grid -->
-        <div id="subjectsContainer" class="grid-container"></div>
-        
-    </main>
-
-    <!-- Modulos JS Secuenciales -->
-    <script src="js/materias-data.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/sidebar.js"></script>
-    <script src="js/app.js"></script>
+        <h1>Estamos mejorando La Biblioteca</h1>
+        <p>La plataforma se encuentra temporalmente cerrada por mantenimiento y actualización de servidores. Volveremos a estar en línea en unos días con una experiencia más rápida y estable.</p>
+    </div>
 </body>
 </html>
